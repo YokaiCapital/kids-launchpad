@@ -25,7 +25,12 @@ export function createApiServer({plugins=[],probe=async()=>true,probeInterval=10
  return {server,check,async shutdown(){draining=true;clearInterval(timer);await new Promise(resolve=>{server.close(resolve);server.closeIdleConnections();const timeout=setTimeout(()=>server.closeAllConnections(),25000);timeout.unref();server.once('close',()=>clearTimeout(timeout));});}};
 }
 export async function ledgerProbe(){
- if((process.env.KIDS_NETWORK||'localnet')!=='localnet'){const {networkProfile}=await import('../../localnet/network.mjs');const profile=networkProfile();const config=JSON.parse(await readFile(new URL('../../localnet/.runtime/active-launch.json',import.meta.url),'utf8')).catch?.(()=>null)||null;const reply=await fetch(profile.rpcUrl,{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({jsonrpc:'2.0',id:1,method:'getGenesisHash'}),signal:AbortSignal.timeout(4000)});if(!reply.ok||(await reply.json()).result!==profile.genesisHash)return false;return true;}
+ if((process.env.KIDS_NETWORK||'localnet')!=='localnet'){
+  // Real network: ready when the RPC answers with the expected genesis. A campaign is optional (none before launch day).
+  const {networkProfile}=await import('../../localnet/network.mjs');const profile=networkProfile();
+  const reply=await fetch(profile.rpcUrl,{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({jsonrpc:'2.0',id:1,method:'getGenesisHash'}),signal:AbortSignal.timeout(6000)});
+  if(!reply.ok)return false;const body=await reply.json();return body.result===profile.genesisHash;
+ }
  for(const [name,port] of [['active-launch.json',19099],['config.json',18999]]){
   const config=JSON.parse(await readFile(new URL('../../localnet/.runtime/'+name,import.meta.url),'utf8'));
   if(config.network&&config.network!=='localnet')return false;

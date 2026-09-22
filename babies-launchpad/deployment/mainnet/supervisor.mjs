@@ -42,6 +42,6 @@ for(const signal of['SIGTERM','SIGINT'])process.on(signal,()=>stop(0));
 function start(command,args){const child=spawn(command,args,{stdio:'inherit'});children.add(child);child.on('error',error=>{console.error('spawn failed',command,error.code);stop(1);});child.on('exit',(code,signal)=>{children.delete(child);if(!stopping){console.error('child exited',command,code,signal);stop(code||1);}});return child;}
 if(!existsSync('interaction-review/staging/gateway.mjs'))throw Error('Authenticated gateway not installed; refusing public listener');
 start('flock',['--nonblock','--no-fork',runtime+'/api-writer.lock',process.execPath,'interaction-review/server/runtime.mjs']);
-let ready=false;for(let i=0;i<90;i++){try{const r=await fetch('http://127.0.0.1:4175/_health/ready');if(r.ok){ready=true;break;}}catch{}await new Promise(r=>setTimeout(r,1000));}
+let ready=false;for(let i=0;i<240;i++){try{const r=await fetch('http://127.0.0.1:4175/_health/ready');if(r.ok){ready=true;break;}if(i%30===29)console.log(JSON.stringify({event:'waiting-for-api',status:r.status,body:(await r.text()).slice(0,200)}));}catch{}await new Promise(r=>setTimeout(r,1000));}
 if(!ready){stop(1);throw Error('Internal API listener not ready');}
 start(process.execPath,['interaction-review/staging/gateway.mjs']);
