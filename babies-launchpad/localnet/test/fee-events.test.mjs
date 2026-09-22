@@ -16,3 +16,10 @@ test('wallet balances come back as strings with the fee reserve, missing coin ac
  const b=await walletBalances(conn,'6EU5CHrLWCvQUZUsRQNPnsPRCs8VJexDeHypwnBgArzi','8wxqJJeeNeJsBKa3Q7JRFxvop6uRryS1JeY3hbhhBdvA');
  assert.deepEqual(b,{owner:'6EU5CHrLWCvQUZUsRQNPnsPRCs8VJexDeHypwnBgArzi',solLamports:'1234567890',coinRaw:'0',coinDecimals:6,feeReserveLamports:'10000000'});
 });
+test('a dust collect (CPMM ZeroTradingTokens) is recognised as nothing to collect; other errors are not',async()=>{
+ const {isNothingToCollect}=await import('../active-fee-keeper.mjs');
+ assert.equal(isNothingToCollect({kind:'collect'},Error('Simulation failed. custom program error: 0x1776')),true);
+ assert.equal(isNothingToCollect({kind:'collect'},Error('AnchorError ZeroTradingTokens')),true);
+ assert.equal(isNothingToCollect({kind:'buy-burn'},Error('custom program error: 0x1776')),false);
+ assert.equal(isNothingToCollect({kind:'collect'},Error('custom program error: 0x1')),false);
+});

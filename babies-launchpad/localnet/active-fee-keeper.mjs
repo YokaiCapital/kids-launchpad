@@ -56,6 +56,8 @@ async function canonicalRoute(ctx,mint){
 }
 /** Token program of each mint the keeper touches: the mint account's owner (classic or Token-2022). */
 async function tokenPrograms(connection,mints){const infos=await connection.getMultipleAccountsInfo(mints,'confirmed');const out=new Map();mints.forEach((m,i)=>{const info=infos[i];if(!info)throw Error('Mint account missing: '+m.toBase58());const program=info.owner.equals(TOKEN_2022_PROGRAM_ID)?TOKEN_2022_PROGRAM_ID:info.owner.equals(TOKEN_PROGRAM_ID)?TOKEN_PROGRAM_ID:null;if(!program)throw Error('Mint is not owned by a token program: '+m.toBase58());out.set(m.toBase58(),program);});return out;}
+/** A collect that fails because the accrued fees round to zero LP tokens is not an error to retry every tick. */
+export function isNothingToCollect(operation,error){return operation?.kind==='collect'&&/0x1776|ZeroTradingTokens/.test(String(error?.message||error));}
 /** Counter changes caused by one confirmed fee operation (strings, only the counters that moved). */
 export function feeDelta(before,after){if(!before||!after)return null;const out={};for(const k of Object.keys(after)){const d=BigInt(after[k])-BigInt(before[k]||0n);if(d!==0n)out[k]=d.toString();}return out;}
 /** Durable, bounded list of confirmed fee operations so the site can show every buyback and burn with its signature. */
@@ -137,9 +139,16 @@ export function createActiveFeeKeeper({resolve=()=>resolvePostlaunchCampaign('ac
    }else throw Error('Unknown fee operation');
    const tables=lookupTables.length?await Promise.all(lookupTables.map(async address=>{const t=(await c.getAddressLookupTable(address)).value;if(!t)throw Error('Route lookup table missing');return t;})):[];
    const before=await readFees(ctx,campaign,mint).catch(()=>null);
-   const signature=await send(operation.id,async block=>{
+   let signature;
+   try{signature=await send(operation.id,async block=>{
     if(!tables.length){const tx=new Transaction({feePayer:admin.publicKey,...block}).add(ComputeBudgetProgram.setComputeUnitLimit({units:1200000}),instruction);await admin.sign(tx);return tx;}
     const message=new TransactionMessage({payerKey:admin.publicKey,recentBlockhash:block.blockhash,instructions:[ComputeBudgetProgram.setComputeUnitLimit({units:1200000}),instruction]}).compileToV0Message(tables);const tx=new VersionedTransaction(message);await admin.sign(tx);return tx;});
+   }catch(error){
+    // Accrued pool fees too small to withdraw (CPMM ZeroTradingTokens): nothing to collect yet. Release the operation and
+    // wait a full interval instead of retrying the same transaction every tick.
+    if(isNothingToCollect(operation,error)){journal.current=null;journal.lastCollectedAt=await chainTime(c);persist();console.log(JSON.stringify({event:'fees-nothing-to-collect',campaign:identity.campaign}));return {status:'nothing-to-collect',campaign:identity.campaign};}
+    throw error;
+   }
    const after=await readFees(ctx,campaign,mint).catch(()=>null);appendFeeEvent(journal,{id:operation.id,kind:operation.kind,index:operation.index??null,amount:operation.amount??operation.slice??null,signature,at:await chainTime(c),delta:feeDelta(before,after)});
    if(operation.kind==='collect')journal.lastCollectedAt=await chainTime(c);journal.current=null;persist();
    return {status:'completed',operation:operation.kind,signature,campaign:identity.campaign};
