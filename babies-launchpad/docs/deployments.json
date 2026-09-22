@@ -1,0 +1,141 @@
+{
+  "schemaVersion": 1,
+  "network": "localnet",
+  "rpcUrl": "http://127.0.0.1:18999",
+  "genesisHash": "BdKFesSjNS8AMEvF1VWjs5946Nh6Vn2PK3EcSFuJRobW",
+  "verifiedDate": "2026-09-20",
+  "programs": {
+    "devVesting": {
+      "status": "deployed-localnet-only",
+      "programId": "HV3Bo9fEdmToXMhFCoXAaDee8nk4NVspyuCzgN5vQPWZ",
+      "programData": "Ej7hBaEp5NUWX3XhpsjJ8MbX8u6MNpCWuT4Q9k16pZuM",
+      "upgradeAuthority": null,
+      "lastDeploySlot": 7747,
+      "sourceRepository": "https://github.com/solana-foundation/rewards",
+      "sourceCommit": "aa1cfd9276375e44e57d1917d110ff095fb6d475",
+      "sourceModification": "declare_id only",
+      "localBuildSha256": "440548a15b51c96b37998ccb80ff0300fa00177422600241d30a73690c6479cc",
+      "reproducibleBuildVerified": false
+    },
+    "commitmentEscrow": {
+      "status": "deployed-localnet-only",
+      "programId": "CvWEQN6NZcEkYUZtYmtUy65wh8o4Fo9L6E8jGsRNjhiN",
+      "upgradeAuthority": null,
+      "source": "programs/commitment-escrow/src/lib.rs",
+      "localBuildSha256": "99baa6f8b8d6d02062cbf28428d501f0dd3ba515277271d79f274e679e8ba47c",
+      "reproducibleBuildVerified": false,
+      "poolLaunchAdapterImplemented": false
+    },
+    "poolAndLiquidityLock": {
+      "status": "integrated-in-v3-localnet-rehearsal-not-production",
+      "programId": "3mejq3CpgFWnrc1UGfh1iYz6R1SfF4LdnPpbxnNGxErw"
+    },
+    "launchEscrowSettlement": {
+      "programId": "CqW6oZwEt1uHyjvAKdcUzN4LrWvqhbvobvYsnGHUSRER",
+      "genesisHash": "BdKFesSjNS8AMEvF1VWjs5946Nh6Vn2PK3EcSFuJRobW",
+      "sha256": "c0d245b59a4febf85f3d22f21442176af5369cd6e0d2174ce68edc4310176a9e",
+      "source": "programs/launch-escrow/src/lib.rs",
+      "upgradeAuthority": null,
+      "status": "separate-localnet-fixture",
+      "activeApplication": false,
+      "launchAdapterImplemented": false
+    },
+    "raydiumCpmmLocal": {
+      "network": "localnet",
+      "genesisHash": "BdKFesSjNS8AMEvF1VWjs5946Nh6Vn2PK3EcSFuJRobW",
+      "programId": "CVpAkHwKCWVub6fhaJSSGmdfbZ9idu2zjWWmMM3iNm2h",
+      "upgradeAuthority": null,
+      "sourceRepository": "https://github.com/raydium-io/raydium-cp-swap",
+      "sourceCommit": "59fb845a9e5bb569c8b2f3415f13b0c0ebcc6b92",
+      "sourceModifications": [
+        "local program ID",
+        "local fee recipient",
+        "upstream localnet admin build feature"
+      ],
+      "sha256": "a060c9911f33fd8dbb7c98e9209f76f7aff582fbeabc663c17930bc2bd077cfb",
+      "ammConfig": "2Uq26vit6SWZkfhuck5c4Erg8Ab8PNtqagrRwkA5EU7C",
+      "feeAccount": "9kDvBzFbY4c9N1jAF2mEsvjXNHThDkuke8kLgirskVZW",
+      "tradeFeePpm": 20000,
+      "protocolSharePpm": 120000,
+      "fundSharePpm": 40000,
+      "creatorFeePpm": 0,
+      "status": "separate-localnet-fixture",
+      "activeApplication": false
+    },
+    "atomicLaunch": {
+      "network": "localnet",
+      "rpcUrl": "http://127.0.0.1:19099",
+      "genesisHash": "DehCbtmJrPbZcREn9dcdVTsD3HeyecQRK44MtrdiPt2V",
+      "programId": "3mejq3CpgFWnrc1UGfh1iYz6R1SfF4LdnPpbxnNGxErw",
+      "upgradeAuthority": "GKkEkX1zsVNj4bt62T16V9wNL82Ugow267sKB27FRbsN",
+      "sha256": "e0b4051752422366e51ae6a5fe8eaeeeab773faa1448cec33a0990961c76e71d",
+      "binarySize": 177880,
+      "source": "programs/atomic-launch/src/lib.rs",
+      "status": "local-development-only",
+      "activeApplication": false,
+      "adminRehearsal": true,
+      "launchAdapterImplemented": true,
+      "claimsImplemented": true,
+      "feeRoutingImplemented": true,
+      "verificationStatus": "combined-localnet-run-passed",
+      "verifiedChecks": {
+        "launchAndClaims": 25,
+        "fees": 9
+      },
+      "verificationCampaign": "46yuTsZ5J2RNp5tjaPD4wKwG2Xp5R2kyzFKL6vn96x91"
+    }
+  },
+  "testMints": {
+    "KIDS": "BLg2djGJ6JqC7L3FHmBmA29QEqyFjQ8MQwQEnCifvR9Z",
+    "FARTCOIN": "6pqBTUUBuqjmKrnb9trpG7XhzKkcCAuUBg4LPeYwqZPJ",
+    "BUTTCOIN": "HT4goN74DVB6twX2L4vNCKK7cqzD3hUHCtBJoGNijXm5",
+    "SHART": "HEkP4dZ3ErQdJtdRNqA2e9KcbuX38wC7Y7B5fECFsmPb"
+  },
+  "mainnet": {
+    "status": "not-deployed",
+    "programs": {},
+    "mints": {}
+  },
+  "feePolicy": {
+    "totalTradeFeeBps": 200,
+    "nominalVolumeBps": {
+      "kidsTreasury": 98,
+      "dev": 20,
+      "parentABuyAndBurn": 25,
+      "parentBBuyAndBurn": 25,
+      "raydiumProtocolAndFund": 32
+    },
+    "lpEarningsWeights": {
+      "denominator": 168,
+      "kidsTreasury": 98,
+      "dev": 20,
+      "parentA": 25,
+      "parentB": 25
+    },
+    "distributionIntegrated": true,
+    "buybackAndBurnIntegrated": true,
+    "settlementAsset": "WSOL after child-fee conversion",
+    "activeApplication": false,
+    "verificationStatus": "combined-localnet-run-passed"
+  },
+  "displayIdentity": {
+    "name": "Shartcoin",
+    "ticker": "$Shartcoin",
+    "internalKey": "SHART"
+  },
+  "hostedPrivateLocalnet": {
+    "verifiedDate": "2026-09-20",
+    "network": "localnet",
+    "genesisHash": "8G5Xak8qnAbJqePzrcXTFWrN2wFpwdDg3bXLfiUt2kq5",
+    "programId": "F5SFr87MGqnxrnrr5MgySRjYrynm2588e93eUUcrxoFv",
+    "campaign": "J7KdyyREzrcyzZWpEVo2t2oGYncXyh4gSotgCVxj7ske",
+    "mint": "AyBJ17LjyNKBH2eoSa3cwLuULXU1LvrAJuLCLMd6Aejo",
+    "programSha256": "e0b4051752422366e51ae6a5fe8eaeeeab773faa1448cec33a0990961c76e71d",
+    "source": "programs/atomic-launch",
+    "site": "https://kids.fun",
+    "publicAccess": "password-gated",
+    "rpcPublic": false,
+    "mainnet": false,
+    "reproducibleBuildVerified": false
+  }
+}

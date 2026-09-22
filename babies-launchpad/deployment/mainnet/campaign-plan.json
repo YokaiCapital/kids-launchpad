@@ -1,0 +1,26 @@
+{
+  "network": "mainnet",
+  "programId": "BLiaZWNQoPm4mG4cXNm4sXifFqs1Xmxx12qD9T4Y5NeN",
+  "creator": "AAuwkFNvXRimHyvdQfh7Zik9baw8W2ufSbc5cyBqsdoE",
+  "nonce": "349636494910775658",
+  "campaign": "4y13ccgNQTTRJ6UTNfkMeSB2DLNzfBmRG9PW4ChJVPve",
+  "terms": {
+    "soft": "100000000000",
+    "hard": "500000000000",
+    "deadlineSeconds": 86400
+  },
+  "parents": [
+    {
+      "role": "parentA",
+      "mint": "9BB6NFEcjBCtnNLFko2FqVQBq8HHM13kCyYcdQbgpump"
+    },
+    {
+      "role": "parentB",
+      "mint": "Cm6fNnMk7NfzStP9CZpsQA2v3jjzbcYGAxdJySmHpump"
+    }
+  ],
+  "dev": "EkqTC1NbAg9zjFxdWY4psYtyHU3JpXDeXCkerSahraSJ",
+  "treasury": "91eLwFTAxkcQLPSMxbzdSFkTyEwyRYcoZk64HMZj8vX",
+  "plannedAt": "2026-09-22T22:42:29.332Z",
+  "snapshotDirectory": "deployment/mainnet/snapshots/4y13ccgNQTTRJ6UTNfkMeSB2DLNzfBmRG9PW4ChJVPve"
+}

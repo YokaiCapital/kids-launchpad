@@ -1,0 +1,1 @@
+{"name":"kids-localnet","private":true,"type":"module","dependencies":{"@solana/web3.js":"1.98.4","@solana/spl-token":"0.4.14","@noble/hashes":"1.8.0"},"scripts":{"test:vesting":"node --test test/vesting.test.mjs","verify:vesting":"node verify-vesting.mjs"}}

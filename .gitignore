@@ -1,0 +1,17 @@
+node_modules/
+.runtime/
+.stage/
+dist/
+build/
+target/
+.env
+.env.*
+!.env.example
+*.sqlite*
+*.db
+*.log
+.DS_Store
+*-keypair.json
+*-secret.json
+*.pem
+*.key

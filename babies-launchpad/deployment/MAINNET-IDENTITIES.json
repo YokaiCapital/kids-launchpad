@@ -1,0 +1,91 @@
+{
+  "schemaVersion": 1,
+  "network": "mainnet",
+  "genesisHash": "5eykt4UsFv8P8NJdTREpY1vzqKqZKvdpKuc147dw2N9d",
+  "status": "program-deployed-service-pending",
+  "verifiedAt": "2026-09-20T17:20:00Z",
+  "verificationMethod": "public RPC read of the mint accounts and metadata; owner supplied the addresses on 20 September 2026",
+  "parents": [
+    {
+      "role": "parentA",
+      "name": "Fartcoin",
+      "mint": "9BB6NFEcjBCtnNLFko2FqVQBq8HHM13kCyYcdQbgpump",
+      "tokenProgram": "spl-token",
+      "decimals": 6,
+      "supplyRawAtVerification": "999971960354570",
+      "mintAuthority": null,
+      "freezeAuthority": null,
+      "metadata": "Metaplex token metadata, name Fartcoin",
+      "pythFeedId": "58cd29ef0e714c5affc44f269b2c1899a52da4169d7acc147b9da692e6953608",
+      "pythFeedNote": "Pyth sponsored on-chain feed FARTCOIN/USD (shard 0), read through the KIDS RPC"
+    },
+    {
+      "role": "parentB",
+      "name": "Buttcoin",
+      "mint": "Cm6fNnMk7NfzStP9CZpsQA2v3jjzbcYGAxdJySmHpump",
+      "tokenProgram": "token-2022",
+      "decimals": 6,
+      "supplyRawAtVerification": "999939456371879",
+      "mintAuthority": null,
+      "freezeAuthority": null,
+      "extensions": [
+        "metadataPointer",
+        "tokenMetadata"
+      ],
+      "metadata": "Token-2022 embedded metadata, name Buttcoin",
+      "pythFeedId": null,
+      "pythFeedNote": "No Pyth feed: buybacks use the impact cap and the 0.1 SOL no-reference slice"
+    }
+  ],
+  "devWallet": {
+    "address": "EkqTC1NbAg9zjFxdWY4psYtyHU3JpXDeXCkerSahraSJ",
+    "createdBy": "operator on the owner's Mac, 22 September 2026 (owner: \"real treasury and dev wallet can be created by you and I will save private keys\")",
+    "keyLocation": "~/.config/kids/mainnet/dev-keypair.json (owner Mac, 0600)",
+    "status": "created; unfunded; replaces the earlier owner-supplied address",
+    "previousOwnerSuppliedAddress": "FvvCnPgyMrLCLVU6XvEsijFpyoJg65pp6CT3rP9WMxoi"
+  },
+  "treasuryWallet": {
+    "address": "91eLwFTAxkcQLPSMxbzdSFkTyEwyRYcoZk64HMZj8vX",
+    "createdBy": "operator on the owner's Mac, 20 September 2026",
+    "keyLocation": "~/.config/kids/treasury-keypair.json (mode 0600, outside the repository; move to a hardware wallet or multisig before real funds)",
+    "onChainAccountAtVerification": false,
+    "status": "generated 20 September 2026; unfunded; owner to move the key to hardware custody before real funds"
+  },
+  "openQuestions": [
+    "Move the treasury and operator keys to owner-controlled custody (hardware wallet or multisig) before real funds",
+    "Upgrade authority after the first deploy: operator key now, multisig later (owner decision)",
+    "Cap conversion source and timing for the soft and hard caps"
+  ],
+  "solUsdPythFeedId": "ef0d8b6fda2ceba41da15d4095d1da392a0d2f8ed0c6c7bc0f4cfac8c280b56d",
+  "updatedAt": "2026-09-23T00:05:00Z",
+  "program": {
+    "programId": "BLiaZWNQoPm4mG4cXNm4sXifFqs1Xmxx12qD9T4Y5NeN",
+    "binarySha256": "ef584ae7555415215b8cda0597cfff8362a7ecdbb31fdc07aa747c3f63368923",
+    "keyLocation": "~/.config/kids/mainnet/program-keypair.json (owner Mac, 0600)",
+    "status": "DEPLOYED on mainnet 23 September 2026 00:03 UTC from the reproducible CI build; on-chain bytes verified equal to the binary; program data sized to the binary (extend before a larger upgrade)",
+    "deploySignature": "2Ty3yuDMkY9FDGdr6EkaVcWvCVZSZ2CHPxtVFJYHkdj8DFPeZz4QPfh5N54zdSuMN6CCJYPRiEtZSH22H81jCga2",
+    "upgradeAuthority": "AAuwkFNvXRimHyvdQfh7Zik9baw8W2ufSbc5cyBqsdoE",
+    "explorer": "https://solscan.io/account/BLiaZWNQoPm4mG4cXNm4sXifFqs1Xmxx12qD9T4Y5NeN"
+  },
+  "operatorWallet": {
+    "address": "AAuwkFNvXRimHyvdQfh7Zik9baw8W2ufSbc5cyBqsdoE",
+    "role": "campaign creator, keeper signer and program upgrade authority at first deploy",
+    "keyLocation": "~/.config/kids/mainnet/operator-keypair.json (owner Mac, 0600); copied into the signer service by the owner",
+    "status": "funded by the owner with 3 SOL on 23 September 2026; paid the program deployment"
+  },
+  "hosting": {
+    "railwayProject": "kids-mainnet",
+    "projectId": "6f623b65-d0e5-4416-acb0-61d4e3507ac9",
+    "serviceId": "94b2dd49-f671-4b80-bf62-d5d5cc0393d5",
+    "environmentId": "65ff9abc-ea23-423b-b157-ac8bc7342320",
+    "domain": "https://kids-api-production-fc8e.up.railway.app",
+    "volume": "2d191ef3-32be-4671-939a-2910bc1121dc",
+    "secrets": "set by the owner on 23 September 2026 (gateway tokens, Helius URL, operator key)"
+  },
+  "firstCampaign": {
+    "campaign": "4y13ccgNQTTRJ6UTNfkMeSB2DLNzfBmRG9PW4ChJVPve",
+    "plan": "deployment/mainnet/campaign-plan.json",
+    "snapshotEvidence": "deployment/mainnet/snapshots/4y13ccgNQTTRJ6UTNfkMeSB2DLNzfBmRG9PW4ChJVPve",
+    "terms": "100 SOL soft, 500 SOL hard, 24 h (changeable until provisioned)"
+  }
+}

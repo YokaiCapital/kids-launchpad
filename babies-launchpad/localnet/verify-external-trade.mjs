@@ -1,0 +1,8 @@
+// Isolated localnet verification: private signing key never enters the trade service.
+import assert from 'node:assert/strict';import {randomUUID} from 'node:crypto';import {Keypair,VersionedTransaction,SystemProgram,Transaction,sendAndConfirmTransaction} from '@solana/web3.js';
+import {qualifiedCampaign} from './postlaunch-campaign.mjs';import {localKey} from './dev-vesting.mjs';import {quotePostlaunchTrade,preparePostlaunchTrade,submitPostlaunchTrade} from './postlaunch-trade.mjs';
+const {ctx,campaign}=await qualifiedCampaign(),owner=Keypair.generate(),funder=localKey('alice');
+await sendAndConfirmTransaction(ctx.connection,new Transaction().add(SystemProgram.transfer({fromPubkey:funder.publicKey,toPubkey:owner.publicKey,lamports:20000000})),[funder]);
+async function trade(side,amountRaw){const q=await quotePostlaunchTrade(owner.publicKey.toBase58(),{campaign:campaign.toBase58(),side,amountRaw,slippageBps:100,requestId:randomUUID()}),wrap=Keypair.generate(),prepared=await preparePostlaunchTrade(q.owner,{intentId:q.intentId,wrappedAccount:wrap.publicKey.toBase58()}),tx=VersionedTransaction.deserialize(Buffer.from(prepared.unsignedTransactionBase64,'base64'));tx.sign([owner,wrap]);const body={intentId:q.intentId,signedTransactionBase64:Buffer.from(tx.serialize()).toString('base64')};const result=await submitPostlaunchTrade(q.owner,body),retry=await submitPostlaunchTrade(q.owner,body);assert.equal(result.signature,retry.signature);console.log(side+' confirmed; identical retry signature');return q;}
+const buy=await trade('buy','1000000');await trade('sell',buy.minOutputRaw);
+console.log('External localnet wallet buy/sell and idempotent replay passed.');

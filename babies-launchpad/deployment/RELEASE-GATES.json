@@ -1,0 +1,40 @@
+{
+  "schemaVersion": 1,
+  "network": "localnet",
+  "publicAccess": "password-gated",
+  "realDepositsEnabled": false,
+  "mainnetReady": false,
+  "blockingRequirements": [
+    {
+      "id": "identities",
+      "status": "partial",
+      "requirement": "Treasury recipient, dev-wallet ownership proof, cap conversion source and immutable published launch terms (parent mints verified on chain 20 September 2026; dev wallet recorded as owner-supplied)"
+    },
+    {
+      "id": "deployment",
+      "status": "missing",
+      "requirement": "Mainnet program deployment and upgrade-authority governance (reproducible two-runner build with equal hashes in CI since 20 September 2026)"
+    },
+    {
+      "id": "review",
+      "status": "missing",
+      "requirement": "Independent contract and economic-security review, including snapshot publisher and upstream custody dependencies"
+    },
+    {
+      "id": "keeper",
+      "status": "partial",
+      "requirement": "Production RPC, a deployed keeper signing service (built and rehearsed on localnet 20 September 2026, not deployed), and a live-quote run of the Pyth reference-price guard (the Jupiter buyback route is rehearsed on the hosted kids-jupiter-localnet environment)"
+    },
+    {
+      "id": "recovery",
+      "status": "partial",
+      "requirement": "Sustained mixed read/write capacity and alert delivery confirmed by the owner (isolated provider restore drill passed and startup chain reconciliation gate in place, 20 September 2026)"
+    },
+    {
+      "id": "lifecycle",
+      "status": "partial",
+      "requirement": "End-to-end long-lived active campaign close, launch, claims and fee settlement through the public wallet application with real browser wallets"
+    }
+  ],
+  "checklist": "deployment/RELEASE-CHECKLIST.md"
+}

@@ -1,0 +1,14 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {PublicKey} from '@solana/web3.js';
+import {activeAmounts,validateActiveManifest,readActiveReceipt} from '../active-launch.mjs';
+const key=new PublicKey('11111111111111111111111111111111');
+const base={soft:100n,hard:500n,total:761n,deadline:10,launchDeadline:20,phase:0};
+const receipt={committed:12n,refunded:0n,settled:false,accepted:0n};
+test('open allocation is an estimate with no claimable refund',()=>{assert.deepEqual(activeAmounts(base,receipt,9),{accepted:7n,refundable:0n,failed:false,phase:'open'});});
+test('closed oversubscription floors acceptance and deducts previous refunds',()=>{assert.equal(activeAmounts(base,receipt,10).refundable,5n);assert.equal(activeAmounts(base,{...receipt,refunded:3n},11).refundable,2n);});
+test('timeout returns accepted balance after a previous excess refund',()=>{const result=activeAmounts(base,{...receipt,refunded:5n},20);assert.equal(result.refundable,7n);assert.equal(result.accepted,0n);assert.equal(result.phase,'failed');});
+test('a launched campaign never becomes a full refund after timeout',()=>{assert.equal(activeAmounts({...base,phase:3},{...receipt,settled:true,accepted:7n,refunded:5n},30).refundable,0n);assert.equal(activeAmounts({...base,phase:3},receipt,30).phase,'launched');});
+test('below-soft funding has full refunds',()=>{assert.equal(activeAmounts({...base,total:99n},receipt,10).refundable,12n);});
+test('manifest rejects another ledger, program binary and altered cap',()=>{const ctx={manifest:{genesisHash:'local',sha256:'verified'},programId:key};const m={network:'localnet',rpcUrl:'http://127.0.0.1:19099',genesisHash:'local',programId:key.toBase58(),programSha256:'verified',soft:'100000000000',hard:'500000000000',supply:'1000000000000000',deadline:10,launchDeadline:86410};assert.equal(validateActiveManifest(ctx,m),m);for(const change of [{rpcUrl:'https://api.mainnet-beta.solana.com'},{genesisHash:'another'},{programSha256:'changed'},{hard:'501000000000'},{soft:'0'},{soft:'600000000000'},{launchDeadline:86409}])assert.throws(()=>validateActiveManifest(ctx,{...m,...change}));const small={...m,soft:'1000000000',hard:'5000000000',deadline:10,launchDeadline:86410};assert.equal(validateActiveManifest(ctx,small),small);});
+test('receipt parser rejects foreign account ownership and v1 layouts',async()=>{for(const info of [{owner:key,data:Buffer.alloc(104)},{owner:new PublicKey('So11111111111111111111111111111111111111112'),data:Buffer.alloc(112)}])await assert.rejects(readActiveReceipt({programId:key,connection:{getAccountInfo:async()=>info}},key,key));});

@@ -1,0 +1,41 @@
+name: KIDS release checks
+on:
+  push:
+    branches: [main]
+  pull_request:
+permissions:
+  contents: read
+concurrency:
+  group: kids-checks-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  application:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38
+        with:
+          node-version: '24'
+      - name: Install locked dependencies without native install scripts
+        run: |
+          npm ci --ignore-scripts --prefix babies-launchpad/localnet
+          npm ci --ignore-scripts --prefix babies-launchpad/interaction-review
+      - name: Build frontend
+        run: npm --prefix babies-launchpad/interaction-review run build
+      - name: Application, authorization, journal and Linux writer-lock tests
+        working-directory: babies-launchpad
+        run: node --test interaction-review/tests/*.test.mjs interaction-review/staging/*.test.mjs interaction-review/deployment/*.test.mjs localnet/test/*.test.mjs protocol/test/*.test.mjs
+      - name: Scan public source
+        run: python3 babies-launchpad/scripts/check-publication.py .
+  contract:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
+        with:
+          persist-credentials: false
+      - name: Locked Rust contract tests
+        run: cargo test --locked --manifest-path babies-launchpad/programs/atomic-launch/Cargo.toml

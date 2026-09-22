@@ -1,0 +1,11 @@
+import {spawn} from 'node:child_process';
+import {homedir} from 'node:os';
+import {fileURLToPath} from 'node:url';
+import {mkdirSync} from 'node:fs';
+const runtime=fileURLToPath(new URL('./.runtime/',import.meta.url));
+mkdirSync(runtime,{recursive:true,mode:0o700});
+const executable=(process.env.SOLANA_BIN||homedir()+'/.local/share/solana/install/active_release/bin')+'/solana-test-validator';
+const validator=spawn(executable,['--ledger',runtime+'/ledger','--rpc-port','18999','--faucet-port','19900','--gossip-port','19001','--dynamic-port-range','19002-19030','--bind-address','127.0.0.1','--limit-ledger-size','10000000','--quiet'],{stdio:'inherit'});
+for(const signal of ['SIGINT','SIGTERM'])process.on(signal,()=>validator.kill(signal));
+validator.once('error',error=>{console.error(error.message);process.exitCode=1;});
+validator.once('exit',code=>{process.exitCode=code||0;});

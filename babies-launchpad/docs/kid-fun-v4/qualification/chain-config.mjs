@@ -1,0 +1,20 @@
+// Read-only mainnet qualification: no transaction building, signatures, or sending.
+import {writeFileSync} from 'node:fs';
+import assert from 'node:assert/strict';
+import {LaunchpadConfig,LAUNCHPAD_PROGRAM} from '@raydium-io/raydium-sdk-v2';
+const apiUrl='https://launch-mint-v1.raydium.io/main/configs';
+const api=await (await fetch(apiUrl,{signal:AbortSignal.timeout(15000)})).json();
+const advertised=api.data.data.find(x=>x.key.mintB==='So11111111111111111111111111111111111111112'&&x.key.curveType===0).key;
+const rpc=await (await fetch('https://api.mainnet-beta.solana.com',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({jsonrpc:'2.0',id:1,method:'getAccountInfo',params:[advertised.pubKey,{encoding:'base64',commitment:'finalized'}]}),signal:AbortSignal.timeout(15000)})).json();
+if(rpc.error)throw Error(JSON.stringify(rpc.error));
+assert.equal(rpc.result.value.owner,LAUNCHPAD_PROGRAM.toBase58());
+const bytes=Buffer.from(rpc.result.value.data[0],'base64');assert.equal(bytes.length,LaunchpadConfig.span);
+const data=LaunchpadConfig.decode(bytes);
+const fields=['curveType','index','migrateFee','tradeFeeRate','maxShareFeeRate','minSupplyA','maxLockRate','minSellRateA','minMigrateRateA','minFundRaisingB','mintB','protocolFeeOwner','migrateFeeOwner','migrateToAmmWallet','migrateToCpmmWallet'];
+const config=Object.fromEntries(fields.map(k=>[k,data[k].toString()]));
+for(const key of fields)assert.equal(config[key],String(advertised[key]),`API mismatch: ${key}`);
+const gates={supply:1000000000000000n>=BigInt(config.minSupplyA),saleRate:550000n>=BigInt(config.minSellRateA),migrationRate:350000n>=BigInt(config.minMigrateRateA),lockRate:100000n<=BigInt(config.maxLockRate),raise:85000000000n>=BigInt(config.minFundRaisingB)};
+assert(Object.values(gates).every(Boolean));
+const report={checkedAt:new Date().toISOString(),status:'Global configuration read and decoded at finalized commitment; platform and launch remain unqualified',address:advertised.pubKey,owner:rpc.result.value.owner,slot:rpc.result.context.slot,config,presetBounds:gates,protocolTradingFeePercent:Number(config.tradeFeeRate)/10000,missing:['kid.fun platform configuration and fee beneficiaries','chosen migration pool fee tier and LP custody/rights','launch mint/pool accounts and unsigned execution simulation','reserve recipient, unlock schedule and funded claim rehearsal'],rawAccountBase64:rpc.result.value.data[0]};
+writeFileSync(new URL('./chain-config-results.json',import.meta.url),JSON.stringify(report,null,2)+'\n');
+console.log(JSON.stringify({...report,rawAccountBase64:undefined},null,2));

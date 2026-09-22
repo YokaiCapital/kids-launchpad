@@ -1,0 +1,14 @@
+import assert from'node:assert/strict';import {randomUUID}from'node:crypto';import {getAccount,getAssociatedTokenAddressSync,NATIVE_MINT}from'@solana/spl-token';
+import {quotePostlaunchTrade,executePostlaunchTrade}from'./postlaunch-trade.mjs';import {qualifiedCampaign}from'./postlaunch-claims.mjs';import {localKey}from'./dev-vesting.mjs';
+const {ctx,campaign,state}=await qualifiedCampaign(),owner=localKey('alice').publicKey.toBase58(),other=localKey('bob').publicKey.toBase58();
+const child=getAssociatedTokenAddressSync(state.mint,localKey('alice').publicKey),wsol=getAssociatedTokenAddressSync(NATIVE_MINT,localKey('alice').publicKey);
+const before=await getAccount(ctx.connection,child).catch(()=>({amount:0n}));const nativeBefore=await ctx.connection.getAccountInfo(wsol);
+const request={campaign:campaign.toBase58(),side:'buy',amountRaw:'1000000',slippageBps:100,requestId:randomUUID()};
+const [quote,again]=await Promise.all([quotePostlaunchTrade(owner,request),quotePostlaunchTrade(owner,request)]);assert.equal(quote.intentId,again.intentId);assert.ok(quote.expiresAt>Date.now());
+await assert.rejects(()=>quotePostlaunchTrade(owner,{...request,amountRaw:'2000000'}));await assert.rejects(()=>executePostlaunchTrade(other,{intentId:quote.intentId}));
+const [buy,replay]=await Promise.all([executePostlaunchTrade(owner,{intentId:quote.intentId}),executePostlaunchTrade(owner,{intentId:quote.intentId})]);assert.equal(buy.signature,replay.signature);
+const after=await getAccount(ctx.connection,child);assert.ok(after.amount-before.amount>=BigInt(quote.minOutputRaw));
+const sellQuote=await quotePostlaunchTrade(owner,{...request,side:'sell',amountRaw:((after.amount-before.amount)/2n).toString(),requestId:randomUUID()});const sell=await executePostlaunchTrade(owner,{intentId:sellQuote.intentId});
+assert.equal((await getAccount(ctx.connection,child)).amount,after.amount-BigInt(sellQuote.inputRaw));assert.deepEqual((await ctx.connection.getAccountInfo(wsol))?.data,nativeBefore?.data);
+assert.equal((await executePostlaunchTrade(owner,{intentId:quote.intentId})).signature,buy.signature);
+console.log(JSON.stringify({campaign:campaign.toBase58(),buySignature:buy.signature,sellSignature:sell.signature,checks:['real buy and sell through canonical 2% pool','fixed recipient and owner binding','exact raw-unit minimum output','duplicate prepare and concurrent execute idempotent','persistent confirmed replay returns same signature','existing WSOL ATA untouched']},null,2));

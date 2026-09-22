@@ -1,0 +1,7 @@
+.stage/
+node_modules/
+.runtime/
+*.sqlite
+*.sqlite-*
+!vendor/
+!vendor/**

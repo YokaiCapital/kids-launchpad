@@ -1,0 +1,32 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {mkdtempSync,rmSync,writeFileSync,readFileSync,cpSync} from 'node:fs';
+import {tmpdir} from 'node:os';
+import {join} from 'node:path';
+import {Keypair,Transaction} from '@solana/web3.js';
+import {createClaimIntentService,claimRequest} from '../postlaunch-claim-intents.mjs';
+import {refundInstruction} from '../atomic-launch.mjs';
+test('full claim service compacts finalized entries, replays from restored archive, and retains unresolved signed rows',async t=>{
+ const dir=mkdtempSync(join(tmpdir(),'kids-claim-archive-'));t.after(()=>rmSync(dir,{recursive:true,force:true}));const file=join(dir,'claims.json');
+ const owner=Keypair.generate().publicKey,campaign=Keypair.generate().publicKey,mint=Keypair.generate().publicKey,programId=Keypair.generate().publicKey;
+ const input={campaign:campaign.toBase58(),action:'refund',requestId:'archived-request-0001'},request=claimRequest(owner.toBase58(),input);
+ const block={blockhash:Keypair.generate().publicKey.toBase58(),lastValidBlockHeight:50};let sends=0,builds=0;
+ const connection={getSignatureStatuses:async([sig])=>({value:[sig==='final'?{confirmationStatus:'finalized',slot:45,err:null}:null]}),getLatestBlockhash:async()=>block,getBlockHeight:async()=>100,sendRawTransaction:async()=>{sends++;throw Error('must not broadcast replay');}};
+ const context={campaign,state:{mint},ctx:{connection,programId,manifest:{genesisHash:'ledger',sha256:'binary'}}};
+ const row={owner:owner.toBase58(),campaign:campaign.toBase58(),action:'refund',programId:programId.toBase58(),programSha256:'binary',genesisHash:'ledger',mint:mint.toBase58(),block,createdAt:0,unsignedTransactionBase64:'original',signed:'signed-wire',signature:'unknown'};
+ const intents={[request.id]:{...row,intentId:request.id,descriptor:request.descriptor,signature:'final'}};
+ for(let n=0;n<9999;n++)intents['z'+String(n).padStart(5,'0')]={...row,intentId:'z'+n};
+ writeFileSync(file,JSON.stringify(intents));
+ const deps={qualified:async()=>context,readClaims:async()=>({ok:true}),build:async()=>{builds++;return {...context,tx:new Transaction().add(refundInstruction({programId},campaign,owner))};}};
+ const service=createClaimIntentService({file,...deps});
+ await service.prepare(owner.toBase58(),{...input,requestId:'new-request-0000001'});
+ const hot=JSON.parse(readFileSync(file));assert.equal(Object.keys(hot).length,10001);assert.equal(hot[request.id],undefined);assert.equal(hot.z00000.signed,'signed-wire');
+ // Restore the hot file AND archive into an independent path.
+ const restored=join(dir,'restored.json');cpSync(file,restored);cpSync(file+'.archive',restored+'.archive',{recursive:true});
+ const recovered=createClaimIntentService({file:restored,...deps});
+ assert.equal((await recovered.submit(owner.toBase58(),{intentId:request.id})).signature,'final');
+ assert.equal((await recovered.prepare(owner.toBase58(),input)).confirmedSignature,'final');assert.equal(sends,0);assert.equal(builds,1);
+ await assert.rejects(recovered.submit(Keypair.generate().publicKey.toBase58(),{intentId:request.id}),/another wallet/);
+ const missing=join(dir,'missing.json');cpSync(file,missing);assert.throws(()=>createClaimIntentService({file:missing,...deps}),/ENOENT/);
+ context.ctx.manifest.genesisHash='different';await assert.rejects(recovered.submit(owner.toBase58(),{intentId:request.id}),/identity changed/);await assert.rejects(recovered.prepare(owner.toBase58(),input),/identity changed/);
+});

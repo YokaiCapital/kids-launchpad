@@ -1,0 +1,1 @@
+{"name":"kidfun-local-protocol","private":true,"type":"module","engines":{"node":">=22.13"},"scripts":{"start":"node server.mjs","test":"node --test test/*.test.mjs"}}

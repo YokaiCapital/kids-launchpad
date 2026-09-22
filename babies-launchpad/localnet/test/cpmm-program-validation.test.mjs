@@ -1,0 +1,12 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {createHash} from 'node:crypto';
+import {PublicKey} from '@solana/web3.js';
+import {validateCpmmProgramAccount,validateCpmmProgramData} from '../cpmm-program-validation.mjs';
+const loader=new PublicKey('BPFLoaderUpgradeab1e11111111111111111111111');
+const binary=Buffer.from([0x7f,0x45,0x4c,0x46,1,2,3,4]);
+function fixture(){const data=Buffer.alloc(45+binary.length+20);data.writeUInt32LE(3);binary.copy(data,45);return {info:{owner:loader,executable:false,data},manifest:{network:'localnet',upgradeAuthority:null,sourceRepository:'https://github.com/raydium-io/raydium-cp-swap',sourceCommit:'59fb845a9e5bb569c8b2f3415f13b0c0ebcc6b92',binarySize:binary.length,sha256:createHash('sha256').update(binary).digest('hex')}};}
+test('accepts immutable bytes with zero padding and matching legacy binary',()=>{const {info,manifest}=fixture();assert.equal(validateCpmmProgramData(info,manifest),binary.length);delete manifest.binarySize;assert.equal(validateCpmmProgramData(info,manifest,binary),binary.length);assert.throws(()=>validateCpmmProgramData(info,manifest,Buffer.from('wrong')),/matching local/);});
+test('rejects tampered byte, hash, padding, and source pin',()=>{for(const mutation of [(i,m)=>i.data[49]^=1,(i,m)=>m.sha256='0'.repeat(64),(i,m)=>i.data[i.data.length-1]=1,(i,m)=>m.sourceCommit='0'.repeat(40)]){const {info,manifest}=fixture();mutation(info,manifest);assert.throws(()=>validateCpmmProgramData(info,manifest));}});
+test('rejects wrong layout, mutable authority and bad bounds',()=>{for(const mutation of [(i,m)=>i.data=Buffer.alloc(12),(i,m)=>i.data.writeUInt32LE(2),(i,m)=>i.data[12]=1,(i,m)=>i.executable=true,(i,m)=>m.binarySize=10000,(i,m)=>m.binarySize=-1]){const {info,manifest}=fixture();mutation(info,manifest);assert.throws(()=>validateCpmmProgramData(info,manifest));}});
+test('program account validates loader layout before following its address',()=>{const data=Buffer.alloc(36);data.writeUInt32LE(2);const info={owner:loader,executable:true,data};assert.equal(validateCpmmProgramAccount(info).toBase58(),'11111111111111111111111111111111');assert.throws(()=>validateCpmmProgramAccount({...info,data:Buffer.alloc(3)}));assert.throws(()=>validateCpmmProgramAccount({...info,data:Buffer.alloc(37)}));assert.throws(()=>validateCpmmProgramAccount({...info,owner:new PublicKey('11111111111111111111111111111111')}));});

@@ -1,0 +1,15 @@
+{
+  "dependencies": {
+    "@noble/hashes": "2.4.0",
+    "@raydium-io/raydium-sdk-v2": "0.2.71-alpha",
+    "bn.js": "5.2.2"
+  },
+  "name": "kidfun-offline-economics-qualification",
+  "private": true,
+  "scripts": {
+    "test": "node final-fill.mjs",
+    "test:baseline": "node ../economics-check.mjs",
+    "check:chain": "node chain-config.mjs",
+    "test:allocations": "node allocation-rehearsal.mjs"
+  }
+}

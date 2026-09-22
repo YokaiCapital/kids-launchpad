@@ -1,0 +1,21 @@
+{
+  "name": "kids-mint-worker",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=24"
+  },
+  "scripts": {
+    "stage": "node stage.mjs",
+    "test": "node verify.mjs",
+    "start": "node worker.mjs"
+  },
+  "dependencies": {
+    "@noble/curves": "2.4.0",
+    "@solana/web3.js": "1.98.4",
+    "@noble/hashes": "2.4.0",
+    "@solana/spl-token": "0.4.15",
+    "bs58": "6.0.0"
+  }
+}

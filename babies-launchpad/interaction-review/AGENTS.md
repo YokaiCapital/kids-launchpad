@@ -1,0 +1,89 @@
+# Prototype Instructions
+
+Run the local server yourself and open the preview in the browser available to this environment. Do not give the user server-start instructions when you can run it.
+
+Before making substantial visual changes, use the Product Design plugin's `get-context` skill when the visual source is unclear or no longer matches the current goal. When the user gives durable prototype-specific design feedback, preferences, or decisions, record them in `AGENTS.md`.
+
+When implementing from a selected generated mock, treat that image as the source of truth for layout, component anatomy, density, spacing, color, typography, visible content, and hierarchy.
+
+Build app UI in `src/`. The production bundle is `dist/client`; `deployment/prepare.mjs` packages it with the password gate for Vercel.
+
+User feedback, 19 September 2026: earlier homepage screenshot ("Two communities. One kid.", first-coin row, parent→kid family diagram, and four-step roadmap) was easier to understand. Restore that explanatory hierarchy on the home page; keep submission and voting accessible but secondary. Preserve the current approved KID identity unless the user explicitly changes the mascot.
+
+Palette trial, 19 September 2026: user said lime UI looked like Robinhood, suggested Solana then “something totally original like hubba bubba colors.” Current trial is bubblegum pink / grape / ice blue over dark plum, with white wordmark. Palette isolated in src/bubblegum.css so it can be revised quickly. Existing KID artwork remains its approved lime identity; this is an interface palette trial, not a final rebrand approval.
+
+Latest selected direction: use simple pink dog with large black nose, dot eyes and purple KID beanie (kid-mutt-v3.png), replacing detailed lime character. KID is site mascot; SHART is first prelaunch coin concept, Fartcoin × Buttcoin. Exact parent mints unverified. Use typographic SHART badge until its artwork is selected. Keep hero → coin → family → roadmap structure.
+
+Local persistence: `/api/demo` is a loopback-only Vite development/preview service backed by `../protocol/.runtime/preview.sqlite`. One shared simulated account, not real wallet authentication. Submitted records and accepted votes are authoritative on the server; browser-only legacy history is preserved in its existing keys but is not migrated. Keep failures explicit and drafts intact; never fall back to claiming browser-only acceptance succeeded when the service is down. The Sites worker stays unchanged.
+
+SHART coin page: dedicated #shart route, banner/logo/description, owner updates, visible SOL funding progress and commitment panel. User selected $200K total starting pool ($100K SOL + $100K SHART) and proportional oversubscription with excess refunds. This replaces the old curve proposal for SHART. Current page uses explicitly synthetic 750 SOL community funding and $200/SOL to demonstrate a 500 SOL retained cap. No real deposits or authenticated owner posting. User prefers wide, compact marketing layout: short banner, single stats strip, updates and commitment side by side, detailed terms collapsed; minimize scrolling and repeated copy.
+
+Coin banners must retain an exact 3:1 aspect ratio on desktop and mobile; uploaded images cover that frame. This overrides earlier fixed-height compact banner styling.
+
+Banner placement correction: use a Dexscreener-style right sidebar for the 3:1 banner, coin identity and commitment form. Never expand the banner across the full desktop page. Funding stats and owner feed stay in the wide left area.
+
+Remove repeated “demo” UI wording. Use plain action labels (Commit SOL, Publish update, Save profile), retaining concise disclosure of no real deposits and illustrative funding so sample data is not presented as real demand. Internal demo IDs, API routes and test semantics may stay unchanged.
+
+Prefer visual progress over explanatory copy on coin pages: large segmented SOL meter with cap marker and excess segment, pool split ring, compact stage indicator, and a live accepted/refund split in the form. Collapse About and launch details; preserve the compact 3:1 banner in the right rail.
+
+Parent icons on the coin page belong inline with the existing Fartcoin × Buttcoin eyebrow above SHART in the right sidebar. Do not add a separate parent row. Homepage keeps its parent icons.
+
+Platform/mascot name is KIDS. Keep SHART as the first coin. The launch stage tracker belongs inside the Committed card. Buttcoin logo chosen by user is CoinMarketCap image ID 39448; use parent-buttcoin.png across both pages.
+
+Brand correction: preserve the original italic wordmark design; use wordmark-kids-v2.png (kids.fun), not a plain text KIDS replacement. X and website icons overlay the upper-right corner of the coin banner, removing them from the title line.
+
+Logo correction: integrate the existing pink dog directly with the italic kids.fun wordmark on transparent background. No circle, avatar badge, or white background. Current header asset kids-logo-integrated-v1.png.
+
+Header refinement: mascot wordmark should sit freely with breathing room. No vertical divider beside logo; use only a very subtle header bottom boundary.
+
+Home identity clarity: the KIDS dog is the platform mascot, not SHART. Keep it in the brand logo; the homepage hero instead shows Fartcoin + Buttcoin leading to the SHART S! identity. Do not illustrate SHART with the platform dog.
+
+Navigation: Explore, SHART, Vote and Submit must remain visible on every page. Ballot now has 12 distinct fictional pairings using recognizable community names (not affiliations), replacing 248 repeated stress-test rows. New proposal hashes invalidate obsolete displayed votes; do not delete stored submissions.
+
+Optional coin-profile featured video: dev may upload MP4/WebM up to 10 MB or use a direct HTTPS MP4/WebM URL. Stored in coinProfile.video; removable. Render only when provided, in a square player beside the updates feed (stacked on small screens). No autoplay; contain video rather than cropping. Local request bound is 17 MB to include video and existing profile images.
+
+Video placement correction: featured square video belongs at the top inside the funding summary, beside SOL progress. Remove its old placement beside Dev updates. With video present, show opening pool as a compact value/key beneath the progress meter instead of a large ring. Keep the right commitment rail intact.
+
+Latest video placement: user rejected embedding video inside funding. Keep a separate square coin introduction card at top left, funding in the adjacent card, and commitment rail on the right. No duplicate video in the feed.
+
+Responsive pass: final layout overrides live in src/responsive.css, imported last. Verified coin page at 320/390/768/1024/1440/1920 CSS px. Video and its poster must be 16:9 (supersedes square request), description below. Tablet overview spans both columns; phone overview stacks. Funding summary now shows total, subscribed multiplier, split values, compact pool equation and stages. Subtle bar sheen/stage pulse honor prefers-reduced-motion; never animate fake live totals.
+
+Localnet decision, 20 September 2026: user explicitly chose localnet, not devnet, and requested reuse of KIDS code plus replaceable test mints/admin identity and a comprehensive admin panel. Local validator runs on 18999 with separate ignored ledger. `/api/admin` uses KIDS loopback/Host/Origin guards and CSRF; do not publicly expose the local operator model. `/api/account` uses signed wallet sessions and wallet-owned submissions. Admin manages settings, content, review, real localnet voting rounds and audit records. Keep the existing concept/funding fixtures distinct from chain data. Escrow, pool execution and funded claims are not implemented; never describe them as working based on preview state. Confirmed supply: 45% prelaunch / 45% liquidity / 10% parents. Permanently lock liquidity and revoke mint/freeze authorities.
+
+Approved 20 September 2026: direct Raydium CPMM SHART/SOL, 2% trade fee (200 bps), permanent lock retaining LP fee rights, no token transfer tax or extra creator fee. Mainnet reference tier index 2; never use its address as a localnet account. Current fee split is 84% LP / 12% protocol / 4% fund; verify chain configuration before execution. Dev/platform payout split remains unspecified. Configuration is not deployed pool execution.
+
+Latest approved supply policy: 43.5% prelaunch / 43.5% liquidity / 10% parents / 3% dev, superseding 45/45/10. Dev gets 1% of total supply at launch; remaining 2% vests linearly from launch over three calendar months, no cliff. These are supply percentages, not percentages of the dev allocation. Fee revenue split remains separate and unassigned. Vesting implementation is pending.
+
+Dev vesting is now implemented for isolated localnet using the existing KIDS rewards-distributor and Merkle source, plus the pinned Solana Foundation rewards contract. Local contract has no upgrade authority. Alice is test dev: 1% timestamp-gated launch unlock, 2% linear over three UTC calendar months, revocation disabled and max-i64 clawback. SHART page has compact collapsed dev allocation/claim card; local session owner must equal the designated dev. Do not describe it as the full pool launch. Public-wallet transaction signing and actual launch-trigger integration remain pending. Funding scripts must never reset the ledger or duplicate allocations on retry.
+
+Submission UX update: compact interactive three-step builder with selectable parent cards, localnet quick picks, live coin preview and review→vote→launch explanation. Preserve saved drafts, explain old unsupported concept parents, invalidate artwork rights when artwork changes. SHART featured video is now the user-supplied Downloads/SHART .mov remuxed losslessly to /assets/shart-introduction-v1.mp4 (1080p16:9 H264/AAC, ~20.46s). Keep no autoplay and original source untouched.
+
+Latest user decision: remove public voting and submissions. Navigation is Explore, SHART, Launch, Guide, Admin. Launch shows a shared fixed 24-hour countdown defined in src/public-launch.json; never reset the deadline on refresh or automatically enable financial actions at zero. Legacy vote/submit routes lead to Launch, and their public write APIs are disabled. Preserve historical stored records.
+
+Display name correction, 20 September 2026: first coin is Shartcoin. Latest ticker correction: display $Shartcoin (exact case), while keeping internal mint key SHART and #shart route. Migrate exact built-in labels only; preserve custom descriptions, uploads and video pixels.
+
+Wallet connector decision, 20 September 2026: modern KIDS-styled multi-wallet connector, not Phantom-only, reusing the Pairz connect/sign-out lessons instead of a new design. Discovery uses the official Wallet Standard registry (`@wallet-standard/app` 1.1.0) plus an injected Phantom/Solflare/Backpack fallback; the one selected wallet signs commit, refund, claim, trade and legacy ballot requests. Kept rules: sign-in only on an explicit click, one wallet prompt at a time, bounded prompt deadlines (60 s connect and message, 120 s transaction), account-change rejection before and after every signature, a failed attempt forgets the wallet choice, sign-out revokes the API session even when the extension stalls, and the sign-in challenge must match the page origin, wallet, nonce and expiry before signing. Qualified with a browser test that registers a mock Wallet Standard wallet against the local dev server (discovery, sign-in, a 1 SOL localnet commit, sign-out). Real extension approval flows are not qualified; never describe a wallet as supported because its icon appears.
+
+Phantom pause, 20 September 2026: Phantom shows a malicious-site warning on domains it has not whitelisted, so until kids.fun is whitelisted Phantom stays visible in the wallet list but disabled with the note "Waiting for Phantom whitelisting"; a saved Phantom choice is never restored, and the empty-state install links point to Solflare and Backpack. Remove the pause only after Phantom confirms the whitelisting; never bypass the warning.
+
+Admin scope, 22 September 2026: the Admin panel, its navigation entry, the `#admin` route and every `/api/admin` function exist only on the local development server. Production builds strip them (`LOCAL_ADMIN` is `import.meta.env.DEV`), the Vercel gate and the hosted gateway never bridge `/api/admin`, and the operator login returns to the home page. Operator-only test-identity routes stay behind the separate operator password.
+
+Test campaign renewal, 22 September 2026: the private test campaign runs 24 hours and closes as failed under the 100 SOL soft cap. Renewal is an explicit boot-time switch (`KIDS_ACTIVE_CAMPAIGN_RENEW=finished`) that archives a fully refunded, fully settled failed campaign and provisions a new one; it never replaces a launched campaign and is not part of the product (a public launch will need a campaign registry instead).
+
+Short test campaigns, 22 September 2026: owner asked for a 1 SOL soft cap and a five-minute funding window on the private test ledger so launch and pool creation can be watched end to end. Terms are environment-driven for new campaigns with production defaults; pool dollar labels derive from the caps and print whole dollars below $1,000. Real wallets on the loopback test validator are topped up with test SOL at commit preparation; this is bound to the manifest's loopback rpcUrl and has no mainnet path.
+
+Commit confirmation, 22 September 2026: owner found the 'confirmed on localnet' line too small to notice after his first real-wallet commit. It is now a full-width green banner: 'Commitment confirmed', the amount in escrow, when funding closes and that launch runs by itself, with the signature folded underneath. Refunds use the same banner.
+
+After launch, 22 September 2026: the owner saw only 'Pool launched' and the allocation figures and did not find the small 'View launched coin' text link. The commit panel now shows a green 'Shartcoin is live' block with a full-width primary button 'Claim and trade Shartcoin' that opens the coin page; the header link stays.
+
+Wallet choice across tabs, 22 September 2026: the owner opened the coin page by direct link in a new tab and the claim asked him to connect although he was signed in. The chosen wallet was kept in sessionStorage (per tab) while the sign-in is a cookie. The choice now lives in localStorage (per browser, sessionStorage still read as a fallback), and when nothing is stored the site selects the Wallet Standard wallet that already lists the signed-in account; only if neither works does it ask, with a plain message naming the fix. A paused wallet is never restored.
+
+Errors in plain words, 22 September 2026: the owner met a raw simulation dump ('custom program error: 0x1 … insufficient funds') after selling more than he held. Every trade, claim and commit message now goes through friendly-errors.mjs: a headline in plain words, the next step, and the raw text folded under 'Technical details'; successes are green with the signature folded. The server also refuses a quote the wallet cannot pay for, before anything is signed, saying how much the wallet holds.
+
+Launch status card, 22 September 2026 (owner: the launch page status must be much more visible and match our UI). A full-width card at the top of the launch page: phase pill (Open / Launching / Live / Not launched / Not open yet), a headline in plain words, a live countdown aligned to the ledger clock (closes-in while open, launch-window while launching), a progress bar with the soft-cap marker and raised / soft / hard figures, and after launch the coin, pool and escrow addresses with copy buttons plus a full-width button to the coin page. There is no scheduled start in the program yet, so 'not open yet' shows a plain sentence instead of a start countdown; a scheduled start is the owner's call. Pure logic in launch-status.mjs with tests; the card asks for a fresh read when a countdown reaches zero.
+
+Claim buttons, 22 September 2026: after claiming, every button read 'Claim unavailable', which the owner read as claims being shut. Buttons now say the reason: Claimed (green), Not eligible, Dev wallet only, Nothing vested yet, Nothing to refund, Refunded, Sign in first; parent cards say whether the wallet held that parent at the snapshot.
+
+Coin page, 22 September 2026 (owner: show buybacks and burns with links in a really nice UI; swap panel needs balances and percent selling like Axiom or GMGN). New 'Every trade feeds the family' section: SOL collected, treasury and dev tiles, one tile per parent with SOL spent and coins burned, and a list of the latest buybacks with time, amounts and the signature (explorer link on mainnet, copy on the test ledger). The keeper now journals every confirmed fee operation with its counter deltas (`history`, bounded to 500) and the API serves the newest 60 as `feeEvents`. The swap panel shows the wallet's SOL balance on Buy with a Max button (keeps 0.01 SOL for fees) and the coin balance on Sell with 25 / 50 / 75 / 100 % presets; balances come from the API as `wallet` for the signed-in owner. The token reserve figure no longer wraps mid-number on phones.
+
+Network profile, 22 September 2026 (owner: go to mainnet, reuse Pairz services, Helius, real wallets, mainnet snapshot, programs on mainnet). `localnet/network.mjs` selects localnet, devnet or mainnet from KIDS_NETWORK; devnet and mainnet read KIDS_HELIUS_RPC_URL server-side and manifests carry a label, never the URL. Every ledger assertion and every site label follows the profile; the site is built for one network (VITE_KIDS_NETWORK) and refuses an API on another. Explorer links appear only where an explorer exists. Plan: docs/MAINNET-PLAN.md.
