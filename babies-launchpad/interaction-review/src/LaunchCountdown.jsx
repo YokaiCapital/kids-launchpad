@@ -1,12 +1,16 @@
-import {useEffect,useState} from 'react';
-import {RocketLaunch} from '@phosphor-icons/react';
-import schedule from './public-launch.json';
+import {RocketLaunch,ArrowRight} from '@phosphor-icons/react';
+import {usePrelaunchChain} from './LocalPrelaunch';
+import {LaunchStatus} from './LaunchStatus';
 import './launch-countdown.css';
-const opensAt=Date.parse(schedule.opensAt);
-export function LaunchCountdown(){
- const [now,setNow]=useState(Date.now);
- useEffect(()=>{const timer=setInterval(()=>setNow(Date.now()),1000);return()=>clearInterval(timer);},[]);
- const remaining=Math.max(0,Math.ceil((opensAt-now)/1000));
- const units=[['Hours',Math.floor(remaining/3600)],['Minutes',Math.floor(remaining/60)%60],['Seconds',remaining%60]];
- return <section className="public-launch"><div className="launch-emblem"><RocketLaunch size={36}/></div><p className="eyebrow">YOUR PARENTS. YOUR COIN.</p><h1>{remaining?`Public launches open in ${Math.ceil(remaining/3600)} ${Math.ceil(remaining/3600)===1?'hr':'hrs'}.`:'Public launches opening soon.'}</h1><p className="launch-subtitle">Two communities. Your next kid.</p><div className="launch-countdown" role="timer" aria-label="Time until public launches">{units.map(([label,value])=><div key={label}><strong>{String(value).padStart(2,'0')}</strong><span>{label}</span></div>)}</div><p className="launch-opens">{remaining?'Opens':'Scheduled opening'} <time dateTime={schedule.opensAt}>{new Date(opensAt).toLocaleString(undefined,{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit',timeZoneName:'short'})}</time></p></section>;
+/** The Launch page: an honest availability state instead of a timer to a fixed date. Public launches (anyone pairing two
+ * coins) are not open yet; the one live campaign, Shartcoin, is shown with its real status and a single next action. */
+export function LaunchCountdown({go}){
+ const chain=usePrelaunchChain(null),live=chain.data?.configured===true,preview=chain.data?.configured===false;
+ return <section className="public-launch"><div className="launch-emblem"><RocketLaunch size={36}/></div><p className="eyebrow">YOUR PARENTS. YOUR COIN.</p>
+  <h1>Public launches are not open yet.</h1>
+  <p className="launch-lede">Soon anyone will pair two coins and launch their kid. Right now KIDS runs one launch, Shartcoin, and this is its live status.</p>
+  <div className="launch-page-status"><LaunchStatus data={live?chain.data:preview?{configured:false}:null} go={go} onRefresh={chain.refresh}/></div>
+  {live&&chain.data.phase!=='launched'&&<button className="primary" onClick={()=>go?.('Shart')}>Go to Shartcoin <ArrowRight size={20}/></button>}
+  <p className="small muted">{chain.error?'Live status unavailable right now. Refresh to try again.':'Status updates every few seconds from the ledger.'}</p>
+ </section>;
 }
