@@ -55,7 +55,7 @@ An isolated, disposable Railway project was created for a full provider-level re
 
 ## Frontend deployment with the multi-wallet connector
 
-Vercel production deployment `dpl_2bhMqkfQc2MzN6RLL8Y9YaTdLzYP` (20 September 2026, 16:26 UTC) is live on https://kids.fun. Verified through the gate: anonymous HTML and assets still gated, password login, authenticated frontend served, the bundle contains the wallet list, the Wallet Standard registry and the bounded-prompt code, and the authenticated account API answers with a CSRF token. Source: StudioAKA/kids-launchpad commit 2559dd4, CI green.
+Vercel production deployment `dpl_2bhMqkfQc2MzN6RLL8Y9YaTdLzYP` (20 September 2026, 16:26 UTC) is live on https://kids.fun. Verified through the gate: anonymous HTML and assets still gated, password login, authenticated frontend served, the bundle contains the wallet list, the Wallet Standard registry and the bounded-prompt code, and the authenticated account API answers with a CSRF token. Source: the private KIDS repository commit 2559dd4, CI green.
 
 Phantom is paused in the wallet list (visible, disabled, "Waiting for Phantom whitelisting") because Phantom flags kids.fun as malicious until the domain is whitelisted with Phantom. Other detected wallets remain selectable. Browser check: a mock Phantom rendered disabled and inert while a mock Solflare stayed usable. Deployed as Vercel `dpl_EjaaiQ3knuBTEnj6jsTqEYL3Dgb6` (17:00 UTC) and verified on kids.fun and the alias: gate intact, bundle carries the pause, Phantom install link removed. Source commit 9eb741b, CI green.
 
