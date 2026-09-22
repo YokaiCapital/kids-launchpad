@@ -65,7 +65,8 @@
     "status": "DEPLOYED on mainnet 23 September 2026 00:03 UTC from the reproducible CI build; on-chain bytes verified equal to the binary; program data sized to the binary (extend before a larger upgrade)",
     "deploySignature": "2Ty3yuDMkY9FDGdr6EkaVcWvCVZSZ2CHPxtVFJYHkdj8DFPeZz4QPfh5N54zdSuMN6CCJYPRiEtZSH22H81jCga2",
     "upgradeAuthority": "AAuwkFNvXRimHyvdQfh7Zik9baw8W2ufSbc5cyBqsdoE",
-    "explorer": "https://solscan.io/account/BLiaZWNQoPm4mG4cXNm4sXifFqs1Xmxx12qD9T4Y5NeN"
+    "explorer": "https://solscan.io/account/BLiaZWNQoPm4mG4cXNm4sXifFqs1Xmxx12qD9T4Y5NeN",
+    "binarySize": 199008
   },
   "operatorWallet": {
     "address": "AAuwkFNvXRimHyvdQfh7Zik9baw8W2ufSbc5cyBqsdoE",

@@ -20,8 +20,12 @@ let healthy=false;for(let i=0;i<30;i++){try{if(await connection.getGenesisHash()
 const programId=process.env.KIDS_PROGRAM_ID||identities.program?.programId;if(!programId)throw Error('Program id unknown');
 const expectedHash=process.env.KIDS_PROGRAM_SHA256||identities.program?.binarySha256;
 const info=await connection.getAccountInfo(new PublicKey(programId));if(!info?.executable||info.owner.toBase58()!=='BPFLoaderUpgradeab1e11111111111111111111111')throw Error('Program is not deployed on '+profile.network);
-const data=await connection.getAccountInfo(new PublicKey(info.data.subarray(4,36)));const body=data.data.subarray(45);let size=body.length;while(size>0&&body[size-1]===0)size--;
-const sha256=createHash('sha256').update(body.subarray(0,size)).digest('hex');if(expectedHash&&sha256!==expectedHash)throw Error('Deployed program hash '+sha256.slice(0,16)+' differs from the recorded build');
+const data=await connection.getAccountInfo(new PublicKey(info.data.subarray(4,36)));const body=data.data.subarray(45);
+// The binary itself ends in zero bytes, so trailing zeros are NOT stripped blindly: hash the recorded binary size when
+// known (program data is sized to the binary), otherwise the whole program data.
+const recordedSize=Number(process.env.KIDS_PROGRAM_SIZE||identities.program?.binarySize||0);const size=recordedSize>0&&recordedSize<=body.length?recordedSize:body.length;
+const sha256=createHash('sha256').update(body.subarray(0,size)).digest('hex');if(expectedHash&&sha256!==expectedHash)throw Error('Deployed program hash '+sha256.slice(0,16)+' differs from the recorded build (hashed '+size+' of '+body.length+' bytes)');
+if(body.subarray(size).some(n=>n!==0))throw Error('Program data has bytes beyond the recorded binary size');
 const authority=data.data[12]?new PublicKey(data.data.subarray(13,45)).toBase58():null;
 const manifestPath=runtime+'/atomic-launch-program.json',previous=existsSync(manifestPath)?JSON.parse(readFileSync(manifestPath,'utf8')):null;
 const manifest=nextProgramManifest(previous,{network:profile.network,rpcUrl:profile.rpcLabel,genesisHash:profile.genesisHash,programId,upgradeAuthority:authority,sha256,binarySize:size,source:'programs/atomic-launch/src/lib.rs (reproducible CI build)',status:profile.network+'-service'});
