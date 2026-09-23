@@ -4,7 +4,7 @@
 // file carried by releases, because it drives enforcement.
 import {existsSync,readFileSync,writeFileSync,mkdirSync,renameSync,readdirSync,unlinkSync} from 'node:fs';import {fileURLToPath} from 'node:url';
 import {trustedGatewayContext} from '../../shared/trusted-gateway.mjs';import {readDenylist} from '../../shared/denylist.mjs';
-const runtime=fileURLToPath(new URL('../../localnet/.runtime/community/',import.meta.url));
+const runtime=fileURLToPath(new URL('../../localnet/.runtime/community/',import.meta.url));let writeSequence=0;
 export const COMMUNITY_FILES=Object.freeze({'supporters':{max:2_000_000,entry:e=>typeof e?.xId==='string'&&/^\d{1,25}$/.test(e.xId)&&typeof e.username==='string'&&e.username.length<=32&&(e.name==null||typeof e.name==='string')&&(e.followers==null||Number.isInteger(e.followers))&&Array.isArray(e.how)&&e.how.every(h=>typeof h==='string'&&h.length<=40)&&typeof e.since==='string'&&!Number.isNaN(Date.parse(e.since))},
  'supporter-wallets':{max:2_000_000,entry:e=>typeof e?.xId==='string'&&/^\d{1,25}$/.test(e.xId)&&typeof e.wallet==='string'&&/^[1-9A-HJ-NP-Za-km-z]{32,44}$/.test(e.wallet)&&typeof e.provedAt==='string'&&!Number.isNaN(Date.parse(e.provedAt))&&typeof e.tweetUrl==='string'&&/^https:\/\/(x|twitter)\.com\//.test(e.tweetUrl)}});
 /** Validates an envelope {generatedAt, entries:[...]}; returns the problem or null. */
@@ -19,7 +19,7 @@ export function validateEnvelope(name,body){
 }
 export function readCommunityFile(name,dir=runtime){const p=dir+name+'.json';if(!existsSync(p))return null;try{return JSON.parse(readFileSync(p,'utf8'));}catch{return null;}}
 export function writeCommunityFile(name,body,dir=runtime,keep=5){
- mkdirSync(dir,{recursive:true,mode:0o700});const p=dir+name+'.json',stamp=new Date().toISOString().replace(/[:.]/g,'-');
+ mkdirSync(dir,{recursive:true,mode:0o700});const p=dir+name+'.json',stamp=new Date().toISOString().replace(/[:.]/g,'-')+'-'+(writeSequence=(writeSequence+1)%1000).toString().padStart(3,'0');
  if(existsSync(p))renameSync(p,dir+name+'.'+stamp+'.json');
  const tmp=p+'.tmp';writeFileSync(tmp,JSON.stringify(body),{mode:0o600});renameSync(tmp,p);
  const old=readdirSync(dir).filter(f=>f.startsWith(name+'.')&&f.endsWith('.json')&&f!==name+'.json').sort();for(const f of old.slice(0,Math.max(0,old.length-keep)))unlinkSync(dir+f);
