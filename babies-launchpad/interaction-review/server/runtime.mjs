@@ -6,6 +6,14 @@ import {fileURLToPath} from 'node:url';
 import {readFile} from 'node:fs/promises';
 const json=(res,status,body)=>{if(res.writableEnded)return;res.writeHead(status,{'Content-Type':'application/json','Cache-Control':'no-store','X-Content-Type-Options':'nosniff'});res.end(JSON.stringify(body));};
 /** Financial write routes stay closed until the startup reconciliation has completed against the chain. */
+/** The admin plugin is local-only: refused on any hosted runtime (Railway or another cloud marker) and by KIDS_ADMIN_PLUGIN=0. */
+export function adminPluginAllowed(env=process.env){
+ if(env.KIDS_ADMIN_PLUGIN==='0')return false;
+ if(env.RAILWAY_ENVIRONMENT||env.RAILWAY_SERVICE_ID||env.RAILWAY_PROJECT_ID||env.KIDS_CLOUD==='1')return false;
+ if(env.KIDS_NETWORK&&env.KIDS_NETWORK!=='localnet')return false;
+ return true;
+}
+
 export const FINANCIAL_WRITE_PATHS=/^\/api\/account\/(prelaunch|prelaunch-legacy|postlaunch\/(claim|trade))(\/|$)/;
 export function createApiServer({plugins=[],probe=async()=>true,probeInterval=10000,writesGate=null}={}){
  const middleware=[];let healthy=false,checkedAt=0,probing=false,draining=false;
@@ -52,9 +60,14 @@ export async function ledgerProbe(){
  return true;
 }
 if(process.argv[1]===fileURLToPath(import.meta.url)){
- const [{accountPlugin},{adminPlugin},{demoPersistencePlugin},{parentLookupPlugin}]=await Promise.all([import('./account-plugin.mjs'),import('./admin-plugin.mjs'),import('./demo-plugin.mjs'),import('./parent-lookup.mjs')]);
+ const [{accountPlugin},{demoPersistencePlugin},{parentLookupPlugin}]=await Promise.all([import('./account-plugin.mjs'),import('./demo-plugin.mjs'),import('./parent-lookup.mjs')]);
  const writesGate={open:false,report:null};
- const runtime=createApiServer({plugins:[adminPlugin(),accountPlugin(),parentLookupPlugin(),demoPersistencePlugin()],probe:ledgerProbe,writesGate});
+ // Admin routes (launch control, rehearsals, settings) exist only on the owner's own machine: a cloud runtime never
+ // installs the plugin, whatever the network (security audit, 23 September 2026: "cloud runtime still installs adminPlugin").
+ const plugins=[accountPlugin(),parentLookupPlugin(),demoPersistencePlugin()];
+ if(adminPluginAllowed(process.env)){const {adminPlugin}=await import('./admin-plugin.mjs');plugins.unshift(adminPlugin());}
+ else console.log(JSON.stringify({event:'admin-plugin-omitted',reason:'cloud runtime or KIDS_ADMIN_PLUGIN=0'}));
+ const runtime=createApiServer({plugins,probe:ledgerProbe,writesGate});
  for(const signal of ['SIGTERM','SIGINT'])process.once(signal,()=>runtime.shutdown().then(()=>process.exit(0)));
  runtime.server.listen(4175,'127.0.0.1',()=>console.log('KIDS API listening on loopback:4175 (financial writes closed until journals reconcile with the chain)'));
  // Signer reachability for the status page (every 60 s) when a remote signer is configured.
