@@ -3,19 +3,28 @@ import {existsSync,readFileSync,mkdirSync} from 'node:fs';
 import {acceptedProgramHash} from './program-lineage.mjs';
 import {fileURLToPath} from 'node:url';
 import {randomBytes} from 'node:crypto';
-import {Keypair,PublicKey,Transaction,SystemProgram,sendAndConfirmTransaction} from '@solana/web3.js';
+import {Keypair,PublicKey,Transaction,SystemProgram} from '@solana/web3.js';
 import {MINT_SIZE,NATIVE_MINT,TOKEN_PROGRAM_ID,getMint,getAccount,getAssociatedTokenAddressSync,createInitializeMint2Instruction,createAssociatedTokenAccountIdempotentInstruction,createMintToInstruction,createSetAuthorityInstruction,AuthorityType} from '@solana/spl-token';
 import {atomicContext,campaignAddress,authorityAddress,initInstruction,readCampaign,PROFILE} from './atomic-launch.mjs';
 import {configureParentsInstruction,parentsAddress} from './atomic-claims.mjs';
 import {captureLocalParentSnapshot,publicSnapshot} from './parent-snapshot.mjs';
 import {localKey,chainTime} from './dev-vesting.mjs';
-import {operatorKeypair} from './operator-key.mjs';
+import {operatorSigner} from './operator-signer.mjs';
 import {buildCampaignSnapshot} from './import-parent-snapshot.mjs';
 const identitiesPath=fileURLToPath(new URL('../deployment/MAINNET-IDENTITIES.json',import.meta.url));
 /** Campaign plan for devnet/mainnet: nonce fixed in advance so the parent snapshot can name the campaign before it exists. */
 export function campaignPlanPath(network){return fileURLToPath(new URL('../deployment/'+network+'/campaign-plan.json',import.meta.url));}
 export function snapshotDirectory(network){return process.env.KIDS_PARENT_SNAPSHOT_DIR||fileURLToPath(new URL('../deployment/'+network+'/snapshots/',import.meta.url));}
 const DRY_RUN=process.env.KIDS_DRY_RUN==='1';
+/** Signs with the operator signer (local keypair on localnet, remote service elsewhere) plus any extra local keypairs,
+ * then sends and confirms. Dry run simulates the signed transaction and stops. */
+export async function sendWithOperator({connection,operator,tx,extraSigners=[],operationId,dryRun=false}){
+ tx.feePayer=operator.publicKey;const block=await connection.getLatestBlockhash('confirmed');tx.recentBlockhash=block.blockhash;
+ if(extraSigners.length)tx.partialSign(...extraSigners);await operator.sign(tx,{operationId});
+ if(dryRun){const sim=await connection.simulateTransaction(tx);if(sim.value.err)throw Error('Dry run: simulation failed '+JSON.stringify(sim.value.err)+' '+(sim.value.logs||[]).slice(-4).join(' | '));throw Error('Dry run: next step simulates OK ('+sim.value.unitsConsumed+' CU); nothing was sent');}
+ const signature=await connection.sendRawTransaction(tx.serialize(),{skipPreflight:false,maxRetries:3});
+ const result=await connection.confirmTransaction({signature,...block},'confirmed');if(result.value.err)throw Error('Transaction failed: '+JSON.stringify(result.value.err));return signature;
+}
 import {activeManifestPath,saveActiveFile,validateActiveManifest,validateActiveTerms,readActive,validCampaignTerms,ACTIVE_SUPPLY,LAUNCH_WINDOW_SECONDS} from './active-launch.mjs';
 /** Campaign terms for a NEW campaign. Defaults are the production terms (100 SOL soft, 500 SOL hard, 24 h funding).
  * Private test services may set KIDS_ACTIVE_SOFT_CAP_SOL, KIDS_ACTIVE_HARD_CAP_SOL (whole or decimal SOL, up to 9 places)
@@ -35,11 +44,8 @@ const read=p=>JSON.parse(readFileSync(p,'utf8'));
 let provisioning;
 export function provisionActiveLaunch(){if(provisioning)return provisioning;provisioning=provision().finally(()=>{provisioning=null;});return provisioning;}
 async function provision(){
- const ctx=await atomicContext(),c=ctx.connection,admin=await operatorKeypair(),local=PROFILE.network==='localnet';mkdirSync(runtime,{recursive:true,mode:0o700});
- const send=async(tx,signers=[admin])=>{
-  if(DRY_RUN){tx.feePayer=admin.publicKey;tx.recentBlockhash=(await c.getLatestBlockhash('confirmed')).blockhash;tx.sign(...signers);const sim=await c.simulateTransaction(tx);if(sim.value.err)throw Error('Dry run: simulation failed '+JSON.stringify(sim.value.err)+' '+(sim.value.logs||[]).slice(-4).join(' | '));throw Error('Dry run: next step simulates OK ('+sim.value.unitsConsumed+' CU); nothing was sent');}
-  return sendAndConfirmTransaction(c,tx,signers,{commitment:'confirmed'});
- };
+ const ctx=await atomicContext(),c=ctx.connection,admin=await operatorSigner(),local=PROFILE.network==='localnet';mkdirSync(runtime,{recursive:true,mode:0o700});
+ const send=(tx,extraSigners=[],stage='step')=>sendWithOperator({connection:c,operator:admin,tx,extraSigners,operationId:'provision:'+stage,dryRun:DRY_RUN});
  let m;
  if(existsSync(activeManifestPath)){m=validateActiveManifest(ctx,read(activeManifestPath));if(m.ready)return readActive();}
  else{
@@ -68,11 +74,11 @@ async function provision(){
  if(!await c.getAccountInfo(mint.publicKey)){
   const rent=await c.getMinimumBalanceForRentExemption(MINT_SIZE);
   const tx=new Transaction().add(SystemProgram.createAccount({fromPubkey:admin.publicKey,newAccountPubkey:mint.publicKey,lamports:rent,space:MINT_SIZE,programId:TOKEN_PROGRAM_ID}),createInitializeMint2Instruction(mint.publicKey,6,admin.publicKey,admin.publicKey),createAssociatedTokenAccountIdempotentInstruction(admin.publicKey,child,authority,mint.publicKey),createMintToInstruction(mint.publicKey,child,admin.publicKey,BigInt(m.supply)),createSetAuthorityInstruction(mint.publicKey,admin.publicKey,AuthorityType.MintTokens,authority),createSetAuthorityInstruction(mint.publicKey,admin.publicKey,AuthorityType.FreezeAccount,authority));
-  m.mintSignature=await send(tx,[admin,mint]);saveActiveFile(activeManifestPath,m);
+  m.mintSignature=await send(tx,[mint],'mint:'+m.address);saveActiveFile(activeManifestPath,m);
  }
  const info=await getMint(c,mint.publicKey),holding=await getAccount(c,child);if(info.decimals!==6||info.supply!==BigInt(m.supply)||!info.mintAuthority?.equals(authority)||!info.freezeAuthority?.equals(authority)||holding.amount!==BigInt(m.supply)||!holding.owner.equals(authority))throw Error('Mint custody or fixed supply mismatch');
- await send(new Transaction().add(createAssociatedTokenAccountIdempotentInstruction(admin.publicKey,wsol,authority,NATIVE_MINT)));
- const balance=await c.getBalance(authority);if(balance<300000000)await send(new Transaction().add(SystemProgram.transfer({fromPubkey:admin.publicKey,toPubkey:authority,lamports:300000000-balance})));
+ await send(new Transaction().add(createAssociatedTokenAccountIdempotentInstruction(admin.publicKey,wsol,authority,NATIVE_MINT)),[],'wsol:'+m.address);
+ const balance=await c.getBalance(authority);if(balance<300000000)await send(new Transaction().add(SystemProgram.transfer({fromPubkey:admin.publicKey,toPubkey:authority,lamports:300000000-balance})),[],'topup:'+m.address);
  const snapshotPath=runtime+'parent-snapshot-'+m.address+'.json';let snapshot;
  if(existsSync(snapshotPath))snapshot=read(snapshotPath);
  else if(local){snapshot=publicSnapshot(await captureLocalParentSnapshot(ctx,campaign,m.parentMints));saveActiveFile(snapshotPath,snapshot);}
@@ -89,7 +95,7 @@ async function provision(){
   // A parent may be Token-2022: read its program from the mint account's owner.
   for(let i=0;i<2;i++){const info=await c.getAccountInfo(parents[i]);if(!info)throw Error('Parent mint missing');const supply=(await getMint(c,parents[i],'confirmed',info.owner)).supply.toString();if(supply!==snapshot.parents[i].supply){if(local)throw Error('Parent supply changed since snapshot');console.log(JSON.stringify({event:'parent-supply-moved-since-snapshot',mint:parents[i].toBase58(),atSnapshot:snapshot.parents[i].supply,now:supply}));}}
   const terms={...m,nonce:BigInt(m.nonce),mint:mint.publicKey};
-  m.initSignature=await send(new Transaction().add(initInstruction(ctx,admin.publicKey,terms),configureParentsInstruction(ctx,campaign,admin.publicKey,parents,snapshot.parents.map(p=>Buffer.from(p.root,'hex')),snapshot.slot,snapshot.parents.map(p=>BigInt(p.eligibleBalance)))));saveActiveFile(activeManifestPath,m);
+  m.initSignature=await send(new Transaction().add(initInstruction(ctx,admin.publicKey,terms),configureParentsInstruction(ctx,campaign,admin.publicKey,parents,snapshot.parents.map(p=>Buffer.from(p.root,'hex')),snapshot.slot,snapshot.parents.map(p=>BigInt(p.eligibleBalance)))),[],'init:'+m.address);saveActiveFile(activeManifestPath,m);
  }
  const state=await readCampaign(ctx,campaign);validateActiveTerms(state,m);
  const parents=await c.getAccountInfo(parentsAddress(ctx,campaign)),live=await c.getAccountInfo(campaign);

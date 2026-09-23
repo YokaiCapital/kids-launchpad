@@ -41,7 +41,7 @@ export function createSignerService({keypair,token,programId,campaigns=null,limi
  return {server,handle};
 }
 export function startSignerService(env=process.env){
- const file=env.KIDS_SIGNER_KEY_FILE,token=env.KIDS_SIGNER_TOKEN,programId=env.KIDS_SIGNER_PROGRAM_ID,[host='127.0.0.1',port='4176']=(env.KIDS_SIGNER_LISTEN||'').split(':').filter(Boolean).length?env.KIDS_SIGNER_LISTEN.split(':'):[];
+ const file=env.KIDS_SIGNER_KEY_FILE,token=env.KIDS_SIGNER_TOKEN,programId=env.KIDS_SIGNER_PROGRAM_ID;const host=env.KIDS_SIGNER_HOST||(env.KIDS_SIGNER_LISTEN||'').split(':')[0]||'127.0.0.1',port=env.KIDS_SIGNER_PORT||(env.KIDS_SIGNER_LISTEN||'').split(':')[1]||'4176';
  if(!file||!token||!programId)throw Error('KIDS_SIGNER_KEY_FILE, KIDS_SIGNER_TOKEN and KIDS_SIGNER_PROGRAM_ID are required');
  const bytes=Uint8Array.from(JSON.parse(readFileSync(file,'utf8')));const keypair=Keypair.fromSecretKey(bytes.slice());bytes.fill(0);
  const campaigns=(env.KIDS_SIGNER_CAMPAIGNS||'').split(',').map(v=>v.trim()).filter(Boolean),provisioning=env.KIDS_SIGNER_ALLOW_PROVISIONING==='1';

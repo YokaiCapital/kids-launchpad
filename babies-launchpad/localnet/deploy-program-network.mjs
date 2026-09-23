@@ -12,7 +12,7 @@ const identities=JSON.parse(readFileSync(new URL('../deployment/MAINNET-IDENTITI
 const bytes=readFileSync(binaryPath),sha256=createHash('sha256').update(bytes).digest('hex');
 if(profile.network==='mainnet'&&sha256!==identities.program.binarySha256)throw Error('Binary hash '+sha256.slice(0,16)+' is not the recorded reproducible build '+identities.program.binarySha256.slice(0,16));
 const keyDir=join(homedir(),'.config/kids',profile.network);const load=name=>{const p=join(keyDir,name+'-keypair.json');if(!existsSync(p))throw Error('Missing key file '+p);return {path:p,keypair:Keypair.fromSecretKey(Uint8Array.from(JSON.parse(readFileSync(p,'utf8'))))};};
-const program=load('program'),operator=load('operator');
+const program=load('program'),operator=load('operator');const governancePath=join(keyDir,'governance-keypair.json'),authorityPath=existsSync(governancePath)?governancePath:operator.path;
 if(profile.network==='mainnet'&&program.keypair.publicKey.toBase58()!==identities.program.programId)throw Error('Program keypair does not match the recorded program id');
 const connection=new Connection(profile.rpcUrl,'confirmed');const genesisHash=await connection.getGenesisHash();if(genesisHash!==profile.genesisHash)throw Error('RPC genesis mismatch for '+profile.network);
 // Program data is sized to the binary (future upgrades that grow use `solana program extend`). Peak cost is the write
@@ -26,7 +26,7 @@ if(checkOnly){console.log(JSON.stringify({deployed:!!programInfo?.executable,che
 if(balance<needed)throw Error('Operator wallet needs about '+(needed/1e9).toFixed(2)+' SOL (has '+(balance/1e9).toFixed(3)+'); fund '+operator.keypair.publicKey.toBase58());
 const tmp=mkdtempSync(join(tmpdir(),'kids-cli-'));const config=join(tmp,'cli.yml');writeFileSync(config,'json_rpc_url: "'+profile.rpcUrl+'"\nwebsocket_url: ""\nkeypair_path: '+operator.path+'\ncommitment: confirmed\n',{mode:0o600});
 try{
- const args=['program','deploy',binaryPath,'--program-id',program.path,'--upgrade-authority',operator.path,'--keypair',operator.path,'--config',config,'--commitment','confirmed','--use-rpc','--max-len',String(bytes.length)];
+ const args=['program','deploy',binaryPath,'--program-id',program.path,'--upgrade-authority',authorityPath,'--keypair',operator.path,'--config',config,'--commitment','confirmed','--use-rpc','--max-len',String(bytes.length)];console.log(JSON.stringify({upgradeAuthorityKey:authorityPath===governancePath?'governance':'operator'}));
  console.log('solana program deploy (URL hidden in a temp config)');execFileSync(join(bin,'solana'),args,{stdio:'inherit'});
 }finally{rmSync(tmp,{recursive:true,force:true});}
 const info=await connection.getAccountInfo(program.keypair.publicKey);if(!info?.executable)throw Error('Program is not executable after deploy');

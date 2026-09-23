@@ -9,7 +9,7 @@ const spki=pk=>createPublicKey({key:Buffer.concat([Buffer.from('302a300506032b65
 export const messageBytes=tx=>tx instanceof VersionedTransaction?Buffer.from(tx.message.serialize()):tx.serializeMessage();
 export function createLocalSigner(keypair){
  if(!(keypair instanceof Keypair))throw Error('Local signer needs a keypair');
- return {kind:'local',publicKey:keypair.publicKey,async sign(tx){if(tx instanceof VersionedTransaction)tx.sign([keypair]);else tx.partialSign(keypair);return tx;}};
+ return {kind:'local',publicKey:keypair.publicKey,async sign(tx,_options={}){if(tx instanceof VersionedTransaction)tx.sign([keypair]);else tx.partialSign(keypair);return tx;}};
 }
 export function createRemoteSigner({url,token,publicKey,fetchImpl=globalThis.fetch,timeoutMs=10000}){
  if(typeof url!=='string'||!/^https?:\/\//.test(url))throw Error('Signer URL required');if(typeof token!=='string'||token.length<32)throw Error('Signer token must be at least 32 characters');
