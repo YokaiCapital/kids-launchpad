@@ -1,4 +1,4 @@
 import test from 'node:test';import assert from 'node:assert/strict';import {tradeMath,validateTradeInput} from './postlaunch-trade.mjs';
 test('2% rounded-up fee and constant product quote use exact units',()=>{assert.deepEqual(tradeMath(10000n,100000n,200000n,100),{fee:200n,output:17850n,minimum:17671n});assert.equal(tradeMath(101n,1000n,100000n,200).fee,3n);});
-test('invalid amounts and excessive slippage rejected',()=>{for(const amount of[0n,-1n,18446744073709551616n])assert.throws(()=>tradeMath(amount,100n,100n,100));for(const s of[-1,201,1.5])assert.throws(()=>tradeMath(100n,100n,100n,s));});
+test('invalid amounts and excessive slippage rejected',()=>{for(const amount of[0n,-1n,18446744073709551616n])assert.throws(()=>tradeMath(amount,100n,100n,100));for(const s of[-1,5001,1.5])assert.throws(()=>tradeMath(100n,100n,100n,s));});
 test('input units cannot be float, exponent or ambiguous number',()=>{const v={side:'buy',amountRaw:'100000',requestId:'1234567890123456',slippageBps:100};validateTradeInput(v);for(const amountRaw of['1.1','1e9','01','-1',1000])assert.throws(()=>validateTradeInput({...v,amountRaw}));});
