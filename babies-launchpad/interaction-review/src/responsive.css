@@ -174,3 +174,27 @@
 .commit-locked{opacity:.45;pointer-events:none;filter:grayscale(.4)}
 .home-cover{display:block;width:100%;max-height:300px;object-fit:cover;border-radius:16px;margin-bottom:16px}.coin-identity .coin-logo{width:48px;height:48px;border-radius:12px;object-fit:cover}
 .post-burn-what b{font-weight:600;font-variant-numeric:tabular-nums;white-space:nowrap}.post-burn-pair{display:inline-flex;align-items:center;gap:4px;white-space:nowrap}.post-burn-what svg{flex-shrink:0;color:#f0b35a}
+/* Funding page once the served phase is known: live header at the top, a compact funding history, one action in the rail. */
+.campaign-overview .funding-visual.is-history{grid-template-columns:minmax(0,1fr);padding:18px 20px;gap:12px}
+.funding-history{display:grid;gap:12px;min-width:0}
+.funding-history-stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin:0}
+.funding-history-stats>div{min-width:0;padding:8px 12px;border:1px solid var(--line);border-radius:10px;background:rgba(255,255,255,.03)}
+.funding-history-stats dt,.funding-history-stats dd{padding:0;border:0;min-height:0}
+.funding-history-stats dt{font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.funding-history-stats dd{margin:2px 0 0;font-size:18px;line-height:1.2;font-weight:650;font-variant-numeric:tabular-nums;letter-spacing:-.3px;overflow-wrap:anywhere}
+.funding-history-stats dd small{display:inline;font-size:12px;font-weight:500;color:var(--muted)}
+.campaign-overview .funding-history .raise-meter{height:6px;margin:4px 0 0;border-radius:3px}
+.campaign-overview .funding-history .raise-meter>div{border-radius:3px 0 0 3px}
+.campaign-overview .funding-history .raise-meter>span{top:-3px;bottom:-3px}
+.funding-history .raise-meter>div:after{animation:none}
+.funding-history-foot{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:6px 12px;font-size:12px;line-height:1.5;color:var(--muted)}
+.funding-history-foot>span{flex:1 1 320px}
+.funding-history-foot>button{margin-left:auto;min-height:36px;padding:0 4px;font-size:12px}
+.community-claim-link{margin:12px 0 0}
+.community-claim-link>button{display:inline-flex;align-items:center;gap:8px;min-height:44px;padding:0 4px;font-size:15px;font-weight:600;color:var(--pink)}
+.community-claim-note{margin:12px 0 0;font-size:13px;line-height:1.5;color:var(--muted)}
+.commit-panel .rail-trade{display:inline-flex;align-items:center;justify-content:center;gap:8px;width:100%}
+.commit-panel .rail-signin{display:block;width:100%;margin:10px 0 0;min-height:44px;font-size:15px}
+.commit-panel .rail-refund{width:100%;margin-top:10px;min-height:44px}
+@media(max-width:1050px){.funding-history-stats{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:760px){.campaign-overview .funding-visual.is-history{padding:14px}}
