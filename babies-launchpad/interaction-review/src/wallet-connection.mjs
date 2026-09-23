@@ -25,7 +25,24 @@ function injectedProvider(raw){
 // whitelisted, Phantom stays visible but cannot be selected, so nobody meets that warning here.
 export const PAUSED_WALLETS={phantom:'Waiting for Phantom whitelisting'};
 const pausedReason=name=>PAUSED_WALLETS[name.toLowerCase()]||null;
+/** Always listed, in this order, whether or not the browser has them (owner, 23 Sep 2026: most people have Phantom and
+ * might not notice the other options). A missing one is an install link, never a dead button. */
+export const FEATURED_WALLETS=Object.freeze([
+ Object.freeze({name:'Phantom',install:'https://phantom.com/download'}),
+ Object.freeze({name:'Backpack',install:'https://backpack.app/download'}),
+ Object.freeze({name:'Jupiter',install:'https://jup.ag/wallet',aliases:['Jupiter Wallet','Jupiter Mobile']}),
+]);
+const featuredIndex=name=>FEATURED_WALLETS.findIndex(f=>f.name.toLowerCase()===name.toLowerCase()||(f.aliases||[]).some(a=>a.toLowerCase()===name.toLowerCase()));
+/** Detected wallets first (featured order, then the rest as found), then an install entry for each featured wallet that
+ * is not detected. Install entries carry `install` (the download page) and no provider. */
 export function discoverWallets(scope=globalThis.window){
+ const detected=detectWallets(scope);
+ const rank=w=>{const i=featuredIndex(w.name);return i<0?FEATURED_WALLETS.length:i;};
+ detected.sort((a,b)=>rank(a)-rank(b));
+ const missing=FEATURED_WALLETS.filter((f,i)=>!detected.some(w=>featuredIndex(w.name)===i)).map(f=>({id:'install:'+f.name,name:f.name,install:f.install,paused:pausedReason(f.name)}));
+ return [...detected,...missing];
+}
+function detectWallets(scope){
  const standard=registry.get().filter(usable).map(wallet=>({id:'standard:'+wallet.name,name:wallet.name,icon:wallet.icon,wallet,paused:pausedReason(wallet.name)}));
  const injected=[['Phantom',scope?.phantom?.solana],['Solflare',scope?.solflare],['Backpack',scope?.backpack],['Solana wallet',scope?.solana]];
  const seen=new Set();
@@ -60,8 +77,8 @@ export function standardProvider(wallet){
 const STORE_KEY='kids-wallet';
 const readChoice=()=>{for(const store of [globalThis.localStorage,globalThis.sessionStorage]){try{const id=store?.getItem(STORE_KEY);if(id)return id;}catch{}}return null;};
 const writeChoice=id=>{for(const store of [globalThis.localStorage,globalThis.sessionStorage]){try{if(id)store?.setItem(STORE_KEY,id);else store?.removeItem(STORE_KEY);}catch{}}};
-export function selectWallet(choice){if(choice.paused)throw Error(choice.name+': '+choice.paused+'. Choose another wallet.');selected={id:choice.id,provider:choice.wallet?standardProvider(choice.wallet):choice.provider};writeChoice(choice.id);return selected.provider;}
-export function getSelectedWallet(){if(!selected){const id=readChoice();const choice=discoverWallets().find(w=>w.id===id);if(choice&&!choice.paused)selectWallet(choice);}if(!selected)throw Error('Choose your wallet in Connect wallet first.');return selected.provider;}
+export function selectWallet(choice){if(choice.install)throw Error(choice.name+' is not installed in this browser. Install it, then choose it here.');if(choice.paused)throw Error(choice.name+': '+choice.paused+'. Choose another wallet.');selected={id:choice.id,provider:choice.wallet?standardProvider(choice.wallet):choice.provider};writeChoice(choice.id);return selected.provider;}
+export function getSelectedWallet(){if(!selected){const id=readChoice();const choice=discoverWallets().find(w=>w.id===id);if(choice&&!choice.paused&&!choice.install)selectWallet(choice);}if(!selected)throw Error('Choose your wallet in Connect wallet first.');return selected.provider;}
 /** When no choice is stored, a Wallet Standard wallet that already lists the signed-in account is selected without a prompt. */
 export function restoreWalletForOwner(owner){
  if(selected)return selected.provider;

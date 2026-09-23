@@ -1,5 +1,5 @@
 import test from 'node:test';import assert from 'node:assert/strict';import {standardProvider,discoverWallets,selectWallet,validateWalletChallenge,walletForOwner} from '../src/wallet-connection.mjs';import {disconnectAndSignOut} from '../src/wallet-sign-out.mjs';
-test('injected alternatives deduplicate and require both signing capabilities',()=>{const provider={connect(){},signMessage(){},signTransaction(){}};assert.equal(discoverWallets({phantom:{solana:provider},solana:provider}).length,1);assert.equal(discoverWallets({solflare:{connect(){}}}).length,0);});
+test('injected alternatives deduplicate and require both signing capabilities',()=>{const provider={connect(){},signMessage(){},signTransaction(){}};assert.equal(discoverWallets({phantom:{solana:provider},solana:provider}).filter(w=>!w.install).length,1);assert.equal(discoverWallets({solflare:{connect(){}}}).filter(w=>!w.install).length,0);});
 test('Standard adapter preserves exact messages and rejects account removal',async()=>{const account={address:'owner',features:['solana:signMessage','solana:signTransaction']};const wallet={accounts:[account],features:{'standard:connect':{connect:async()=>({accounts:[account]})},'solana:signMessage':{signMessage:async({message})=>[{signedMessage:message,signature:new Uint8Array(64)}]}}};const adapter=standardProvider(wallet);await adapter.connect();assert.equal((await adapter.signMessage(Uint8Array.of(1))).signature.length,64);wallet.accounts=[];await assert.rejects(adapter.signMessage(Uint8Array.of(1)),/changed/);});
 test('challenge binds owner, origin, nonce and valid expiry',()=>{const now=Date.now(),c={id:'nonce',message:`kids.fun wants you to sign in with your Solana account:\nowner\n\nSign in to KIDS. This does not authorize transactions or move funds.\n\nURI: https://kids.fun\nVersion: 1\nNonce: nonce\nIssued At: ${new Date(now).toISOString()}\nExpiration Time: ${new Date(now+60000).toISOString()}`};validateWalletChallenge(c,'owner','https://kids.fun',now);assert.throws(()=>validateWalletChallenge(c,'other','https://kids.fun',now));assert.throws(()=>validateWalletChallenge({...c,message:c.message.replace('Expiration Time: ','Expiry: ')},'owner','https://kids.fun',now));});
 test('reused sign-out revokes session despite stalled extension',async()=>{let forgot=false,revoked=false;const result=await disconnectAndSignOut({disconnect:()=>new Promise(()=>{}),forgetWallet:()=>forgot=true,logout:async()=>{revoked=true;}},{walletMs:5,sessionMs:50});assert.equal(result.walletDisconnected,false);assert.equal(result.sessionRevoked,true);assert.ok(forgot&&revoked);});
@@ -25,7 +25,16 @@ test('a direct link in a new tab finds the wallet again: stored choice in localS
  forgetWallet();
  const owner='OwnerAddress11111111111111111111111111111111';
  const store=new Map();globalThis.localStorage={getItem:k=>store.get(k)??null,setItem:(k,v)=>store.set(k,v),removeItem:k=>store.delete(k)};globalThis.sessionStorage={getItem:()=>null,setItem(){},removeItem(){}};
- const wallets=discoverWallets();
+ const wallets=discoverWallets().filter(x=>!x.install);
  if(wallets.length){const w=wallets.find(x=>!x.paused);w.wallet.accounts=[{address:owner,features:['solana:signMessage','solana:signTransaction']}];assert.ok(restoreWalletForOwner(owner));assert.equal(store.get('kids-wallet'),w.id);forgetWallet();assert.equal(store.get('kids-wallet'),undefined);}
  else assert.throws(()=>restoreWalletForOwner(owner),/no wallet chosen/);
+});
+
+test('Phantom, Backpack and Jupiter are always listed in that order; a missing one is an install link, a detected one comes first',()=>{
+ const provider={connect(){},signMessage(){},signTransaction(){}};
+ const none=discoverWallets({});assert.deepEqual(none.map(w=>w.name),['Phantom','Backpack','Jupiter']);assert.ok(none.every(w=>w.install&&!w.provider&&!w.wallet));
+ assert.equal(none[0].install,'https://phantom.com/download');assert.equal(none[2].install,'https://jup.ag/wallet');
+ const some=discoverWallets({backpack:provider});assert.deepEqual(some.map(w=>[w.name,!!w.install]),[['Backpack',false],['Phantom',true],['Jupiter',true]]);
+ const withPhantom=discoverWallets({phantom:{solana:provider},solflare:{connect(){},signMessage(){},signTransaction(){}}});assert.deepEqual(withPhantom.map(w=>w.name),['Phantom','Solflare','Backpack','Jupiter']);assert.match(withPhantom[0].paused,/whitel/);assert.equal(withPhantom[0].install,undefined);
+ assert.throws(()=>selectWallet(none[1]),/not installed/);
 });
