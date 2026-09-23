@@ -37,6 +37,14 @@ export function validateActiveManifest(ctx,m){
 }
 export async function activeContext(){const ctx=await atomicContext();const wallets=PROFILE.network==='localnet'?Object.fromEntries(['alice','bob'].map(name=>[name,localKey(name).publicKey.toBase58()])):{};return {...ctx,config:{genesisHash:ctx.manifest.genesisHash,wallets}};}
 export function activeManifest(ctx){const m=validateActiveManifest(ctx,read(manifestPath));if(m.ready!==true)throw Error('Active campaign provisioning is incomplete');return m;}
+/** Funding window of a campaign that is about to be created on chain: it opens at creation, not when the manifest was
+ * first written. A retry after a failed or refused creation (the 23 September 2026 test: the signer refused the first
+ * attempt, the retry ten minutes later carried a deadline already in the past and the program refused with error 1)
+ * recomputes both deadlines from the current chain time. */
+export function campaignWindow(deadlineSeconds,now){
+ if(!Number.isSafeInteger(deadlineSeconds)||deadlineSeconds<60||!Number.isSafeInteger(now)||now<=0)throw Error('Campaign window needs a deadline in seconds and the current chain time');
+ return {deadline:now+deadlineSeconds,launchDeadline:now+deadlineSeconds+LAUNCH_WINDOW_SECONDS};
+}
 export function validateActiveTerms(c,m){
  if(c.soft.toString()!==m.soft||c.hard.toString()!==m.hard||c.deadline!==m.deadline||c.launchDeadline!==m.launchDeadline||c.mint.toBase58()!==m.mint||c.supply.toString()!==m.supply||c.dev.toBase58()!==m.dev||c.treasury.toBase58()!==m.treasury||c.creator.toBase58()!==m.creator)throw Error('Active campaign terms differ from registry');
 }
