@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {PublicKey} from '@solana/web3.js';
-import {activeAmounts,validateActiveManifest,readActiveReceipt,campaignWindow,LAUNCH_WINDOW_SECONDS} from '../active-launch.mjs';
+import {activeAmounts,validateActiveManifest,readActiveReceipt,campaignWindow,secondsUntilOpening,LAUNCH_WINDOW_SECONDS} from '../active-launch.mjs';
 const key=new PublicKey('11111111111111111111111111111111');
 const base={soft:100n,hard:500n,total:761n,deadline:10,launchDeadline:20,phase:0};
 const receipt={committed:12n,refunded:0n,settled:false,accepted:0n};
@@ -10,8 +10,13 @@ test('closed oversubscription floors acceptance and deducts previous refunds',()
 test('timeout returns accepted balance after a previous excess refund',()=>{const result=activeAmounts(base,{...receipt,refunded:5n},20);assert.equal(result.refundable,7n);assert.equal(result.accepted,0n);assert.equal(result.phase,'failed');});
 test('a launched campaign never becomes a full refund after timeout',()=>{assert.equal(activeAmounts({...base,phase:3},{...receipt,settled:true,accepted:7n,refunded:5n},30).refundable,0n);assert.equal(activeAmounts({...base,phase:3},receipt,30).phase,'launched');});
 test('below-soft funding has full refunds',()=>{assert.equal(activeAmounts({...base,total:99n},receipt,10).refundable,12n);});
-test('manifest rejects another ledger, program binary and altered cap',()=>{const ctx={manifest:{genesisHash:'local',sha256:'verified'},programId:key};const m={network:'localnet',rpcUrl:'http://127.0.0.1:19099',genesisHash:'local',programId:key.toBase58(),programSha256:'verified',soft:'100000000000',hard:'500000000000',supply:'1000000000000000',deadline:10,launchDeadline:86410};assert.equal(validateActiveManifest(ctx,m),m);for(const change of [{rpcUrl:'https://api.mainnet-beta.solana.com'},{genesisHash:'another'},{programSha256:'changed'},{hard:'501000000000'},{soft:'0'},{soft:'600000000000'},{launchDeadline:86409}])assert.throws(()=>validateActiveManifest(ctx,{...m,...change}));const small={...m,soft:'1000000000',hard:'5000000000',deadline:10,launchDeadline:86410};assert.equal(validateActiveManifest(ctx,small),small);});
+test('manifest rejects another ledger, program binary and altered cap',()=>{const ctx={manifest:{genesisHash:'local',sha256:'verified'},programId:key};const m={network:'localnet',rpcUrl:'http://127.0.0.1:19099',genesisHash:'local',programId:key.toBase58(),programSha256:'verified',soft:'100000000000',hard:'500000000000',supply:'1000000000000000',deadline:10,launchDeadline:86410};assert.equal(validateActiveManifest(ctx,m),m);for(const change of [{rpcUrl:'https://api.mainnet-beta.solana.com'},{genesisHash:'another'},{programSha256:'changed'},{hard:'1001000000000'},{soft:'0'},{soft:'600000000000'},{launchDeadline:86409}])assert.throws(()=>validateActiveManifest(ctx,{...m,...change}));const small={...m,soft:'1000000000',hard:'5000000000',deadline:10,launchDeadline:86410};assert.equal(validateActiveManifest(ctx,small),small);});
 test('receipt parser rejects foreign account ownership and v1 layouts',async()=>{for(const info of [{owner:key,data:Buffer.alloc(104)},{owner:new PublicKey('So11111111111111111111111111111111111111112'),data:Buffer.alloc(112)}])await assert.rejects(readActiveReceipt({programId:key,connection:{getAccountInfo:async()=>info}},key,key));});
 test('the funding window is computed from the creation time, launch window after it',()=>{assert.deepEqual(campaignWindow(600,1000),{deadline:1600,launchDeadline:1600+LAUNCH_WINDOW_SECONDS});assert.deepEqual(campaignWindow(86400,5000),{deadline:91400,launchDeadline:91400+86400});});
 test('a stale window is replaced, never kept: recomputing later always moves the deadline forward',()=>{const first=campaignWindow(600,1000),retry=campaignWindow(600,1000+610);assert.ok(retry.deadline>first.deadline);assert.ok(retry.deadline>1000+610);});
 test('the window refuses a missing deadline or clock',()=>{assert.throws(()=>campaignWindow(undefined,1000));assert.throws(()=>campaignWindow(600,undefined));assert.throws(()=>campaignWindow(30,1000));});
+test('a scheduled opening waits until its UTC time and is due from then; no schedule means due now',()=>{
+ const m={opensAt:'2026-09-23T20:00:00Z'},at=Date.parse(m.opensAt)/1000;
+ assert.equal(secondsUntilOpening(m,at-90),90);assert.equal(secondsUntilOpening(m,at),0);assert.equal(secondsUntilOpening(m,at+5),0);
+ assert.equal(secondsUntilOpening({},at-90),0);assert.equal(secondsUntilOpening(null,at),0);assert.throws(()=>secondsUntilOpening({opensAt:'soon'},at));
+});

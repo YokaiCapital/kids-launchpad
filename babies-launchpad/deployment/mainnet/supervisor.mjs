@@ -51,8 +51,19 @@ if(existsSync(new URL('./campaign-plan.json',import.meta.url))){
  // a launched campaign is never replaced here. The new campaign then comes from the (new) plan.
  const renewSetting=process.env.KIDS_ACTIVE_CAMPAIGN_RENEW;
  if(renewSetting){const renew=await import('../../localnet/renew-active-launch.mjs');const setting=renew.parseRenewSetting(renewSetting);if(setting?.refused)console.log(JSON.stringify({event:'active-campaign-renew-refused',reason:setting.refused}));else if(setting){try{const r=await renew.renewFinishedActiveLaunch({mode:setting.mode,token:setting.token,log:line=>console.log(JSON.stringify(line))});console.log(JSON.stringify({event:'active-campaign-renew',...r}));}catch(error){console.log(JSON.stringify({event:'active-campaign-renew-failed',reason:String(error.message).slice(0,200)}));}}}
- try{const {provisionActiveLaunch}=await import('../../localnet/provision-active-launch.mjs');const state=await provisionActiveLaunch();console.log(JSON.stringify({event:'campaign-ready',campaign:state.escrowAddress,phase:state.phase,deadlineUnix:state.deadlineUnix}));}
- catch(error){console.log(JSON.stringify({event:'campaign-not-provisioned',reason:String(error.message).slice(0,300)}));if(process.env.KIDS_REQUIRE_CAMPAIGN==='1')throw error;}
+ const {provisionActiveLaunch}=await import('../../localnet/provision-active-launch.mjs');
+ // A scheduled opening (plan.opensAt): the coin is made now, the campaign at the scheduled time. The supervisor keeps
+ // trying from that moment (every 15 s, bounded) so a transient failure at the opening never leaves the site dark.
+ const provisionUntilReady=async(attempt=0)=>{
+  try{const state=await provisionActiveLaunch();console.log(JSON.stringify({event:'campaign-ready',campaign:state.escrowAddress,phase:state.phase,deadlineUnix:state.deadlineUnix}));return true;}
+  catch(error){
+   if(error.code==='campaign-scheduled'){console.log(JSON.stringify({event:'campaign-scheduled',opensAt:error.opensAt,seconds:error.seconds}));setTimeout(()=>provisionUntilReady(0),Math.min(error.seconds,3600)*1000+1000).unref();return false;}
+   console.log(JSON.stringify({event:'campaign-not-provisioned',reason:String(error.message).slice(0,300),attempt}));
+   if(attempt>0&&attempt<240)setTimeout(()=>provisionUntilReady(attempt+1),15000).unref();
+   if(process.env.KIDS_REQUIRE_CAMPAIGN==='1'&&attempt===0)throw error;return false;
+  }
+ };
+ try{const ok=await provisionUntilReady(0);if(!ok){/* scheduled or failed at boot: keepers answer 'incomplete' until ready */}}catch(error){throw error;}
 }else console.log(JSON.stringify({event:'no-campaign-plan'}));
 const children=new Set();let stopping=false;
 function stop(code){if(stopping)return;stopping=true;for(const c of children)c.kill('SIGTERM');setTimeout(()=>{for(const c of children)c.kill('SIGKILL');process.exit(code);},35000).unref();process.exitCode=code;}

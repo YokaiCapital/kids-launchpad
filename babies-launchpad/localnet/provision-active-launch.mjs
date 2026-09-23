@@ -32,7 +32,7 @@ export async function sendWithOperator({connection,operator,tx,extraSigners=[],o
  const signature=await connection.sendRawTransaction(tx.serialize(),{skipPreflight:false,maxRetries:3});
  const result=await connection.confirmTransaction({signature,...block},'confirmed');if(result.value.err)throw Error('Transaction failed: '+JSON.stringify(result.value.err));return signature;
 }
-import {activeManifestPath,saveActiveFile,validateActiveManifest,validateActiveTerms,readActive,validCampaignTerms,campaignWindow,ACTIVE_SUPPLY,LAUNCH_WINDOW_SECONDS} from './active-launch.mjs';
+import {activeManifestPath,saveActiveFile,validateActiveManifest,validateActiveTerms,readActive,validCampaignTerms,campaignWindow,secondsUntilOpening,ACTIVE_SUPPLY,LAUNCH_WINDOW_SECONDS} from './active-launch.mjs';
 /** Campaign terms for a NEW campaign. Defaults are the production terms (100 SOL soft, 500 SOL hard, 24 h funding).
  * Private test services may set KIDS_ACTIVE_SOFT_CAP_SOL, KIDS_ACTIVE_HARD_CAP_SOL (whole or decimal SOL, up to 9 places)
  * and KIDS_ACTIVE_DEADLINE_SECONDS (60 s to 7 days). The launch window after funding closes stays 24 h. An existing
@@ -82,12 +82,12 @@ async function provision(){
    parentMints=identities.parents.map(p=>p.mint);dev=identities.devWallet.address;treasury=identities.treasuryWallet.address;nonce=BigInt(plan.nonce);terms={...terms,...plan.terms};
    if(campaignAddress(ctx.programId,admin.publicKey,nonce).toBase58()!==plan.campaign)throw Error('Campaign plan address mismatch');
    // Branding comes from the plan (the public launch carries the real name and artwork); a plan without it is a test coin.
-   var token=tokenBranding(plan.token||TEST_TOKEN);
+   var token=tokenBranding(plan.token||TEST_TOKEN);var opensAt=plan.opensAt||null;if(opensAt&&Number.isNaN(Date.parse(opensAt)))throw Error('Campaign plan opensAt is not a valid time');
   }
   // Persist identities before any transaction; retries cannot create another coin.
   const mint=plannedMintKeypair(local?null:read(campaignPlanPath(PROFILE.network)),process.env),nft=Keypair.generate();
   saveActiveFile(keysPath,{mint:Array.from(mint.secretKey),nft:Array.from(nft.secretKey)});
-  m={version:3,network:PROFILE.network,rpcUrl:PROFILE.rpcLabel,programId:ctx.programId.toBase58(),programSha256:ctx.manifest.sha256,genesisHash:ctx.manifest.genesisHash,creator:admin.publicKey.toBase58(),nonce:nonce.toString(),address:campaignAddress(ctx.programId,admin.publicKey,nonce).toBase58(),mint:mint.publicKey.toBase58(),feeNft:nft.publicKey.toBase58(),supply:'1000000000000000',soft:terms.soft,hard:terms.hard,deadlineSeconds:terms.deadlineSeconds,...campaignWindow(terms.deadlineSeconds,now),dev,treasury,parentMints,token,metadataUri:null,distributionProgram:distributionProgramFor(PROFILE.network)?.toBase58()||null,ready:false};
+  m={version:3,network:PROFILE.network,rpcUrl:PROFILE.rpcLabel,programId:ctx.programId.toBase58(),programSha256:ctx.manifest.sha256,genesisHash:ctx.manifest.genesisHash,creator:admin.publicKey.toBase58(),nonce:nonce.toString(),address:campaignAddress(ctx.programId,admin.publicKey,nonce).toBase58(),mint:mint.publicKey.toBase58(),feeNft:nft.publicKey.toBase58(),supply:'1000000000000000',soft:terms.soft,hard:terms.hard,deadlineSeconds:terms.deadlineSeconds,...campaignWindow(terms.deadlineSeconds,now),dev,treasury,parentMints,token,opensAt:opensAt||null,metadataUri:null,distributionProgram:distributionProgramFor(PROFILE.network)?.toBase58()||null,ready:false};
   saveActiveFile(activeManifestPath,m);
  }
  if(m.creator!==admin.publicKey.toBase58())throw Error('Provisioner creator mismatch');
@@ -128,6 +128,8 @@ async function provision(){
  if(snapshot.campaign!==m.address||snapshot.genesisHash!==m.genesisHash||snapshot.parents.some((p,i)=>p.mint!==m.parentMints[i]))throw Error('Parent snapshot identity mismatch');
  const campaignInfo=await c.getAccountInfo(campaign);
  if(!campaignInfo||campaignInfo.owner.equals(SystemProgram.programId)&&campaignInfo.data.length===0){
+  // A scheduled opening: the coin is ready, the campaign is created (and its clock starts) at the scheduled time.
+  const wait=secondsUntilOpening(m,await chainTime(c));if(wait>0){const e=Error('Campaign opens at '+m.opensAt+' ('+wait+' s)');e.code='campaign-scheduled';e.opensAt=m.opensAt;e.seconds=wait;throw e;}
   const parents=m.parentMints.map(x=>new PublicKey(x));
   // A parent may be Token-2022: read its program from the mint account's owner.
   for(let i=0;i<2;i++){const info=await c.getAccountInfo(parents[i]);if(!info)throw Error('Parent mint missing');const supply=(await getMint(c,parents[i],'confirmed',info.owner)).supply.toString();if(supply!==snapshot.parents[i].supply){if(local)throw Error('Parent supply changed since snapshot');console.log(JSON.stringify({event:'parent-supply-moved-since-snapshot',mint:parents[i].toBase58(),atSnapshot:snapshot.parents[i].supply,now:supply}));}}

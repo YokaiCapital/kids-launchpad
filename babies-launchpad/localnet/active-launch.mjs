@@ -25,9 +25,9 @@ export const activeManifestPath=runtime+'active-launch.json';
 const manifestPath=activeManifestPath,intentPath=runtime+'active-launch-intents.json';
 export const saveActiveFile=writeDurableJson;
 const save=saveActiveFile,read=path=>JSON.parse(readFileSync(path,'utf8'));
-export const MAX_HARD_CAP_LAMPORTS=500000000000n,ACTIVE_SUPPLY='1000000000000000',LAUNCH_WINDOW_SECONDS=86400,REFERENCE_SOL_USD=200;
+export const MAX_HARD_CAP_LAMPORTS=1000000000000n,ACTIVE_SUPPLY='1000000000000000',LAUNCH_WINDOW_SECONDS=86400,REFERENCE_SOL_USD=200;
 const lamportsField=v=>typeof v==='string'&&/^\d{1,20}$/.test(v)?BigInt(v):null;
-/** Soft and hard caps come from the manifest (test terms are configurable); the supply, the 24-hour launch window and the 500 SOL ceiling are fixed. */
+/** Soft and hard caps come from the manifest (test terms are configurable); the supply, the 24-hour launch window and the 1,000 SOL ceiling are fixed. */
 export function validCampaignTerms(m){const soft=lamportsField(m.soft),hard=lamportsField(m.hard);return soft!==null&&hard!==null&&soft>0n&&soft<=hard&&hard<=MAX_HARD_CAP_LAMPORTS&&m.supply===ACTIVE_SUPPLY&&Number.isSafeInteger(m.deadline)&&Number.isSafeInteger(m.launchDeadline)&&m.launchDeadline-m.deadline===LAUNCH_WINDOW_SECONDS;}
 const poolUsd=lamports=>Number(lamports)/1e9*REFERENCE_SOL_USD*2;
 export function validateActiveManifest(ctx,m){
@@ -74,8 +74,16 @@ async function loadPublicCampaign(){
  const now=await chainTime(ctx.connection);return {ctx,m,c,now};
 }
 const publicCampaign=createPublicCampaignRead(loadPublicCampaign);
+/** Seconds until a scheduled campaign may be created on chain: 0 when it is due or unscheduled. `opensAt` is the plan's
+ * ISO time, copied into the manifest; the coin exists before it, the campaign (and its clock) only from it. */
+export function secondsUntilOpening(m,nowUnix){
+ if(!m?.opensAt)return 0;const at=Date.parse(m.opensAt);if(Number.isNaN(at))throw Error('Campaign opensAt is not a valid time');
+ return Math.max(0,Math.ceil(at/1000)-nowUnix);
+}
 export async function readActive(owner){
  if(!existsSync(manifestPath))return {configured:false,network:PROFILE.network,next:readLaunchSchedule(),chainTimeUnix:Math.floor(Date.now()/1000)};
+ // Coin made, campaign not yet created (waiting for the scheduled opening): the public read is the countdown, not an error.
+ {const raw=read(manifestPath);if(raw.ready!==true&&raw.opensAt)return {configured:false,scheduled:true,mint:raw.mint||null,opensAt:raw.opensAt,network:PROFILE.network,next:readLaunchSchedule(),chainTimeUnix:Math.floor(Date.now()/1000)};}
  const {ctx,m,c,now}=await publicCampaign();
  const r=owner?await readActiveReceipt(ctx,c.address,owner):{committed:0n,refunded:0n,sequence:0n},a=activeAmounts(c,r,now);
  return {configured:true,network:PROFILE.network,version:3,scope:scopeFor(PROFILE),next:readLaunchSchedule(),genesisHash:ctx.manifest.genesisHash,programId:ctx.programId.toBase58(),escrowAddress:m.address,mint:m.mint,phase:a.phase,chainTimeUnix:now,deadlineUnix:c.deadline,launchDeadlineUnix:c.launchDeadline,totalLamports:c.total.toString(),softCapLamports:c.soft.toString(),hardCapLamports:c.hard.toString(),refundedLamports:c.refunded.toString(),settledAcceptedLamports:c.settledAccepted.toString(),receiptCount:c.receiptCount.toString(),settledReceiptCount:c.settledReceiptCount.toString(),poolSoftUsd:poolUsd(c.soft),poolHardUsd:poolUsd(c.hard),referenceSolUsd:REFERENCE_SOL_USD,explorerUrl:PROFILE.explorerUrl,explorerCluster:PROFILE.explorerCluster,mintExplorerUrl:explorerLink(PROFILE,'token',m.mint),pool:c.phase===3?c.pool.toBase58():null,user:owner?{owner,committedLamports:r.committed.toString(),acceptedLamports:a.accepted.toString(),refundableLamports:a.refundable.toString(),refundedLamports:r.refunded.toString(),settled:r.settled}:null};
