@@ -43,7 +43,18 @@ export async function fetchMarket(path,params={},{fetchImpl=globalThis.fetch,sig
  if(!data||typeof data!=='object')return {ok:false,reason:'malformed',status:response.status??null};
  if(path==='candles'&&!Array.isArray(data.candles))return {ok:false,reason:'malformed',status:response.status??null};
  if(path==='trades'&&!Array.isArray(data.trades))return {ok:false,reason:'malformed',status:response.status??null};
- return {ok:true,data};
+ return {ok:true,data:adaptMarketData(path,data)};
+}
+/** The served shapes (localnet/market/api.mjs) use long names and nested feed/coverage objects; the page's helpers read
+ * short, flat fields. Both spellings are accepted so fixtures and the live API render the same. */
+export function adaptGaps(gaps){return Array.isArray(gaps)?gaps.map(g=>({fromUnix:g?.fromUnix??g?.olderBlockTime??g?.from??null,toUnix:g?.toUnix??g?.newerBlockTime??g?.to??null})):[];}
+export function adaptMarketData(path,data){
+ if(!data||typeof data!=='object')return data;
+ if(path==='summary'){const s=data;const status=s.freshness??(s.status==='live'||s.status==='stale'||s.status==='backfilling'?s.status:s.status?'unavailable':undefined);
+  return {...s,priceChange24hPct:s.priceChange24hPct??s.change24hPercent??null,lastTradeUnix:s.lastTradeUnix??s.lastTrade?.time??null,lagSeconds:s.lagSeconds??s.feed?.lagSeconds??null,freshness:status,
+   coverage:{fromUnix:s.coverage?.fromUnix??s.coverage?.oldestBlockTime??null,toUnix:s.coverage?.toUnix??s.coverage?.newestBlockTime??null,gaps:adaptGaps(s.coverage?.gaps)}};}
+ if(path==='candles')return {...data,gaps:adaptGaps(data.gaps??data.coverage?.gaps)};
+ return data;
 }
 
 // ---------- cache (last valid data only; a failure is never cached) ----------
@@ -105,10 +116,10 @@ export function isoStamp(unix){const t=finite(unix);return t==null?'':new Date(t
 /** A served candle becomes a chart bar, or null when any field is not a finite number or the range is impossible. */
 export function normaliseCandle(c){
  if(!c||typeof c!=='object')return null;
- const time=finite(c.t),open=finite(c.o),high=finite(c.h),low=finite(c.l),close=finite(c.c);
+ const time=finite(c.t??c.time),open=finite(c.o??c.open),high=finite(c.h??c.high),low=finite(c.l??c.low),close=finite(c.c??c.close);
  if([time,open,high,low,close].some(v=>v==null||v<0))return null;
  if(high<low||high<Math.max(open,close)||low>Math.min(open,close))return null;
- const volume=finite(c.v),trades=finite(c.n);
+ const volume=finite(c.v??c.volumeSol),trades=finite(c.n??c.trades);
  return {time:Math.floor(time),open,high,low,close,volume:volume==null?null:volume,trades:trades==null?null:Math.round(trades),provisional:c.provisional===true};
 }
 /** Ascending by time, one bar per bucket; an incoming bar replaces the bar it shares a bucket with (this is how a provisional bar is replaced). */
@@ -169,8 +180,8 @@ export function candleRange(intervalKey,candles,nowUnix){
 export function normaliseTrade(t){
  if(!t||typeof t!=='object'||typeof t.signature!=='string'||!t.signature)return null;
  const side=t.side==='buy'||t.side==='sell'?t.side:null;if(!side)return null;
- const blockTimeUnix=finite(t.blockTimeUnix),slot=finite(t.slot);
- return {signature:t.signature,slot:slot==null?null:Math.floor(slot),blockTimeUnix:blockTimeUnix==null?null:Math.floor(blockTimeUnix),side,solRaw:t.solRaw==null?null:String(t.solRaw),coinRaw:t.coinRaw==null?null:String(t.coinRaw),priceSol:t.priceSol==null?null:String(t.priceSol),nested:t.nested===true,provisional:t.provisional===true,wallet:typeof t.wallet==='string'?t.wallet:null};
+ const blockTimeUnix=finite(t.blockTimeUnix??t.time),slot=finite(t.slot);const solRaw=t.solRaw??t.exact?.solLamports??null,coinRaw=t.coinRaw??t.exact?.coinRaw??null,priceSol=t.exact?.priceSol??t.priceSol??null;
+ return {signature:t.signature,slot:slot==null?null:Math.floor(slot),blockTimeUnix:blockTimeUnix==null?null:Math.floor(blockTimeUnix),side,solRaw:solRaw==null?null:String(solRaw),coinRaw:coinRaw==null?null:String(coinRaw),priceSol:priceSol==null?null:String(priceSol),nested:t.nested===true,provisional:t.provisional===true||(typeof t.commitment==='string'&&t.commitment!=='finalized'),wallet:typeof t.wallet==='string'?t.wallet:typeof t.trader==='string'?t.trader:null};
 }
 /** Newest first, one row per signature; an incoming row replaces the row it shares a signature with (confirming → confirmed). */
 export function mergeTrades(existing,incoming){

@@ -106,3 +106,11 @@ test('polling runs now, every tick while visible, pauses when hidden and resumes
  doc.visibilityState='visible';listeners.visibilitychange();assert.equal(runs,3);assert.equal(timers.length,2);
  stop();assert.equal(cleared,2);assert.equal(listeners.visibilitychange,undefined);timers[1]();assert.equal(runs,3);
 });
+test('the served shapes (long names, nested feed and coverage, exact amounts) adapt to the page fields',async()=>{
+ const {adaptMarketData,normaliseCandle,normaliseTrade}=await import('../src/market-data.mjs');
+ const s=adaptMarketData('summary',{priceSol:1.268622982e-9,change24hPercent:-75.02,volume24hSol:1.871113175,trades24h:47,status:'live',lastTrade:{time:1790144972},feed:{lagSeconds:8},coverage:{oldestBlockTime:1790129330,newestBlockTime:1790144972,gaps:[]}});
+ assert.equal(s.priceChange24hPct,-75.02);assert.equal(s.lastTradeUnix,1790144972);assert.equal(s.lagSeconds,8);assert.equal(s.freshness,'live');assert.equal(s.coverage.fromUnix,1790129330);assert.deepEqual(s.coverage.gaps,[]);
+ const c=normaliseCandle({time:1790129100,open:5.079091885e-9,high:5.507515437e-9,low:4.707834734e-9,close:4.939845235e-9,volumeSol:0.411343482,trades:11});assert.equal(c.time,1790129100);assert.equal(c.volume,0.411343482);assert.equal(c.trades,11);
+ const t=normaliseTrade({signature:'4ePp',path:'5.0',slot:449622084,time:1790144972,side:'buy',trader:'xEMq',sol:0.005620729,coin:4430574.786107,priceSol:1.268622982e-9,exact:{solLamports:'5620729',coinRaw:'4430574786107',priceSol:'0.000000001268622982'},nested:true,commitment:'finalized'});
+ assert.equal(t.blockTimeUnix,1790144972);assert.equal(t.solRaw,'5620729');assert.equal(t.coinRaw,'4430574786107');assert.equal(t.priceSol,'0.000000001268622982');assert.equal(t.wallet,'xEMq');assert.equal(t.provisional,false);assert.equal(normaliseTrade({signature:'x',side:'sell',time:1,commitment:'confirmed'}).provisional,true);
+});
