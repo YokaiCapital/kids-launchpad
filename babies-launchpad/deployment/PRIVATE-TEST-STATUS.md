@@ -194,3 +194,8 @@ Owner decisions after the first mainnet launch: coin-side trading fees are burne
 - The classic path (campaign without a distribution program) re-verified on the same build with `atomic-launch-verify.mjs`.
 - Builds: kids_atomic_launch.so 210,440 bytes `1f8d3dbe…2de5`; kids_distribution.so 128,576 bytes `75252cab…13d9` (local builds; CI reproducible hashes follow the push). Program tests 29 + 19.
 - Still owed before mainnet: independent review of both programs, CI hashes, deployment of kids-distribution (governance key), recording its id in MAINNET-IDENTITIES.json (`distribution.programId`), a mainnet test launch on the vault path, then revocation of the distribution program's upgrade authority.
+
+## 23 September 2026, ~05:20 UTC: authorities revoked at creation (localnet)
+
+- Owner saw the test coin as "mintable" on a scanner: stale snapshot from the funding window (the chain shows both authorities gone). Fix: the freeze authority is revoked at creation from the next release; the mint authority too once build 3 is live (the launch accepts an already-revoked mint).
+- Localnet, launch program build `3e6bf499…9067` (local): vault lifecycle with both authorities revoked before the campaign opened (launch 56zWViH2…, all claims paid), classic lifecycle unchanged. Build 3's CI hash changes with this source change; the identities record is updated after the next reproducible build.

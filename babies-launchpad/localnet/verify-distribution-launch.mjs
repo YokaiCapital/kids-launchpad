@@ -22,7 +22,8 @@ for(const owner of [alice,bob])if(await c.getBalance(owner.publicKey)<5000000000
 const nonce=randomBytes(8).readBigUInt64LE(),campaign=campaignAddress(ctx.programId,admin.publicKey,nonce),authority=authorityAddress(ctx,campaign),supply=1000000000000000n;
 const mint=await createMint(c,admin,admin.publicKey,admin.publicKey,6),child=await getOrCreateAssociatedTokenAccount(c,admin,mint,authority,true),wsol=await getOrCreateAssociatedTokenAccount(c,admin,NATIVE_MINT,authority,true);
 await mintTo(c,admin,mint,child.address,admin,supply);
-await setAuthority(c,admin,mint,admin,AuthorityType.MintTokens,authority);await setAuthority(c,admin,mint,admin,AuthorityType.FreezeAccount,authority);
+// Vault path exercises the revoke-at-creation rule: both authorities are gone before the campaign even opens.
+await setAuthority(c,admin,mint,admin,AuthorityType.MintTokens,null);await setAuthority(c,admin,mint,admin,AuthorityType.FreezeAccount,null);
 await send(SystemProgram.transfer({fromPubkey:admin.publicKey,toPubkey:authority,lamports:300000000}));
 await send(SystemProgram.transfer({fromPubkey:admin.publicKey,toPubkey:poor.publicKey,lamports:1000000}));
 await send(SystemProgram.transfer({fromPubkey:admin.publicKey,toPubkey:wsol.address,lamports:12345}));
@@ -74,7 +75,7 @@ const badKeys=good.instruction.keys.map((k,i)=>i===16?{...k,pubkey:SystemProgram
 await reject('wrong AMM config',()=>launch(new TransactionInstruction({programId:ctx.programId,keys:badKeys,data:good.instruction.data})),ctx.programId,/custom program error: 0x15/);
 const before=await readCampaign(ctx,campaign),beforeAuthority=await c.getBalance(authority),beforeWsol=await getAccount(c,wsol.address);
 await reject('lock payer cannot fund NFT rent',()=>launch(lateFailure.instruction,[poor]),LOCK,/insufficient lamports|insufficient funds/i);
-assert.equal(await c.getAccountInfo(p.pool),null);assert.equal(await c.getAccountInfo(nft.publicKey),null);assert.equal((await readCampaign(ctx,campaign)).lamports,before.lamports);assert.equal(await c.getBalance(authority),beforeAuthority);assert.equal((await getAccount(c,wsol.address)).amount,beforeWsol.amount);assert.ok((await getMint(c,mint)).mintAuthority.equals(authority));assert.equal((await readCampaign(ctx,campaign)).phase,before.phase);
+assert.equal(await c.getAccountInfo(p.pool),null);assert.equal(await c.getAccountInfo(nft.publicKey),null);assert.equal((await readCampaign(ctx,campaign)).lamports,before.lamports);assert.equal(await c.getBalance(authority),beforeAuthority);assert.equal((await getAccount(c,wsol.address)).amount,beforeWsol.amount);assert.equal((await getMint(c,mint)).mintAuthority,null,'revoked at creation');assert.equal((await readCampaign(ctx,campaign)).phase,before.phase);
 const signature=await launch(good.instruction);state=await readCampaign(ctx,campaign);assert.equal(state.phase,3);assert.ok(state.launchedAt>=deadline);assert.ok(state.pool.equals(p.pool));assert.ok(state.feeNft.equals(nft.publicKey));
 assert.equal(decodePool(await c.getAccountInfo(p.pool),CPMM,p).creatorFeesEnabled,false);
 const base=supply*435n/1000n,vault0=await getAccount(c,p.vault0),vault1=await getAccount(c,p.vault1);assert.equal(vault0.amount,p.mint0.equals(mint)?base:3000000001n);assert.equal(vault1.amount,p.mint1.equals(mint)?base:3000000001n);

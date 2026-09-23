@@ -12,7 +12,7 @@ import {localKey,chainTime} from './dev-vesting.mjs';
 import {operatorSigner} from './operator-signer.mjs';
 import {buildCampaignSnapshot} from './import-parent-snapshot.mjs';
 import {tokenBranding,pinTokenMetadata,createMetadataInstruction,metadataAddress,LOCALNET_TOKEN,TEST_TOKEN} from './token-metadata.mjs';
-import {distributionProgramFor} from './distribution.mjs';
+import {distributionProgramFor} from './distribution.mjs';import {manifestFeatures} from './program-builds.mjs';
 const repoRoot=fileURLToPath(new URL('../',import.meta.url));
 const identitiesPath=fileURLToPath(new URL('../deployment/MAINNET-IDENTITIES.json',import.meta.url));
 /** Campaign plan for devnet/mainnet: nonce fixed in advance so the parent snapshot can name the campaign before it exists. */
@@ -87,12 +87,15 @@ async function provision(){
    else throw Error('KIDS_PINATA_JWT is required to attach the coin metadata on '+PROFILE.network);
    saveActiveFile(activeManifestPath,m);
   }
+  // Freeze authority: revoked at creation. Mint authority: revoked at creation once the live program accepts it (build 3
+  // feature 'revoke-at-creation'); until then it stays on the launch authority and is revoked at launch.
+  const revokeAtCreation=manifestFeatures(ctx.manifest).includes('revoke-at-creation');m.revokeAtCreation=revokeAtCreation;
   const rent=await c.getMinimumBalanceForRentExemption(MINT_SIZE);
-  const tx=new Transaction().add(SystemProgram.createAccount({fromPubkey:admin.publicKey,newAccountPubkey:mint.publicKey,lamports:rent,space:MINT_SIZE,programId:TOKEN_PROGRAM_ID}),createInitializeMint2Instruction(mint.publicKey,6,admin.publicKey,admin.publicKey),createAssociatedTokenAccountIdempotentInstruction(admin.publicKey,child,authority,mint.publicKey),createMintToInstruction(mint.publicKey,child,admin.publicKey,BigInt(m.supply)),createMetadataInstruction({mint:mint.publicKey,mintAuthority:admin.publicKey,payer:admin.publicKey,name:m.token.name,symbol:m.token.symbol,uri:m.metadataUri}),createSetAuthorityInstruction(mint.publicKey,admin.publicKey,AuthorityType.MintTokens,authority),createSetAuthorityInstruction(mint.publicKey,admin.publicKey,AuthorityType.FreezeAccount,authority));
+  const tx=new Transaction().add(SystemProgram.createAccount({fromPubkey:admin.publicKey,newAccountPubkey:mint.publicKey,lamports:rent,space:MINT_SIZE,programId:TOKEN_PROGRAM_ID}),createInitializeMint2Instruction(mint.publicKey,6,admin.publicKey,admin.publicKey),createAssociatedTokenAccountIdempotentInstruction(admin.publicKey,child,authority,mint.publicKey),createMintToInstruction(mint.publicKey,child,admin.publicKey,BigInt(m.supply)),createMetadataInstruction({mint:mint.publicKey,mintAuthority:admin.publicKey,payer:admin.publicKey,name:m.token.name,symbol:m.token.symbol,uri:m.metadataUri}),createSetAuthorityInstruction(mint.publicKey,admin.publicKey,AuthorityType.MintTokens,revokeAtCreation?null:authority),createSetAuthorityInstruction(mint.publicKey,admin.publicKey,AuthorityType.FreezeAccount,null));
   m.mintSignature=await send(tx,[mint],'mint:'+m.address);saveActiveFile(activeManifestPath,m);
  }
  if(!await c.getAccountInfo(metadataAddress(mint.publicKey)))throw Error('Coin metadata account missing after mint creation');
- const info=await getMint(c,mint.publicKey),holding=await getAccount(c,child);if(info.decimals!==6||info.supply!==BigInt(m.supply)||!info.mintAuthority?.equals(authority)||!info.freezeAuthority?.equals(authority)||holding.amount!==BigInt(m.supply)||!holding.owner.equals(authority))throw Error('Mint custody or fixed supply mismatch');
+ const info=await getMint(c,mint.publicKey),holding=await getAccount(c,child);if(info.decimals!==6||info.supply!==BigInt(m.supply)||(m.revokeAtCreation?info.mintAuthority!==null:!info.mintAuthority?.equals(authority))||info.freezeAuthority!==null||holding.amount!==BigInt(m.supply)||!holding.owner.equals(authority))throw Error('Mint custody or fixed supply mismatch');
  await send(new Transaction().add(createAssociatedTokenAccountIdempotentInstruction(admin.publicKey,wsol,authority,NATIVE_MINT)),[],'wsol:'+m.address);
  // Launch authority funding: a mainnet launch used 0.18 SOL (pool creation fee, lookup table, rent); 0.22 SOL leaves a margin. Override with KIDS_LAUNCH_AUTHORITY_TOPUP_LAMPORTS.
  const topUp=BigInt(process.env.KIDS_LAUNCH_AUTHORITY_TOPUP_LAMPORTS||'220000000');const balance=BigInt(await c.getBalance(authority));if(balance<topUp)await send(new Transaction().add(SystemProgram.transfer({fromPubkey:admin.publicKey,toPubkey:authority,lamports:topUp-balance})),[],'topup:'+m.address);

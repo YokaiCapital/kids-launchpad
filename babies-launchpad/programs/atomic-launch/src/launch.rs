@@ -91,7 +91,10 @@ pub(super) fn execute(program:&Pubkey,a:&[AccountInfo],body:&[u8])->ProgramResul
  check(a[18].data_is_empty()&&*a[18].owner==system_program::id())?;
  check(a[6].data_is_empty()&&*a[6].owner==system_program::id())?;
  ata(&a[4],&authority,&c.child_mint)?;ata(&a[5],&authority,&WSOL)?;
- mint(&a[3],c.supply,Some(&authority),6)?;
+ // Mint and freeze authorities may already be revoked at creation (scanners then never see the coin as mintable); when
+ // still set they must be the launch authority and are revoked below.
+ let mintable={let d=a[3].try_borrow_data()?;d[0..4]!=[0;4]};
+ mint(&a[3],c.supply,if mintable{Some(&authority)}else{None},6)?;
  let freeze={let d=a[3].try_borrow_data()?;if d[46..50]==[0;4]{false}else{check(d[46..50]==[1,0,0,0]&&read_key(&d,50)?==authority)?;true}};
  check(token(&a[4],&c.child_mint,&authority)?==c.supply)?;
  token(&a[5],&WSOL,&authority)?;
@@ -136,7 +139,7 @@ pub(super) fn execute(program:&Pubkey,a:&[AccountInfo],body:&[u8])->ProgramResul
  let mut lock_data=vec![216,157,29,78,38,51,31,26];lock_data.extend_from_slice(&lp_amount.to_le_bytes());lock_data.push(0);
  cpi(a,25,&[(26,false,false),(1,true,true),(2,true,false),(0,false,false),(6,true,true),(7,false,true),(18,false,false),(8,false,true),(19,false,false),(20,false,true),(9,false,true),(21,false,true),(22,false,true),(10,false,true),(14,false,false),(13,false,false),(11,false,false),(12,false,false),(27,false,false)],lock_data,seeds)?;
  // SPL SetAuthority encodes authority kind then an absent optional key.
- cpi(a,11,&[(3,false,true),(2,true,false)],vec![6,0,0],seeds)?;
+ if mintable{cpi(a,11,&[(3,false,true),(2,true,false)],vec![6,0,0],seeds)?;}
  if freeze{cpi(a,11,&[(3,false,true),(2,true,false)],vec![6,1,0],seeds)?;}
  mint(&a[3],c.supply,None,6)?;{let d=a[3].try_borrow_data()?;check(d[46..50]==[0;4])?;}
  check(token(&a[4],&c.child_mint,&authority)?==c.supply-base)?;

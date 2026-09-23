@@ -19,8 +19,9 @@ every release; the coin page links to it.
 
 | Fact | Value |
 | --- | --- |
-| Mint authority | none (revoked at launch) |
-| Freeze authority | none (revoked at launch) |
+| Mint authority | none (revoked in the launch transaction; read it from the chain, some scanners still show the funding-window snapshot when the program's own address held it) |
+| Freeze authority | none (revoked at launch; new coins revoke it at creation) |
+| From build 3 | both authorities are revoked at creation, before the campaign opens, so no scanner ever sees the coin as mintable |
 | Metadata | **none** on this coin (created before metadata-at-creation existed). New coins get an immutable Metaplex metadata account in the mint transaction. |
 | Supply in program custody | 56.5 % of the original supply at launch (43.5 % participants + 5 % + 5 % parents + 3 % dev), decreasing as claims are paid. It is program-controlled, not a wallet, but see "upgradeable" above. |
 | Liquidity | Raydium CPMM pool `FAThun8y…`, 2 % fee tier, LP permanently locked (Raydium lock, fee key held by the campaign). |
