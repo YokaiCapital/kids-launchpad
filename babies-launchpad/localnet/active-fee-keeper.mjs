@@ -61,6 +61,17 @@ async function canonicalRoute(ctx,mint,ownPool=null){
 /** Token program of each mint the keeper touches: the mint account's owner (classic or Token-2022). */
 async function tokenPrograms(connection,mints){const infos=await connection.getMultipleAccountsInfo(mints,'confirmed');const out=new Map();mints.forEach((m,i)=>{const info=infos[i];if(!info)throw Error('Mint account missing: '+m.toBase58());const program=info.owner.equals(TOKEN_2022_PROGRAM_ID)?TOKEN_2022_PROGRAM_ID:info.owner.equals(TOKEN_PROGRAM_ID)?TOKEN_PROGRAM_ID:null;if(!program)throw Error('Mint is not owned by a token program: '+m.toBase58());out.set(m.toBase58(),program);});return out;}
 /** A collect that fails because the accrued fees round to zero LP tokens is not an error to retry every tick. */
+/** Fee harvesting redeems the accrued fee share of the locked LP position (Raydium CollectCpFees then Withdraw): each
+ * collect moves a few LP units into the fee custody. A collect that harvests less than the thresholds is dust (network
+ * fees paid for no value); the next collect is then delayed with a growing backoff, reset by the first worthwhile harvest.
+ * Codex verified repeated no-op collections on the live pool on 23 September 2026. */
+// The SOL half of a harvest is worth the same as the coin half at the pool price, so the SOL side alone measures value.
+export const COLLECT_THRESHOLDS=Object.freeze({lamports:500_000n,maxBackoffSeconds:6*3600});
+export function nextCollectionDelay({delta,current,base,max=COLLECT_THRESHOLDS.maxBackoffSeconds}){
+ const sol=BigInt(delta?.totalSol||0n);
+ if(sol>=COLLECT_THRESHOLDS.lamports)return base;
+ return Math.min(max,Math.max(base,(Number(current)||base)*4));
+}
 export function isNothingToCollect(operation,error){return operation?.kind==='collect'&&/0x1776|ZeroTradingTokens/.test(String(error?.message||error));}
 /** Counter changes caused by one confirmed fee operation (strings, only the counters that moved). */
 export function feeDelta(before,after){if(!before||!after)return null;const out={};for(const k of Object.keys(after)){const d=BigInt(after[k])-BigInt(before[k]||0n);if(d!==0n)out[k]=d.toString();}return out;}
@@ -98,7 +109,8 @@ export function createActiveFeeKeeper({resolve=()=>resolvePostlaunchCampaign('ac
      if(!operation){
       const plan=feePlan(await readFees(ctx,campaign,mint),manifestFeatures(ctx.manifest));
       for(const item of plan){if(item.kind==='distribute'||item.kind==='burn'){operation=item;break;}try{await boundedQuote(c,item.kind==='convert'?mint:NATIVE_MINT,item.kind==='convert'?NATIVE_MINT:parents[item.index],BigInt(item.amount));operation=item;break;}catch(error){if(error.message!=='Trade too small')throw error;}}
-      if(!operation&&(journal.lastCollectedAt===null||now-journal.lastCollectedAt>=collectionIntervalSeconds))operation={kind:'collect'};
+      const collectDelay=journal.collectDelaySeconds||collectionIntervalSeconds;
+      if(!operation&&(journal.lastCollectedAt===null||now-journal.lastCollectedAt>=collectDelay))operation={kind:'collect'};
      }
     }
     if(!operation)return {status:'idle'};
@@ -153,11 +165,11 @@ export function createActiveFeeKeeper({resolve=()=>resolvePostlaunchCampaign('ac
    }catch(error){
     // Accrued pool fees too small to withdraw (CPMM ZeroTradingTokens): nothing to collect yet. Release the operation and
     // wait a full interval instead of retrying the same transaction every tick.
-    if(isNothingToCollect(operation,error)){journal.current=null;journal.lastCollectedAt=await chainTime(c);persist();console.log(JSON.stringify({event:'fees-nothing-to-collect',campaign:identity.campaign}));return {status:'nothing-to-collect',campaign:identity.campaign};}
+    if(isNothingToCollect(operation,error)){journal.current=null;journal.lastCollectedAt=await chainTime(c);journal.collectDelaySeconds=nextCollectionDelay({delta:null,current:journal.collectDelaySeconds,base:collectionIntervalSeconds});persist();console.log(JSON.stringify({event:'fees-nothing-to-collect',campaign:identity.campaign}));return {status:'nothing-to-collect',campaign:identity.campaign};}
     throw error;
    }
    const after=await readFees(ctx,campaign,mint).catch(()=>null);appendFeeEvent(journal,{id:operation.id,kind:operation.kind,index:operation.index??null,amount:operation.executedAmount??operation.slice??operation.amount??null,budget:operation.amount??null,signature,at:await chainTime(c),delta:feeDelta(before,after)});
-   if(operation.kind==='collect')journal.lastCollectedAt=await chainTime(c);journal.current=null;persist();
+   if(operation.kind==='collect'){journal.lastCollectedAt=await chainTime(c);journal.collectDelaySeconds=nextCollectionDelay({delta:feeDelta(before,after),current:journal.collectDelaySeconds,base:collectionIntervalSeconds});if(journal.collectDelaySeconds>collectionIntervalSeconds)console.log(JSON.stringify({event:'fees-collect-backoff',campaign:identity.campaign,nextInSeconds:journal.collectDelaySeconds}));}journal.current=null;persist();
    return {status:'completed',operation:operation.kind,signature,campaign:identity.campaign};
   }finally{running=false;}
  };

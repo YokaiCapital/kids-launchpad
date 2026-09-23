@@ -34,3 +34,9 @@ test('collection bound belongs to the fee NFT position, not aggregate LP custody
  assert.throws(()=>lockedPositionAmount({...info,owner:Keypair.generate().publicKey},expected),/Invalid/);
  const wrong=Buffer.from(data);wrong[0]^=1;assert.throws(()=>lockedPositionAmount({...info,data:wrong},expected),/Invalid/);
 });
+test('dust harvests back off (300 s → 1200 → 4800 → … → 6 h); a worthwhile harvest resets to the base interval',async()=>{
+ const {nextCollectionDelay}=await import('../active-fee-keeper.mjs');
+ assert.equal(nextCollectionDelay({delta:{totalSol:'46',childPending:'37682365'},current:undefined,base:300}),1200);
+ assert.equal(nextCollectionDelay({delta:{totalSol:'0'},current:1200,base:300}),4800);assert.equal(nextCollectionDelay({delta:null,current:19200,base:300}),21600);assert.equal(nextCollectionDelay({delta:null,current:21600,base:300}),21600);
+ assert.equal(nextCollectionDelay({delta:{totalSol:'500000',childPending:'0'},current:21600,base:300}),300);assert.equal(nextCollectionDelay({delta:{totalSol:'499999',childPending:'99999999999'},current:4800,base:300}),19200,'the coin half alone does not count');
+});
