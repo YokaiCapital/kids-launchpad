@@ -135,3 +135,4 @@
 @media(max-width:900px){.post-flywheel-grid{grid-template-columns:1fr 1fr}.post-burn-log li{grid-template-columns:1fr;gap:4px}}
 .opens-in{margin:6px 0 10px;padding:12px 14px;border:2px dashed var(--line);border-radius:14px;display:flex;flex-direction:column;gap:2px}.opens-in span{font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}.opens-in strong{font-size:40px;line-height:1;font-variant-numeric:tabular-nums;letter-spacing:-1px}.opens-in.is-tba strong{font-size:20px}.opens-in small{font-size:12px;color:var(--muted)}
 .commit-locked{opacity:.45;pointer-events:none;filter:grayscale(.4)}
+.home-cover{display:block;width:100%;max-height:300px;object-fit:cover;border-radius:16px;margin-bottom:16px}.coin-identity .coin-logo{width:48px;height:48px;border-radius:12px;object-fit:cover}
