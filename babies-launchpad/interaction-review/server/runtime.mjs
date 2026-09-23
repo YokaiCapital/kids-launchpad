@@ -19,7 +19,12 @@ export function createApiServer({plugins=[],probe=async()=>true,probeInterval=10
  });
  const context={httpServer:server,middlewares:{use(fn){if(typeof fn!=='function')throw Error('Invalid API middleware');middleware.push(fn);}}};
  for(const plugin of plugins){const install=plugin.configurePreviewServer||plugin.configureServer;if(install)install(context);}
- const check=async()=>{if(probing||draining)return;probing=true;try{healthy=(await probe())===true;}catch{healthy=false;}finally{checkedAt=Date.now();probing=false;}};
+ // Financial writes close again when the ledger probe fails repeatedly after start (degraded RPC must not accept new
+ // money operations that would then fail downstream or need reconciliation); they reopen after two healthy probes.
+ let failedProbes=0,healthyProbes=0;
+ const check=async()=>{if(probing||draining)return;probing=true;try{healthy=(await probe())===true;}catch{healthy=false;}finally{checkedAt=Date.now();probing=false;
+  if(healthy){healthyProbes+=1;failedProbes=0;if(gate.degraded&&healthyProbes>=2){gate.open=gate.reconciled===true;gate.degraded=false;console.log(JSON.stringify({event:'writes-reopened',reason:'ledger probe healthy'}));}}
+  else{failedProbes+=1;healthyProbes=0;if(failedProbes>=3&&gate.open){gate.open=false;gate.degraded=true;console.log(JSON.stringify({event:'writes-closed',reason:'ledger probe failed '+failedProbes+' times'}));}}}};
  const timer=setInterval(check,probeInterval);timer.unref();server.once('listening',check);server.once('close',()=>clearInterval(timer));
  server.headersTimeout=10000;server.requestTimeout=30000;server.keepAliveTimeout=5000;server.maxHeadersCount=40;
  return {server,check,async shutdown(){draining=true;clearInterval(timer);await new Promise(resolve=>{server.close(resolve);server.closeIdleConnections();const timeout=setTimeout(()=>server.closeAllConnections(),25000);timeout.unref();server.once('close',()=>clearTimeout(timeout));});}};
@@ -49,5 +54,5 @@ if(process.argv[1]===fileURLToPath(import.meta.url)){
  runtime.server.listen(4175,'127.0.0.1',()=>console.log('KIDS API listening on loopback:4175 (financial writes closed until journals reconcile with the chain)'));
  // Reconcile every intent journal with the chain before financial writes reopen; retry until the ledger answers.
  const {reconcileJournals}=await import('../../localnet/startup-reconcile.mjs');
- (async()=>{for(let attempt=1;;attempt+=1){const report=await reconcileJournals({log:line=>console.log(JSON.stringify(line))});writesGate.report=report;if(report.complete){writesGate.open=true;console.log(JSON.stringify({event:'startup-reconcile-complete',unresolvedSigned:report.unresolvedSigned,ms:report.ms}));return;}console.error(JSON.stringify({event:'startup-reconcile-retry',attempt,failed:report.services.filter(s=>s.status!=='reconciled').map(s=>s.service)}));await new Promise(r=>setTimeout(r,Math.min(60000,15000*attempt)));}})();
+ (async()=>{for(let attempt=1;;attempt+=1){const report=await reconcileJournals({log:line=>console.log(JSON.stringify(line))});writesGate.report=report;if(report.complete){writesGate.reconciled=true;writesGate.open=true;console.log(JSON.stringify({event:'startup-reconcile-complete',unresolvedSigned:report.unresolvedSigned,ms:report.ms}));return;}console.error(JSON.stringify({event:'startup-reconcile-retry',attempt,failed:report.services.filter(s=>s.status!=='reconciled').map(s=>s.service)}));await new Promise(r=>setTimeout(r,Math.min(60000,15000*attempt)));}})();
 }

@@ -7,7 +7,11 @@ import {chainAllocation,parseCommitment,validatePrelaunchState} from './prelaunc
 import {sol} from './prelaunch';
 export function usePrelaunchChain(owner,endpoint='prelaunch'){
  const [snapshot,setSnapshot]=useState(null),[error,setError]=useState(''),[tick,setTick]=useState(0);
- useEffect(()=>{let active=true,timer;async function read(){try{const data=validatePrelaunchState(await accountApi(endpoint));if(active){setSnapshot({owner,data});setError('');}}catch(e){if(active)setError(e.message);}finally{if(active)timer=setTimeout(read,15000);}}read();return()=>{active=false;clearTimeout(timer);};},[owner,tick,endpoint]);
+ // Polling: 15 s plus jitter so many tabs never line up, paused while the tab is hidden, one read when it comes back.
+ useEffect(()=>{let active=true,timer;const delay=()=>15000+Math.floor(Math.random()*5000);
+  async function read(){if(!active)return;if(typeof document!=='undefined'&&document.visibilityState==='hidden'){timer=setTimeout(read,delay());return;}try{const data=validatePrelaunchState(await accountApi(endpoint));if(active){setSnapshot({owner,data});setError('');}}catch(e){if(active)setError(e.message);}finally{if(active)timer=setTimeout(read,delay());}}
+  const onVisible=()=>{if(document.visibilityState==='visible'){clearTimeout(timer);read();}};document.addEventListener?.('visibilitychange',onVisible);
+  read();return()=>{active=false;clearTimeout(timer);document.removeEventListener?.('visibilitychange',onVisible);};},[owner,tick,endpoint]);
  return {data:snapshot?.owner===owner?snapshot.data:null,error,refresh:()=>setTick(n=>n+1),accept:data=>{setSnapshot({owner,data:validatePrelaunchState(data)});setError('');}};
 }
 const base64=bytes=>{let text='';for(const byte of bytes)text+=String.fromCharCode(byte);return btoa(text);};
