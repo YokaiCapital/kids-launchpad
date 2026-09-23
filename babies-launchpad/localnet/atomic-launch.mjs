@@ -9,6 +9,7 @@ export {campaignAddress,receiptAddress,commitInstruction,finalizeInstruction,ref
 import {campaignAddress} from './launch-escrow.mjs';
 import {networkProfile} from './network.mjs';
 import {acceptedBuilds,matchBuild} from './program-builds.mjs';
+import {distributionAddress,vaultAuthority,vaultAddress} from './distribution.mjs';
 function readIdentities(){try{return JSON.parse(readFileSync(new URL('../deployment/MAINNET-IDENTITIES.json',import.meta.url),'utf8'));}catch{return {};}}
 export const PROFILE=networkProfile();
 export const RPC=PROFILE.rpcUrl;
@@ -69,20 +70,28 @@ async function qualifyAtomicContext(){
  return {connection,programId,manifest};
 }
 export function authorityAddress(ctx,campaign){return PublicKey.findProgramAddressSync([Buffer.from('launch_authority'),new PublicKey(campaign).toBuffer()],ctx.programId)[0];}
-export function initInstruction(ctx,creator,terms){
+/** Tag 0. `distributionProgram` (optional) is recorded on the campaign: its claims then live in purpose vaults funded at launch. */
+export function initInstruction(ctx,creator,terms,distributionProgram=null){
  const campaign=campaignAddress(ctx.programId,creator,terms.nonce);
  const data=Buffer.concat([Buffer.from([0]),...[terms.nonce,terms.soft,terms.hard,terms.deadline,terms.launchDeadline].map(u64),new PublicKey(terms.mint).toBuffer(),u64(terms.supply),new PublicKey(terms.dev).toBuffer(),new PublicKey(terms.treasury).toBuffer()]);
- return new TransactionInstruction({programId:ctx.programId,keys:[{pubkey:creator,isSigner:true,isWritable:true},{pubkey:campaign,isSigner:false,isWritable:true},{pubkey:SystemProgram.programId,isSigner:false,isWritable:false}],data});
+ const keys=[{pubkey:creator,isSigner:true,isWritable:true},{pubkey:campaign,isSigner:false,isWritable:true},{pubkey:SystemProgram.programId,isSigner:false,isWritable:false}];
+ if(distributionProgram)keys.push({pubkey:new PublicKey(distributionProgram),isSigner:false,isWritable:false});
+ return new TransactionInstruction({programId:ctx.programId,keys,data});
 }
-export function launchInstruction(ctx,campaign,sponsor,mint,nft){
+/** Tag 6. With `distributionProgram` the packet carries eleven more accounts (29..39): the vaults are funded and the
+ * distribution activated inside the launch (programs/atomic-launch/src/launch.rs). */
+export function launchInstruction(ctx,campaign,sponsor,mint,nft,distributionProgram=null){
  const authority=authorityAddress(ctx,campaign),p=poolAddresses(CPMM,AMM_CONFIG,mint,NATIVE_MINT);
  const child=getAssociatedTokenAddressSync(mint,authority,true),wsol=getAssociatedTokenAddressSync(NATIVE_MINT,authority,true),feeNft=getAssociatedTokenAddressSync(nft,campaign,true),locked=PublicKey.findProgramAddressSync([Buffer.from('locked_liquidity'),nft.toBuffer()],LOCK)[0],lockVault=getAssociatedTokenAddressSync(p.lpMint,LOCK_AUTH,true),metadata=PublicKey.findProgramAddressSync([Buffer.from('metadata'),METADATA.toBuffer(),nft.toBuffer()],METADATA)[0],lp=getAssociatedTokenAddressSync(p.lpMint,authority,true);
  const spec=[[campaign,false,true],[sponsor,true,true],[authority,false,true],[mint,false,true],[child,false,true],[wsol,false,true],[nft,true,true],[feeNft,false,true],[locked,false,true],[lockVault,false,true],[metadata,false,true],[TOKEN_PROGRAM_ID,false,false],[ASSOCIATED_TOKEN_PROGRAM_ID,false,false],[SystemProgram.programId,false,false],[SYSVAR_RENT_PUBKEY,false,false],[CPMM,false,false],[AMM_CONFIG,false,false],[p.authority,false,false],[p.pool,false,true],[p.lpMint,false,true],[lp,false,true],[p.vault0,false,true],[p.vault1,false,true],[POOL_FEE,false,true],[p.observation,false,true],[LOCK,false,false],[LOCK_AUTH,false,false],[METADATA,false,false],[NATIVE_MINT,false,false]];
- return {instruction:new TransactionInstruction({programId:ctx.programId,data:Buffer.from([6]),keys:spec.map(([pubkey,isSigner,isWritable])=>({pubkey,isSigner,isWritable}))}),addresses:{...p,authority,child,wsol,feeNft,locked,lockVault,metadata,lp}};
+ let vaults=null;
+ if(distributionProgram){const dp=new PublicKey(distributionProgram),parents=PublicKey.findProgramAddressSync([Buffer.from('parents'),campaign.toBuffer()],ctx.programId)[0];vaults={program:dp,parents,distribution:distributionAddress(dp,campaign),authorities:[0,1,2,3].map(k=>vaultAuthority(dp,campaign,k)),accounts:[0,1,2,3].map(k=>vaultAddress(dp,campaign,k,mint))};
+  spec.push([dp,false,false],[parents,false,false],[vaults.distribution,false,true],...vaults.authorities.map(a=>[a,false,false]),...vaults.accounts.map(a=>[a,false,true]));}
+ return {instruction:new TransactionInstruction({programId:ctx.programId,data:Buffer.from([6]),keys:spec.map(([pubkey,isSigner,isWritable])=>({pubkey,isSigner,isWritable}))}),addresses:{...p,authority,child,wsol,feeNft,locked,lockVault,metadata,lp,vaults}};
 }
 export async function readCampaign(ctx,address){
  const key=new PublicKey(address),info=await ctx.connection.getAccountInfo(key);
  if(!info||!info.owner.equals(ctx.programId)||info.data.length!==384||info.data.subarray(0,8).toString()!=='KIDSESC3')throw Error('Invalid atomic campaign');
  const d=info.data,creator=new PublicKey(d.subarray(8,40)),nonce=d.readBigUInt64LE(40);if(!campaignAddress(ctx.programId,creator,nonce).equals(key))throw Error('Atomic campaign PDA mismatch');
- return {address:key,creator,nonce,soft:d.readBigUInt64LE(48),hard:d.readBigUInt64LE(56),deadline:Number(d.readBigInt64LE(64)),launchDeadline:Number(d.readBigInt64LE(72)),total:d.readBigUInt64LE(80),refunded:d.readBigUInt64LE(88),phase:d[96],receiptCount:d.readBigUInt64LE(104),settledReceiptCount:d.readBigUInt64LE(112),settledAccepted:d.readBigUInt64LE(120),mint:new PublicKey(d.subarray(128,160)),supply:d.readBigUInt64LE(160),dev:new PublicKey(d.subarray(168,200)),treasury:new PublicKey(d.subarray(200,232)),launchedAt:Number(d.readBigInt64LE(232)),pool:new PublicKey(d.subarray(240,272)),feeNft:new PublicKey(d.subarray(272,304)),devClaimed:d.readBigUInt64LE(304),lamports:BigInt(info.lamports)};
+ return {address:key,creator,nonce,soft:d.readBigUInt64LE(48),hard:d.readBigUInt64LE(56),deadline:Number(d.readBigInt64LE(64)),launchDeadline:Number(d.readBigInt64LE(72)),total:d.readBigUInt64LE(80),refunded:d.readBigUInt64LE(88),phase:d[96],receiptCount:d.readBigUInt64LE(104),settledReceiptCount:d.readBigUInt64LE(112),settledAccepted:d.readBigUInt64LE(120),mint:new PublicKey(d.subarray(128,160)),supply:d.readBigUInt64LE(160),dev:new PublicKey(d.subarray(168,200)),treasury:new PublicKey(d.subarray(200,232)),launchedAt:Number(d.readBigInt64LE(232)),pool:new PublicKey(d.subarray(240,272)),feeNft:new PublicKey(d.subarray(272,304)),devClaimed:d.readBigUInt64LE(304),distributionProgram:d.subarray(312,344).some(b=>b!==0)?new PublicKey(d.subarray(312,344)):null,distributionActivated:d[344]!==0,lamports:BigInt(info.lamports)};
 }

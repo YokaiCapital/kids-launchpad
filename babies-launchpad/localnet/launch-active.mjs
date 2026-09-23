@@ -19,7 +19,9 @@ async function run(){
  await settleActive();state=await readCampaign(ctx,m.address);
  if(state.phase===2||state.receiptCount===0n||state.settledReceiptCount!==state.receiptCount||state.settledAccepted<state.soft)throw Error('Campaign is not fully settled above the soft cap');
  const keys=read(runtime+'active-launch-setup-keys.json'),nft=Keypair.fromSecretKey(Uint8Array.from(keys.nft));if(nft.publicKey.toBase58()!==m.feeNft)throw Error('Fee NFT identity mismatch');
- const good=launchInstruction(ctx,new PublicKey(m.address),admin.publicKey,new PublicKey(m.mint),nft.publicKey);
+ const good=launchInstruction(ctx,new PublicKey(m.address),admin.publicKey,new PublicKey(m.mint),nft.publicKey,m.distributionProgram?new PublicKey(m.distributionProgram):null);
+ // Vault token accounts for a campaign with a distribution program are created ahead of the launch (idempotent, operator pays).
+ if(good.addresses.vaults){const {createAssociatedTokenAccountIdempotentInstruction:createAta}=await import('@solana/spl-token');for(const [k,account] of good.addresses.vaults.accounts.entries()){if(await c.getAccountInfo(account))continue;await send('vault-ata:'+m.address+':'+k,legacy(createAta(admin.publicKey,account,good.addresses.vaults.authorities[k],new PublicKey(m.mint))));}}
  const journal=existsSync(journalPath)?read(journalPath):{campaign:m.address,genesisHash:m.genesisHash,programSha256:m.programSha256,attempts:{}};
  if(journal.campaign!==m.address||journal.genesisHash!==m.genesisHash||!acceptedProgramHash(ctx.manifest,journal.programSha256))throw Error('Operator journal identity mismatch');
  const persist=()=>saveActiveFile(journalPath,journal);
@@ -42,7 +44,7 @@ async function run(){
  const missing=addresses.filter(a=>!table.state.addresses.some(b=>a.equals(b)));
  for(let i=0;i<missing.length;i+=20){const chunk=missing.slice(i,i+20);await send('extend:'+tableAddress+':'+chunk.map(x=>x.toBase58()).join(','),legacy(AddressLookupTableProgram.extendLookupTable({lookupTable:tableAddress,authority:admin.publicKey,payer:admin.publicKey,addresses:chunk})));}
  table=(await c.getAddressLookupTable(tableAddress)).value;const start=Date.now();while(await c.getSlot('confirmed')<=table.state.lastExtendedSlot){if(Date.now()-start>30000)throw Error('Lookup table activation stalled');await new Promise(resolve=>setTimeout(resolve,200));}
- const signature=await send('launch',async(block,operationId)=>{const message=new TransactionMessage({payerKey:admin.publicKey,recentBlockhash:block.blockhash,instructions:[ComputeBudgetProgram.setComputeUnitLimit({units:1200000}),good.instruction]}).compileToV0Message([table]),tx=new VersionedTransaction(message);tx.sign([nft]);await admin.sign(tx,{operationId});return tx;});
+ const signature=await send('launch',async(block,operationId)=>{const message=new TransactionMessage({payerKey:admin.publicKey,recentBlockhash:block.blockhash,instructions:[ComputeBudgetProgram.setComputeUnitLimit({units:1400000}),good.instruction]}).compileToV0Message([table]),tx=new VersionedTransaction(message);tx.sign([nft]);await admin.sign(tx,{operationId});return tx;});
  state=await readCampaign(ctx,m.address);if(state.phase!==3||!state.pool.equals(good.addresses.pool)||!state.feeNft.equals(nft.publicKey))throw Error('Launch postconditions failed');
  m.launchSignature=signature;m.pool=state.pool.toBase58();saveActiveFile(activeManifestPath,m);return {signature,state:await readActive()};
 }

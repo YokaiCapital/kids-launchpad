@@ -2,6 +2,7 @@
 // claim, burn and sweep instruction builders. Layout offsets mirror programs/kids-distribution/src/lib.rs.
 import {PublicKey,TransactionInstruction,SystemProgram} from '@solana/web3.js';
 import {TOKEN_PROGRAM_ID,getAssociatedTokenAddressSync} from '@solana/spl-token';
+import {readFileSync,existsSync} from 'node:fs';
 export const PURPOSES=Object.freeze({participants:0,parentA:1,parentB:2,dev:3});
 export const PARENT_EXPIRY_SECONDS=2_592_000;
 export const OFF=Object.freeze({campaign:8,mint:40,launchProgram:72,supply:104,settledAccepted:112,launchTime:120,parentExpiry:128,devStart:136,devEnd:144,roots:152,parentSupply:216,eligible:232,allocation:248,claimed:280,burned:312,devPrior:328,flags:336,bumps:337,dev:344});
@@ -47,3 +48,11 @@ function vaultOp(tag,{programId,campaign,mint,purpose}){
 export function burnExpiredInstruction({programId,campaign,mint,index}){if(![0,1].includes(index))throw Error('Parent index must be 0 or 1');return vaultOp(4,{programId,campaign,mint,purpose:1+index});}
 /** Tag 5: anyone may burn what a vault holds above what it still owes (donations). */
 export function sweepDonationInstruction({programId,campaign,mint,purpose}){if(![0,1,2,3].includes(purpose))throw Error('Bad purpose');return vaultOp(5,{programId,campaign,mint,purpose});}
+
+/** The distribution program a NEW campaign records: KIDS_DISTRIBUTION_PROGRAM, else the localnet manifest written by
+ * kids-distribution-deploy.mjs, else the recorded mainnet identity; null when none is deployed (old claim paths). */
+export function distributionProgramFor(network,env=process.env){
+ if(env.KIDS_DISTRIBUTION_PROGRAM==='none')return null;if(env.KIDS_DISTRIBUTION_PROGRAM)return new PublicKey(env.KIDS_DISTRIBUTION_PROGRAM);
+ if(network==='localnet'){const p=new URL('./.runtime/kids-distribution-program.json',import.meta.url);if(!existsSync(p))return null;const m=JSON.parse(readFileSync(p,'utf8'));return new PublicKey(m.programId);}
+ try{const ids=JSON.parse(readFileSync(new URL('../deployment/MAINNET-IDENTITIES.json',import.meta.url),'utf8'));return ids.distribution?.programId?new PublicKey(ids.distribution.programId):null;}catch{return null;}
+}

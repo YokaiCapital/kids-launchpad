@@ -16,7 +16,8 @@ export function feeAuthority(programId,campaign){return PublicKey.findProgramAdd
 export const ATA_RENT_LAMPORTS=2_039_280n,BASE_FEE_LAMPORTS=5_000n;export const rentLamports=bytes=>BigInt(128+bytes)*6_960n;
 export function launchAuthority(programId,campaign){return PublicKey.findProgramAddressSync([Buffer.from('launch_authority'),new PublicKey(campaign).toBuffer()],new PublicKey(programId))[0].toBase58();}
 /** @returns {{ok:true,spendLamports:bigint,priorityFeeLamports:bigint,operations:string[]}|{ok:false,reason:string}} */
-export function evaluateOperatorMessage(message,{operator,programId,campaigns=null,limits=DEFAULT_LIMITS,loadedAddresses=null,provisioning=false,recipients=null,unrestricted=false}){
+export function vaultAuthority(distributionProgram,campaign,purpose){return PublicKey.findProgramAddressSync([Buffer.from('vault'),new PublicKey(campaign).toBuffer(),Buffer.from([purpose])],new PublicKey(distributionProgram))[0].toBase58();}
+export function evaluateOperatorMessage(message,{operator,programId,campaigns=null,limits=DEFAULT_LIMITS,loadedAddresses=null,provisioning=false,recipients=null,unrestricted=false,distributionProgram=null}){
  const fail=reason=>({ok:false,reason});
  // Fail closed: a production signer without a served-campaign list signs nothing (localnet rehearsals opt in).
  if(!campaigns&&!unrestricted)return fail('signer campaigns not configured');
@@ -43,7 +44,7 @@ export function evaluateOperatorMessage(message,{operator,programId,campaigns=nu
    // The sponsored account's owner must be the operator, a served campaign's launch or fee authority, or a recorded
    // recipient (treasury, dev): an attacker-owned recipient could close the account and keep the rent.
    const owner=acc[2];if(!owner)return fail('ata owner missing');
-   if(campaigns){const allowed=new Set([op,...(recipients||[])]);for(const c of campaigns){allowed.add(launchAuthority(program,c));allowed.add(feeAuthority(program,c));}if(!allowed.has(owner))return fail('ata owner is not served by this signer');}
+   if(campaigns){const allowed=new Set([op,...(recipients||[])]);for(const c of campaigns){allowed.add(launchAuthority(program,c));allowed.add(feeAuthority(program,c));if(distributionProgram)for(const purpose of [0,1,2,3])allowed.add(vaultAuthority(distributionProgram,c,purpose));}if(!allowed.has(owner))return fail('ata owner is not served by this signer');}
    spend+=ATA_RENT_LAMPORTS;operations.push('ata');continue;
   }
   if(pid===PROGRAMS.alt){

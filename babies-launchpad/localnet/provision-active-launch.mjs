@@ -12,6 +12,7 @@ import {localKey,chainTime} from './dev-vesting.mjs';
 import {operatorSigner} from './operator-signer.mjs';
 import {buildCampaignSnapshot} from './import-parent-snapshot.mjs';
 import {tokenBranding,pinTokenMetadata,createMetadataInstruction,metadataAddress,LOCALNET_TOKEN,TEST_TOKEN} from './token-metadata.mjs';
+import {distributionProgramFor} from './distribution.mjs';
 const repoRoot=fileURLToPath(new URL('../',import.meta.url));
 const identitiesPath=fileURLToPath(new URL('../deployment/MAINNET-IDENTITIES.json',import.meta.url));
 /** Campaign plan for devnet/mainnet: nonce fixed in advance so the parent snapshot can name the campaign before it exists. */
@@ -69,7 +70,7 @@ async function provision(){
   // Persist identities before any transaction; retries cannot create another coin.
   const mint=Keypair.generate(),nft=Keypair.generate();
   saveActiveFile(keysPath,{mint:Array.from(mint.secretKey),nft:Array.from(nft.secretKey)});
-  m={version:3,network:PROFILE.network,rpcUrl:PROFILE.rpcLabel,programId:ctx.programId.toBase58(),programSha256:ctx.manifest.sha256,genesisHash:ctx.manifest.genesisHash,creator:admin.publicKey.toBase58(),nonce:nonce.toString(),address:campaignAddress(ctx.programId,admin.publicKey,nonce).toBase58(),mint:mint.publicKey.toBase58(),feeNft:nft.publicKey.toBase58(),supply:'1000000000000000',soft:terms.soft,hard:terms.hard,deadline:now+terms.deadlineSeconds,launchDeadline:now+terms.deadlineSeconds+LAUNCH_WINDOW_SECONDS,dev,treasury,parentMints,token,metadataUri:null,ready:false};
+  m={version:3,network:PROFILE.network,rpcUrl:PROFILE.rpcLabel,programId:ctx.programId.toBase58(),programSha256:ctx.manifest.sha256,genesisHash:ctx.manifest.genesisHash,creator:admin.publicKey.toBase58(),nonce:nonce.toString(),address:campaignAddress(ctx.programId,admin.publicKey,nonce).toBase58(),mint:mint.publicKey.toBase58(),feeNft:nft.publicKey.toBase58(),supply:'1000000000000000',soft:terms.soft,hard:terms.hard,deadline:now+terms.deadlineSeconds,launchDeadline:now+terms.deadlineSeconds+LAUNCH_WINDOW_SECONDS,dev,treasury,parentMints,token,metadataUri:null,distributionProgram:distributionProgramFor(PROFILE.network)?.toBase58()||null,ready:false};
   saveActiveFile(activeManifestPath,m);
  }
  if(m.creator!==admin.publicKey.toBase58())throw Error('Provisioner creator mismatch');
@@ -111,7 +112,7 @@ async function provision(){
   // A parent may be Token-2022: read its program from the mint account's owner.
   for(let i=0;i<2;i++){const info=await c.getAccountInfo(parents[i]);if(!info)throw Error('Parent mint missing');const supply=(await getMint(c,parents[i],'confirmed',info.owner)).supply.toString();if(supply!==snapshot.parents[i].supply){if(local)throw Error('Parent supply changed since snapshot');console.log(JSON.stringify({event:'parent-supply-moved-since-snapshot',mint:parents[i].toBase58(),atSnapshot:snapshot.parents[i].supply,now:supply}));}}
   const terms={...m,nonce:BigInt(m.nonce),mint:mint.publicKey};
-  m.initSignature=await send(new Transaction().add(initInstruction(ctx,admin.publicKey,terms),configureParentsInstruction(ctx,campaign,admin.publicKey,parents,snapshot.parents.map(p=>Buffer.from(p.root,'hex')),snapshot.slot,snapshot.parents.map(p=>BigInt(p.eligibleBalance)))),[],'init:'+m.address);saveActiveFile(activeManifestPath,m);
+  m.initSignature=await send(new Transaction().add(initInstruction(ctx,admin.publicKey,terms,m.distributionProgram?new PublicKey(m.distributionProgram):null),configureParentsInstruction(ctx,campaign,admin.publicKey,parents,snapshot.parents.map(p=>Buffer.from(p.root,'hex')),snapshot.slot,snapshot.parents.map(p=>BigInt(p.eligibleBalance)))),[],'init:'+m.address);saveActiveFile(activeManifestPath,m);
  }
  const state=await readCampaign(ctx,campaign);validateActiveTerms(state,m);
  const parents=await c.getAccountInfo(parentsAddress(ctx,campaign)),live=await c.getAccountInfo(campaign);

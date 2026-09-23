@@ -59,3 +59,13 @@ test('SEC-03: missing history with an expired blockhash is closed but flagged, o
  const verified=rows();const s2=await reconcileSignedIntents({service:'t',intents:verified,connection,verifyAbsent:async row=>row.signature==='sig-a'});
  assert.equal(s2.expired,1);assert.equal(s2.expiredUnverified,0);assert.equal(s2.effectPresent,1);assert.equal(s2.unresolvedSigned,1);assert.equal(verified.a.closedReason,'expired');assert.equal(verified.b.closedReason,undefined);assert.match(verified.b.chainNote,/effect is present/);
 });
+
+test('vault authorities of a served campaign may own sponsored accounts once a distribution program is configured',async()=>{
+ const {vaultAuthority}=await import('../signer-policy.mjs');const dp=Keypair.generate().publicKey;
+ const ata=owner=>createAssociatedTokenAccountIdempotentInstruction(operator.publicKey,getAssociatedTokenAddressSync(NATIVE_MINT,owner,true),owner,NATIVE_MINT);
+ const ev=(ixs,opts={})=>evaluateOperatorMessage(msg(ixs),{operator:operator.publicKey,programId:program,campaigns:served,...opts});
+ const vault=new PublicKey(vaultAuthority(dp,campaign,2));
+ assert.match(ev([ata(vault)]).reason,/owner is not served/,'without a configured distribution program');
+ assert.equal(ev([ata(vault)],{distributionProgram:dp.toBase58()}).ok,true);
+ assert.match(ev([ata(new PublicKey(vaultAuthority(dp,stranger,2)))],{distributionProgram:dp.toBase58()}).reason,/owner is not served/,'another campaign');
+});
