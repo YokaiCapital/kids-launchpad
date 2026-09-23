@@ -1,8 +1,8 @@
 {
   "coin": "Shartcoin",
-  "opensAt": "2026-09-23T21:00:00Z",
+  "opensAt": "2026-09-23T23:00:00Z",
   "soft": "200000000000",
   "hard": "1000000000000",
   "deadlineSeconds": 7200,
-  "note": "Public launch: 23 September 2026, 21:00 UTC (owner, 23 September 2026 19:20 UTC; moved from 20:00). Soft cap 200 SOL, hard cap 1,000 SOL, commitments open for two hours from the campaign's on-chain creation, which the API performs at the scheduled time (plan.opensAt). One canonical UTC value; the site counts down to it and shows the live campaign after it."
+  "note": "Public launch: 23 September 2026, 23:00 UTC (owner, 23 September 2026 20:47 UTC; moved from 20:00, then 21:00). Soft cap 200 SOL, hard cap 1,000 SOL, commitments open for two hours from the campaign's on-chain creation, which the API performs at the scheduled time (plan.opensAt). One canonical UTC value; the site counts down to it and shows the live campaign after it."
 }
