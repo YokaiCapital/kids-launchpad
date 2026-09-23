@@ -29,7 +29,10 @@ if(checkOnly){console.log(JSON.stringify({deployed:!!programInfo?.executable,che
 if(balance<needed)throw Error('Operator wallet needs about '+(needed/1e9).toFixed(2)+' SOL (has '+(balance/1e9).toFixed(3)+'); fund '+operator.keypair.publicKey.toBase58());
 const tmp=mkdtempSync(join(tmpdir(),'kids-cli-'));const config=join(tmp,'cli.yml');writeFileSync(config,'json_rpc_url: "'+profile.rpcUrl+'"\nwebsocket_url: ""\nkeypair_path: '+operator.path+'\ncommitment: confirmed\n',{mode:0o600});
 try{
- if(extendBy){console.log('solana program extend');execFileSync(join(bin,'solana'),['program','extend',program.keypair.publicKey.toBase58(),String(extendBy),'--authority',authorityPath,'--payer',operator.path,'--keypair',operator.path,'--config',config],{stdio:'inherit'});}
+ // Extension: `solana program deploy` extends the program-data account itself when the binary grew (CLI 2.x+), signed by
+ // the upgrade authority and paid by the fee payer. The explicit extend is attempted first and is not fatal: the CLI's
+ // signer resolution for extend with a separate authority has refused both operator-as-authority and payer+authority.
+ if(extendBy){console.log('solana program extend (best effort)');try{execFileSync(join(bin,'solana'),['program','extend',program.keypair.publicKey.toBase58(),String(extendBy),'--authority',authorityPath,'--keypair',operator.path,'--config',config],{stdio:'inherit'});}catch{console.log(JSON.stringify({event:'extend-deferred-to-deploy',bytes:extendBy}));}}
  const upgrade=!!programInfo?.executable;
  const args=upgrade?['program','deploy',binaryPath,'--program-id',program.keypair.publicKey.toBase58(),'--upgrade-authority',authorityPath,'--keypair',operator.path,'--config',config,'--commitment','confirmed','--use-rpc']:['program','deploy',binaryPath,'--program-id',program.path,'--upgrade-authority',authorityPath,'--keypair',operator.path,'--config',config,'--commitment','confirmed','--use-rpc','--max-len',String(bytes.length)];
  console.log(JSON.stringify({mode:upgrade?'upgrade':'first-deploy',upgradeAuthorityKey:authorityPath===governancePath?'governance':'operator'}));
