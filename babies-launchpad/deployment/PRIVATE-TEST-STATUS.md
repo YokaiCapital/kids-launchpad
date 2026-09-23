@@ -222,3 +222,9 @@ Owner decisions after the first mainnet launch: coin-side trading fees are burne
 - API and signer SUCCESS on ee19e4e; ready, keepers running, market and activity feeds connected. Site: brand-style gate page (self-contained, no app bundle behind it), help popovers (11 on the launched coin page), parent reward cards, chart and activity verified in a browser at 1280 and 375.
 - Believers worker: first build on 8a4b258 failed (Railway refuses a Docker VOLUME instruction); fixed in ee19e4e, build SUCCESS; runs on the */30 schedule; the API answers 404 "not published yet" until the first run publishes the list.
 - Keeper economics live: buyback minimum budget 0.005 SOL, burn value gate 0.0005 SOL, harvest backoff.
+
+## 23 September 2026, ~14:40 UTC: release 60853a3 live + site bundle index-C45tphpL.js
+
+- API, signer and believers worker SUCCESS on 60853a3; ready, writes open, signer reachable, keepers running, market and activity feeds connected.
+- Live browser checks (1280 and 375): gate placeholder "Enter password"; coin page shows 8 trades with real times and exact amounts (the Pending/dash bug is gone), chart rendered, page height 2,560 px at 1280 (was about 4,500); Believers page: 1,076 believers, "refreshed 14:31 UTC", 100 rows per page; Blocked page: "0 wallets blocked · 0 added today", both enforcement badges; no horizontal overflow, no page errors.
+- Worker keeps publishing every 30 minutes (1,070 → 1,076 between 09:01 and 14:31 UTC).
