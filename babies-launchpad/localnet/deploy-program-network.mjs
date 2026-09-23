@@ -19,12 +19,12 @@ const connection=new Connection(profile.rpcUrl,'confirmed');const genesisHash=aw
 // buffer plus the program-data rent, both at the current rent rate, plus about 0.1 SOL of write-transaction fees.
 const rentPerByte=await connection.getMinimumBalanceForRentExemption(1)-await connection.getMinimumBalanceForRentExemption(0);
 const bufferRent=await connection.getMinimumBalanceForRentExemption(bytes.length+37),programDataRent=await connection.getMinimumBalanceForRentExemption(bytes.length+45);
-const balance=await connection.getBalance(operator.keypair.publicKey);const needed=bufferRent+programDataRent+100_000_000;void rentPerByte;
+const balance=await connection.getBalance(operator.keypair.publicKey);let needed=bufferRent+programDataRent+100_000_000;void rentPerByte;
 console.log(JSON.stringify({network:profile.network,programId:program.keypair.publicKey.toBase58(),operator:operator.keypair.publicKey.toBase58(),binarySha256:sha256,binaryBytes:bytes.length,operatorBalanceSol:balance/1e9,neededSolEstimate:needed/1e9}));
 const programInfo=await connection.getAccountInfo(program.keypair.publicKey);
 // An upgrade with a bigger binary needs the program-data account extended first (paid by the payer, signed by nobody else).
 let extendBy=0;if(programInfo?.executable){const dataInfo=await connection.getAccountInfo(new PublicKey(programInfo.data.subarray(4,36)));const capacity=dataInfo.data.length-45;if(bytes.length>capacity)extendBy=bytes.length-capacity;}
-if(extendBy)console.log(JSON.stringify({programDataExtendBytes:extendBy}));
+if(programInfo?.executable){needed=bufferRent+(extendBy?await connection.getMinimumBalanceForRentExemption(extendBy):0)+100_000_000;console.log(JSON.stringify({upgrade:true,programDataExtendBytes:extendBy,neededSolEstimate:needed/1e9,note:'the write buffer rent is returned when the buffer closes after the upgrade'}));}
 if(checkOnly){console.log(JSON.stringify({deployed:!!programInfo?.executable,check:'only'}));process.exit(0);}
 if(balance<needed)throw Error('Operator wallet needs about '+(needed/1e9).toFixed(2)+' SOL (has '+(balance/1e9).toFixed(3)+'); fund '+operator.keypair.publicKey.toBase58());
 const tmp=mkdtempSync(join(tmpdir(),'kids-cli-'));const config=join(tmp,'cli.yml');writeFileSync(config,'json_rpc_url: "'+profile.rpcUrl+'"\nwebsocket_url: ""\nkeypair_path: '+operator.path+'\ncommitment: confirmed\n',{mode:0o600});

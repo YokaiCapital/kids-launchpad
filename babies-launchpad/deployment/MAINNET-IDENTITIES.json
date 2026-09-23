@@ -57,7 +57,7 @@
     "Cap conversion source and timing for the soft and hard caps"
   ],
   "solUsdPythFeedId": "ef0d8b6fda2ceba41da15d4095d1da392a0d2f8ed0c6c7bc0f4cfac8c280b56d",
-  "updatedAt": "2026-09-23T03:55:00Z",
+  "updatedAt": "2026-09-23T04:40:00Z",
   "program": {
     "programId": "BLiaZWNQoPm4mG4cXNm4sXifFqs1Xmxx12qD9T4Y5NeN",
     "binarySha256": "ef584ae7555415215b8cda0597cfff8362a7ecdbb31fdc07aa747c3f63368923",
@@ -75,9 +75,19 @@
         "binarySize": 199008,
         "features": [],
         "note": "deployed 23 September 2026; coin-side fees converted to SOL; 2 % CPMM tier only"
+      },
+      {
+        "version": 2,
+        "sha256": "9721a4d8b7cdcc4aebe11ca54d968e0be73d0e2dfea261e4954eeacdc7d8ae58",
+        "binarySize": 200784,
+        "features": [
+          "burn-child-fees",
+          "cpmm-config-allowlist"
+        ],
+        "note": "reproducible CI build 1b1c47f (23 September 2026): coin-side fees burned (tag 26), launch accepts the 2 % and 2.5 % Raydium tiers, sell instruction (tag 22) retired; program-data account grows by 1776 bytes (extend); upgrade signed by the governance key"
       }
     ],
-    "buildsNote": "The service accepts any listed build on chain and records the live one in its program manifest; the keeper plans only what the live build supports. Version 2 (burn coin-side fees, 2.5 % tier, sell instruction retired) is added here with its reproducible CI hash once the build has run, before the governance-key upgrade."
+    "buildsNote": "The service accepts any listed build on chain and records the live one in its program manifest; the keeper plans only what the live build supports. Move `binarySha256`/`binarySize` to version 2 once the upgrade is verified on chain."
   },
   "operatorWallet": {
     "address": "AAuwkFNvXRimHyvdQfh7Zik9baw8W2ufSbc5cyBqsdoE",
