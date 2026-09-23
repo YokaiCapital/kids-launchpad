@@ -41,3 +41,9 @@ test('the password never ends by itself: only KIDS_ACCESS_OPENS_AT opens the sit
  assert.equal((await gate(req('/'),open,at)).headers.get('x-middleware-next'),'1');
  assert.equal((await gate(req('/api/admin'),open,at+1)).status,503,'the API allowlist still applies to the public');
 });
+
+test('analytics script and beacons pass the gate without a session; everything else stays gated',async()=>{
+ for(const p of ['/_vercel/insights/script.js','/_vercel/insights/view'])assert.equal((await gate(req(p),env,1800000000)).headers.get('x-middleware-next'),'1',p);
+ assert.equal((await gate(req('/_vercel/insights/other'),env,1800000000)).headers.get('x-middleware-next'),null);
+ assert.match(await(await gate(req('/'),env,1800000000)).text(),/_vercel\/insights\/script\.js/,'the password page carries the script');
+});

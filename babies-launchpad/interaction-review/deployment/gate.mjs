@@ -5,7 +5,7 @@ const headers = { 'cache-control': 'private, no-store', 'x-robots-tag': 'noindex
 async function digest(value) { return new Uint8Array(await crypto.subtle.digest('SHA-256', encoder.encode(value))); }
 async function equal(a, b) { const [x,y] = await Promise.all([digest(a),digest(b)]); let diff=0; for(let i=0;i<x.length;i++) diff |= x[i]^y[i]; return diff===0; }
 async function signature(value, secret) { const key=await crypto.subtle.importKey('raw',encoder.encode(secret),{name:'HMAC',hash:'SHA-256'},false,['sign']); return Array.from(new Uint8Array(await crypto.subtle.sign('HMAC',key,encoder.encode(value))),x=>x.toString(16).padStart(2,'0')).join(''); }
-function page(error=false, operator=false) { return new Response(`<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="color-scheme" content="dark"><title>KIDS · Private access</title><style>
+function page(error=false, operator=false) { return new Response(`<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><script>window.va=window.va||function(){(window.vaq=window.vaq||[]).push(arguments)}</script><script defer src="/_vercel/insights/script.js"></script><meta name="color-scheme" content="dark"><title>KIDS · Private access</title><style>
 :root{--bg:#130d1b;--card:#1b1128;--line:#4a3358;--fg:#fff4fc;--muted:#c9b6d8;--pink:#ff77ce;--pink-hover:#ff9bdc;--pink-shadow:#973f8c;--lilac:#a88aff;--ice:#8cecff;--ink:#250d2a;--error:#ffb3d4;color-scheme:dark}
 *{box-sizing:border-box}html,body{height:100%}body{margin:0;min-height:100dvh;display:grid;place-items:center;padding:24px 16px;background:var(--bg);color:var(--fg);font:16px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;-webkit-font-smoothing:antialiased;position:relative;overflow-x:hidden}
 body::before{content:"";position:fixed;inset:-20vmax;pointer-events:none;background:radial-gradient(38vmax 30vmax at 22% 24%,rgba(255,119,206,.22),transparent 60%),radial-gradient(34vmax 30vmax at 78% 76%,rgba(168,138,255,.22),transparent 60%)}
@@ -93,6 +93,8 @@ export async function gate(request, env, now=Math.floor(Date.now()/1000)) {
   if (!password || password.length<20 || !secret || secret.length<32) return new Response('Private access is not configured.',{status:503,headers});
   const opensAt=publicFrom(env),isPublic=opensAt!==null&&now>=opensAt;
   const url=new URL(request.url);
+  // Vercel Web Analytics (cookieless): its script and beacons pass the gate so visits to the locked page count too.
+  if(url.pathname==='/_vercel/insights/script.js'||url.pathname==='/_vercel/insights/view'||url.pathname==='/_vercel/insights/event')return new Response(null,{headers:{...headers,'x-middleware-next':'1'}});
   const isOperator=await validCookie(request,'__Host-kids_operator',secret+':operator',now);
   const operatorLogin=url.pathname==='/__operator';
   const siteValid=isPublic||await validCookie(request,cookieName,secret,now);
