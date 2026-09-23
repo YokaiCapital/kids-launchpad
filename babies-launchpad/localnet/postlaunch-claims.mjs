@@ -7,7 +7,15 @@ import {participantClaimInstruction,parentClaimInstruction,devClaimInstruction,p
 import {devPlan,unlockedRaw} from './vesting-plan.mjs';
 import {localKey,chainTime} from './dev-vesting.mjs';
 import {qualifiedCampaign} from './postlaunch-campaign.mjs';
+import {networkProfile} from './network.mjs';
 export {qualifiedCampaign};
+/** The fixture identity (alice or bob) that owns `owner`, or null. Never consulted outside the isolated localnet, and a
+ * missing fixture file is 'no identity', not an error: on a real network every wallet is external. */
+export function localClaimIdentity(owner,profile=networkProfile()){
+ if(profile.network!=='localnet')return null;
+ for(const name of ['alice','bob']){let key;try{key=localKey(name);}catch(error){if(error.message==='Wallet missing')continue;throw error;}if(key.publicKey.toBase58()===owner)return key;}
+ return null;
+}
 function snapshot(campaign){const path=new URL('./.runtime/parent-snapshot-'+campaign.toBase58()+'.json',import.meta.url);return existsSync(path)?JSON.parse(readFileSync(path,'utf8')):null;}
 export async function postlaunchClaims(owner,expectedCampaign){
  if(!owner)return null;
@@ -31,7 +39,7 @@ export async function postlaunchClaims(owner,expectedCampaign){
   return {name:index?'Buttcoin':'Fartcoin',eligible:!!entry,allocationRaw:entry?.allocation||'0',claimedRaw:claim?(entry?.allocation||'0'):'0'};
  });
  const plan=devPlan(state.supply,state.launchedAt),unlocked=BigInt(plan.immediateRaw)+unlockedRaw('linear',plan.linearRaw,plan.start,plan.end,now),isDev=state.dev.equals(wallet);
- return {owner:wallet.toBase58(),genesisHash:ctx.manifest.genesisHash,campaign:campaign.toBase58(),participant,refund,parents,dev:{isDev,totalRaw:plan.totalRaw,claimableRaw:isDev?(unlocked>state.devClaimed?unlocked-state.devClaimed:0n).toString():'0',claimedRaw:isDev?state.devClaimed.toString():'0',endUnix:plan.end},externalClaimEnabled:true,localClaimEnabled:['alice','bob'].some(name=>localKey(name).publicKey.equals(wallet))};
+ return {owner:wallet.toBase58(),genesisHash:ctx.manifest.genesisHash,campaign:campaign.toBase58(),participant,refund,parents,dev:{isDev,totalRaw:plan.totalRaw,claimableRaw:isDev?(unlocked>state.devClaimed?unlocked-state.devClaimed:0n).toString():'0',claimedRaw:isDev?state.devClaimed.toString():'0',endUnix:plan.end},externalClaimEnabled:true,localClaimEnabled:!!localClaimIdentity(owner)};
 }
 const pending=new Map();
 export async function claimPostlaunch(owner,input){
@@ -40,8 +48,8 @@ export async function claimPostlaunch(owner,input){
  if(input.campaign!==campaign.toBase58())throw Error('Local launch changed. Refresh before claiming');
  const key=campaign+':'+owner+':'+input.action;if(pending.has(key))return pending.get(key);
  const operation=(async()=>{
-  const signer=['alice','bob'].map(localKey).find(k=>k.publicKey.toBase58()===owner);
-  if(!signer)throw Error('Only the local test identities can claim in this rehearsal');
+  const signer=localClaimIdentity(owner);
+  if(!signer)throw Error(networkProfile().network==='localnet'?'Only the local test identities can claim in this rehearsal':'Claims on this network are signed by your own wallet');
   const {tx}=await buildPostlaunchClaim(owner,input.action,input.campaign);
   const signature=await sendAndConfirmTransaction(ctx.connection,tx,[signer],{commitment:'confirmed',maxRetries:3});
   return {signature,claims:await postlaunchClaims(owner,campaign.toBase58())};

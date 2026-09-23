@@ -10,7 +10,7 @@ const profile=networkProfile();if(profile.network==='localnet')throw Error('Use 
 const [binaryPath,flag]=process.argv.slice(2);if(!binaryPath)throw Error('usage: <binary.so> [--check-only]');const checkOnly=flag==='--check-only';
 const identities=JSON.parse(readFileSync(new URL('../deployment/MAINNET-IDENTITIES.json',import.meta.url),'utf8'));
 const bytes=readFileSync(binaryPath),sha256=createHash('sha256').update(bytes).digest('hex');
-if(profile.network==='mainnet'&&sha256!==identities.program.binarySha256)throw Error('Binary hash '+sha256.slice(0,16)+' is not the recorded reproducible build '+identities.program.binarySha256.slice(0,16));
+const expectedHash=process.env.KIDS_PROGRAM_SHA256||identities.program.binarySha256;if(profile.network==='mainnet'&&sha256!==expectedHash)throw Error('Binary hash '+sha256.slice(0,16)+' is not the expected reproducible build '+expectedHash.slice(0,16)+' (set KIDS_PROGRAM_SHA256 to the CI hash of the new build)');
 const keyDir=join(homedir(),'.config/kids',profile.network);const load=name=>{const p=join(keyDir,name+'-keypair.json');if(!existsSync(p))throw Error('Missing key file '+p);return {path:p,keypair:Keypair.fromSecretKey(Uint8Array.from(JSON.parse(readFileSync(p,'utf8'))))};};
 const program=load('program'),operator=load('operator');const governancePath=join(keyDir,'governance-keypair.json'),authorityPath=existsSync(governancePath)?governancePath:operator.path;
 if(profile.network==='mainnet'&&program.keypair.publicKey.toBase58()!==identities.program.programId)throw Error('Program keypair does not match the recorded program id');
@@ -22,11 +22,17 @@ const bufferRent=await connection.getMinimumBalanceForRentExemption(bytes.length
 const balance=await connection.getBalance(operator.keypair.publicKey);const needed=bufferRent+programDataRent+100_000_000;void rentPerByte;
 console.log(JSON.stringify({network:profile.network,programId:program.keypair.publicKey.toBase58(),operator:operator.keypair.publicKey.toBase58(),binarySha256:sha256,binaryBytes:bytes.length,operatorBalanceSol:balance/1e9,neededSolEstimate:needed/1e9}));
 const programInfo=await connection.getAccountInfo(program.keypair.publicKey);
+// An upgrade with a bigger binary needs the program-data account extended first (paid by the payer, signed by nobody else).
+let extendBy=0;if(programInfo?.executable){const dataInfo=await connection.getAccountInfo(new PublicKey(programInfo.data.subarray(4,36)));const capacity=dataInfo.data.length-45;if(bytes.length>capacity)extendBy=bytes.length-capacity;}
+if(extendBy)console.log(JSON.stringify({programDataExtendBytes:extendBy}));
 if(checkOnly){console.log(JSON.stringify({deployed:!!programInfo?.executable,check:'only'}));process.exit(0);}
 if(balance<needed)throw Error('Operator wallet needs about '+(needed/1e9).toFixed(2)+' SOL (has '+(balance/1e9).toFixed(3)+'); fund '+operator.keypair.publicKey.toBase58());
 const tmp=mkdtempSync(join(tmpdir(),'kids-cli-'));const config=join(tmp,'cli.yml');writeFileSync(config,'json_rpc_url: "'+profile.rpcUrl+'"\nwebsocket_url: ""\nkeypair_path: '+operator.path+'\ncommitment: confirmed\n',{mode:0o600});
 try{
- const args=['program','deploy',binaryPath,'--program-id',program.path,'--upgrade-authority',authorityPath,'--keypair',operator.path,'--config',config,'--commitment','confirmed','--use-rpc','--max-len',String(bytes.length)];console.log(JSON.stringify({upgradeAuthorityKey:authorityPath===governancePath?'governance':'operator'}));
+ if(extendBy){console.log('solana program extend');execFileSync(join(bin,'solana'),['program','extend',program.keypair.publicKey.toBase58(),String(extendBy),'--keypair',operator.path,'--config',config],{stdio:'inherit'});}
+ const upgrade=!!programInfo?.executable;
+ const args=upgrade?['program','deploy',binaryPath,'--program-id',program.keypair.publicKey.toBase58(),'--upgrade-authority',authorityPath,'--keypair',operator.path,'--config',config,'--commitment','confirmed','--use-rpc']:['program','deploy',binaryPath,'--program-id',program.path,'--upgrade-authority',authorityPath,'--keypair',operator.path,'--config',config,'--commitment','confirmed','--use-rpc','--max-len',String(bytes.length)];
+ console.log(JSON.stringify({mode:upgrade?'upgrade':'first-deploy',upgradeAuthorityKey:authorityPath===governancePath?'governance':'operator'}));
  console.log('solana program deploy (URL hidden in a temp config)');execFileSync(join(bin,'solana'),args,{stdio:'inherit'});
 }finally{rmSync(tmp,{recursive:true,force:true});}
 const info=await connection.getAccountInfo(program.keypair.publicKey);if(!info?.executable)throw Error('Program is not executable after deploy');
