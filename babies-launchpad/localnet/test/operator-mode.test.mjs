@@ -16,7 +16,7 @@ test('provisioning sends through the operator signer with extra local signers an
  const tx=()=>new Transaction().add(SystemProgram.transfer({fromPubkey:op.publicKey,toPubkey:extra.publicKey,lamports:1}));
  await assert.rejects(sendWithOperator({connection,operator:createLocalSigner(op),tx:tx(),operationId:'p:1',dryRun:true}),/Dry run: next step simulates OK/);assert.equal(sent,0);
  const seen=[];const signer={publicKey:op.publicKey,async sign(t,o){seen.push(o.operationId);t.partialSign(op);return t;}};
- assert.equal(await sendWithOperator({connection,operator:signer,tx:tx(),extraSigners:[],operationId:'p:2'}),'sig');assert.deepEqual(seen,['p:2']);assert.equal(sent,1);
+ assert.equal(await sendWithOperator({connection,operator:signer,tx:tx(),extraSigners:[],operationId:'p:2'}),'sig');assert.deepEqual(seen,['p:2:EETubP5AKHgjPAhzPAFcb8BAY1hMH639CWCFTqi3hq1k'],'each attempt is its own signer operation: the id carries the blockhash');assert.equal(sent,1);
 });
 
 test('restore drill: mainnet boots without a signer, refuses keys, and every signing attempt is refused',async()=>{

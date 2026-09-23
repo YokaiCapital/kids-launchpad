@@ -23,7 +23,11 @@ const DRY_RUN=process.env.KIDS_DRY_RUN==='1';
  * then sends and confirms. Dry run simulates the signed transaction and stops. */
 export async function sendWithOperator({connection,operator,tx,extraSigners=[],operationId,dryRun=false}){
  tx.feePayer=operator.publicKey;const block=await connection.getLatestBlockhash('confirmed');tx.recentBlockhash=block.blockhash;
- if(extraSigners.length)tx.partialSign(...extraSigners);await operator.sign(tx,{operationId});
+ // The signer's replay guard binds an operation id to one exact message. Every provisioning step checks the chain
+ // before it is sent (mint present, campaign present, balance, idempotent token accounts), so a fresh attempt with a
+ // fresh blockhash is a new operation: the id carries the blockhash. Re-signing the same attempt keeps the same id.
+ const attemptId=operationId?operationId+':'+block.blockhash:null;
+ if(extraSigners.length)tx.partialSign(...extraSigners);await operator.sign(tx,{operationId:attemptId});
  if(dryRun){const sim=await connection.simulateTransaction(tx);if(sim.value.err)throw Error('Dry run: simulation failed '+JSON.stringify(sim.value.err)+' '+(sim.value.logs||[]).slice(-4).join(' | '));throw Error('Dry run: next step simulates OK ('+sim.value.unitsConsumed+' CU); nothing was sent');}
  const signature=await connection.sendRawTransaction(tx.serialize(),{skipPreflight:false,maxRetries:3});
  const result=await connection.confirmTransaction({signature,...block},'confirmed');if(result.value.err)throw Error('Transaction failed: '+JSON.stringify(result.value.err));return signature;
