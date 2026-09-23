@@ -18,3 +18,12 @@ test('provisioning sends through the operator signer with extra local signers an
  const seen=[];const signer={publicKey:op.publicKey,async sign(t,o){seen.push(o.operationId);t.partialSign(op);return t;}};
  assert.equal(await sendWithOperator({connection,operator:signer,tx:tx(),extraSigners:[],operationId:'p:2'}),'sig');assert.deepEqual(seen,['p:2']);assert.equal(sent,1);
 });
+
+test('restore drill: mainnet boots without a signer, refuses keys, and every signing attempt is refused',async()=>{
+ const {resolveOperatorMode}=await import('../../deployment/mainnet/operator-mode.mjs');const {operatorSigner}=await import('../operator-signer.mjs');
+ const pk='AAuwkFNvXRimHyvdQfh7Zik9baw8W2ufSbc5cyBqsdoE';
+ assert.equal(resolveOperatorMode({KIDS_NETWORK:'mainnet',KIDS_DRILL:'1',KIDS_SIGNER_PUBKEY:pk}).mode,'drill');
+ assert.equal(resolveOperatorMode({KIDS_NETWORK:'mainnet',KIDS_DRILL:'1'}).mode,'invalid');
+ assert.equal(resolveOperatorMode({KIDS_NETWORK:'mainnet',KIDS_DRILL:'1',KIDS_SIGNER_PUBKEY:pk,KIDS_OPERATOR_KEY_JSON:'[1]'}).mode,'invalid');
+ const signer=await operatorSigner({KIDS_DRILL:'1',KIDS_SIGNER_PUBKEY:pk});assert.equal(signer.publicKey.toBase58(),pk);await assert.rejects(signer.sign({}),/drill/);
+});

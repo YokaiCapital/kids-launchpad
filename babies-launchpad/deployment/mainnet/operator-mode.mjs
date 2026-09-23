@@ -4,6 +4,8 @@
 //   local mode (tests only):  KIDS_ALLOW_LOCAL_OPERATOR_KEY=1 with KIDS_OPERATOR_KEY_JSON on first boot.
 export function resolveOperatorMode(env){
  const network=env.KIDS_NETWORK||'localnet';
+ // Restore drill (docs/RESTORE-DRILL.md): a throwaway service on a restored volume, no signer, every signing refused.
+ if(env.KIDS_DRILL==='1'){if(env.KIDS_SIGNER_URL||env.KIDS_OPERATOR_KEY_JSON)return {mode:'invalid',reason:'a restore drill runs without a signer and without any operator key'};if(!env.KIDS_SIGNER_PUBKEY)return {mode:'invalid',reason:'KIDS_SIGNER_PUBKEY (the operator address, public) is required for a drill'};return {mode:'drill',publicKey:env.KIDS_SIGNER_PUBKEY,wipeLocalKey:true};}
  if(env.KIDS_SIGNER_URL){
   if(!env.KIDS_SIGNER_TOKEN||!env.KIDS_SIGNER_PUBKEY)return {mode:'invalid',reason:'KIDS_SIGNER_TOKEN and KIDS_SIGNER_PUBKEY are required with KIDS_SIGNER_URL'};
   if(env.KIDS_OPERATOR_KEY_JSON)return {mode:'invalid',reason:'KIDS_OPERATOR_KEY_JSON must be removed from the API service when a signer is configured'};

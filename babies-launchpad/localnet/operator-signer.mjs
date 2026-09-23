@@ -26,6 +26,7 @@ export function createRemoteSigner({url,token,publicKey,fetchImpl=globalThis.fet
 /** Accepts a Keypair (tests, localnet) or a signer object. */
 export const toSigner=value=>value instanceof Keypair?createLocalSigner(value):value;
 export async function operatorSigner(env=process.env){
+ if(env.KIDS_DRILL==='1'){const pk=new PublicKey(env.KIDS_SIGNER_PUBKEY);return {kind:'drill',publicKey:pk,async sign(){throw Error('Restore drill: signing is disabled on this service');}};}
  if(env.KIDS_SIGNER_URL){if(!env.KIDS_SIGNER_TOKEN||!env.KIDS_SIGNER_PUBKEY)throw Error('KIDS_SIGNER_TOKEN and KIDS_SIGNER_PUBKEY are required with KIDS_SIGNER_URL');return createRemoteSigner({url:env.KIDS_SIGNER_URL,token:env.KIDS_SIGNER_TOKEN,publicKey:env.KIDS_SIGNER_PUBKEY});}
  return createLocalSigner(await operatorKeypair(env));
 }

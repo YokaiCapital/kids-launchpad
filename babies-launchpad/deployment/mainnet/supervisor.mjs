@@ -13,14 +13,14 @@ const runtime='/data/localnet';mkdirSync(runtime,{recursive:true,mode:0o700});mk
 const {resolveOperatorMode}=await import('./operator-mode.mjs');const mode=resolveOperatorMode(process.env);
 if(mode.mode==='invalid')throw Error('Operator mode: '+mode.reason);
 const keyFile=runtime+'/admin.json';
-if(mode.mode==='signer'){
+if(mode.mode==='signer'||mode.mode==='drill'){
  if(existsSync(keyFile)){const size=statSync(keyFile).size;writeFileSync(keyFile,Buffer.alloc(size));unlinkSync(keyFile);console.log(JSON.stringify({event:'operator-key-wiped-from-volume'}));}
  for(const name of Object.keys(process.env))if(/^KIDS_OPERATOR_KEY/.test(name))delete process.env[name];
 }else{
  if(!existsSync(keyFile)){const raw=process.env.KIDS_OPERATOR_KEY_JSON;if(!raw)throw Error('KIDS_OPERATOR_KEY_JSON is required on first boot in local mode');const bytes=JSON.parse(raw);if(!Array.isArray(bytes)||bytes.length!==64)throw Error('Operator key must be a 64-byte array');writeFileSync(keyFile,JSON.stringify(bytes),{mode:0o600,flag:'wx'});}
  process.env.KIDS_OPERATOR_KEY_FILE=keyFile;
 }
-const operatorPublicKey=mode.mode==='signer'?mode.publicKey:Keypair.fromSecretKey(Uint8Array.from(JSON.parse(readFileSync(keyFile,'utf8')))).publicKey.toBase58();
+const operatorPublicKey=mode.mode==='signer'||mode.mode==='drill'?mode.publicKey:Keypair.fromSecretKey(Uint8Array.from(JSON.parse(readFileSync(keyFile,'utf8')))).publicKey.toBase58();
 const identities=JSON.parse(readFileSync(new URL('../MAINNET-IDENTITIES.json',import.meta.url),'utf8'));
 if(profile.network==='mainnet'&&identities.operatorWallet?.address!==operatorPublicKey)throw Error('Operator public key does not match the recorded operator wallet');
 const operator={publicKey:new PublicKey(operatorPublicKey)};
