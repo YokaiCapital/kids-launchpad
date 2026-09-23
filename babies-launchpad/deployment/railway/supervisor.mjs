@@ -32,7 +32,7 @@ await new Promise((resolve,reject)=>{const child=spawn(process.execPath,['deploy
 if(!stopping){
  if(!existsSync('interaction-review/staging/gateway.mjs')){stop(1);throw Error('Authenticated gateway not installed; refusing public listener');}
  start('flock',['--nonblock','--no-fork',runtime+'/api-writer.lock',process.execPath,'interaction-review/server/runtime.mjs']);
- let ready=false;for(let i=0;i<60;i++){try{const r=await fetch('http://127.0.0.1:4175/_health/ready');if(r.ok){ready=true;break;}}catch{}await new Promise(r=>setTimeout(r,1000));}
+ let ready=false;for(let i=0;i<240;i++){try{const r=await fetch('http://127.0.0.1:4175/_health/ready');if(r.ok){ready=true;break;}}catch{}await new Promise(r=>setTimeout(r,1000));}
  if(!ready){stop(1);throw Error('Internal API listener not ready');}
  start(process.execPath,['interaction-review/staging/gateway.mjs']);
 }

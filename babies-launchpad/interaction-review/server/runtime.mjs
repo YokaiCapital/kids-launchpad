@@ -11,8 +11,10 @@ export function createApiServer({plugins=[],probe=async()=>true,probeInterval=10
  const middleware=[];let healthy=false,checkedAt=0,probing=false,draining=false;
  const gate=writesGate||{open:true,report:null};
  const server=http.createServer((req,res)=>{
-  if(req.url==='/_health/status'&&req.method==='GET'){const ready=!draining&&healthy&&Date.now()-checkedAt<30000&&gate.open===true;return json(res,200,statusSnapshot({ready,runtimePath:runtimeDir}));}
-  if(req.url==='/_health/ready'&&req.method==='GET'){const ready=!draining&&healthy&&Date.now()-checkedAt<30000&&gate.open===true;return json(res,ready?200:503,{status:ready?'ready':'unavailable',reconciliation:gate.report?{complete:!!gate.report.complete,unresolvedSigned:gate.report.unresolvedSigned??null,at:gate.report.at??null}:null});}
+  // Readiness = the ledger answers and the process is not draining. Financial writes are a separate, slower gate
+  // (reconciliation, RPC health): they are refused with 503 while closed and reported here as writesOpen.
+  if(req.url==='/_health/status'&&req.method==='GET'){const ready=!draining&&healthy&&Date.now()-checkedAt<30000;return json(res,200,statusSnapshot({ready,runtimePath:runtimeDir}));}
+  if(req.url==='/_health/ready'&&req.method==='GET'){const ready=!draining&&healthy&&Date.now()-checkedAt<30000;return json(res,ready?200:503,{status:ready?'ready':'unavailable',writesOpen:gate.open===true,reconciliation:gate.report?{complete:!!gate.report.complete,unresolvedSigned:gate.report.unresolvedSigned??null,at:gate.report.at??null}:null});}
   if(draining)return json(res,503,{error:'Service restarting; retry with the same request ID.'});
   if(!req.url?.startsWith('/api/'))return json(res,404,{error:'Not found'});
   if(gate.open!==true&&req.method==='POST'&&FINANCIAL_WRITE_PATHS.test(req.url.split('?')[0]))return json(res,503,{error:'Journals are being reconciled with the chain after start; retry with the same request ID.'});

@@ -39,7 +39,7 @@ export async function reconcileSignedIntents({service,intents,connection,success
    }
    unresolvedSigned+=1;
   }
-  persist();
+  persist();log({event:'chain-reconcile-progress',service,checked,of:pending.length});
  }
  const summary={service,hot,signed,checked,resolvedSuccess,resolvedFailed,expired,unresolvedSigned,unchecked,complete:unchecked===0,ms:now()-started};
  log({event:'chain-reconcile',...summary});return summary;
