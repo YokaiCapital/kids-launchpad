@@ -84,13 +84,18 @@ async function proxyApi(request,env,operator){
  }catch{return json(502,'Backend unavailable');}
 }
 
+/** The password stays until the owner says otherwise (owner, 23 Sep 2026: never automatic). KIDS_ACCESS_OPENS_AT, an ISO
+ * UTC time, opens the site from that moment; unset or 'never' keeps the password. Only the password page goes away; the
+ * operator login, the route allowlist and the API forwarding are unchanged. */
+export function publicFrom(env){const raw=env.KIDS_ACCESS_OPENS_AT;if(!raw||raw==='never')return null;const at=Date.parse(raw);if(Number.isNaN(at))return null;return Math.floor(at/1000);}
 export async function gate(request, env, now=Math.floor(Date.now()/1000)) {
   const password=env.KIDS_ACCESS_PASSWORD, secret=env.KIDS_ACCESS_SECRET;
   if (!password || password.length<20 || !secret || secret.length<32) return new Response('Private access is not configured.',{status:503,headers});
+  const opensAt=publicFrom(env),isPublic=opensAt!==null&&now>=opensAt;
   const url=new URL(request.url);
   const isOperator=await validCookie(request,'__Host-kids_operator',secret+':operator',now);
   const operatorLogin=url.pathname==='/__operator';
-  const siteValid=await validCookie(request,cookieName,secret,now);
+  const siteValid=isPublic||await validCookie(request,cookieName,secret,now);
   if(operatorLogin&&!siteValid)return page();
   if(operatorLogin&&request.method==='GET')return page(false,true);
   if((url.pathname==='/__access'||operatorLogin) && request.method==='POST') {

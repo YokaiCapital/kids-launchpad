@@ -1,5 +1,5 @@
 import test from 'node:test';import assert from 'node:assert/strict';import {gate} from './gate.mjs';
-const env={KIDS_ACCESS_PASSWORD:'test-password-long-enough',KIDS_ACCESS_SECRET:'test-secret-at-least-32-characters-long'};
+const env={KIDS_ACCESS_PASSWORD:'test-password-long-enough',KIDS_ACCESS_SECRET:'test-secret-at-least-32-characters-long',KIDS_ACCESS_OPENS_AT:'never'};
 const req=(p='/',init={})=>new Request('https://kids.fun'+p,init);
 async function session(){const r=await gate(req('/__access',{method:'POST',headers:{origin:'https://kids.fun','content-type':'application/x-www-form-urlencoded'},body:new URLSearchParams({password:env.KIDS_ACCESS_PASSWORD})}),env,1800000000);assert.equal(r.status,303);return r.headers.get('set-cookie').split(';')[0];}
 test('missing configuration fails closed',async()=>assert.equal((await gate(req(),{})).status,503));
@@ -30,4 +30,14 @@ test('active and explicit preview endpoints proxy separately without a query ove
  const cookie=await session(),original=globalThis.fetch,cfg={...env,KIDS_BACKEND_ORIGIN:'https://kids-test.up.railway.app',KIDS_BACKEND_TOKEN:'secret-backend-token'},seen=[];
  globalThis.fetch=async url=>{seen.push(new URL(url).pathname);return Response.json({ok:true});};
  try{for(const path of ['/api/account/postlaunch','/api/account/postlaunch-preview'])assert.equal((await gate(req(path,{headers:{cookie}}),cfg,1800000001)).status,200);assert.deepEqual(seen,['/api/account/postlaunch','/api/account/postlaunch-preview']);assert.equal((await gate(req('/api/account/postlaunch?preview=true',{headers:{cookie}}),cfg,1800000001)).status,404);}finally{globalThis.fetch=original;}
+});
+
+test('the password never ends by itself: only KIDS_ACCESS_OPENS_AT opens the site, from its UTC time',async()=>{
+ const {publicFrom}=await import('./gate.mjs');const unset={...env};delete unset.KIDS_ACCESS_OPENS_AT;const at=Date.parse('2026-09-23T20:00:00Z')/1000;
+ assert.equal(publicFrom(unset),null);assert.equal(publicFrom(env),null);assert.equal(publicFrom({...env,KIDS_ACCESS_OPENS_AT:'2026-09-23T20:00:00Z'}),at);
+ assert.match(await(await gate(req('/'),unset,at+86400*365)).text(),/Private access/);
+ const open={...env,KIDS_ACCESS_OPENS_AT:'2026-09-23T20:00:00Z'};
+ assert.match(await(await gate(req('/'),open,at-1)).text(),/Private access/);
+ assert.equal((await gate(req('/'),open,at)).headers.get('x-middleware-next'),'1');
+ assert.equal((await gate(req('/api/admin'),open,at+1)).status,503,'the API allowlist still applies to the public');
 });

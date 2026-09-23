@@ -6,7 +6,7 @@ const output=path.join(destination,'.vercel/output');
 await mkdir(path.join(output,'functions/access.func'),{recursive:true});
 await cp(new URL('../dist/client/',import.meta.url),path.join(output,'static'),{recursive:true});
 await cp(new URL('./gate.mjs',import.meta.url),path.join(output,'functions/access.func/index.js'));
-await writeFile(path.join(output,'functions/access.func/.vc-config.json'),JSON.stringify({runtime:'edge',entrypoint:'index.js',envVarsInUse:['KIDS_ACCESS_PASSWORD','KIDS_ACCESS_SECRET','KIDS_OPERATOR_PASSWORD','KIDS_BACKEND_ORIGIN','KIDS_BACKEND_TOKEN','KIDS_OPERATOR_BACKEND_TOKEN']}));
+await writeFile(path.join(output,'functions/access.func/.vc-config.json'),JSON.stringify({runtime:'edge',entrypoint:'index.js',envVarsInUse:['KIDS_ACCESS_PASSWORD','KIDS_ACCESS_SECRET','KIDS_ACCESS_OPENS_AT','KIDS_OPERATOR_PASSWORD','KIDS_BACKEND_ORIGIN','KIDS_BACKEND_TOKEN','KIDS_OPERATOR_BACKEND_TOKEN']}));
 await writeFile(path.join(output,'config.json'),JSON.stringify({version:3,routes:[{src:'/(.*)',middlewarePath:'access',continue:true},{handle:'filesystem'},{src:'/(.*)',dest:'/index.html'}]},null,2));
 await writeFile(path.join(destination,'vercel.json'),JSON.stringify({version:2}));
 console.log('Prepared protected frontend and authenticated gateway bridge. No local keys or validator runtime included.');
