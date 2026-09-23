@@ -24,13 +24,17 @@ import {feeAddresses,initFeesInstruction,collectFeesInstruction,convertFeesInstr
 import {createOperatorSender} from './operator-journal.mjs';
 const defaultFile=fileURLToPath(new URL('./.runtime/active-fee-operator.json',import.meta.url));
 const raw=value=>{if(typeof value!=='bigint'||value<0n||value>18446744073709551615n)throw Error('Invalid fee counter');return value;};
-export function feePlan(state,features=CURRENT_FEATURES){
+/** A parent buyback below this budget costs more in network, routing and account fees than it burns; the budget stays
+ * reserved on chain (nothing is lost) until it reaches the threshold. Owner escalation 23 September 2026 (0.0016 SOL
+ * buybacks burning 0.00). Override with KIDS_BUYBACK_MIN_LAMPORTS. */
+export const BUYBACK_MIN_LAMPORTS=(()=>{const v=BigInt(process.env.KIDS_BUYBACK_MIN_LAMPORTS||'5000000');return v>0n?v:5_000_000n;})();
+export function feePlan(state,features=CURRENT_FEATURES,minBuyback=BUYBACK_MIN_LAMPORTS){
  for(const name of ['childPending','totalSol','treasuryPaid','devPaid','parentAAllocated','parentBAllocated','parentASpent','parentBSpent'])raw(state[name]);
  const treasury=state.totalSol*98n/168n,dev=state.totalSol*20n/168n,parent=state.totalSol*25n/168n;
  if(state.treasuryPaid>treasury||state.devPaid>dev||state.parentAAllocated>parent||state.parentBAllocated>parent||state.parentASpent>state.parentAAllocated||state.parentBSpent>state.parentBAllocated)throw Error('Fee counter accounting mismatch');
  const plan=[];if(state.childPending>0n)plan.push({kind:features.includes('burn-child-fees')?'burn':'convert',amount:state.childPending.toString()});
  if(state.treasuryPaid<treasury||state.devPaid<dev||state.parentAAllocated<parent||state.parentBAllocated<parent)plan.push({kind:'distribute'});
- for(const index of [0,1]){const budget=index?state.parentBAllocated-state.parentBSpent:state.parentAAllocated-state.parentASpent;if(budget>0n)plan.push({kind:'buy-burn',index,amount:budget.toString()});}
+ for(const index of [0,1]){const budget=index?state.parentBAllocated-state.parentBSpent:state.parentAAllocated-state.parentASpent;if(budget>=minBuyback)plan.push({kind:'buy-burn',index,amount:budget.toString()});else if(budget>0n)plan.push({kind:'buy-burn-waiting',index,amount:budget.toString(),minimum:minBuyback.toString()});}
  return plan;
 }
 export function validateActiveFeeIdentity(selected,admin){
@@ -108,7 +112,7 @@ export function createActiveFeeKeeper({resolve=()=>resolvePostlaunchCampaign('ac
      }
      if(!operation){
       const plan=feePlan(await readFees(ctx,campaign,mint),manifestFeatures(ctx.manifest));
-      for(const item of plan){if(item.kind==='distribute'||item.kind==='burn'){operation=item;break;}try{await boundedQuote(c,item.kind==='convert'?mint:NATIVE_MINT,item.kind==='convert'?NATIVE_MINT:parents[item.index],BigInt(item.amount));operation=item;break;}catch(error){if(error.message!=='Trade too small')throw error;}}
+      for(const item of plan){if(item.kind==='buy-burn-waiting'){console.log(JSON.stringify({event:'buyback-waiting-for-budget',campaign:identity.campaign,parent:item.index,budgetLamports:item.amount,minimumLamports:item.minimum}));continue;}if(item.kind==='distribute'||item.kind==='burn'){operation=item;break;}try{await boundedQuote(c,item.kind==='convert'?mint:NATIVE_MINT,item.kind==='convert'?NATIVE_MINT:parents[item.index],BigInt(item.amount));operation=item;break;}catch(error){if(error.message!=='Trade too small')throw error;}}
       const collectDelay=journal.collectDelaySeconds||collectionIntervalSeconds;
       if(!operation&&(journal.lastCollectedAt===null||now-journal.lastCollectedAt>=collectDelay))operation={kind:'collect'};
      }
