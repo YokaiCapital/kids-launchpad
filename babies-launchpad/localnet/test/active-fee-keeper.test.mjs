@@ -41,3 +41,9 @@ test('dust harvests back off (300 s → 1200 → 4800 → … → 6 h); a worthw
  assert.equal(nextCollectionDelay({delta:{totalSol:'0'},current:1200,base:300}),4800);assert.equal(nextCollectionDelay({delta:null,current:19200,base:300}),21600);assert.equal(nextCollectionDelay({delta:null,current:21600,base:300}),21600);
  assert.equal(nextCollectionDelay({delta:{totalSol:'500000',childPending:'0'},current:21600,base:300}),300);assert.equal(nextCollectionDelay({delta:{totalSol:'499999',childPending:'99999999999'},current:4800,base:300}),19200,'the coin half alone does not count');
 });
+test('cost basis: the minimum buyback budget covers the bounded operation cost fifty times over; a burn waits below the value threshold',async()=>{
+ const {BUYBACK_MIN_LAMPORTS,OPERATION_COST_CEILING_LAMPORTS,worthwhileBudget,BURN_MIN_VALUE_LAMPORTS,COLLECT_THRESHOLDS}=await import('../active-fee-keeper.mjs');
+ assert.equal(OPERATION_COST_CEILING_LAMPORTS,10_000n);assert.ok(BUYBACK_MIN_LAMPORTS>=OPERATION_COST_CEILING_LAMPORTS*50n);
+ assert.equal(worthwhileBudget(5_000_000n),true);assert.equal(worthwhileBudget(400_000n),false,'2 % of the budget must cover the fixed costs');
+ assert.equal(BURN_MIN_VALUE_LAMPORTS,COLLECT_THRESHOLDS.lamports);
+});

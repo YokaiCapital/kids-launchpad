@@ -28,6 +28,14 @@ const raw=value=>{if(typeof value!=='bigint'||value<0n||value>184467440737095516
  * reserved on chain (nothing is lost) until it reaches the threshold. Owner escalation 23 September 2026 (0.0016 SOL
  * buybacks burning 0.00). Override with KIDS_BUYBACK_MIN_LAMPORTS. */
 export const BUYBACK_MIN_LAMPORTS=(()=>{const v=BigInt(process.env.KIDS_BUYBACK_MIN_LAMPORTS||'5000000');return v>0n?v:5_000_000n;})();
+/** Bounded cost of one keeper operation: base fee for at most two signatures, no priority fee (the keeper sets none), no
+ * rent (every token account is created ahead of time; Jupiter routes reuse the fee custody's accounts), plus the price
+ * guard's 1 % slippage on the executed amount. A budget is worthwhile when the fixed costs are below 2 % of it. */
+export const OPERATION_COST_CEILING_LAMPORTS=2n*5_000n;
+export const worthwhileBudget=(lamports,ceiling=OPERATION_COST_CEILING_LAMPORTS)=>BigInt(lamports)*2n/100n>=ceiling;
+/** Coin-side fees are burned only once their SOL value (quoted on the pool) reaches the harvest threshold (0.0005 SOL,
+ * the same as COLLECT_THRESHOLDS.lamports): a burn transaction costs the same base fee whatever the amount. */
+export const BURN_MIN_VALUE_LAMPORTS=500_000n;
 export function feePlan(state,features=CURRENT_FEATURES,minBuyback=BUYBACK_MIN_LAMPORTS){
  for(const name of ['childPending','totalSol','treasuryPaid','devPaid','parentAAllocated','parentBAllocated','parentASpent','parentBSpent'])raw(state[name]);
  const treasury=state.totalSol*98n/168n,dev=state.totalSol*20n/168n,parent=state.totalSol*25n/168n;
@@ -112,7 +120,9 @@ export function createActiveFeeKeeper({resolve=()=>resolvePostlaunchCampaign('ac
      }
      if(!operation){
       const plan=feePlan(await readFees(ctx,campaign,mint),manifestFeatures(ctx.manifest));
-      for(const item of plan){if(item.kind==='buy-burn-waiting'){console.log(JSON.stringify({event:'buyback-waiting-for-budget',campaign:identity.campaign,parent:item.index,budgetLamports:item.amount,minimumLamports:item.minimum}));continue;}if(item.kind==='distribute'||item.kind==='burn'){operation=item;break;}try{await boundedQuote(c,item.kind==='convert'?mint:NATIVE_MINT,item.kind==='convert'?NATIVE_MINT:parents[item.index],BigInt(item.amount));operation=item;break;}catch(error){if(error.message!=='Trade too small')throw error;}}
+      for(const item of plan){if(item.kind==='buy-burn-waiting'){console.log(JSON.stringify({event:'buyback-waiting-for-budget',campaign:identity.campaign,parent:item.index,budgetLamports:item.amount,minimumLamports:item.minimum}));continue;}
+       if(item.kind==='burn'){let value=null;try{value=(await boundedQuote(c,mint,NATIVE_MINT,BigInt(item.amount),state.pool)).quote;}catch(error){if(error.message!=='Trade too small')throw error;value=0n;}if(value<BURN_MIN_VALUE_LAMPORTS){console.log(JSON.stringify({event:'burn-waiting-for-value',campaign:identity.campaign,childPendingRaw:item.amount,valueLamports:value.toString(),minimumLamports:BURN_MIN_VALUE_LAMPORTS.toString()}));continue;}operation=item;break;}
+       if(item.kind==='distribute'){operation=item;break;}try{await boundedQuote(c,item.kind==='convert'?mint:NATIVE_MINT,item.kind==='convert'?NATIVE_MINT:parents[item.index],BigInt(item.amount));operation=item;break;}catch(error){if(error.message!=='Trade too small')throw error;}}
       const collectDelay=journal.collectDelaySeconds||collectionIntervalSeconds;
       if(!operation&&(journal.lastCollectedAt===null||now-journal.lastCollectedAt>=collectDelay))operation={kind:'collect'};
      }
