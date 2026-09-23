@@ -16,6 +16,7 @@ on:
     - cron: '7,22,37,52 * * * *'
 permissions:
   contents: read
+  issues: write
 concurrency:
   group: private-kids-readiness
   cancel-in-progress: false
@@ -33,3 +34,27 @@ jobs:
       - run: node babies-launchpad/deployment/health-check.mjs
         env:
           KIDS_SIMULATE_FAILURE: ${{ github.event.inputs.simulate_failure }}
+      # Alert delivery that does not depend on GitHub's email settings: an issue is opened (or bumped) on failure and
+      # closed on the next success; when the KIDS_ALERT_WEBHOOK secret is set (Telegram bot sendMessage URL or a
+      # Discord/Slack webhook), a message is posted there too.
+      - if: failure()
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          WEBHOOK: ${{ secrets.KIDS_ALERT_WEBHOOK }}
+        run: |
+          set -e
+          TITLE="KIDS readiness is failing"
+          BODY="The readiness monitor failed at $(date -u +%Y-%m-%dT%H:%M:%SZ). Run: $RUN_URL"
+          EXISTING=$(gh issue list -R "$GITHUB_REPOSITORY" --state open --search "$TITLE in:title" --json number --jq '.[0].number // empty')
+          if [ -n "$EXISTING" ]; then gh issue comment "$EXISTING" -R "$GITHUB_REPOSITORY" --body "$BODY"; else gh issue create -R "$GITHUB_REPOSITORY" --title "$TITLE" --body "$BODY"; fi
+          if [ -n "$WEBHOOK" ]; then
+            if printf '%s' "$WEBHOOK" | grep -q 'api.telegram.org'; then curl -sS -m 15 -X POST "$WEBHOOK" --data-urlencode "text=$TITLE. $BODY" >/dev/null || true;
+            else curl -sS -m 15 -X POST -H 'content-type: application/json' --data "{\"content\":\"$TITLE. $BODY\",\"text\":\"$TITLE. $BODY\"}" "$WEBHOOK" >/dev/null || true; fi
+          fi
+      - if: success()
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          EXISTING=$(gh issue list -R "$GITHUB_REPOSITORY" --state open --search "KIDS readiness is failing in:title" --json number --jq '.[0].number // empty')
+          if [ -n "$EXISTING" ]; then gh issue close "$EXISTING" -R "$GITHUB_REPOSITORY" --comment "Readiness recovered at $(date -u +%Y-%m-%dT%H:%M:%SZ)."; fi
