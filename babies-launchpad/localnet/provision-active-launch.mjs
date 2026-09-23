@@ -129,6 +129,9 @@ async function provision(){
  const campaignInfo=await c.getAccountInfo(campaign);
  if(!campaignInfo||campaignInfo.owner.equals(SystemProgram.programId)&&campaignInfo.data.length===0){
   // A scheduled opening: the coin is ready, the campaign is created (and its clock starts) at the scheduled time.
+  // Until the campaign exists the PLAN is the source of the time (the owner may move it with a new release); the
+  // manifest follows it. After creation the chain holds the clock and nothing here can move it.
+  if(!local){const planned=read(campaignPlanPath(PROFILE.network));if(planned.campaign===m.address&&(planned.opensAt||null)!==(m.opensAt||null)){console.log(JSON.stringify({event:'campaign-opening-moved',from:m.opensAt||null,to:planned.opensAt||null}));m.opensAt=planned.opensAt||null;saveActiveFile(activeManifestPath,m);}}
   const wait=secondsUntilOpening(m,await chainTime(c));if(wait>0){const e=Error('Campaign opens at '+m.opensAt+' ('+wait+' s)');e.code='campaign-scheduled';e.opensAt=m.opensAt;e.seconds=wait;throw e;}
   const parents=m.parentMints.map(x=>new PublicKey(x));
   // A parent may be Token-2022: read its program from the mint account's owner.
