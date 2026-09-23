@@ -72,7 +72,7 @@ export function Believers(){
    <h2 id="kc-howto-title">how to get on the list</h2>
    <ol className="kc-steps">
     <li><strong>reply, quote or repost one of the two posts</strong><span>say something real: what you would build, what you would ban, what would make you commit SOL again.</span><span className="kc-links">{POSTS.map(post=><a key={post.url} href={post.url} target="_blank" rel="noopener noreferrer">{post.label}<ArrowUpRight size={14} aria-hidden="true"/></a>)}</span></li>
-    <li><strong>link your wallet</strong><span>reply to the pinned post from your account with one self-custody Solana address. first valid reply wins.</span><span className="kc-links"><a href={FOLLOW_URL} target="_blank" rel="noopener noreferrer">the pinned post at @kidsdotfun<ArrowUpRight size={14} aria-hidden="true"/></a></span></li>
+    <li><strong>nothing else to do now</strong><span>when the allocation happens, you sign in with X on kids.fun and link your wallet then. do not post your wallet address anywhere; nobody from kids.fun will ask for it.</span></li>
     <li><strong>follow @kidsdotfun</strong><span>the list is rebuilt every {refresh.every} minutes from public replies, quotes, reposts and likes. your “since” date is set once and never moves.</span><a className="kc-follow" href={FOLLOW_URL} target="_blank" rel="noopener noreferrer"><XLogo size={18} aria-hidden="true"/>Follow @kidsdotfun</a></li>
    </ol>
   </section>
