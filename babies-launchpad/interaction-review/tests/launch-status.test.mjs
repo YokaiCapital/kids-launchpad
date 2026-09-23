@@ -26,3 +26,10 @@ test('coin links: the profile link wins, otherwise the Shartcoin X account; neve
  assert.equal(coinLink(null,'xUrl'),'https://x.com/shartcoinkids');assert.equal(coinLink({xUrl:'https://x.com/other'},'xUrl'),'https://x.com/other');
  assert.equal(coinLink({xUrl:'javascript:alert(1)'},'xUrl'),'https://x.com/shartcoinkids');assert.equal(coinLink({},'websiteUrl'),null);
 });
+
+test('above the hard cap: the headline says so, commitments stay welcome, subscription is shown over 100 % and the bar stays full',()=>{
+ const d=describeLaunch({...base,totalLamports:'5230000000'},1000);
+ assert.match(d.headline,/Hard cap reached\. You can still commit/);assert.match(d.sub,/proportional/);assert.match(d.sub,/refunded/);
+ assert.equal(d.progress.full,true);assert.equal(d.progress.subscribed,104.6);assert.equal(d.progress.pct,100);
+ const s=describeLaunch({...base,totalLamports:'1500000000'},1000);assert.doesNotMatch(s.sub,/Every SOL/);assert.match(s.sub,/refunded pro rata/);
+});

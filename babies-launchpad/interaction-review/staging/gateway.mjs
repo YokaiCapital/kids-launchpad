@@ -7,7 +7,7 @@ const origin='https://kids.fun';
 const accountGets=['state','prelaunch','prelaunch-legacy','postlaunch','postlaunch-preview','dev-vesting','rounds'];
 const accountPosts=['challenge','verify','logout','local','prelaunch/prepare','prelaunch/submit','prelaunch-legacy/prepare','prelaunch-legacy/submit','postlaunch/claim','postlaunch/claim/prepare','postlaunch/claim/submit','postlaunch/trade/quote','postlaunch/trade/prepare','postlaunch/trade/submit','postlaunch/trade/execute','dev-vesting/claim'];
 // Admin routes are never served by the gateway (owner rule, 22 September 2026): the admin plugin stays loopback-only inside the container.
-const routes=new Set(['GET /api/demo','GET /api/community/supporters','GET /api/community/supporter-wallets','GET /api/community/denylist',...accountGets.map(p=>'GET /api/account/'+p),...accountPosts.map(p=>'POST /api/account/'+p)]);
+const routes=new Set(['GET /api/community/supporters','GET /api/community/supporter-wallets','GET /api/community/denylist',...accountGets.map(p=>'GET /api/account/'+p),...accountPosts.map(p=>'POST /api/account/'+p)]);
 export const requiresOperator=path=>['/api/account/local','/api/account/postlaunch/claim','/api/account/postlaunch/trade/execute','/api/account/dev-vesting/claim'].includes(path);
 const equal=(a,b)=>timingSafeEqual(createHash('sha256').update(a).digest(),createHash('sha256').update(b).digest());
 export function gatewayConfig(env=process.env){

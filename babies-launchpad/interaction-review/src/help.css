@@ -29,3 +29,6 @@
 .help-panel.is-exact{width:max-content;max-width:min(340px,calc(100vw - 24px));padding:8px 11px 9px;font-variant-numeric:tabular-nums;overflow-wrap:anywhere;word-break:break-all;font-size:12.5px}
 .help-panel.is-exact>b{margin-bottom:2px;font-size:11px;letter-spacing:.02em;text-transform:uppercase;color:#c9b6d8}
 @media(prefers-reduced-motion:reduce){.exact>.exact-button{transition:none}}
+
+/* Portal panel: fixed to the viewport, above every card and sidebar; width follows the viewport on phones. */
+.help-panel.is-portal{position:fixed;z-index:1000;top:auto;bottom:auto;width:min(320px,calc(100vw - 24px));white-space:normal;overflow-wrap:anywhere;pointer-events:auto}.help-panel.is-portal.is-above{bottom:auto}
