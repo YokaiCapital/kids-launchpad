@@ -5,7 +5,7 @@
 .coin-pfp-trigger:hover>.coin-pfp,.coin-pfp-trigger[aria-expanded=true]>.coin-pfp{box-shadow:0 0 0 2px rgba(140,236,255,.5)}
 .coin-pfp-trigger:focus-visible{outline:2px solid #8cecff;outline-offset:3px}
 /* Header sizes: modestly larger than before, still shorter than the text block beside them, so no row is added. */
-.post-identity .coin-pfp{width:56px;height:56px;border-radius:12px;object-fit:contain}
+.post-identity .coin-pfp{width:72px;height:72px;border-radius:12px;object-fit:contain}
 .post-identity>.coin-pfp-trigger{border-radius:12px}
 .sidebar-campaign .prelaunch-heading .coin-pfp.coin-logo{width:52px;height:52px;border-radius:12px}
 .prelaunch-heading>.coin-pfp-trigger{border-radius:12px}
