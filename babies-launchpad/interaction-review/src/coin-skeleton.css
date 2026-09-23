@@ -1,0 +1,18 @@
+.coin-skeleton{width:100%;min-width:0}
+.coin-skeleton-shapes{display:flex;flex-direction:column;gap:20px}
+.coin-skeleton-shapes>span,.coin-skeleton-pair>span{display:block;border-radius:7px;background:rgba(188,170,199,.11);animation:coin-skeleton-breathe 1.8s ease-in-out infinite alternate}
+.coin-skeleton-line{width:42%;height:16px}
+.coin-skeleton-value{width:48%;height:52px;margin:5px 0}
+.coin-skeleton-bar{width:100%;height:14px}
+.coin-skeleton-pair{display:flex;justify-content:space-between;gap:24px}
+.coin-skeleton-pair>span{width:30%;height:30px}
+.coin-skeleton-note{width:64%;height:12px}
+.coin-skeleton-footer{width:100%;height:30px;margin-top:4px}
+.coin-skeleton--commit .coin-skeleton-shapes{gap:24px}
+.coin-skeleton--commit .coin-skeleton-bar{height:56px}
+.coin-skeleton--commit .coin-skeleton-footer{height:52px;margin-top:20px}
+.coin-skeleton--status .coin-skeleton-value{width:62%;height:32px}
+.coin-skeleton--status .coin-skeleton-pair{display:none}
+@keyframes coin-skeleton-breathe{to{background:rgba(188,170,199,.2)}}
+@media(prefers-reduced-motion:reduce){.coin-skeleton-shapes>span,.coin-skeleton-pair>span{animation:none}}
+@media(max-width:760px){.coin-skeleton-shapes{gap:16px}.coin-skeleton-value{height:40px}}

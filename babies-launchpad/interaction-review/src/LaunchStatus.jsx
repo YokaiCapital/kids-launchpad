@@ -1,4 +1,5 @@
 import {useEffect,useState} from 'react';
+import {CoinSkeleton} from './CoinSkeleton';
 import {ArrowRight,Copy,Check} from '@phosphor-icons/react';
 import {describeLaunch,formatCountdown} from './launch-status.mjs';
 function Address({label,value}){
@@ -13,6 +14,7 @@ export function LaunchStatus({data,go,onRefresh}){
  const nowUnix=Math.floor((now+skew)/1000),d=describeLaunch(data,nowUnix);
  // When a countdown hits zero the phase changes on the ledger; ask for a fresh read once.
  useEffect(()=>{if(d.countdown&&d.countdown.seconds<=0&&onRefresh){const id=setTimeout(onRefresh,1500);return()=>clearTimeout(id);}},[d.countdown&&d.countdown.seconds<=0,d.phase]);
+ if(!data)return <section className="launch-status"><CoinSkeleton variant="status"/></section>;
  return <section className={'launch-status tone-'+d.tone} aria-live="polite">
   <div className="launch-status-head"><span className="launch-pill">{d.pill}</span>{d.countdown&&<span className="launch-when">{d.countdown.label.replace(' in','')} {new Date(d.countdown.at*1000).toLocaleString()}</span>}</div>
   <h2>{d.headline}</h2>
