@@ -1,7 +1,8 @@
 import {FEE_DISTRIBUTION,resolveFeeDistribution} from './fee-distribution.mjs';
 // Approved launch policy. Mainnet reference is metadata, never a localnet account.
 export const POOL_POLICY = Object.freeze({
- provider: 'raydium-cpmm', quoteSymbol: 'SOL', tradeFeeBps: 200,
+ provider: 'raydium-cpmm', quoteSymbol: 'SOL', tradeFeeBps: 200, // localnet clone tier; new mainnet pools use 250 (owner decision 23 Sep 2026)
+ approvedTiers: [{ index: 2, tradeFeeBps: 200, address: '2fGXL8uhqxJ4tpgtosHZXT4zcQap6j62z3bMDxdkMvy5' }, { index: 7, tradeFeeBps: 250, address: 'ESLj2Rzmvn3RhDo4Z18hY1wYmGyC9xM4ZtRXhvoFkDAi' }],
  protocolShareBps: 1200, fundShareBps: 400,
  creatorFeeEnabled: false, tokenTransferFeeBps: 0,
  liquidityPolicy: 'permanent-lock-retain-fees',

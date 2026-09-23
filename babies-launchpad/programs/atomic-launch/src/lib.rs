@@ -214,6 +214,8 @@ pub fn process_instruction(program:&Pubkey,accounts:&[AccountInfo],data:&[u8])->
   8=>claims::dev(program,accounts,body),
   9=>claims::configure(program,accounts,body),
   10=>claims::parent(program,accounts,body),
+  // Tag 22 (sell coin-side fees for SOL) is retired: coin-side fees are burned (tag 26), never sold (owner, 23 September 2026).
+  22=>Err(ProgramError::InvalidInstructionData),
   20..=26=>fees::process(program,accounts,body,tag),
   _=>Err(ProgramError::InvalidInstructionData),
  }

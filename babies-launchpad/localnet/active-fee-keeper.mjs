@@ -8,8 +8,9 @@ import {TOKEN_PROGRAM_ID,TOKEN_2022_PROGRAM_ID,NATIVE_MINT,getAssociatedTokenAdd
 import {writeDurableJson} from '../shared/durable-json.mjs';
 import {resolvePostlaunchCampaign} from './postlaunch-campaign.mjs';
 import {localKey,chainTime} from './dev-vesting.mjs';
-import {CPMM,AMM_CONFIG,LOCK,LOCK_AUTH,authorityAddress} from './atomic-launch.mjs';
+import {CPMM,PARENT_AMM_CONFIG,LOCK,LOCK_AUTH,authorityAddress,campaignPoolAddresses,checkPoolPolicy} from './atomic-launch.mjs';
 import {burnChildFeesInstruction} from './atomic-fees.mjs';
+import {CURRENT_FEATURES,manifestFeatures} from './program-builds.mjs';
 import {parentsAddress} from './atomic-claims.mjs';
 import {poolAddresses,decodePool,decodeConfig} from './cpmm.mjs';
 import {localnetParentRoute,fetchJupiterParentRoute} from './jupiter-route.mjs';
@@ -23,11 +24,11 @@ import {feeAddresses,initFeesInstruction,collectFeesInstruction,convertFeesInstr
 import {createOperatorSender} from './operator-journal.mjs';
 const defaultFile=fileURLToPath(new URL('./.runtime/active-fee-operator.json',import.meta.url));
 const raw=value=>{if(typeof value!=='bigint'||value<0n||value>18446744073709551615n)throw Error('Invalid fee counter');return value;};
-export function feePlan(state){
+export function feePlan(state,features=CURRENT_FEATURES){
  for(const name of ['childPending','totalSol','treasuryPaid','devPaid','parentAAllocated','parentBAllocated','parentASpent','parentBSpent'])raw(state[name]);
  const treasury=state.totalSol*98n/168n,dev=state.totalSol*20n/168n,parent=state.totalSol*25n/168n;
  if(state.treasuryPaid>treasury||state.devPaid>dev||state.parentAAllocated>parent||state.parentBAllocated>parent||state.parentASpent>state.parentAAllocated||state.parentBSpent>state.parentBAllocated)throw Error('Fee counter accounting mismatch');
- const plan=[];if(state.childPending>0n)plan.push({kind:'burn',amount:state.childPending.toString()});
+ const plan=[];if(state.childPending>0n)plan.push({kind:features.includes('burn-child-fees')?'burn':'convert',amount:state.childPending.toString()});
  if(state.treasuryPaid<treasury||state.devPaid<dev||state.parentAAllocated<parent||state.parentBAllocated<parent)plan.push({kind:'distribute'});
  for(const index of [0,1]){const budget=index?state.parentBAllocated-state.parentBSpent:state.parentAAllocated-state.parentASpent;if(budget>0n)plan.push({kind:'buy-burn',index,amount:budget.toString()});}
  return plan;
@@ -49,9 +50,11 @@ export function lockedPositionAmount(info,{pool,nft,owner,lpMint,vaultAmount}){
  for(const [offset,key] of [[64,pool],[96,nft],[128,owner],[160,lpMint]])if(!d.subarray(offset,offset+32).equals(key.toBuffer()))throw Error('Locked position identity mismatch');
  const amount=d.readBigUInt64LE(8);if(amount===0n||amount>vaultAmount)throw Error('Locked position amount unavailable');return amount;
 }
-async function canonicalRoute(ctx,mint){
- const p=poolAddresses(CPMM,AMM_CONFIG,mint,NATIVE_MINT),infos=await ctx.connection.getMultipleAccountsInfo([p.pool,AMM_CONFIG,p.vault0,p.vault1],'confirmed'),pool=decodePool(infos[0],CPMM,p),config=decodeConfig(infos[1],CPMM);
- if(!pool.config.equals(AMM_CONFIG)||(pool.status&4)!==0||pool.creatorFeesEnabled||config.disabled||config.index!==2||config.trade!==20000n||config.protocol!==120000n||config.fund!==40000n)throw Error('Canonical 2% fee route unavailable');
+/** The campaign's own pool (its recorded pool decides the tier) or a parent's SOL pool on the parent tier. */
+async function canonicalRoute(ctx,mint,ownPool=null){
+ const p=ownPool?campaignPoolAddresses(mint,ownPool):{...poolAddresses(CPMM,PARENT_AMM_CONFIG,mint,NATIVE_MINT),config:PARENT_AMM_CONFIG};
+ const infos=await ctx.connection.getMultipleAccountsInfo([p.pool,p.config,p.vault0,p.vault1],'confirmed'),pool=decodePool(infos[0],CPMM,p),config=decodeConfig(infos[1],CPMM);
+ if((pool.status&4)!==0||config.disabled)throw Error('Canonical fee route unavailable');checkPoolPolicy(pool,config,p.config);
  for(const [i,address] of [p.vault0,p.vault1].entries()){const token=unpackAccount(address,infos[i+2],i?pool.program1:pool.program0);if(!token.owner.equals(p.authority)||!token.mint.equals(i?p.mint1:p.mint0)||token.isFrozen||token.delegate||token.closeAuthority)throw Error('Canonical fee route vault mismatch');}
  return {...p,program0:pool.program0,program1:pool.program1};
 }
@@ -74,7 +77,7 @@ export function createActiveFeeKeeper({resolve=()=>resolvePostlaunchCampaign('ac
    const parentInfo=await c.getAccountInfo(parentsAddress(ctx,campaign));
    if(!parentInfo||!parentInfo.owner.equals(ctx.programId)||parentInfo.data.length!==256||parentInfo.data.subarray(0,8).toString()!=='KIDSPAR1'||!parentInfo.data.subarray(8,40).equals(campaign.toBuffer())||parents.some((p,i)=>!parentInfo.data.subarray(40+i*32,72+i*32).equals(p.toBuffer())))throw Error('On-chain parent registration mismatch');
    // Validate every route before collection: never silently redirect a missing parent pool.
-   const own=await canonicalRoute(ctx,mint);if(!own.pool.equals(state.pool))throw Error('Active fee pool mismatch');for(const parent of parents)await canonicalRoute(ctx,parent);
+   const own=await canonicalRoute(ctx,mint,state.pool);if(!own.pool.equals(state.pool))throw Error('Active fee pool mismatch');for(const parent of parents)await canonicalRoute(ctx,parent);
    const journal=existsSync(file)?JSON.parse(readFileSync(file,'utf8')):{identity,sequence:0,attempts:{},lastCollectedAt:null,current:null};
    if(JSON.stringify(journal.identity)!==JSON.stringify(identity))throw Error('Active fee journal identity changed');
    const persist=()=>writeDurableJson(file,journal),send=createOperatorSender({connection:c,journal,persist});
@@ -93,7 +96,7 @@ export function createActiveFeeKeeper({resolve=()=>resolvePostlaunchCampaign('ac
       const account=unpackAccount(address,info,programOf(tokenMint));if(!account.owner.equals(owner)||!account.mint.equals(tokenMint)||account.isFrozen||account.delegate||account.closeAuthority)throw Error('Fee custody ATA mismatch');
      }
      if(!operation){
-      const plan=feePlan(await readFees(ctx,campaign,mint));
+      const plan=feePlan(await readFees(ctx,campaign,mint),manifestFeatures(ctx.manifest));
       for(const item of plan){if(item.kind==='distribute'||item.kind==='burn'){operation=item;break;}try{await boundedQuote(c,item.kind==='convert'?mint:NATIVE_MINT,item.kind==='convert'?NATIVE_MINT:parents[item.index],BigInt(item.amount));operation=item;break;}catch(error){if(error.message!=='Trade too small')throw error;}}
       if(!operation&&(journal.lastCollectedAt===null||now-journal.lastCollectedAt>=collectionIntervalSeconds))operation={kind:'collect'};
      }
@@ -110,7 +113,7 @@ export function createActiveFeeKeeper({resolve=()=>resolvePostlaunchCampaign('ac
     const vault=getAssociatedTokenAddressSync(own.lpMint,LOCK_AUTH,true),account=unpackAccount(vault,await c.getAccountInfo(vault),TOKEN_PROGRAM_ID);if(!account.owner.equals(LOCK_AUTH)||!account.mint.equals(own.lpMint)||account.amount===0n||account.isFrozen||account.delegate||account.closeAuthority)throw Error('Locked liquidity custody unavailable');
     const position=PublicKey.findProgramAddressSync([Buffer.from('locked_liquidity'),state.feeNft.toBuffer()],LOCK)[0];
     const amount=lockedPositionAmount(await c.getAccountInfo(position),{pool:own.pool,nft:state.feeNft,owner:authorityAddress(ctx,campaign),lpMint:own.lpMint,vaultAmount:account.amount});
-    instruction=collectFeesInstruction(ctx,campaign,admin.publicKey,mint,state.feeNft,amount);
+    instruction=collectFeesInstruction(ctx,campaign,admin.publicKey,mint,state.feeNft,amount,state.pool);
    }else if(operation.kind==='distribute')instruction=distributeFeesInstruction(ctx,campaign,admin.publicKey,mint,state.treasury,state.dev);
    else if(operation.kind==='burn'){instruction=burnChildFeesInstruction(ctx,campaign,admin.publicKey,mint,BigInt(operation.amount));}
    else if(operation.kind==='convert'||operation.kind==='buy-burn'){
@@ -119,7 +122,7 @@ export function createActiveFeeKeeper({resolve=()=>resolvePostlaunchCampaign('ac
     // Parent buybacks: KIDS_PARENT_BUYBACK_ROUTE = 'cpmm' (direct canonical pool, tag 24), 'jupiter-localnet' (Jupiter over the
     // parent's CPMM pool on a validator with Jupiter cloned) or 'jupiter' (Jupiter API route, mainnet). Slices are capped at 0.5 SOL.
     const routeMode=process.env.KIDS_PARENT_BUYBACK_ROUTE||'cpmm';
-    if(operation.kind==='convert'){const quote=await boundedQuote(c,input,output,amount);instruction=convertFeesInstruction(ctx,campaign,admin.publicKey,mint,amount,quote.minOutput,expiry);}
+    if(operation.kind==='convert'){const quote=await boundedQuote(c,input,output,amount,state.pool);instruction=convertFeesInstruction(ctx,campaign,admin.publicKey,mint,amount,quote.minOutput,expiry,state.pool);}
     else if(routeMode==='cpmm'){const quote=await boundedQuote(c,input,output,amount);instruction=buyBurnInstruction(ctx,campaign,admin.publicKey,mint,output,operation.index,amount,quote.minOutput,expiry,programOf(output));}
     else{
      const slice=amount>500000000n?500000000n:amount;let route,minOutput;

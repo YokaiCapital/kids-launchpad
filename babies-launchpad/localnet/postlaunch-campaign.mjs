@@ -5,7 +5,7 @@ import {existsSync,readFileSync} from 'node:fs';
 import {acceptedProgramHash} from './program-lineage.mjs';
 import {PublicKey} from '@solana/web3.js';
 import {NATIVE_MINT} from '@solana/spl-token';
-import {atomicContext,readCampaign,CPMM,AMM_CONFIG} from './atomic-launch.mjs';
+import {atomicContext,readCampaign,CPMM,campaignPoolAddresses,checkPoolPolicy} from './atomic-launch.mjs';
 import {validateActiveManifest,activeManifestPath,validateActiveTerms} from './active-launch.mjs';
 import {poolAddresses,decodePool,decodeConfig} from './cpmm.mjs';
 const reportPath=new URL('./.runtime/atomic-launch-verification.json',import.meta.url);
@@ -16,8 +16,7 @@ export function verifyLaunchedIdentity(ctx,state,record,{active=false}={}){
  if(state.phase!==3)throw Error('Campaign has not launched');
  if(state.mint.toBase58()!==record.mint||state.pool.toBase58()!==(record.pool||state.pool.toBase58()))throw Error('Launch mint or pool changed');
  if(active)validateActiveTerms(state,record);
- const addresses=poolAddresses(CPMM,AMM_CONFIG,state.mint,NATIVE_MINT);
- if(!addresses.pool.equals(state.pool))throw Error('Launch pool is not canonical');return addresses;
+ return campaignPoolAddresses(state.mint,state.pool);
 }
 export function createCampaignResolver({context=atomicContext,readState=readCampaign,has=existsSync,readRecord=read}={}){
  async function resolve(scope='active'){
@@ -28,9 +27,9 @@ export function createCampaignResolver({context=atomicContext,readState=readCamp
   // An active prelaunch is a known unavailable state, never a rehearsal fallback.
   if(active&&state.phase!==3){validateActiveTerms(state,record);return null;}
   const addresses=verifyLaunchedIdentity(ctx,state,record,{active});
-  const infos=await ctx.connection.getMultipleAccountsInfo([addresses.pool,AMM_CONFIG],'confirmed');
+  const infos=await ctx.connection.getMultipleAccountsInfo([addresses.pool,addresses.config],'confirmed');
   const pool=decodePool(infos[0],CPMM,addresses),config=decodeConfig(infos[1],CPMM);
-  if(!pool.config.equals(AMM_CONFIG)||pool.creatorFeesEnabled||config.index!==2||config.trade!==20000n||config.protocol!==120000n||config.fund!==40000n)throw Error('Launch pool policy changed');
+  checkPoolPolicy(pool,config,addresses.config);
   let signature=record.launchSignature||record.signature;
   if(active&&!signature&&has(journalPath)){const journal=readRecord(journalPath);if(journal.campaign!==record.address||journal.genesisHash!==record.genesisHash||!acceptedProgramHash(ctx.manifest,journal.programSha256))throw Error('Launch journal identity changed');signature=journal.attempts?.launch?.signature;}
   if(signature!==undefined&&typeof signature!=='string')throw Error('Invalid launch receipt metadata');

@@ -5,7 +5,7 @@
 import {PublicKey} from '@solana/web3.js';
 import {TOKEN_PROGRAM_ID,NATIVE_MINT,getAssociatedTokenAddressSync} from '@solana/spl-token';
 import {poolAddresses} from './cpmm.mjs';
-import {CPMM,AMM_CONFIG} from './atomic-launch.mjs';
+import {CPMM,PARENT_AMM_CONFIG} from './atomic-launch.mjs';
 export const JUPITER_PROGRAM=new PublicKey('JUP6LkbZbjS1jKKwapdHNy74zcZ3tLUZoi5QNyVTaV4');
 export const JUPITER_EVENT_AUTHORITY=PublicKey.findProgramAddressSync([Buffer.from('__event_authority')],JUPITER_PROGRAM)[0];
 export const ROUTE_V2_DISCRIMINATOR=Buffer.from('bb64facc31c4af14','hex');
@@ -30,9 +30,9 @@ export function decodeRouteV2Header(data,{amount,minOut}){
 }
 /** Localnet rehearsal route: one RaydiumCP step over the parent's CPMM pool, user accounts = the fee custody accounts. */
 export function localnetParentRoute({feeAuthority,parentMint,parentProgram,amount,quotedOut,slippageBps=100}){
- const p=poolAddresses(CPMM,AMM_CONFIG,NATIVE_MINT,parentMint),forward=p.mint0.equals(NATIVE_MINT);
+ const p=poolAddresses(CPMM,PARENT_AMM_CONFIG,NATIVE_MINT,parentMint),forward=p.mint0.equals(NATIVE_MINT);
  const source=getAssociatedTokenAddressSync(NATIVE_MINT,feeAuthority,true),destination=getAssociatedTokenAddressSync(parentMint,feeAuthority,true,parentProgram);
- const remaining=[[CPMM,false],[feeAuthority,false],[p.authority,false],[AMM_CONFIG,false],[p.pool,true],[source,true],[destination,true],[forward?p.vault0:p.vault1,true],[forward?p.vault1:p.vault0,true],[TOKEN_PROGRAM_ID,false],[parentProgram,false],[NATIVE_MINT,false],[parentMint,false],[p.observation,true]];
+ const remaining=[[CPMM,false],[feeAuthority,false],[p.authority,false],[PARENT_AMM_CONFIG,false],[p.pool,true],[source,true],[destination,true],[forward?p.vault0:p.vault1,true],[forward?p.vault1:p.vault0,true],[TOKEN_PROGRAM_ID,false],[parentProgram,false],[NATIVE_MINT,false],[parentMint,false],[p.observation,true]];
  return {data:encodeRouteV2({inAmount:amount,quotedOut,slippageBps,steps:[{swap:SWAP_RAYDIUM_CP,bps:10000,inputIndex:0,outputIndex:1}]}),remainingAccounts:remaining.map(([pubkey,isWritable])=>({pubkey,isSigner:false,isWritable})),lookupTables:[],source:'localnet-raydium-cp'};
 }
 /** Mainnet route from Jupiter's API. Requests a non-shared route for the fee authority and refuses anything the program would. */

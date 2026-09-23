@@ -13,7 +13,7 @@ import {Keypair,PublicKey,Transaction,VersionedTransaction,SystemProgram,Compute
 import {TOKEN_PROGRAM_ID,NATIVE_MINT,ACCOUNT_SIZE,getAssociatedTokenAddressSync,createAssociatedTokenAccountIdempotentInstruction,createInitializeAccount3Instruction,createCloseAccountInstruction,unpackAccount} from '@solana/spl-token';
 import {qualifiedCampaign} from './postlaunch-claims.mjs';
 import {localKey} from './dev-vesting.mjs';
-import {CPMM,AMM_CONFIG} from './atomic-launch.mjs';
+import {CPMM,campaignPoolAddresses,checkPoolPolicy} from './atomic-launch.mjs';
 import {poolAddresses,decodePool,decodeConfig,swapInstruction} from './cpmm.mjs';
 import {encodeBase58} from '../shared/solana.mjs';
 const file=new URL('./.runtime/postlaunch-trade-intents.json',import.meta.url);
@@ -40,10 +40,10 @@ export function validateTradeInput(input){
  if(BigInt(input.amountRaw)>18446744073709551615n)throw Error('Amount exceeds u64');
 }
 async function reserves(ctx,state){
- const p=poolAddresses(CPMM,AMM_CONFIG,state.mint,NATIVE_MINT);if(!p.pool.equals(state.pool))throw Error('Campaign pool mismatch');
- const infos=await ctx.connection.getMultipleAccountsInfo([p.pool,AMM_CONFIG,p.vault0,p.vault1],'confirmed');
+ const p=campaignPoolAddresses(state.mint,state.pool);
+ const infos=await ctx.connection.getMultipleAccountsInfo([p.pool,p.config,p.vault0,p.vault1],'confirmed');
  const decoded=decodePool(infos[0],CPMM,p),fee=decodeConfig(infos[1],CPMM);
- if(!decoded.config.equals(AMM_CONFIG)||(decoded.status&4)!==0||decoded.creatorFeesEnabled||fee.index!==2||fee.trade!==20000n||fee.protocol!==120000n||fee.fund!==40000n)throw Error('Pool configuration is not the approved canonical 2% tier');
+ if((decoded.status&4)!==0)throw Error('Pool is not open for swaps');try{checkPoolPolicy(decoded,fee,p.config);}catch{throw Error('Pool configuration is not an approved fee tier');}
  const vaults=[p.vault0,p.vault1].map((v,i)=>unpackAccount(v,infos[i+2],TOKEN_PROGRAM_ID));
  for(let i=0;i<2;i++)if(!vaults[i].owner.equals(p.authority)||!vaults[i].mint.equals(i?p.mint1:p.mint0)||vaults[i].isFrozen)throw Error('Pool vault mismatch');
  const d=infos[0].data;const a=vaults[0].amount-d.readBigUInt64LE(341)-d.readBigUInt64LE(357)-d.readBigUInt64LE(397),b=vaults[1].amount-d.readBigUInt64LE(349)-d.readBigUInt64LE(365)-d.readBigUInt64LE(405);
@@ -94,7 +94,7 @@ export async function executePostlaunchTrade(owner,{intentId}){
    const {p}=await reserves(ctx,state),ephemeral=Keypair.generate(),rent=await ctx.connection.getMinimumBalanceForRentExemption(ACCOUNT_SIZE),child=getAssociatedTokenAddressSync(state.mint,signer.publicKey),amount=BigInt(i.inputRaw);
    const funding=BigInt(rent)+(i.side==='buy'?amount:0n);if(funding>BigInt(Number.MAX_SAFE_INTEGER))throw Error('Local SOL funding exceeds safe transfer range');
    const tx=new Transaction().add(ComputeBudgetProgram.setComputeUnitLimit({units:180000}),createAssociatedTokenAccountIdempotentInstruction(signer.publicKey,child,signer.publicKey,state.mint),SystemProgram.createAccount({fromPubkey:signer.publicKey,newAccountPubkey:ephemeral.publicKey,lamports:Number(funding),space:ACCOUNT_SIZE,programId:TOKEN_PROGRAM_ID}),createInitializeAccount3Instruction(ephemeral.publicKey,NATIVE_MINT,signer.publicKey));
-   const instruction=swapInstruction({programId:CPMM,ammConfig:AMM_CONFIG},p,signer.publicKey,i.side==='buy'?NATIVE_MINT:state.mint,amount,BigInt(i.minOutputRaw));
+   const instruction=swapInstruction({programId:CPMM,ammConfig:p.config},p,signer.publicKey,i.side==='buy'?NATIVE_MINT:state.mint,amount,BigInt(i.minOutputRaw));
    instruction.keys[i.side==='buy'?4:5].pubkey=ephemeral.publicKey;
    tx.add(instruction,createCloseAccountInstruction(ephemeral.publicKey,signer.publicKey,signer.publicKey));
    i.block=await ctx.connection.getLatestBlockhash('confirmed');tx.feePayer=signer.publicKey;tx.recentBlockhash=i.block.blockhash;tx.sign(signer,ephemeral);
@@ -115,7 +115,7 @@ export function buildExternalTrade(i,{state,p},wrappedAccount,rent){
  if(wrapped.equals(owner)||wrapped.equals(child)||wrapped.equals(state.mint)||!PublicKey.isOnCurve(wrapped.toBytes()))throw Error('A distinct ephemeral signing account is required');
  const funding=BigInt(rent)+(i.side==='buy'?amount:0n);if(!Number.isSafeInteger(rent)||rent<0||funding>BigInt(Number.MAX_SAFE_INTEGER))throw Error('Trade funding exceeds safe range');
  const tx=new Transaction().add(createAssociatedTokenAccountIdempotentInstruction(owner,child,owner,state.mint),SystemProgram.createAccount({fromPubkey:owner,newAccountPubkey:wrapped,lamports:Number(funding),space:ACCOUNT_SIZE,programId:TOKEN_PROGRAM_ID}),createInitializeAccount3Instruction(wrapped,NATIVE_MINT,owner));
- const instruction=swapInstruction({programId:CPMM,ammConfig:AMM_CONFIG},p,owner,i.side==='buy'?NATIVE_MINT:state.mint,amount,BigInt(i.minOutputRaw));instruction.keys[i.side==='buy'?4:5].pubkey=wrapped;
+ const instruction=swapInstruction({programId:CPMM,ammConfig:p.config},p,owner,i.side==='buy'?NATIVE_MINT:state.mint,amount,BigInt(i.minOutputRaw));instruction.keys[i.side==='buy'?4:5].pubkey=wrapped;
  tx.add(instruction,createCloseAccountInstruction(wrapped,owner,owner));return tx;
 }
 export function validateSignedTrade(raw,unsigned,owner,wrappedAccount){

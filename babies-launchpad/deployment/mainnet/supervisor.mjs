@@ -2,7 +2,7 @@
 // program manifest verified against the chain and the recorded identities, campaign provisioning (idempotent),
 // then the API with its keepers behind the authenticated gateway. Never prints a key or the RPC URL.
 import {mkdirSync,existsSync,readFileSync,writeFileSync,statSync,unlinkSync} from 'node:fs';import {spawn} from 'node:child_process';import {createHash} from 'node:crypto';
-import {createRequire} from 'node:module';const require=createRequire(new URL('../../localnet/package.json',import.meta.url));const {Connection,Keypair,PublicKey}=require('@solana/web3.js');
+import {createRequire} from 'node:module';import {acceptedBuilds,matchBuild} from '../../localnet/program-builds.mjs';const require=createRequire(new URL('../../localnet/package.json',import.meta.url));const {Connection,Keypair,PublicKey}=require('@solana/web3.js');
 const {networkProfile}=await import('../../localnet/network.mjs');const {nextProgramManifest}=await import('../../localnet/program-lineage.mjs');
 if(process.env.KIDS_ROLE==='signer'){await import('./signer-supervisor.mjs');}else{
 const profile=networkProfile();if(profile.network==='localnet')throw Error('This supervisor is for devnet or mainnet');
@@ -28,18 +28,21 @@ const connection=new Connection(profile.rpcUrl,'confirmed');
 let healthy=false;for(let i=0;i<30;i++){try{if(await connection.getGenesisHash()===profile.genesisHash){healthy=true;break;}throw Error('genesis');}catch{await new Promise(r=>setTimeout(r,2000));}}if(!healthy)throw Error('RPC unreachable or wrong network');
 // Program manifest from the chain: id from identities (or KIDS_PROGRAM_ID for devnet), bytes hashed and compared.
 const programId=process.env.KIDS_PROGRAM_ID||identities.program?.programId;if(!programId)throw Error('Program id unknown');
-const expectedHash=process.env.KIDS_PROGRAM_SHA256||identities.program?.binarySha256;
+// Accepted builds: the recorded primary plus every build listed under program.builds (an upgrade lands between two
+// uploads, so both the current and the next build are accepted); KIDS_PROGRAM_SHA256 + KIDS_PROGRAM_SIZE add one more.
+const builds=acceptedBuilds(identities.program||{});if(process.env.KIDS_PROGRAM_SHA256)builds.unshift({sha256:process.env.KIDS_PROGRAM_SHA256,binarySize:Number(process.env.KIDS_PROGRAM_SIZE||0)||0,features:[]});
+if(!builds.length)throw Error('No accepted program build recorded');
 const info=await connection.getAccountInfo(new PublicKey(programId));if(!info?.executable||info.owner.toBase58()!=='BPFLoaderUpgradeab1e11111111111111111111111')throw Error('Program is not deployed on '+profile.network);
 const data=await connection.getAccountInfo(new PublicKey(info.data.subarray(4,36)));const body=data.data.subarray(45);
-// The binary itself ends in zero bytes, so trailing zeros are NOT stripped blindly: hash the recorded binary size when
-// known (program data is sized to the binary), otherwise the whole program data.
-const recordedSize=Number(process.env.KIDS_PROGRAM_SIZE||identities.program?.binarySize||0);const size=recordedSize>0&&recordedSize<=body.length?recordedSize:body.length;
-const sha256=createHash('sha256').update(body.subarray(0,size)).digest('hex');if(expectedHash&&sha256!==expectedHash)throw Error('Deployed program hash '+sha256.slice(0,16)+' differs from the recorded build (hashed '+size+' of '+body.length+' bytes)');
-if(body.subarray(size).some(n=>n!==0))throw Error('Program data has bytes beyond the recorded binary size');
+// The binary itself ends in zero bytes, so trailing zeros are NOT stripped blindly: each accepted build is hashed at its
+// recorded size and the bytes beyond it must be zero.
+const live=matchBuild(body,builds.map(b=>b.binarySize>0?b:{...b,binarySize:body.length}));
+if(!live)throw Error('Deployed program is none of the '+builds.length+' accepted build(s): '+builds.map(b=>b.sha256.slice(0,16)).join(', '));
+const sha256=live.sha256,size=live.binarySize;
 const authority=data.data[12]?new PublicKey(data.data.subarray(13,45)).toBase58():null;
 const manifestPath=runtime+'/atomic-launch-program.json',previous=existsSync(manifestPath)?JSON.parse(readFileSync(manifestPath,'utf8')):null;
-const manifest=nextProgramManifest(previous,{network:profile.network,rpcUrl:profile.rpcLabel,genesisHash:profile.genesisHash,programId,upgradeAuthority:authority,sha256,binarySize:size,source:'programs/atomic-launch/src/lib.rs (reproducible CI build)',status:profile.network+'-service'});
-if(!previous||previous.sha256!==sha256||previous.upgradeAuthority!==authority)writeFileSync(manifestPath,JSON.stringify(manifest,null,2),{mode:0o600});
+const manifest=nextProgramManifest(previous,{network:profile.network,rpcUrl:profile.rpcLabel,genesisHash:profile.genesisHash,programId,upgradeAuthority:authority,sha256,binarySize:size,features:[...live.features],source:'programs/atomic-launch/src/lib.rs (reproducible CI build)',status:profile.network+'-service'});
+if(!previous||previous.sha256!==sha256||previous.upgradeAuthority!==authority||JSON.stringify(previous.features||null)!==JSON.stringify(manifest.features))writeFileSync(manifestPath,JSON.stringify(manifest,null,2),{mode:0o600});
 console.log(JSON.stringify({event:'program-verified',network:profile.network,programId,sha256,upgradeAuthority:authority,operator:operator.publicKey.toBase58(),operatorMode:mode.mode,operatorBalanceSol:(await connection.getBalance(operator.publicKey))/1e9,upgradeAuthorityIsOperator:authority===operator.publicKey.toBase58()}));
 if(profile.network==='mainnet'&&authority===operator.publicKey.toBase58())console.log(JSON.stringify({event:'governance-warning',message:'the keeper key still holds the program upgrade authority; move it to the governance key'}));
 // Campaign: provision only when a plan and its snapshot evidence exist; otherwise the API answers "not configured".

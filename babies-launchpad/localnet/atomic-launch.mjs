@@ -8,10 +8,31 @@ import {poolAddresses} from './cpmm.mjs';
 export {campaignAddress,receiptAddress,commitInstruction,finalizeInstruction,refundInstruction,settleInstruction,readyInstruction} from './launch-escrow.mjs';
 import {campaignAddress} from './launch-escrow.mjs';
 import {networkProfile} from './network.mjs';
+import {acceptedBuilds,matchBuild} from './program-builds.mjs';
+function readIdentities(){try{return JSON.parse(readFileSync(new URL('../deployment/MAINNET-IDENTITIES.json',import.meta.url),'utf8'));}catch{return {};}}
 export const PROFILE=networkProfile();
 export const RPC=PROFILE.rpcUrl;
-export const CPMM=new PublicKey('CPMMoo8L3F4NbTegBCKVNunggL7H1ZpdTHKxQB5qKP1C'),LOCK=new PublicKey('LockrWmn6K5twhz3y9w1dQERbmgSaRkfnTeTKbpofwE'),LOCK_AUTH=new PublicKey('3f7GcQFG397GAaEnv51zR6tsTVihYRydnydDD1cXekxH'),METADATA=new PublicKey('metaqbxxUerdq28cj1RbAWkYQm3ybzjb6a8bt518x1s'),AMM_CONFIG=new PublicKey(PROFILE.network==='localnet'?'2fGXL8uhqxJ4tpgtosHZXT4zcQap6j62z3bMDxdkMvy5':'ESLj2Rzmvn3RhDo4Z18hY1wYmGyC9xM4ZtRXhvoFkDAi')/* 2 % on the localnet clone, 2.5 % on real networks (owner decision 23 Sep 2026) */,POOL_FEE=new PublicKey('DNXgeM9EiiaAbaWvwjHj9fQQLAX5ZsfHyvmYUNRAdNC8');
+export const CPMM=new PublicKey('CPMMoo8L3F4NbTegBCKVNunggL7H1ZpdTHKxQB5qKP1C'),LOCK=new PublicKey('LockrWmn6K5twhz3y9w1dQERbmgSaRkfnTeTKbpofwE'),LOCK_AUTH=new PublicKey('3f7GcQFG397GAaEnv51zR6tsTVihYRydnydDD1cXekxH'),METADATA=new PublicKey('metaqbxxUerdq28cj1RbAWkYQm3ybzjb6a8bt518x1s'),AMM_CONFIG=new PublicKey(PROFILE.network==='localnet'?'2fGXL8uhqxJ4tpgtosHZXT4zcQap6j62z3bMDxdkMvy5':'ESLj2Rzmvn3RhDo4Z18hY1wYmGyC9xM4ZtRXhvoFkDAi')/* tier for NEW pools: 2 % on the localnet clone, 2.5 % on real networks (owner decision 23 Sep 2026). Existing pools keep the tier they were created with: use campaignPoolAddresses. */,POOL_FEE=new PublicKey('DNXgeM9EiiaAbaWvwjHj9fQQLAX5ZsfHyvmYUNRAdNC8');
 const LOADER='BPFLoaderUpgradeab1e11111111111111111111111';
+/** Raydium CPMM fee tiers the program accepts (CONFIGS in fees.rs): index and trade rate as recorded in the AmmConfig account. */
+export const AMM_TIERS=Object.freeze([
+ Object.freeze({key:new PublicKey('2fGXL8uhqxJ4tpgtosHZXT4zcQap6j62z3bMDxdkMvy5'),index:2,trade:20000n,tradeFeeBps:200}),
+ Object.freeze({key:new PublicKey('ESLj2Rzmvn3RhDo4Z18hY1wYmGyC9xM4ZtRXhvoFkDAi'),index:7,trade:25000n,tradeFeeBps:250}),
+]);
+/** Parent (Fartcoin, Buttcoin) SOL pools used for route validation and the localnet rehearsal route: the 2 % tier they exist on. */
+export const PARENT_AMM_CONFIG=AMM_TIERS[0].key;
+export function approvedTier(configKey){return AMM_TIERS.find(t=>t.key.equals(configKey))||null;}
+/** Pool addresses of a launched campaign, derived from whichever approved tier produces its recorded pool. */
+export function campaignPoolAddresses(mint,pool){
+ for(const tier of AMM_TIERS){const p=poolAddresses(CPMM,tier.key,mint,NATIVE_MINT);if(p.pool.equals(pool))return {...p,config:tier.key,tier};}
+ throw Error('Launch pool is not canonical');
+}
+/** Refuses a pool whose recorded config is not the expected approved tier, or whose AmmConfig account differs from that tier. */
+export function checkPoolPolicy(pool,config,expectedConfig){
+ const tier=approvedTier(expectedConfig);
+ if(!tier||!pool.config.equals(expectedConfig)||pool.creatorFeesEnabled||config.index!==tier.index||config.trade!==tier.trade||config.protocol!==120000n||config.fund!==40000n)throw Error('Launch pool policy changed');
+ return tier;
+}
 export const u64=n=>{const b=Buffer.alloc(8);b.writeBigUInt64LE(BigInt(n));return b;};
 // The qualified context (genesis, executable bytes, hash, upgrade authority) is expensive: one ProgramData download
 // per call. It is shared across the process and revalidated every CONTEXT_TTL_MS (or on demand with {fresh:true} and
@@ -35,7 +56,14 @@ async function qualifyAtomicContext(){
  const authority=data.data[12]===0?null:new PublicKey(data.data.subarray(13,45)).toBase58();
  if(authority!==manifest.upgradeAuthority)throw Error('Atomic launch upgrade authority changed');
  if(!Number.isSafeInteger(manifest.binarySize)||manifest.binarySize<4||manifest.binarySize>data.data.length-45)throw Error('Invalid binary size');
- if(createHash('sha256').update(data.data.subarray(45,45+manifest.binarySize)).digest('hex')!==manifest.sha256||data.data.subarray(45+manifest.binarySize).some(n=>n!==0))throw Error('Atomic launch binary differs from verified local build');
+ if(createHash('sha256').update(data.data.subarray(45,45+manifest.binarySize)).digest('hex')!==manifest.sha256||data.data.subarray(45+manifest.binarySize).some(n=>n!==0)){
+  // On a real network the program may have been upgraded since this service started: any build recorded as accepted in
+  // deployment/MAINNET-IDENTITIES.json is taken with its own features; anything else is refused.
+  const upgraded=PROFILE.network==='localnet'?null:matchBuild(data.data.subarray(45),acceptedBuilds(readIdentities().program));
+  if(!upgraded)throw Error('Atomic launch binary differs from verified local build');
+  if(upgraded.sha256!==contextStats.liveBuild)console.log(JSON.stringify({event:'program-upgraded-live',sha256:upgraded.sha256,features:upgraded.features}));contextStats.liveBuild=upgraded.sha256;
+  return {connection,programId,manifest:{...manifest,sha256:upgraded.sha256,binarySize:upgraded.binarySize,features:[...upgraded.features]}};
+ }
  return {connection,programId,manifest};
 }
 export function authorityAddress(ctx,campaign){return PublicKey.findProgramAddressSync([Buffer.from('launch_authority'),new PublicKey(campaign).toBuffer()],ctx.programId)[0];}

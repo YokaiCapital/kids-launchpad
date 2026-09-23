@@ -11,6 +11,14 @@ const WSOL:Pubkey=pubkey!("So11111111111111111111111111111111111111112");
 const CONFIGS:[Pubkey;2]=[pubkey!("2fGXL8uhqxJ4tpgtosHZXT4zcQap6j62z3bMDxdkMvy5"),pubkey!("ESLj2Rzmvn3RhDo4Z18hY1wYmGyC9xM4ZtRXhvoFkDAi")];
 const FEE:Pubkey=pubkey!("DNXgeM9EiiaAbaWvwjHj9fQQLAX5ZsfHyvmYUNRAdNC8");
 fn check(value:bool)->ProgramResult{if value{Ok(())}else{Err(err(21))}}
+/// The Raydium AmmConfig a launch may create its pool on: enabled, one of the approved tiers (index 2 at 2 % or index 7 at
+/// 2.5 %, owner decision 23 September 2026) with the standard protocol and fund shares. Returns the trade rate.
+fn amm_config_rate(d:&[u8])->Result<u64,ProgramError>{
+ check(d.len()==236&&d[..8]==solana_program::hash::hash(b"account:AmmConfig").to_bytes()[..8]&&d[9]==0)?;
+ let index=u16::from_le_bytes([d[10],d[11]]);let rate=read64(d,12)?;
+ check((index==2&&rate==20000)||(index==7&&rate==25000))?;
+ check(read64(d,20)?==120000&&read64(d,28)?==40000)?;Ok(rate)
+}
 fn key(a:&AccountInfo,k:Pubkey)->ProgramResult{check(*a.key==k)}
 fn pda(a:&AccountInfo,seeds:&[&[u8]],program:&Pubkey)->ProgramResult{key(a,Pubkey::find_program_address(seeds,program).0)}
 fn ata(a:&AccountInfo,owner:&Pubkey,mint:&Pubkey)->ProgramResult{pda(a,&[owner.as_ref(),TOKEN.as_ref(),mint.as_ref()],&ATA)}
@@ -53,9 +61,7 @@ pub(super) fn execute(program:&Pubkey,a:&[AccountInfo],body:&[u8])->ProgramResul
  // Synchronize donated WSOL before computing the source balance. Only the
  // settled contribution is moved into the new pool; donations stay in custody.
  native_sync(a)?;let prior_wsol=token(&a[5],&WSOL,&authority)?;
- {check(*a[16].owner==CPMM)?;let d=a[16].try_borrow_data()?;check(d.len()==236)?;
- check(d[..8]==solana_program::hash::hash(b"account:AmmConfig").to_bytes()[..8]&&d[9]==0&&d[10..12]==[2,0])?;
- check(read64(&d,12)?==20000&&read64(&d,20)?==120000&&read64(&d,28)?==40000)?;}
+ {check(*a[16].owner==CPMM)?;let d=a[16].try_borrow_data()?;amm_config_rate(&d)?;}
  let (m0,m1)=if c.child_mint<WSOL{(c.child_mint,WSOL)}else{(WSOL,c.child_mint)};
  pda(&a[17],&[b"vault_and_lp_mint_auth_seed"],&CPMM)?;
  check(CONFIGS.contains(a[16].key)&&*a[16].owner==CPMM)?;let config=*a[16].key;
@@ -113,6 +119,17 @@ pub(super) fn execute(program:&Pubkey,a:&[AccountInfo],body:&[u8])->ProgramResul
  c.phase=3;c.launch_time=now;c.pool=*a[18].key;c.fee_nft=*a[6].key;c.write(&a[0])
 }
 #[cfg(test)]mod tests{
+ fn amm_config(index:u16,rate:u64,disabled:u8)->Vec<u8>{let mut d=vec![0u8;236];d[..8].copy_from_slice(&solana_program::hash::hash(b"account:AmmConfig").to_bytes()[..8]);d[9]=disabled;d[10..12].copy_from_slice(&index.to_le_bytes());d[12..20].copy_from_slice(&rate.to_le_bytes());d[20..28].copy_from_slice(&120000u64.to_le_bytes());d[28..36].copy_from_slice(&40000u64.to_le_bytes());d}
+ #[test]fn launch_accepts_both_approved_fee_tiers_and_nothing_else(){
+  assert_eq!(amm_config_rate(&amm_config(2,20000,0)).unwrap(),20000);
+  assert_eq!(amm_config_rate(&amm_config(7,25000,0)).unwrap(),25000);
+  assert!(amm_config_rate(&amm_config(7,20000,0)).is_err(),"index and rate are bound");
+  assert!(amm_config_rate(&amm_config(2,25000,0)).is_err());
+  assert!(amm_config_rate(&amm_config(3,30000,0)).is_err(),"3 % is not an approved tier");
+  assert!(amm_config_rate(&amm_config(7,25000,1)).is_err(),"disabled config");
+  let mut wrong_fund=amm_config(7,25000,0);wrong_fund[28..36].copy_from_slice(&50000u64.to_le_bytes());assert!(amm_config_rate(&wrong_fund).is_err());
+  assert!(amm_config_rate(&amm_config(7,25000,0)[..200]).is_err());
+ }
  use super::*;
  #[test]fn predicted_native_vault_donations_preserve_surplus_only(){let rent=2_039_280;assert_eq!(native_vault_surplus(1,rent),0);assert_eq!(native_vault_surplus(rent,rent),0);assert_eq!(native_vault_surplus(rent+1,rent),1);assert_eq!(native_vault_surplus(rent+1_000_000,rent),1_000_000);assert_eq!(native_vault_surplus(u64::MAX,rent),u64::MAX-rent);}
  #[test]fn campaign_custody_rejects_delegate_frozen_and_close_authority(){

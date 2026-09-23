@@ -5,12 +5,12 @@
 // The RPC URL goes to the Solana CLI through a temporary config file, never on the command line or in output.
 import {execFileSync} from 'node:child_process';import {readFileSync,writeFileSync,mkdirSync,existsSync,rmSync,mkdtempSync} from 'node:fs';import {homedir,tmpdir} from 'node:os';import {join} from 'node:path';
 import {createHash} from 'node:crypto';import {Connection,Keypair,PublicKey} from '@solana/web3.js';
-import {networkProfile} from './network.mjs';import {nextProgramManifest} from './program-lineage.mjs';import {bin,directory} from './setup.mjs';
+import {networkProfile} from './network.mjs';import {acceptedBuilds} from './program-builds.mjs';import {nextProgramManifest} from './program-lineage.mjs';import {bin,directory} from './setup.mjs';
 const profile=networkProfile();if(profile.network==='localnet')throw Error('Use atomic-launch-deploy.mjs for localnet');
 const [binaryPath,flag]=process.argv.slice(2);if(!binaryPath)throw Error('usage: <binary.so> [--check-only]');const checkOnly=flag==='--check-only';
 const identities=JSON.parse(readFileSync(new URL('../deployment/MAINNET-IDENTITIES.json',import.meta.url),'utf8'));
 const bytes=readFileSync(binaryPath),sha256=createHash('sha256').update(bytes).digest('hex');
-const expectedHash=process.env.KIDS_PROGRAM_SHA256||identities.program.binarySha256;if(profile.network==='mainnet'&&sha256!==expectedHash)throw Error('Binary hash '+sha256.slice(0,16)+' is not the expected reproducible build '+expectedHash.slice(0,16)+' (set KIDS_PROGRAM_SHA256 to the CI hash of the new build)');
+const accepted=[process.env.KIDS_PROGRAM_SHA256,...acceptedBuilds(identities.program).map(b=>b.sha256)].filter(Boolean);const expectedHash=accepted.join(' or ');if(profile.network==='mainnet'&&!accepted.includes(sha256))throw Error('Binary hash '+sha256.slice(0,16)+' is not the expected reproducible build '+expectedHash.slice(0,16)+' (set KIDS_PROGRAM_SHA256 to the CI hash of the new build)');
 const keyDir=join(homedir(),'.config/kids',profile.network);const load=name=>{const p=join(keyDir,name+'-keypair.json');if(!existsSync(p))throw Error('Missing key file '+p);return {path:p,keypair:Keypair.fromSecretKey(Uint8Array.from(JSON.parse(readFileSync(p,'utf8'))))};};
 const program=load('program'),operator=load('operator');const governancePath=join(keyDir,'governance-keypair.json'),authorityPath=existsSync(governancePath)?governancePath:operator.path;
 if(profile.network==='mainnet'&&program.keypair.publicKey.toBase58()!==identities.program.programId)throw Error('Program keypair does not match the recorded program id');

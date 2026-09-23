@@ -14,18 +14,17 @@ import {resolvePostlaunchCampaign} from './postlaunch-campaign.mjs';
 import {readFileSync,existsSync} from 'node:fs';
 import {PublicKey} from '@solana/web3.js';
 import {NATIVE_MINT,TOKEN_PROGRAM_ID,unpackAccount,unpackMint} from '@solana/spl-token';
-import {atomicContext,readCampaign,CPMM,AMM_CONFIG} from './atomic-launch.mjs';
+import {atomicContext,readCampaign,CPMM,campaignPoolAddresses,approvedTier} from './atomic-launch.mjs';
 import {poolAddresses,decodePool} from './cpmm.mjs';
 import {singleFlight} from '../shared/single-flight.mjs';
 async function readPostlaunchState(scope='active'){
  const selected=await resolvePostlaunchCampaign(scope);
  if(!selected)return {configured:false,network:PROFILE.network,scope:scopeFor(PROFILE,scope==='active'),claims:null};
  const {ctx,state:campaign,signature}=selected;
- const p=poolAddresses(CPMM,AMM_CONFIG,campaign.mint,NATIVE_MINT);
- if(!p.pool.equals(campaign.pool))throw Error('Pool identity mismatch');
+ const p=campaignPoolAddresses(campaign.mint,campaign.pool);
  const {context,value}=await ctx.connection.getMultipleAccountsInfoAndContext([p.pool,p.vault0,p.vault1,campaign.mint],{commitment:'confirmed'});
  const pool=decodePool(value[0],CPMM,p);
- if(!pool.config.equals(AMM_CONFIG)||pool.creatorFeesEnabled)throw Error('Pool policy mismatch');
+ if(!pool.config.equals(p.config)||!approvedTier(pool.config)||pool.creatorFeesEnabled)throw Error('Pool policy mismatch');
  const vaults=[unpackAccount(p.vault0,value[1],TOKEN_PROGRAM_ID),unpackAccount(p.vault1,value[2],TOKEN_PROGRAM_ID)],mint=unpackMint(campaign.mint,value[3],TOKEN_PROGRAM_ID),data=value[0].data;
  for(let i=0;i<2;i++)if(!vaults[i].owner.equals(p.authority)||!vaults[i].mint.equals(i?p.mint1:p.mint0))throw Error('Pool vault identity mismatch');
  const reserve0=vaults[0].amount-data.readBigUInt64LE(341)-data.readBigUInt64LE(357)-data.readBigUInt64LE(397);
@@ -35,7 +34,7 @@ async function readPostlaunchState(scope='active'){
  const feeAddress=feeAddresses(ctx,selected.campaign,campaign.mint).state,feeAccount=await ctx.connection.getAccountInfo(feeAddress,'confirmed');let fees=null;
  if(feeAccount){const d=feeAccount.data;if(!feeAccount.owner.equals(ctx.programId)||d.length!==128||d.subarray(0,8).toString()!=='KIDSFEE1'||!d.subarray(8,40).equals(selected.campaign.toBuffer()))throw Error('Fee account identity mismatch');fees=Object.fromEntries(['childPending','totalSol','treasuryPaid','devPaid','parentAAllocated','parentBAllocated','parentASpent','parentBSpent','parentABurned','parentBBurned','childBurned'].map((name,i)=>[name,d.readBigUInt64LE(40+i*8).toString()]));}
 
- const {AMM_CONFIG,authorityAddress}=await import('./atomic-launch.mjs');const configInfo=await ctx.connection.getAccountInfo(AMM_CONFIG,'confirmed');const tradeFeeBps=configInfo?Number(configInfo.data.readBigUInt64LE(12))/100:null;const launchAuthority=authorityAddress(ctx,selected.campaign);
+ const {authorityAddress}=await import('./atomic-launch.mjs');const configInfo=await ctx.connection.getAccountInfo(p.config,'confirmed');const tradeFeeBps=configInfo?Number(configInfo.data.readBigUInt64LE(12))/100:p.tier.tradeFeeBps;const launchAuthority=authorityAddress(ctx,selected.campaign);
 
  const feeEvents=readFeeEvents(selected.campaign.toBase58());
 

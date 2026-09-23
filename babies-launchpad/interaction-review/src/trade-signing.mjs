@@ -1,5 +1,5 @@
 import {PublicKey,VersionedTransaction,TransactionMessage,SystemProgram} from '@solana/web3.js';
-const TOKEN=new PublicKey('TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA'),ATA=new PublicKey('ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL'),NATIVE=new PublicKey('So11111111111111111111111111111111111111112'),CPMM=new PublicKey('CPMMoo8L3F4NbTegBCKVNunggL7H1ZpdTHKxQB5qKP1C'),CONFIG=new PublicKey('2fGXL8uhqxJ4tpgtosHZXT4zcQap6j62z3bMDxdkMvy5');
+const TOKEN=new PublicKey('TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA'),ATA=new PublicKey('ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL'),NATIVE=new PublicKey('So11111111111111111111111111111111111111112'),CPMM=new PublicKey('CPMMoo8L3F4NbTegBCKVNunggL7H1ZpdTHKxQB5qKP1C'),CONFIGS=['2fGXL8uhqxJ4tpgtosHZXT4zcQap6j62z3bMDxdkMvy5','ESLj2Rzmvn3RhDo4Z18hY1wYmGyC9xM4ZtRXhvoFkDAi'].map(k=>new PublicKey(k))/* approved Raydium CPMM tiers: 2 % and 2.5 % */;
 const bytes=s=>new TextEncoder().encode(s),u64=(d,o)=>new DataView(d.buffer,d.byteOffset,d.byteLength).getBigUint64(o,true);
 export function decodeApprovedTrade(raw,q,expected){
  for(const key of ['owner','campaign','mint','pool','programId','genesisHash','side','inputRaw','minOutputRaw','intentId','expiresAt'])if(q[key]!==expected[key])throw Error('Trade quote changed: '+key);
@@ -8,8 +8,8 @@ export function decodeApprovedTrade(raw,q,expected){
  if(m.header.numRequiredSignatures!==2||m.staticAccountKeys[0].toBase58()!==q.owner||m.staticAccountKeys[1].toBase58()!==q.wrappedAccount||m.addressTableLookups?.length)throw Error('Unexpected trade signers');
  const pda=(s,...keys)=>PublicKey.findProgramAddressSync([bytes(s),...keys.map(k=>k.toBytes())],CPMM)[0];
  const ordered=[mint,NATIVE].sort((a,b)=>{const x=a.toBytes(),y=b.toBytes();for(let i=0;i<32;i++)if(x[i]!==y[i])return x[i]-y[i];return 0;});
+ const CONFIG=CONFIGS.find(c=>pda('pool',c,...ordered).toBase58()===q.pool);if(!CONFIG)throw Error('Unexpected pool');
  const pool=pda('pool',CONFIG,...ordered),authority=pda('vault_and_lp_mint_auth_seed'),child=PublicKey.findProgramAddressSync([owner.toBytes(),TOKEN.toBytes(),mint.toBytes()],ATA)[0];
- if(pool.toBase58()!==q.pool)throw Error('Unexpected pool');
  const ix=TransactionMessage.decompile(m).instructions;
  const check=(n,program,keys)=>{const v=ix[n];if(!v||!v.programId.equals(program)||v.keys.length!==keys.length||!keys.every((k,i)=>v.keys[i].pubkey.equals(k)))throw Error('Unexpected trade instruction '+n);return v.data;};
  if(ix.length!==5)throw Error('Unexpected extra trade instructions');
