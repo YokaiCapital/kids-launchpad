@@ -2,7 +2,10 @@ import {PublicKey,VersionedTransaction,TransactionMessage,SystemProgram} from '@
 const TOKEN=new PublicKey('TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA'),ATA=new PublicKey('ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL'),NATIVE=new PublicKey('So11111111111111111111111111111111111111112'),CPMM=new PublicKey('CPMMoo8L3F4NbTegBCKVNunggL7H1ZpdTHKxQB5qKP1C'),CONFIGS=['2fGXL8uhqxJ4tpgtosHZXT4zcQap6j62z3bMDxdkMvy5','ESLj2Rzmvn3RhDo4Z18hY1wYmGyC9xM4ZtRXhvoFkDAi'].map(k=>new PublicKey(k))/* approved Raydium CPMM tiers: 2 % and 2.5 % */;
 const bytes=s=>new TextEncoder().encode(s),u64=(d,o)=>new DataView(d.buffer,d.byteOffset,d.byteLength).getBigUint64(o,true);
 export function decodeApprovedTrade(raw,q,expected){
- for(const key of ['owner','campaign','mint','pool','programId','genesisHash','side','inputRaw','minOutputRaw','intentId','expiresAt'])if(q[key]!==expected[key])throw Error('Trade quote changed: '+key);
+ for(const key of ['owner','campaign','mint','pool','programId','genesisHash','side','inputRaw','minOutputRaw','intentId','expiresAt','slippageBps'])if(q[key]!==expected[key])throw Error('Trade quote changed: '+key);
+ // The minimum output must be at least the quoted output less the slippage the user chose (never wider).
+ if(!Number.isInteger(q.slippageBps)||q.slippageBps<1||q.slippageBps>5000)throw Error('Trade quote has no valid slippage');
+ if(BigInt(q.minOutputRaw)<BigInt(q.outputRaw)*BigInt(10000-q.slippageBps)/10000n)throw Error('Minimum output is below the chosen slippage');
  if(Date.now()>=q.expiresAt)throw Error('Quote expired');
  const tx=VersionedTransaction.deserialize(raw),m=tx.message,owner=new PublicKey(q.owner),mint=new PublicKey(q.mint),wrapped=new PublicKey(q.wrappedAccount);
  if(m.header.numRequiredSignatures!==2||m.staticAccountKeys[0].toBase58()!==q.owner||m.staticAccountKeys[1].toBase58()!==q.wrappedAccount||m.addressTableLookups?.length)throw Error('Unexpected trade signers');

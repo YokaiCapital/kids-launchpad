@@ -27,16 +27,22 @@ const history=createIntentRetention({file:fileURLToPath(file),service:'postlaunc
 let quoteQueue=Promise.resolve();
 const enqueueQuote=work=>{const p=quoteQueue.then(work);quoteQueue=p.catch(()=>{});return p;};
 function signerFor(owner){const key=['alice','bob'].map(localKey).find(k=>k.publicKey.toBase58()===owner);if(!key)throw Error('Trading is available only to authenticated local test wallets');return key;}
-export function tradeMath(amount,reserveIn,reserveOut,slippageBps){
+/** User swaps: slippage is the user's choice (owner, 23 September 2026: default 10 %, editable), bounded to 0.01 %..50 %.
+ * Keeper buybacks keep their own guards (active-fee-keeper.mjs); this bound is for user quotes only. */
+export const SLIPPAGE_BPS={min:1,max:5000,default:1000};
+export function validSlippageBps(bps){return Number.isInteger(bps)&&bps>=SLIPPAGE_BPS.min&&bps<=SLIPPAGE_BPS.max;}
+/** `tradeRate` is the pool's trade fee in Raydium units (per 1,000,000: 20000 = 2 %, 25000 = 2.5 %), read from its config. */
+export function tradeMath(amount,reserveIn,reserveOut,slippageBps,tradeRate=20000n){
  if(typeof amount!=='bigint'||amount<=0n||amount>18446744073709551615n||reserveIn<=0n||reserveOut<=0n)throw Error('Invalid raw trade amount or reserves');
- if(!Number.isInteger(slippageBps)||slippageBps<0||slippageBps>200)throw Error('Slippage must be between 0 and 200 basis points');
- const fee=(amount*20000n+999999n)/1000000n,net=amount-fee,output=net*reserveOut/(reserveIn+net),minimum=output*BigInt(10000-slippageBps)/10000n;
+ if(!validSlippageBps(slippageBps))throw Error('Slippage must be between 0.01 % and 50 %');
+ if(typeof tradeRate!=='bigint'||tradeRate<=0n||tradeRate>=1000000n)throw Error('Invalid pool trade rate');
+ const fee=(amount*tradeRate+999999n)/1000000n,net=amount-fee,output=net*reserveOut/(reserveIn+net),minimum=output*BigInt(10000-slippageBps)/10000n;
  if(net<=0n||minimum<=0n)throw Error('Trade too small');return{fee,output,minimum};
 }
 export function validateTradeInput(input){
  if(!['buy','sell'].includes(input.side)||typeof input.amountRaw!=='string'||! /^[1-9][0-9]{0,19}$/.test(input.amountRaw))throw Error('Use a positive exact raw-unit amount and buy or sell');
  if(!/^[a-zA-Z0-9-]{16,80}$/.test(input.requestId||''))throw Error('A unique request ID is required');
- if(!Number.isInteger(input.slippageBps)||input.slippageBps<0||input.slippageBps>200)throw Error('Slippage must be between 0 and 200 basis points');
+ if(!validSlippageBps(input.slippageBps))throw Error('Slippage must be between 0.01 % and 50 %');
  if(BigInt(input.amountRaw)>18446744073709551615n)throw Error('Amount exceeds u64');
 }
 async function reserves(ctx,state){
@@ -49,7 +55,7 @@ async function reserves(ctx,state){
  const d=infos[0].data;const a=vaults[0].amount-d.readBigUInt64LE(341)-d.readBigUInt64LE(357)-d.readBigUInt64LE(397),b=vaults[1].amount-d.readBigUInt64LE(349)-d.readBigUInt64LE(365)-d.readBigUInt64LE(405);
  return{p,a,b};
 }
-function publicIntent(i){return Object.fromEntries(['intentId','campaign','owner','side','inputRaw','outputRaw','minOutputRaw','feeRaw','expiresAt','decimalsIn','decimalsOut','signature','mint','pool','programId','genesisHash'].filter(k=>i[k]!==undefined).map(k=>[k,i[k]]));}
+function publicIntent(i){return Object.fromEntries(['intentId','slippageBps','campaign','owner','side','inputRaw','outputRaw','minOutputRaw','feeRaw','expiresAt','decimalsIn','decimalsOut','signature','mint','pool','programId','genesisHash'].filter(k=>i[k]!==undefined).map(k=>[k,i[k]]));}
 const fmt=(raw,decimals)=>{const s=raw.toString().padStart(decimals+1,'0');const whole=s.slice(0,-decimals),frac=s.slice(-decimals).replace(/0+$/,'');return whole+(frac?'.'+frac:'');};
 /** Refuse a quote the wallet cannot pay for, in plain words, before anything is signed. Buys keep 0.01 SOL for fees and the temporary wrapped-SOL account. */
 export async function assertTradeBalance(connection,owner,side,amountRaw,mint){
@@ -71,8 +77,8 @@ export async function quotePostlaunchTrade(owner,input){
   const {ctx,campaign,state}=await qualifiedCampaign(input.campaign);if(input.campaign!==campaign.toBase58())throw Error('Launch changed; refresh the coin');
   const {p,a,b}=await reserves(ctx,state),inputMint=input.side==='buy'?NATIVE_MINT:state.mint,forward=p.mint0.equals(inputMint);
   await assertTradeBalance(ctx.connection,owner,input.side,BigInt(input.amountRaw),state.mint);
-  const math=tradeMath(BigInt(input.amountRaw),forward?a:b,forward?b:a,input.slippageBps);
-  const intent={intentId:id,descriptor,campaign:campaign.toBase58(),owner,side:input.side,inputRaw:input.amountRaw,outputRaw:math.output.toString(),minOutputRaw:math.minimum.toString(),feeRaw:math.fee.toString(),expiresAt:Date.now()+30000,decimalsIn:input.side==='buy'?9:6,decimalsOut:input.side==='buy'?6:9,genesisHash:ctx.manifest.genesisHash,programSha256:ctx.manifest.sha256,programId:ctx.programId.toBase58(),mint:state.mint.toBase58(),pool:state.pool.toBase58()};
+  const math=tradeMath(BigInt(input.amountRaw),forward?a:b,forward?b:a,input.slippageBps,p.tier.trade);
+  const intent={intentId:id,descriptor,campaign:campaign.toBase58(),owner,side:input.side,slippageBps:input.slippageBps,inputRaw:input.amountRaw,outputRaw:math.output.toString(),minOutputRaw:math.minimum.toString(),feeRaw:math.fee.toString(),expiresAt:Date.now()+30000,decimalsIn:input.side==='buy'?9:6,decimalsOut:input.side==='buy'?6:9,genesisHash:ctx.manifest.genesisHash,programSha256:ctx.manifest.sha256,programId:ctx.programId.toBase58(),mint:state.mint.toBase58(),pool:state.pool.toBase58()};
   intents[id]=intent;save();return publicIntent(intent);
   }finally{release();}
  }));

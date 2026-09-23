@@ -122,13 +122,15 @@ export function createActiveFeeKeeper({resolve=()=>resolvePostlaunchCampaign('ac
     // Parent buybacks: KIDS_PARENT_BUYBACK_ROUTE = 'cpmm' (direct canonical pool, tag 24), 'jupiter-localnet' (Jupiter over the
     // parent's CPMM pool on a validator with Jupiter cloned) or 'jupiter' (Jupiter API route, mainnet). Slices are capped at 0.5 SOL.
     const routeMode=process.env.KIDS_PARENT_BUYBACK_ROUTE||'cpmm';
+    // One executed amount per operation: the quote, the price guard, the instruction and the journal all use it.
+    operation.executedAmount=amount.toString();
     if(operation.kind==='convert'){const quote=await boundedQuote(c,input,output,amount,state.pool);instruction=convertFeesInstruction(ctx,campaign,admin.publicKey,mint,amount,quote.minOutput,expiry,state.pool);}
     else if(routeMode==='cpmm'){const quote=await boundedQuote(c,input,output,amount);instruction=buyBurnInstruction(ctx,campaign,admin.publicKey,mint,output,operation.index,amount,quote.minOutput,expiry,programOf(output));}
     else{
-     const slice=amount>500000000n?500000000n:amount;let route,minOutput;
+     const slice=amount>500000000n?500000000n:amount;let route,minOutput,executed=slice;
      if(routeMode==='jupiter-localnet'){const quote=await boundedQuote(c,input,output,slice);minOutput=quote.minOutput;route=localnetParentRoute({feeAuthority:f.authority,parentMint:output,parentProgram:programOf(output),amount:slice,quotedOut:quote.quote});}
      else if(routeMode==='jupiter'){
-      const feed=parentPythFeed(output);const guardedSlice=feed?slice:(slice>100000000n?100000000n:slice);operation.slice=guardedSlice.toString();
+      const feed=parentPythFeed(output);const guardedSlice=feed?slice:(slice>100000000n?100000000n:slice);executed=guardedSlice;
       route=await fetchJupiterParentRoute({apiBase:process.env.KIDS_JUPITER_API||undefined,feeAuthority:f.authority,parentMint:output,parentProgram:programOf(output),amount:guardedSlice,minOut:1n,slippageBps:100});
       const decimals=(await c.getParsedAccountInfo(output)).value?.data?.parsed?.info?.decimals;if(!Number.isInteger(decimals))throw Error('Parent decimals unreadable');
       // Reference-price guard (price-guard.mjs): Pyth on-chain feeds when the parent has one, impact cap always; the result is journaled.
@@ -137,8 +139,8 @@ export function createActiveFeeKeeper({resolve=()=>resolvePostlaunchCampaign('ac
       if(guardedSlice!==slice)operation.sliceReducedNoReference=true;
      }
      else throw Error('Unknown parent buyback route mode');
-     operation.slice=slice.toString();lookupTables=route.lookupTables;
-     const sliceUsed=BigInt(operation.slice);
+     operation.slice=executed.toString();operation.executedAmount=executed.toString();lookupTables=route.lookupTables;
+     const sliceUsed=executed;
      instruction=jupiterBuyBurnInstruction(ctx,campaign,admin.publicKey,mint,output,operation.index,sliceUsed,minOutput,expiry,programOf(output),route);
     }
    }else throw Error('Unknown fee operation');
@@ -154,7 +156,7 @@ export function createActiveFeeKeeper({resolve=()=>resolvePostlaunchCampaign('ac
     if(isNothingToCollect(operation,error)){journal.current=null;journal.lastCollectedAt=await chainTime(c);persist();console.log(JSON.stringify({event:'fees-nothing-to-collect',campaign:identity.campaign}));return {status:'nothing-to-collect',campaign:identity.campaign};}
     throw error;
    }
-   const after=await readFees(ctx,campaign,mint).catch(()=>null);appendFeeEvent(journal,{id:operation.id,kind:operation.kind,index:operation.index??null,amount:operation.amount??operation.slice??null,signature,at:await chainTime(c),delta:feeDelta(before,after)});
+   const after=await readFees(ctx,campaign,mint).catch(()=>null);appendFeeEvent(journal,{id:operation.id,kind:operation.kind,index:operation.index??null,amount:operation.executedAmount??operation.slice??operation.amount??null,budget:operation.amount??null,signature,at:await chainTime(c),delta:feeDelta(before,after)});
    if(operation.kind==='collect')journal.lastCollectedAt=await chainTime(c);journal.current=null;persist();
    return {status:'completed',operation:operation.kind,signature,campaign:identity.campaign};
   }finally{running=false;}
