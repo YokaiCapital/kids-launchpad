@@ -1,8 +1,8 @@
 {
   "coin": "Shartcoin",
   "opensAt": null,
-  "soft": "100000000000",
-  "hard": "500000000000",
-  "deadlineSeconds": 86400,
-  "note": "Opening date to be announced. Set opensAt (ISO 8601, UTC) here and redeploy the API; the campaign itself is created on launch day."
+  "soft": "1000000000",
+  "hard": "5000000000",
+  "deadlineSeconds": 180,
+  "note": "Owner test launch on mainnet: 1 SOL soft cap, 5 SOL hard cap, 3 minutes to commit. The clock starts when the campaign is created at API boot."
 }

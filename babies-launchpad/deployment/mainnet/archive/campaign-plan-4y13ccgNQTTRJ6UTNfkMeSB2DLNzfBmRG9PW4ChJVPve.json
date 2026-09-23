@@ -2,12 +2,12 @@
   "network": "mainnet",
   "programId": "BLiaZWNQoPm4mG4cXNm4sXifFqs1Xmxx12qD9T4Y5NeN",
   "creator": "AAuwkFNvXRimHyvdQfh7Zik9baw8W2ufSbc5cyBqsdoE",
-  "nonce": "12957019611345843413",
-  "campaign": "9zT7cyDvveF4t5LTs8vcyfFQeZwJv6B6KFEMWg1G6ZLT",
+  "nonce": "349636494910775658",
+  "campaign": "4y13ccgNQTTRJ6UTNfkMeSB2DLNzfBmRG9PW4ChJVPve",
   "terms": {
-    "soft": "1000000000",
-    "hard": "5000000000",
-    "deadlineSeconds": 180
+    "soft": "100000000000",
+    "hard": "500000000000",
+    "deadlineSeconds": 86400
   },
   "parents": [
     {
@@ -21,6 +21,6 @@
   ],
   "dev": "EkqTC1NbAg9zjFxdWY4psYtyHU3JpXDeXCkerSahraSJ",
   "treasury": "91eLwFTAxkcQLPSMxbzdSFkTyEwyRYcoZk64HMZj8vX",
-  "plannedAt": "2026-09-23T01:35:20.639Z",
-  "snapshotDirectory": "deployment/mainnet/snapshots/9zT7cyDvveF4t5LTs8vcyfFQeZwJv6B6KFEMWg1G6ZLT"
+  "plannedAt": "2026-09-22T22:42:29.332Z",
+  "snapshotDirectory": "deployment/mainnet/snapshots/4y13ccgNQTTRJ6UTNfkMeSB2DLNzfBmRG9PW4ChJVPve"
 }
