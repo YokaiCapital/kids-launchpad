@@ -5,6 +5,10 @@ import {ParentIcon} from './Parents';
 import {formatUnits,formatSolAmount} from './flywheel-format.mjs';
 import {formatUtc} from './launch-status.mjs';
 import {remainingRaw,claimedAll,parentState,devSchedule} from './claim-view.mjs';
+import {ParentClaimValue} from './ParentClaimValue';
+import {parentStatsFor} from './valuation.mjs';
+import {fetchMarket} from './market-data.mjs';
+import {Help} from './Help';
 const short=value=>value?`${value.slice(0,5)}…${value.slice(-5)}`:'';
 const PARENTS=['Fartcoin','Buttcoin'];
 function Row({label,icon,tag,amount,unit,note,state,children}){
@@ -15,7 +19,7 @@ function Row({label,icon,tag,amount,unit,note,state,children}){
  * `act(action)` claims on the coin page; when it is absent the panel is read-only (header modal) and `onOpen` leads
  * to the coin page. Amounts shown are what remains to claim, never the total entitlement.
  */
-export function ClaimPanel({owner,claims,data,verified,loading,error,onSignIn,act,busy='',canClaim,reasonFor,onOpen,onRefresh,result}){
+export function ClaimPanel({owner,claims,data,verified,loading,error,onSignIn,act,busy='',canClaim,reasonFor,onOpen,onRefresh,result,priceSol=null}){
  const decimals=Number.isInteger(data?.decimals)?data.decimals:6,readOnly=!act;
  if(!owner)return <div className="claim-panel claim-panel-empty"><p>Sign in to see what you can claim.</p><p className="claim-panel-sub">Prelaunch tokens, SOL refunds and parent rewards are read for the signed-in wallet only.</p><button className="primary" onClick={onSignIn}>Sign in</button></div>;
  if(loading||(!data&&!error))return <div className="claim-panel claim-panel-empty" aria-busy="true"><p>Checking claims for {short(owner)}…</p></div>;
@@ -35,10 +39,10 @@ export function ClaimPanel({owner,claims,data,verified,loading,error,onSignIn,ac
   <h3 className="claim-group-title">Your allocation</h3>
   <Row label="Prelaunch tokens" state={participantState} amount={formatUnits(participantLeft,decimals,2)} unit="$Shartcoin left" note={participantState==='claimed'?'All claimed: these coins are in your wallet.':participantState==='off'?'No prelaunch allocation for this wallet.':`Allocated ${formatUnits(claims.participant.allocatedRaw,decimals,2)} · claimed ${formatUnits(claims.participant.claimedRaw,decimals,2)}. No deadline.`}>{button('participant',0,'Claim')}</Row>
   <Row label="SOL refund" state={refundState} amount={formatSolAmount(refundLeft).text} note={refundState==='claimed'?`${formatSolAmount(claims.refund.refundedLamports).text} refunded. Nothing left.`:refundState==='off'?'No refund due for this wallet.':`Excess over your accepted commitment. ${formatSolAmount(claims.refund.refundedLamports).text} refunded so far. No deadline.`}>{button('refund',0,'Claim refund')}</Row>
-  <h3 className="claim-group-title">Parent rewards <small>5 % of supply each · either parent counts</small></h3>
+  <h3 className="claim-group-title">Parent rewards <small>5 % of supply each · either parent counts<Help label="Parent rewards">Wallets that held a parent at its snapshot get a share of that parent's Shartcoin pool. Holding either parent is enough; holding both gives a share of each.</Help></small></h3>
   {parentDeadline&&<p className="claim-group-note"><b>Claim by {parentDeadline}</b><time dateTime={new Date(claims.vault.parentExpiryUnix*1000).toISOString()}> · {new Date(claims.vault.parentExpiryUnix*1000).toLocaleString()} your time</time>. Unclaimed parent rewards are burned after this deadline.</p>}
-  {PARENTS.map((name,index)=>{const row=claims.parents?.[index],p=parentState(row,claims.vault,decimals),snapshot=row?.snapshotSlot??data?.parentSnapshot?.slot??null,snapshotAt=row?.snapshotAtUnix??data?.parentSnapshot?.atUnix??null;
-   return <Row key={name} icon={<ParentIcon name={name}/>} label={name+' holders'} tag={p.state==='open'?'Eligible':p.state==='claimed'?'Claimed':p.state==='expired'?'Closed':p.state==='ineligible'?'Not eligible':'Unknown'} state={p.state==='ineligible'||p.state==='unknown'?'off':p.state} amount={p.state==='open'||p.state==='expired'?p.remainingText:null} unit={p.state==='open'||p.state==='expired'?'$Shartcoin left':null} note={p.note+(p.state==='open'&&row?.claimedRaw&&BigInt(row.claimedRaw)>0n?` Allocated ${formatUnits(row.allocationRaw,decimals,2)} · claimed ${formatUnits(row.claimedRaw,decimals,2)}.`:'')+(snapshot!=null?` Snapshot slot ${Number(snapshot).toLocaleString('en-GB')}${snapshotAt?' · '+formatUtc(snapshotAt):''}.`:'')}>{p.state==='open'?button('parent',index,'Claim'):null}</Row>;})}
+  {PARENTS.map((name,index)=>{const row=claims.parents?.[index],p=parentState(row,claims.vault,decimals),stats=parentStatsFor(data,index);
+   return <Row key={`${name}:${owner}:${claims.campaign||''}`} icon={<ParentIcon name={name}/>} label={name+' holders'} tag={p.state==='open'?'Eligible':p.state==='claimed'?'Claimed':p.state==='expired'?'Closed':p.state==='ineligible'?'Not eligible':'Unknown'} state={p.state==='ineligible'||p.state==='unknown'?'off':p.state} amount={p.state==='open'||p.state==='expired'?p.remainingText:null} unit={p.state==='open'||p.state==='expired'?'$Shartcoin left':null} note={p.note+(p.state==='open'&&row?.claimedRaw&&BigInt(row.claimedRaw)>0n?` Allocated ${formatUnits(row.allocationRaw,decimals,2)} · claimed ${formatUnits(row.claimedRaw,decimals,2)}.`:'')}>{p.state==='open'?button('parent',index,'Claim'):null}<ParentClaimValue name={name} stats={stats} row={row} state={p} decimals={decimals} priceSol={priceSol} data={data}/></Row>;})}
   <h3 className="claim-group-title">Dev vesting <small>3 % of supply · 1 % at launch, 2 % linear over three months</small></h3>
   <Row label="Dev allocation" state={dev.isDev&&dev.claimableRaw&&BigInt(dev.claimableRaw)>0n?'open':'off'} tag={dev.isDev?'Your wallet':null} amount={dev.remainingRaw!=null?formatUnits(dev.remainingRaw,decimals,2):null} unit={dev.remainingRaw!=null?'$Shartcoin left to vest':null}
    note={[dev.startUnix?'Starts '+formatUtc(dev.startUnix):null,dev.endUnix?'ends '+formatUtc(dev.endUnix):null].filter(Boolean).join(' · ')+(dev.totalRaw!=null?`. Total ${formatUnits(dev.totalRaw,decimals,2)}`:'')+(dev.claimedRaw!=null?` · claimed ${formatUnits(dev.claimedRaw,decimals,2)}`:dev.isDev?'':' · claimed and remaining are read from the dev wallet')+(dev.isDev&&dev.claimableRaw!=null?` · ${formatUnits(dev.claimableRaw,decimals,2)} claimable now`:'')+'.'+(dev.beneficiary?` Beneficiary ${short(dev.beneficiary)}${dev.isDev?' (you)':''}.`:'')}>
@@ -55,6 +59,8 @@ export function AllocationsModal({identity,onSignIn,onOpen}){
  const data=snapshot?.owner===owner?snapshot.data:null;
  const verified=data?.configured===true&&['localnet','devnet','mainnet'].includes(data.network)&&data.scope==='active-'+data.network&&typeof data.mint==='string'&&typeof data.pool==='string';
  const claims=verified&&data.claims?.owner===owner?data.claims:null;
+ const [price,setPrice]=useState(null);
+ useEffect(()=>{const campaign=verified?data.campaign:null;setPrice(null);if(!campaign)return;const controller=new AbortController();fetchMarket('summary',{campaign},{signal:controller.signal}).then(r=>{if(r.ok&&!controller.signal.aborted)setPrice(typeof r.data?.priceSol==='number'?r.data.priceSol:null);});return()=>controller.abort();},[verified,data?.campaign]);
  if(owner&&data&&!verified&&!error)return <div className="claim-panel claim-panel-empty"><p>Shartcoin has not launched yet, so there is nothing to claim.</p><p className="claim-panel-sub">Parent holders qualify by holding at least 0.05 % of a parent at its snapshot; claims open on the coin page after launch.</p></div>;
- return <ClaimPanel owner={owner} claims={claims} data={data} verified={verified} loading={!!owner&&!data&&!error} error={error} onSignIn={onSignIn} onOpen={onOpen} onRefresh={()=>setTick(n=>n+1)}/>;
+ return <ClaimPanel owner={owner} claims={claims} data={data} verified={verified} loading={!!owner&&!data&&!error} error={error} onSignIn={onSignIn} onOpen={onOpen} onRefresh={()=>setTick(n=>n+1)} priceSol={price}/>;
 }

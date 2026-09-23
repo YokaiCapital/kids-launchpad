@@ -19,6 +19,8 @@ import {compactUnits} from './flywheel-format.mjs';
 import {ActivityFeed} from './ActivityFeed';
 import {formatUtc} from './launch-status.mjs';
 import {claimableItems,claimedAll,custodyFacts,networkFact,parentState,remainingRaw} from './claim-view.mjs';
+import {Help} from './Help';
+import {parentStatsList} from './valuation.mjs';
 const formatWhole=(value,decimals=6)=>value==null?'—':Math.round(Number(value)/10**decimals).toLocaleString('en-GB');
 const format=(value,decimals=6)=>value==null?'—':(Number(value)/10**decimals).toLocaleString('en-GB',{maximumFractionDigits:decimals===9?4:2});
 function moveTab(event){const tabs=[...event.currentTarget.querySelectorAll('[role="tab"]')],index=tabs.indexOf(event.target);if(index<0)return;let next;if(event.key==='ArrowRight')next=(index+1)%tabs.length;else if(event.key==='ArrowLeft')next=(index+tabs.length-1)%tabs.length;else if(event.key==='Home')next=0;else if(event.key==='End')next=tabs.length-1;else return;event.preventDefault();tabs[next].focus();tabs[next].click();}
@@ -33,20 +35,20 @@ function Flywheel({data,verified}){
  // Token counters are raw base units: the child mint's decimals from the record (6), parents at 6. SOL is lamports.
  const childDecimals=Number.isInteger(data?.decimals)?data.decimals:6,parentDecimals=6;
  const childBurned=compactUnits(f?.childBurned,childDecimals,'coins');
- const parentStats=Array.isArray(data?.parentStats)?data.parentStats:[];
+ const parentStats=parentStatsList(data);
  const names={coin:verified?data.mint:null,parentMints:PARENT_NAMES.map((_,i)=>parentStats.find(p=>p?.index===i)?.mint||null),parents:PARENT_NAMES};
- return <section className="post-flywheel"><div className="post-flywheel-head"><div><h2>Every trade feeds the family.</h2><p>{feeSentence(verified?data.tradeFeeBps:null)}</p></div><span className="post-preview-badge">{f?format(f.totalSol,9)+' SOL collected':'No fees yet'}</span></div>
+ return <section className="post-flywheel"><div className="post-flywheel-head"><div><h2>Every trade feeds the family.</h2><p>{feeSentence(verified?data.tradeFeeBps:null)}</p></div><span className="post-preview-badge">{f?format(f.totalSol,9)+' SOL collected':'No fees yet'}<Help label="SOL collected">All the SOL the pool fee has brought in since launch. It is split between the KIDS treasury, the dev and buybacks of both parents.</Help></span></div>
   <div className="post-flywheel-grid">
-   <div className="post-flywheel-tile is-burn"><span>$Shartcoin burned from fees</span><strong title={childBurned.exact||undefined}>{childBurned.text} <small>coins</small></strong><em><Burn/> never sold</em></div>
-   <div className="post-flywheel-tile"><span>KIDS treasury</span><Figure raw={f?.treasuryPaid} decimals={9} unit="SOL"/></div>
-   <div className="post-flywheel-tile"><span>Dev</span><Figure raw={f?.devPaid} decimals={9} unit="SOL"/></div>
+   <div className="post-flywheel-tile is-burn"><span>$Shartcoin burned from fees<Help label="$Shartcoin burned from fees">The coin side of the pool fee. These coins are destroyed for good, never sold back into the pool.</Help></span><strong title={childBurned.exact||undefined}>{childBurned.text} <small>coins</small></strong><em><Burn/> never sold</em></div>
+   <div className="post-flywheel-tile"><span>KIDS treasury<Help label="KIDS treasury">The part of the SOL fee that has been paid to the KIDS treasury so far.</Help></span><Figure raw={f?.treasuryPaid} decimals={9} unit="SOL"/></div>
+   <div className="post-flywheel-tile"><span>Dev<Help label="Dev">The part of the SOL fee that has been paid to the Shartcoin dev wallet so far.</Help></span><Figure raw={f?.devPaid} decimals={9} unit="SOL"/></div>
    {PARENT_NAMES.map((name,i)=>{const spent=f?(i?f.parentBSpent:f.parentASpent):null,burned=compactUnits(f?(i?f.parentBBurned:f.parentABurned):null,parentDecimals,name+' burned');let queued=null;try{if(f){const q=BigInt(i?f.parentBAllocated:f.parentAAllocated)-BigInt(spent);if(q>0n)queued=q;}}catch{}
-    return <div key={name} className="post-flywheel-tile is-burn"><span><ParentIcon name={name}/> {name} buyback</span><Figure raw={spent} decimals={9} unit="SOL"/><em title={burned.exact||undefined}><Burn/> {burned.text} burned</em>{queued!=null&&<small>{format(queued,9)} SOL queued, not yet bought</small>}</div>;})}
+    return <div key={name} className="post-flywheel-tile is-burn"><span><ParentIcon name={name}/> {name} buyback<Help label={name+' buyback'}>SOL from the fee that bought {name} on the open market. Every coin bought this way is burned.</Help></span><Figure raw={spent} decimals={9} unit="SOL"/><em title={burned.exact||undefined}><Burn/> {burned.text} burned</em>{queued!=null&&<small>{format(queued,9)} SOL queued, not yet bought</small>}</div>;})}
   </div>
   <ActivityFeed campaign={verified?data.campaign:null} data={verified?data:null} names={names} enabled={verified}/>
  </section>;
 }
-function Metric({label,value,unit,note,tone,fresh,title}){return <div className="post-metric"><span>{label}</span><strong className={tone?'is-'+tone:undefined} title={title||undefined}>{value}{unit&&<small>{unit}</small>}</strong>{(note||fresh)&&<small>{note&&<span>{note}</span>}{fresh&&<em className={`post-metric-fresh is-${fresh.tone}`}>{fresh.text}</em>}</small>}</div>;}
+function Metric({label,value,unit,note,tone,fresh,title,help}){return <div className="post-metric"><span>{label}{help&&<Help label={label}>{help}</Help>}</span><strong className={tone?'is-'+tone:undefined} title={title||undefined}>{value}{unit&&<small>{unit}</small>}</strong>{(note||fresh)&&<small>{note&&<span>{note}</span>}{fresh&&<em className={`post-metric-fresh is-${fresh.tone}`}>{fresh.text}</em>}</small>}</div>;}
 /** Market summary for the metrics row: read every 10 s while the page is visible, last valid answer kept through failures. */
 function useMarketSummary(campaign,enabled){
  const [state,setState]=useState({summary:null,result:null,readAt:null,now:Math.floor(Date.now()/1000)});
@@ -124,9 +126,9 @@ export function PostLaunch({identity,onSignIn,profile,posts=[],go,preview=false}
      <Metric label="Price" value={price.text} unit={price.exact?' SOL':null} title={price.exact?price.exact+' SOL per $Shartcoin':undefined} note="SOL per $Shartcoin" fresh={feedFresh}/>
      <Metric label="24h change" value={change.text} tone={change.tone==='up'||change.tone==='down'?change.tone:null} note="Against the price 24 hours ago" fresh={feedFresh}/>
      <Metric label="24h volume" value={volume.text} unit={volume.exact?' SOL':null} title={volume.exact?volume.exact+' SOL traded in 24 hours':undefined} note={marketOk&&summary?.trades24h!=null?Number(summary.trades24h).toLocaleString('en-GB')+' trades':'Traded in the last 24 hours'} fresh={feedFresh}/>
-     <Metric label="Pool liquidity" value={liquidity?formatSol(liquidity.total??liquidity.solSide):'—'} unit={liquidity&&(liquidity.total??liquidity.solSide)!=null?' SOL':null} title={liquidity?.total!=null?formatSol(liquidity.solSide)+' SOL + '+formatSol(liquidity.coinSideSol)+' SOL in $Shartcoin at the last price':undefined} note={liquidity?.total!=null?`${formatSol(liquidity.solSide,2)} SOL + $Shartcoin worth ${formatSol(liquidity.coinSideSol,2)} SOL at the last price`:liquidity?.solSide!=null?'SOL side only; the coin side needs a price from the feed':'Both sides of the pool'} fresh={poolFresh}/>
-     <Metric label="Token reserve" value={verified?formatWhole(data.baseReserveRaw,decimals):'—'} note="$Shartcoin in the pool" fresh={poolFresh}/>
-     <Metric label="Pool fee" value={verified&&data.tradeFeeBps?(data.tradeFeeBps/100).toLocaleString('en-GB')+'%':'—'} note={verified&&data.tradeFeeBps?'Read from the pool':'Not served'} fresh={verified&&data.tradeFeeBps?poolFresh:null}/>
+     <Metric label="Pool liquidity" value={liquidity?formatSol(liquidity.total??liquidity.solSide):'—'} unit={liquidity&&(liquidity.total??liquidity.solSide)!=null?' SOL':null} title={liquidity?.total!=null?formatSol(liquidity.solSide)+' SOL + '+formatSol(liquidity.coinSideSol)+' SOL in $Shartcoin at the last price':undefined} note={liquidity?.total!=null?`${formatSol(liquidity.solSide,2)} SOL + $Shartcoin worth ${formatSol(liquidity.coinSideSol,2)} SOL at the last price`:liquidity?.solSide!=null?'SOL side only; the coin side needs a price from the feed':'Both sides of the pool'} fresh={poolFresh} help="The SOL in the pool plus its $Shartcoin valued at the last trade price. A deeper pool moves less on each trade."/>
+     <Metric label="Token reserve" value={verified?formatWhole(data.baseReserveRaw,decimals):'—'} note="$Shartcoin in the pool" fresh={poolFresh} help="How many $Shartcoin sit in the pool right now. Buys take coins out of it, sells put coins back."/>
+     <Metric label="Pool fee" value={verified&&data.tradeFeeBps?(data.tradeFeeBps/100).toLocaleString('en-GB')+'%':'—'} note={verified&&data.tradeFeeBps?'Read from the pool':'Not served'} fresh={verified&&data.tradeFeeBps?poolFresh:null} help="The share of every trade that goes to the pool, read from the pool itself. Part of it feeds the family; the rest is Raydium's share."/>
     </div>
     <section className="post-market-panel" aria-label="Coin market and media"><div className="post-panel-tabs" role="tablist" onKeyDown={moveTab} aria-label="Coin content">{['Market','Dev updates',...(video?['Video']:[])].map(name=><button id={`post-tab-${name.replaceAll(' ','-')}`} key={name} role="tab" tabIndex={tab===name?0:-1} aria-selected={tab===name} aria-controls="post-content-panel" onClick={()=>setTab(name)}>{name==='Market'?<ChartLine size={17}/>:name==='Video'?<Play size={17}/>:null}{name}</button>)}</div>
      <div id="post-content-panel" role="tabpanel" aria-labelledby={`post-tab-${tab.replaceAll(' ','-')}`} className={`post-panel-content ${tab==='Video'?'is-video':''}${tab==='Market'&&verified?' is-market':''}`}>
@@ -158,7 +160,7 @@ export function PostLaunch({identity,onSignIn,profile,posts=[],go,preview=false}
     <div className="post-rail-tabs" role="tablist" aria-label="Trade or claim" onKeyDown={moveTab}>{['Trade','Claims'].map(name=><button key={name} id={`post-rail-tab-${name}`} role="tab" tabIndex={railTab===name?0:-1} aria-selected={railTab===name} aria-controls="post-rail-panel" onClick={()=>setRailTab(name)}>{name}{name==='Claims'&&claims&&claimableItems(claims,decimals).length>0&&<i className="post-rail-dot" role="img" aria-label="something to claim"/>}</button>)}</div>
     <div id="post-rail-panel" role="tabpanel" aria-labelledby={`post-rail-tab-${railTab}`} className="post-rail-panel">
      {railTab==='Trade'&&<LocalTradePanel owner={owner} campaign={data?.campaign} tradeFeeBps={data?.tradeFeeBps||null} wallet={data?.wallet||null} network={data?.network||'localnet'} enabled={verified&&!!owner} localExecution={claims?.localClaimEnabled===true} mint={data?.mint} pool={data?.pool} programId={data?.programId} genesisHash={data?.genesisHash} onSignIn={onSignIn} onTraded={()=>setRefresh(n=>n+1)}/>}
-     {railTab==='Claims'&&<div aria-busy={!!claimBusy}><ClaimPanel owner={owner} claims={claims} data={data} verified={verified} loading={loading} error={error} onSignIn={onSignIn} act={claim} busy={claimBusy} canClaim={canClaim} reasonFor={reasonFor} onRefresh={()=>setRefresh(n=>n+1)} result={claimResult}/></div>}
+     {railTab==='Claims'&&<div aria-busy={!!claimBusy}><ClaimPanel owner={owner} claims={claims} data={data} verified={verified} loading={loading} error={error} onSignIn={onSignIn} act={claim} busy={claimBusy} canClaim={canClaim} reasonFor={reasonFor} onRefresh={()=>setRefresh(n=>n+1)} result={claimResult} priceSol={marketOk?summary?.priceSol:null}/></div>}
     </div>
    </aside>
    <Flywheel data={data} verified={verified}/>

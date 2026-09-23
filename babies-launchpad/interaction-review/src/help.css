@@ -1,0 +1,18 @@
+/* Help popover (owner UX review, 23 September 2026): a "?" beside a term, high-contrast panel, 44 px hit area. */
+.help{position:relative;display:inline-flex;align-items:center;vertical-align:middle;margin-left:2px}
+.help>.help-button{position:relative;display:inline-grid;place-items:center;width:24px;height:24px;min-width:0;min-height:0;max-width:24px;max-height:24px;flex:none;padding:0;margin:0;opacity:1;font-size:0;line-height:0;box-shadow:none;transform:none;border:1px solid var(--help-line,#6d5385);border-radius:50%;background:transparent;color:var(--help-fg,#c9b6d8);cursor:help;touch-action:manipulation;transition:color .15s,border-color .15s,background .15s}
+.help-button::before{content:"";position:absolute;inset:-10px;border-radius:50%}
+.help>.help-button:hover,.help>.help-button[aria-expanded=true]{color:var(--help-accent,#ff77ce);border-color:var(--help-accent,#ff77ce);background:rgba(255,119,206,.1)}
+.help-button:focus-visible{outline:2px solid var(--help-focus,#8cecff);outline-offset:2px}
+.help-live{position:absolute;top:100%;left:0;width:0;height:0;overflow:visible}
+.help-panel{position:absolute;z-index:30;top:8px;width:min(280px,calc(100vw - 24px));padding:10px 12px 11px;border:1px solid var(--help-line,#6d5385);border-left:3px solid var(--help-accent,#ff77ce);border-radius:10px;background:#0f0a16;color:#fff4fc;font-size:13px;font-weight:400;line-height:1.5;letter-spacing:0;text-transform:none;text-align:left;white-space:normal;box-shadow:0 12px 32px rgba(0,0,0,.55);font-variant-numeric:normal;animation:help-in .14s ease-out}
+.help-panel.is-above{top:auto;bottom:calc(24px + 8px)}
+.help-panel>b{display:block;margin-bottom:3px;font-weight:700;color:#ffd0ee}
+.help-panel::after{content:"";position:absolute;left:var(--help-arrow,20px);width:10px;height:10px;background:#0f0a16;border:1px solid var(--help-line,#6d5385);border-right:0;border-bottom:0;transform:translateX(-50%) rotate(45deg)}
+.help-panel.is-below::after{top:-6px}
+.help-panel.is-above::after{bottom:-6px;transform:translateX(-50%) rotate(225deg)}
+@keyframes help-in{from{opacity:0;transform:translateY(-3px)}to{opacity:1;transform:none}}
+@media(prefers-reduced-motion:reduce){.help-panel{animation:none}.help-button{transition:none}}
+/* Beside a large figure the ring sits on the baseline; inside metric labels it stays 12 px text-sized. */
+.post-flywheel-tile>span .help,.post-metric>span .help,.funding-cap-labels small .help,.claim-eligibility .help,.post-swap-terms .help,.post-swap-row>span .help,.claim-group-title .help{margin-left:4px}
+.post-preview-badge .help{margin-left:6px}

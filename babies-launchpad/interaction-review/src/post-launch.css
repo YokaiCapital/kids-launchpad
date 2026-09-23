@@ -51,3 +51,4 @@ dialog .claim-panel{padding-top:0;font-size:14px}dialog .claim-row-note{font-siz
 .post-burn-more{display:inline-flex;min-height:36px;margin-top:8px;font-size:13px}
 @media(prefers-reduced-motion:reduce){.post-socials>a,.post-rail-tabs>button{transition:none}}
 @media(max-width:760px){.post-claim-strip{margin-top:0;padding:10px 12px}.post-claim-strip .post-claim-strip-open{width:100%;margin-left:0;justify-content:center}.post-launch .post-socials>a{width:40px;height:40px}.post-rail-tabs{grid-column:1/-1}.post-rail-panel{grid-column:1/-1}.post-terminal>.post-flywheel{margin-top:16px}}
+.post-swap-terms-slippage{display:inline-flex;align-items:center;gap:2px}

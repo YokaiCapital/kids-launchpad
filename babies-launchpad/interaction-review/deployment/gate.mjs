@@ -5,7 +5,43 @@ const headers = { 'cache-control': 'private, no-store', 'x-robots-tag': 'noindex
 async function digest(value) { return new Uint8Array(await crypto.subtle.digest('SHA-256', encoder.encode(value))); }
 async function equal(a, b) { const [x,y] = await Promise.all([digest(a),digest(b)]); let diff=0; for(let i=0;i<x.length;i++) diff |= x[i]^y[i]; return diff===0; }
 async function signature(value, secret) { const key=await crypto.subtle.importKey('raw',encoder.encode(secret),{name:'HMAC',hash:'SHA-256'},false,['sign']); return Array.from(new Uint8Array(await crypto.subtle.sign('HMAC',key,encoder.encode(value))),x=>x.toString(16).padStart(2,'0')).join(''); }
-function page(error=false, operator=false) { return new Response(`<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>KIDS · Private access</title><style>body{margin:0;min-height:100dvh;display:grid;place-items:center;background:#140e1d;color:#fff1fb;font:16px system-ui}main{width:min(340px,80vw);padding:32px;border:1px solid #49324f;border-radius:20px;background:#20152c}h1{font-size:36px;margin:0 0 8px}p{color:#bcaac7}input,button{box-sizing:border-box;width:100%;font:inherit;padding:14px;border-radius:10px;margin-top:12px}input{background:#140e1d;border:1px solid #6c507c;color:white}button{background:#ff72d2;border:0;font-weight:700;color:#211025}</style><main><h1>kids.fun</h1><p>Private access. Enter the ${operator?'operator':'site'} password.</p>${error?'<p role="alert">Password not recognised.</p>':''}<form method="post" action="/${operator?'__operator':'__access'}"><input type="password" name="password" autocomplete="current-password" aria-label="Site password" maxlength="256" required><button>Enter</button></form></main></html>`, {status:error?401:200,headers:{...headers,'content-type':'text/html; charset=utf-8','content-security-policy':"default-src 'none'; style-src 'unsafe-inline'; form-action 'self'; frame-ancestors 'none'; base-uri 'none'"}}); }
+function page(error=false, operator=false) { return new Response(`<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="color-scheme" content="dark"><title>KIDS · Private access</title><style>
+:root{--bg:#130d1b;--card:#1b1128;--line:#4a3358;--fg:#fff4fc;--muted:#c9b6d8;--pink:#ff77ce;--pink-hover:#ff9bdc;--pink-shadow:#973f8c;--lilac:#a88aff;--ice:#8cecff;--ink:#250d2a;--error:#ffb3d4;color-scheme:dark}
+*{box-sizing:border-box}html,body{height:100%}body{margin:0;min-height:100dvh;display:grid;place-items:center;padding:24px 16px;background:var(--bg);color:var(--fg);font:16px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;-webkit-font-smoothing:antialiased;position:relative;overflow-x:hidden}
+body::before{content:"";position:fixed;inset:-20vmax;pointer-events:none;background:radial-gradient(38vmax 30vmax at 22% 24%,rgba(255,119,206,.22),transparent 60%),radial-gradient(34vmax 30vmax at 78% 76%,rgba(168,138,255,.22),transparent 60%)}
+body::after{content:"";position:fixed;inset:0;pointer-events:none;opacity:.5;background-image:radial-gradient(rgba(255,255,255,.05) .6px,transparent .7px);background-size:3px 3px;mix-blend-mode:screen}
+main{position:relative;width:min(380px,100%);padding:30px 28px 28px;border:1px solid var(--line);border-radius:22px;background:var(--card);box-shadow:0 30px 80px rgba(0,0,0,.55),0 0 0 1px rgba(255,255,255,.02) inset,0 0 60px rgba(255,119,206,.08)}
+.mark{display:block;width:118px;height:36px;margin:0 0 22px}
+h1{font-size:44px;line-height:1;letter-spacing:-1.6px;font-weight:800;margin:0 0 8px}
+.sub{margin:0 0 24px;color:var(--muted);font-size:15px}
+label{display:block;font-size:13px;font-weight:600;color:var(--muted);margin:0 0 6px}
+input{display:block;width:100%;min-height:50px;padding:12px 14px;border-radius:12px;border:1px solid #6a4d80;background:#120c1a;color:var(--fg);font:inherit;font-size:17px;letter-spacing:.12em;transition:border-color .15s,box-shadow .15s}
+input::placeholder{color:#7c6690;letter-spacing:.12em}
+input:hover{border-color:#8a68a6}
+input:focus{outline:none;border-color:var(--ice)}
+input:focus-visible{outline:2px solid var(--ice);outline-offset:2px}
+input[aria-invalid=true]{border-color:var(--error)}
+.err{display:flex;align-items:center;gap:8px;margin:10px 0 0;font-size:14px;font-weight:600;color:var(--error)}
+.err svg{flex-shrink:0}
+button{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;min-height:52px;margin-top:16px;padding:12px 18px;border:1px solid var(--pink);border-radius:12px;background:var(--pink);color:var(--ink);font:inherit;font-size:17px;font-weight:700;cursor:pointer;box-shadow:0 4px 0 var(--pink-shadow);transition:background .15s,border-color .15s,transform .08s,box-shadow .08s;touch-action:manipulation}
+button:hover{background:var(--pink-hover);border-color:var(--pink-hover)}
+button:active{transform:translateY(2px);box-shadow:0 2px 0 var(--pink-shadow)}
+button:focus-visible{outline:3px solid var(--ice);outline-offset:3px;box-shadow:0 4px 0 var(--pink-shadow),0 0 0 6px rgba(140,236,255,.2)}
+.foot{margin:18px 0 0;font-size:12px;color:#9d88ad;text-align:center}
+@media(max-width:400px){main{padding:24px 20px 22px;border-radius:18px}h1{font-size:38px}}
+@media(prefers-reduced-motion:reduce){input,button{transition:none}button:active{transform:none}}
+</style><main>
+<svg class="mark" viewBox="0 0 118 36" role="img" aria-label="kids.fun"><text x="0" y="29" font-family="system-ui,-apple-system,'Segoe UI',Roboto,sans-serif" font-size="32" font-weight="900" font-style="italic" letter-spacing="-1.5" fill="#fff4fc">kids<tspan fill="#ff77ce">.</tspan>fun</text></svg>
+<h1>${operator?'Operator.':'Not yet.'}</h1>
+<p class="sub">${operator?'Second door. Site session first, then the operator password.':'If you know, you know.'}</p>
+<form method="post" action="/${operator?'__operator':'__access'}" novalidate>
+<label for="password">${operator?'Operator password':'Password'}</label>
+<input id="password" type="password" name="password" autocomplete="current-password" maxlength="256" required autofocus placeholder="••••••••"${error?' aria-invalid="true" aria-describedby="err"':''}>
+${error?'<p class="err" id="err" role="alert"><svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="7" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M8 4.5v4M8 11.2v.3" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>That’s not it.</p>':''}
+<button type="submit">Enter<svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h13M13 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+</form>
+<p class="foot">Private access</p>
+</main></html>`, {status:error?401:200,headers:{...headers,'content-type':'text/html; charset=utf-8','content-security-policy':"default-src 'none'; style-src 'unsafe-inline'; form-action 'self'; frame-ancestors 'none'; base-uri 'none'"}}); }
 
 async function validCookie(request,name,secret,now){
  const cookie=request.headers.get('cookie')?.split(';').map(x=>x.trim()).find(x=>x.startsWith(name+'='))?.slice(name.length+1)||'';
