@@ -46,7 +46,7 @@ export function LaunchStatus({data,go,onRefresh}){
  if(!data)return <section className="launch-status"><CoinSkeleton variant="status"/></section>;
  if(d.phase==='launched')return <LaunchedCard d={d} data={data} go={go}/>;
  return <section className={'launch-status tone-'+d.tone} aria-live="polite">
-  <div className="launch-status-head"><span className="launch-pill">{d.pill}</span>{d.countdown&&<span className="launch-when">{d.countdown.label.replace(' in','')} {new Date(d.countdown.at*1000).toLocaleString()}</span>}</div>
+  <div className="launch-status-head"><span className="launch-pill">{d.pill}</span>{d.countdown&&<span className="launch-when">{d.countdown.label.replace(' in','')} {formatUtc(d.countdown.at)}</span>}</div>
   <h2>{d.headline}</h2>
   {d.countdown&&<div className="launch-countdown"><span>{d.countdown.label}</span><strong>{formatCountdown(d.countdown.seconds)}</strong></div>}
   <p>{d.sub}</p>
@@ -54,6 +54,16 @@ export function LaunchStatus({data,go,onRefresh}){
   {d.addresses&&<div className="launch-addresses">{d.addresses.map(a=><Address key={a.label} {...a}/>)}<small>{d.explorerUrl?<a href={d.explorerUrl+'/token/'+(data?.mint||'')+(data?.explorerCluster||'')} target="_blank" rel="noreferrer">View the coin on the explorer</a>:'Private test ledger: these addresses do not appear on public explorers or trading terminals.'}</small></div>}
   {d.phase==='launched'&&go&&<button className="primary launch-cta" onClick={()=>go('PostLaunch')}>Open the coin page: claim and trade <ArrowRight size={20}/></button>}
  </section>;
+}
+/** Ticking countdown above the live commit box while commitments are open: "Closes in 01:58:20" and the UTC close time.
+ * The clock is the campaign's on-chain deadline; the chain time from the API corrects the viewer's clock. */
+export function ClosesIn({data}){
+ const [skew,setSkew]=useState(0),[now,setNow]=useState(Date.now());
+ useEffect(()=>{if(Number.isFinite(data?.chainTimeUnix))setSkew(data.chainTimeUnix*1000-Date.now());},[data]);
+ useEffect(()=>{const id=setInterval(()=>setNow(Date.now()),1000);return()=>clearInterval(id);},[]);
+ const at=data?.deadlineUnix;if(data?.phase!=='open'||!Number.isFinite(at))return null;
+ const seconds=at-Math.floor((now+skew)/1000);
+ return <div className={'opens-in closes-in'+(seconds<=0?' is-due':'')}><span>{seconds>0?'Closes in':'Closing'}</span><strong>{seconds>0?formatCountdown(seconds):'the window has reached its close time'}</strong><small>{formatUtc(at)}</small></div>;
 }
 /** Ticking countdown for the disabled commit box: "Opens in 02:14:09" above the greyed controls. */
 export function OpensIn({data}){
