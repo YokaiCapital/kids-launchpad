@@ -18,7 +18,7 @@ export function gatewayConfig(env=process.env){
 export function authorizeGateway(req,config){
  const h=req.headers||{},path=req.url;
  if(h.host!==config.host||h.origin!==origin)return {status:403,error:'Gateway origin or host rejected'};
- if(typeof path!=='string'||!(routes.has(req.method+' '+path)||(req.method==='GET'&&/^\/api\/market\/(summary|candles|trades)\?[A-Za-z0-9=&_.%-]{1,600}$/.test(path))))return {status:404,error:'Route unavailable'};// market reads (public, cached upstream) carry a query string
+ if(typeof path!=='string'||!(routes.has(req.method+' '+path)||(req.method==='GET'&&/^\/api\/market\/(summary|candles|trades|activity)\?[A-Za-z0-9=&_.%,-]{1,600}$/.test(path))))return {status:404,error:'Route unavailable'};// market reads (public, cached upstream) carry a query string
  if(typeof h.authorization!=='string'||h.authorization.length>600||!h.authorization.startsWith('Bearer ')||!equal(h.authorization.slice(7),config.service))return {status:401,error:'Service authentication required'};
  const isOperator=typeof h['x-kids-operator-token']==='string'&&h['x-kids-operator-token'].length<600&&equal(h['x-kids-operator-token'],config.operator);
  if(requiresOperator(path)&&!isOperator)return {status:403,error:'Operator authentication required'};

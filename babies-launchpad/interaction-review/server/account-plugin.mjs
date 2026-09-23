@@ -24,6 +24,7 @@ import {guardLocalRequest,newCsrfToken} from '../../shared/local-http.mjs';
 import {signWithSeed,rpc} from '../../shared/solana.mjs';
 import {parseMint} from '../src/mint.js';
 import {createMarketFeed} from '../../localnet/market/feed.mjs';
+import {createActivityFeed} from '../../localnet/market/activity.mjs';
 const runtime=fileURLToPath(new URL('../../localnet/.runtime/',import.meta.url));
 export function accountPlugin(){
  const install=server=>{
@@ -32,8 +33,8 @@ export function accountPlugin(){
   let feeTick;
   const tickKeepers=createEscrowKeepers({legacy:()=>runKeeper('legacy',async()=>{await (await escrow()).runRefundKeeper();}),active:()=>runKeeper('active',activeTick),fees:()=>runKeeper('fees',async()=>{feeTick??=(await import(/* @vite-ignore */ activeFeeURL)).createActiveFeeKeeper();return feeTick();})},(name,error)=>console.error('Local '+name+' escrow keeper:',error.message));
   const keeper=setInterval(tickKeepers,15000);keeper.unref();
-  const market=createMarketFeed();market.start();server.middlewares.use(market.api.middleware);// read-only market data (localnet/market): runs only once a campaign has launched; KIDS_MARKET_FEED=0 switches it off
-  server.httpServer?.once('close',()=>{clearInterval(keeper);market.stop();for(const store of stores.values())store.close();});
+  const market=createMarketFeed(),activity=createActivityFeed();market.start();activity.start();server.middlewares.use(activity.api.middleware);server.middlewares.use(market.api.middleware);// read-only market data (localnet/market): swaps plus the program activity feed; both run only once a campaign has launched; KIDS_MARKET_FEED=0 switches them off (KIDS_MARKET_ACTIVITY=0 only the activity feed). The activity middleware goes first: the swap API answers 404 for every other /api/market path.
+  server.httpServer?.once('close',()=>{clearInterval(keeper);market.stop();activity.stop();for(const store of stores.values())store.close();});
   server.middlewares.use(async(req,res,next)=>{
    const path=req.url?.split('?')[0];if(!path?.startsWith('/api/account/'))return next();
    const send=(code,data)=>{res.writeHead(code,{'Content-Type':'application/json','Cache-Control':'no-store','X-Content-Type-Options':'nosniff'});res.end(JSON.stringify(data));};
