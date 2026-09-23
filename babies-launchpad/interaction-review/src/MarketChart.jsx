@@ -164,7 +164,7 @@ export function MarketTab({campaign,decimals=6,data,market,enabled}){
   </div>
   <section className="market-trades" aria-label="Transactions">
    <div className="market-trades-head"><h2>Transactions</h2><span>{tradeState==='ready'?'Newest first · '+shown.length+' of '+trades.trades.length+' loaded':tradeState==='loading'?'Loading…':''}</span></div>
-   {tradeState==='ready'&&<ul>{shown.map(t=><TradeRow key={t.signature} trade={t} data={data} decimals={decimals} now={now}/>)}</ul>}
+   {tradeState==='ready'&&<ul>{shown.map(t=><TradeRow key={t.key||t.signature} trade={t} data={data} decimals={decimals} now={now}/>)}</ul>}
    {tradeState==='loading'&&<p className="market-trades-empty" aria-busy="true">Reading the last trades…</p>}
    {tradeState==='off'&&<p className="market-trades-empty">Transactions appear here when the market feed is connected.</p>}
    {tradeState==='unavailable'&&<p className="market-trades-empty" role="status">The trade feed is unavailable right now. It retries every 10 seconds.<button type="button" className="text-button" onClick={()=>setRetry(n=>n+1)}>Try again now</button></p>}

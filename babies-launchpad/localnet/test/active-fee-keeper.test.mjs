@@ -53,3 +53,12 @@ test('runtime floor: the configured buyback minimum can only raise the floor; th
  assert.equal(effectiveBuybackMinimum({}),5_000_000n);assert.equal(effectiveBuybackMinimum({KIDS_BUYBACK_MIN_LAMPORTS:'20000000'}),20_000_000n);
  assert.equal(burnWorthwhile(499_999n),false);assert.equal(burnWorthwhile(500_000n),true);
 });
+test('resumed operations: an already signed one is never re-planned; an unsigned one must pass today\'s policy',async()=>{
+ const {resumedOperationWithheld}=await import('../active-fee-keeper.mjs');
+ assert.equal(resumedOperationWithheld({id:'fee:7',kind:'buy-burn',amount:'1000'},{attempts:{'fee:7':{signature:'x'}}}),null,'signed: reconciled, not withheld');
+ assert.match(resumedOperationWithheld({id:'fee:8',kind:'buy-burn',amount:'1000'},{attempts:{}}),/below the minimum/);
+ assert.equal(resumedOperationWithheld({id:'fee:9',kind:'buy-burn',amount:'5000000'},{attempts:{}}),null);
+ assert.match(resumedOperationWithheld({id:'fee:10',kind:'burn',amount:'5'},{attempts:{},burnValueLamports:1n}),/below the threshold/);
+ assert.equal(resumedOperationWithheld({id:'fee:11',kind:'burn',amount:'5'},{attempts:{},burnValueLamports:600000n}),null);
+ assert.equal(resumedOperationWithheld({id:'fee:12',kind:'distribute'},{attempts:{}}),null);
+});

@@ -41,6 +41,15 @@ export const BUYBACK_FLOOR_LAMPORTS=OPERATION_COST_CEILING_LAMPORTS*50n;
 export function effectiveBuybackMinimum(env=process.env){let v=0n;try{v=BigInt(env.KIDS_BUYBACK_MIN_LAMPORTS||'5000000');}catch{v=0n;}return v>BUYBACK_FLOOR_LAMPORTS?v:BUYBACK_FLOOR_LAMPORTS;}
 export const BUYBACK_MIN_LAMPORTS=effectiveBuybackMinimum();
 export const burnWorthwhile=(valueLamports,minimum=BURN_MIN_VALUE_LAMPORTS)=>BigInt(valueLamports)>=minimum;
+/** A resumed operation (journal.current after a restart) that was already signed is reconciled by the sender and never
+ * re-planned or retried to enforce a newer threshold. One that was never signed must pass today's policy before signing:
+ * returns null when allowed, else the reason it is withheld. `burnValueLamports` is the quoted value for a burn. */
+export function resumedOperationWithheld(operation,{attempts={},burnValueLamports=null,minBuyback=BUYBACK_MIN_LAMPORTS}={}){
+ if(!operation)return null;if(attempts[operation.id])return null;
+ if(operation.kind==='buy-burn'&&BigInt(operation.amount||0)<minBuyback)return 'buyback budget below the minimum';
+ if(operation.kind==='burn'&&burnValueLamports!==null&&!burnWorthwhile(burnValueLamports))return 'burn value below the threshold';
+ return null;
+}
 
 export function feePlan(state,features=CURRENT_FEATURES,minBuyback=BUYBACK_MIN_LAMPORTS){
  for(const name of ['childPending','totalSol','treasuryPaid','devPaid','parentAAllocated','parentBAllocated','parentASpent','parentBSpent'])raw(state[name]);
@@ -114,6 +123,8 @@ export function createActiveFeeKeeper({resolve=()=>resolvePostlaunchCampaign('ac
    const programOf=m=>programs.get(m.toBase58());
    const atas=[[mint,f.authority],[NATIVE_MINT,f.authority],[NATIVE_MINT,state.treasury],[NATIVE_MINT,state.dev],...[...parents].map(p=>[p,f.authority])];
    let operation=journal.current,now=await chainTime(c);
+   if(operation&&!journal.attempts[operation.id]){let burnValue=null;if(operation.kind==='burn'){try{burnValue=(await boundedQuote(c,mint,NATIVE_MINT,BigInt(operation.amount),state.pool)).quote;}catch(error){if(error.message!=='Trade too small')throw error;burnValue=0n;}}
+    const withheld=resumedOperationWithheld(operation,{attempts:journal.attempts,burnValueLamports:burnValue});if(withheld){console.log(JSON.stringify({event:'resumed-operation-withheld',campaign:identity.campaign,id:operation.id,kind:operation.kind,reason:withheld}));journal.current=null;persist();operation=null;}}
    if(!operation){
     const feeInfo=await c.getAccountInfo(f.state);
     if(!feeInfo||feeInfo.owner.equals(SystemProgram.programId)&&feeInfo.data.length===0)operation={kind:'init'};

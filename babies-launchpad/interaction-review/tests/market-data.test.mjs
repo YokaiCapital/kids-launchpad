@@ -136,3 +136,9 @@ test('served trade and candle rows are always normalised when merged (the live l
  assert.equal(t.blockTimeUnix,1790144972);assert.equal(t.solRaw,'5620729');assert.equal(t.provisional,false);
  const [c]=mergeCandles([],[{time:1790129100,open:1,high:2,low:0.5,close:1.5,volumeSol:0.4,trades:3}]);assert.equal(c.volume,0.4);assert.equal(c.trades,3);
 });
+test('two swaps in one transaction are two rows (keyed by signature and instruction path)',async()=>{
+ const {mergeTrades}=await import('../src/market-data.mjs');
+ const rows=mergeTrades([],[{signature:'S',path:'1',time:5,side:'buy',exact:{solLamports:'1',coinRaw:'2'},nested:true},{signature:'S',path:'3.0',time:5,side:'sell',exact:{solLamports:'3',coinRaw:'4'},nested:true}]);
+ assert.equal(rows.length,2);assert.deepEqual(rows.map(r=>r.key).sort(),['S:1','S:3.0']);
+ const again=mergeTrades(rows,[{signature:'S',path:'1',time:5,side:'buy',exact:{solLamports:'1',coinRaw:'2'},nested:true,commitment:'finalized'}]);assert.equal(again.length,2);
+});

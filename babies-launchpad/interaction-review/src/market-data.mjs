@@ -195,12 +195,13 @@ export function normaliseTrade(t){
  if(!t||typeof t!=='object'||typeof t.signature!=='string'||!t.signature)return null;
  const side=t.side==='buy'||t.side==='sell'?t.side:null;if(!side)return null;
  const blockTimeUnix=finite(t.blockTimeUnix??t.time),slot=finite(t.slot);const solRaw=t.solRaw??t.exact?.solLamports??null,coinRaw=t.coinRaw??t.exact?.coinRaw??null,priceSol=t.exact?.priceSol??t.priceSol??null;
- return {signature:t.signature,slot:slot==null?null:Math.floor(slot),blockTimeUnix:blockTimeUnix==null?null:Math.floor(blockTimeUnix),side,solRaw:solRaw==null?null:String(solRaw),coinRaw:coinRaw==null?null:String(coinRaw),priceSol:priceSol==null?null:String(priceSol),nested:t.nested===true,provisional:t.provisional===true||(typeof t.commitment==='string'&&t.commitment!=='finalized'),wallet:typeof t.wallet==='string'?t.wallet:typeof t.trader==='string'?t.trader:null};
+const path=typeof t.path==='string'?t.path:typeof t.instructionPath==='string'?t.instructionPath:'';
+ return {signature:t.signature,path,key:t.signature+':'+path,slot:slot==null?null:Math.floor(slot),blockTimeUnix:blockTimeUnix==null?null:Math.floor(blockTimeUnix),side,solRaw:solRaw==null?null:String(solRaw),coinRaw:coinRaw==null?null:String(coinRaw),priceSol:priceSol==null?null:String(priceSol),nested:t.nested===true,provisional:t.provisional===true||(typeof t.commitment==='string'&&t.commitment!=='finalized'),wallet:typeof t.wallet==='string'?t.wallet:typeof t.trader==='string'?t.trader:null};
 }
 /** Newest first, one row per signature; an incoming row replaces the row it shares a signature with (confirming → confirmed). */
 export function mergeTrades(existing,incoming){
- const map=new Map();for(const t of existing||[])if(t)map.set(t.signature,t);
- for(const raw of incoming||[]){const t=normaliseTrade(raw);if(t)map.set(t.signature,t);}// always normalised: served rows carry `time` and `exact` amounts, not the page's field names
+ const map=new Map();for(const t of existing||[])if(t)map.set(t.key||t.signature,t);
+ for(const raw of incoming||[]){const t=normaliseTrade(raw);if(t)map.set(t.key,t);}// one row per swap instruction: a transaction with two swaps on our pool is two rows// always normalised: served rows carry `time` and `exact` amounts, not the page's field names
  return [...map.values()].sort((a,b)=>(b.blockTimeUnix??0)-(a.blockTimeUnix??0)||(b.slot??0)-(a.slot??0)||(a.signature<b.signature?-1:1));
 }
 
