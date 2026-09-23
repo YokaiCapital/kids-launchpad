@@ -14,6 +14,7 @@ import {createHash,randomUUID} from 'node:crypto';
 import {PublicKey,Transaction,VersionedTransaction,SystemProgram} from '@solana/web3.js';
 import {atomicContext,readCampaign,receiptAddress,commitInstruction,refundInstruction,finalizeInstruction,settleInstruction,PROFILE} from './atomic-launch.mjs';
 import {explorerLink,scopeFor} from './network.mjs';
+import {singleFlight} from '../shared/single-flight.mjs';
 import {validateApprovedMessage} from '../shared/approved-message.mjs';
 import {verifySignature} from '../shared/solana.mjs';
 import {encodeBase58} from '../shared/solana.mjs';
@@ -55,11 +56,19 @@ export function readLaunchSchedule(network=PROFILE.network){
  const path=fileURLToPath(new URL('../deployment/'+network+'/launch-schedule.json',import.meta.url));if(!existsSync(path))return null;
  try{const j=JSON.parse(readFileSync(path,'utf8'));const opensAt=typeof j.opensAt==='string'&&!Number.isNaN(Date.parse(j.opensAt))?j.opensAt:null;return {coin:j.coin||'Shartcoin',opensAt,opensAtUnix:opensAt?Math.floor(Date.parse(opensAt)/1000):null,terms:{soft:String(j.soft||'100000000000'),hard:String(j.hard||'500000000000'),deadlineSeconds:Number(j.deadlineSeconds||86400)},note:typeof j.note==='string'?j.note.slice(0,200):null};}catch{return null;}
 }
-export async function readActive(owner){
- if(!existsSync(manifestPath))return {configured:false,network:PROFILE.network,next:readLaunchSchedule(),chainTimeUnix:Math.floor(Date.now()/1000)};
+/** Public campaign state shared by every poll for PUBLIC_READ_TTL_MS; wallet receipts are read per owner and never cached. */
+export const PUBLIC_READ_TTL_MS=2000;
+export function createPublicCampaignRead(load,{ttlMs=PUBLIC_READ_TTL_MS,now=Date.now}={}){return singleFlight(load,{ttlMs,now});}
+async function loadPublicCampaign(){
  const ctx=await activeContext(),m=activeManifest(ctx),c=await readCampaign(ctx,m.address);validateActiveTerms(c,m);
  const info=await ctx.connection.getAccountInfo(c.address);if(info.data[98]!==1)throw Error('Parent snapshots must be configured');
- const now=await chainTime(ctx.connection),r=owner?await readActiveReceipt(ctx,c.address,owner):{committed:0n,refunded:0n,sequence:0n},a=activeAmounts(c,r,now);
+ const now=await chainTime(ctx.connection);return {ctx,m,c,now};
+}
+const publicCampaign=createPublicCampaignRead(loadPublicCampaign);
+export async function readActive(owner){
+ if(!existsSync(manifestPath))return {configured:false,network:PROFILE.network,next:readLaunchSchedule(),chainTimeUnix:Math.floor(Date.now()/1000)};
+ const {ctx,m,c,now}=await publicCampaign();
+ const r=owner?await readActiveReceipt(ctx,c.address,owner):{committed:0n,refunded:0n,sequence:0n},a=activeAmounts(c,r,now);
  return {configured:true,network:PROFILE.network,version:3,scope:scopeFor(PROFILE),genesisHash:ctx.manifest.genesisHash,programId:ctx.programId.toBase58(),escrowAddress:m.address,mint:m.mint,phase:a.phase,chainTimeUnix:now,deadlineUnix:c.deadline,launchDeadlineUnix:c.launchDeadline,totalLamports:c.total.toString(),softCapLamports:c.soft.toString(),hardCapLamports:c.hard.toString(),refundedLamports:c.refunded.toString(),settledAcceptedLamports:c.settledAccepted.toString(),receiptCount:c.receiptCount.toString(),settledReceiptCount:c.settledReceiptCount.toString(),poolSoftUsd:poolUsd(c.soft),poolHardUsd:poolUsd(c.hard),referenceSolUsd:REFERENCE_SOL_USD,explorerUrl:PROFILE.explorerUrl,explorerCluster:PROFILE.explorerCluster,mintExplorerUrl:explorerLink(PROFILE,'token',m.mint),pool:c.phase===3?c.pool.toBase58():null,user:owner?{owner,committedLamports:r.committed.toString(),acceptedLamports:a.accepted.toString(),refundableLamports:a.refundable.toString(),refundedLamports:r.refunded.toString(),settled:r.settled}:null};
 }
 let intents=existsSync(intentPath)?read(intentPath):{};

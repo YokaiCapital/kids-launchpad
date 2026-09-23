@@ -13,7 +13,19 @@ export const RPC=PROFILE.rpcUrl;
 export const CPMM=new PublicKey('CPMMoo8L3F4NbTegBCKVNunggL7H1ZpdTHKxQB5qKP1C'),LOCK=new PublicKey('LockrWmn6K5twhz3y9w1dQERbmgSaRkfnTeTKbpofwE'),LOCK_AUTH=new PublicKey('3f7GcQFG397GAaEnv51zR6tsTVihYRydnydDD1cXekxH'),METADATA=new PublicKey('metaqbxxUerdq28cj1RbAWkYQm3ybzjb6a8bt518x1s'),AMM_CONFIG=new PublicKey('2fGXL8uhqxJ4tpgtosHZXT4zcQap6j62z3bMDxdkMvy5'),POOL_FEE=new PublicKey('DNXgeM9EiiaAbaWvwjHj9fQQLAX5ZsfHyvmYUNRAdNC8');
 const LOADER='BPFLoaderUpgradeab1e11111111111111111111111';
 export const u64=n=>{const b=Buffer.alloc(8);b.writeBigUInt64LE(BigInt(n));return b;};
-export async function atomicContext(){
+// The qualified context (genesis, executable bytes, hash, upgrade authority) is expensive: one ProgramData download
+// per call. It is shared across the process and revalidated every CONTEXT_TTL_MS (or on demand with {fresh:true} and
+// after invalidateAtomicContext()). Identity checks are unchanged; they simply run once per interval, not once per poll.
+export const CONTEXT_TTL_MS=60000;let contextCache=null,contextInFlight=null;export const contextStats={qualifications:0,hits:0};
+export function invalidateAtomicContext(){contextCache=null;}
+export async function atomicContext({fresh=false,now=Date.now}={}){
+ if(!fresh&&contextCache&&now()-contextCache.at<CONTEXT_TTL_MS){contextStats.hits+=1;return contextCache.value;}
+ if(!fresh&&contextInFlight)return contextInFlight;
+ const run=qualifyAtomicContext().then(value=>{contextCache={value,at:now()};return value;}).finally(()=>{contextInFlight=null;});
+ if(!fresh)contextInFlight=run;return run;
+}
+async function qualifyAtomicContext(){
+ contextStats.qualifications+=1;
  const manifest=JSON.parse(readFileSync(new URL('./.runtime/atomic-launch-program.json',import.meta.url))),connection=new Connection(RPC,{commitment:'confirmed',fetch:boundedRpcFetch()});
  if(manifest.network!==PROFILE.network||manifest.rpcUrl!==PROFILE.rpcLabel||await connection.getGenesisHash()!==manifest.genesisHash||PROFILE.genesisHash&&manifest.genesisHash!==PROFILE.genesisHash)throw Error('Atomic launch ledger mismatch');
  const programId=new PublicKey(manifest.programId),p=await connection.getAccountInfo(programId);
