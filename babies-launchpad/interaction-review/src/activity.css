@@ -1,0 +1,74 @@
+/* Program activity ledger under the flywheel (owner, 23 September 2026). One dot per executed event on a vertical
+   spine, newest first: pink for a burn, hollow for a failed attempt, amber ring while confirming. Money entering
+   custody reads in the site's ice signal blue, burns in the brand pink, so the ledger reads without red/green vision. */
+.post-launch{--act-in:#8cecff;--act-burn:var(--post-pink);--act-failed:var(--post-error);--act-confirming:var(--post-warn);--act-spine:#4d3a5d}
+.act{margin-top:18px;padding-top:14px;border-top:1px solid var(--post-line);min-width:0}
+.act-head{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:6px 12px;margin-bottom:10px}
+.act-head>div{display:flex;align-items:baseline;flex-wrap:wrap;gap:2px 10px}
+.act-head h3{font-size:15px;letter-spacing:-.2px;text-transform:none;margin:0}
+.act-counts{font-size:12px;color:var(--post-muted);font-variant-numeric:tabular-nums}
+
+/* Filter chips: wrap, never scroll the page sideways. */
+.act-filters{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px}
+.post-launch .act-filters button{display:inline-flex;align-items:center;gap:6px;min-height:32px;padding:4px 11px;border:1px solid var(--post-line);border-radius:999px;background:transparent;color:var(--post-muted);font-size:12px;font-weight:600;white-space:nowrap;transition:color .15s,background-color .15s,border-color .15s}
+.post-launch .act-filters button:hover{color:var(--post-ink);background:var(--post-soft)}
+.post-launch .act-filters button[aria-pressed=true]{color:var(--post-ink);border-color:var(--post-pink);background:rgba(248,107,207,.1)}
+.act-filters b{font-weight:600;font-size:11px;color:var(--post-muted);font-variant-numeric:tabular-nums}
+.post-launch .act-filters button[aria-pressed=true] b{color:var(--post-pink)}
+
+/* The ledger: a spine on the left, one row per event. */
+.act-list{position:relative;list-style:none;margin:0;padding:0 0 0 18px;display:grid;gap:3px}
+.act-list::before{content:"";position:absolute;left:5px;top:10px;bottom:10px;width:1px;background:var(--act-spine)}
+.act-row{position:relative;display:grid;grid-template-columns:62px minmax(0,1.75fr) minmax(0,1.65fr) 80px 100px;align-items:center;gap:10px;min-height:38px;padding:6px 10px;border:1px solid var(--post-line);border-radius:8px;font-size:12px;font-variant-numeric:tabular-nums;min-width:0}
+.act-row.is-confirming{border-style:dashed}
+.act-row.is-failed{border-color:rgba(255,163,189,.35)}
+.act-dot{position:absolute;left:-17px;top:50%;width:9px;height:9px;margin-top:-5px;border-radius:50%;background:var(--post-muted);border:1px solid var(--post-card);box-shadow:0 0 0 2px var(--post-card)}
+.act-row.is-burn .act-dot{background:var(--act-burn);box-shadow:0 0 0 2px var(--post-card),0 0 0 4px rgba(248,107,207,.25)}
+.act-row.is-confirming .act-dot{background:transparent;border:2px dashed var(--act-confirming)}
+.act-row.is-failed .act-dot{background:transparent;border:2px solid var(--act-failed)}
+.act-when{color:var(--post-muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.act-what{display:flex;align-items:center;flex-wrap:wrap;gap:3px 6px;min-width:0}
+.act-label{font-weight:600;color:var(--post-ink);overflow-wrap:anywhere}
+.act-row.is-failed .act-label{color:var(--post-muted)}
+.act-tags{display:inline-flex;flex-wrap:wrap;gap:4px}
+.act-tags em{font-style:normal;font-size:10px;line-height:1.4;padding:1px 6px;border:1px solid var(--post-line);border-radius:999px;color:var(--post-muted);white-space:nowrap}
+.act-tags em.is-confirming{color:var(--act-confirming);border-color:rgba(240,179,90,.5)}
+.act-tags em.is-failed{color:var(--act-failed);border-color:rgba(255,163,189,.5)}
+.act-tags em.is-vault{color:var(--act-in);border-color:rgba(140,236,255,.4)}
+.act-assets{display:flex;flex-wrap:wrap;align-items:center;gap:2px 10px;min-width:0;color:var(--post-ink)}
+.act-asset{white-space:nowrap;font-weight:600}
+.act-asset.is-in{color:var(--act-in)}
+.act-asset.is-out{color:var(--post-ink)}
+.act-asset.is-burn{color:var(--act-burn)}
+.act-asset.is-burn::before{content:"";display:inline-block;width:6px;height:6px;margin:0 5px 1px 0;border-radius:50%;background:currentColor}
+.act-none{color:var(--post-muted);font-weight:400}
+.act-actor{font-family:monospace;font-size:11px;color:var(--post-muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.act-actor code{color:var(--post-muted)}
+.act-sig{justify-self:end;font-family:monospace;font-size:11px;white-space:nowrap}
+.act-sig a{color:#80e6e9;display:inline-flex;align-items:center;min-height:24px}.act-sig a:hover{color:var(--post-ink)}.act-sig code{color:var(--post-muted)}
+.act-empty{margin:0;padding:12px 4px 4px;font-size:13px;line-height:1.5;color:var(--post-muted)}
+.act-empty .text-button{display:inline-flex;min-height:28px;padding:0 4px;font-size:13px;margin-left:6px}
+.act-foot{display:flex;align-items:center;flex-wrap:wrap;gap:8px 14px;margin-top:10px;font-size:12px;color:var(--post-muted)}
+.act-foot .act-note{flex-basis:100%;font-size:11px}
+.post-launch .act-more{min-height:36px;font-size:12px;padding:6px 14px}
+
+@media(max-width:1200px){.act-row{grid-template-columns:58px minmax(0,1.7fr) minmax(0,1.7fr) 74px 96px;gap:8px}}
+@media(max-width:900px){
+ .act-row{display:flex;flex-wrap:wrap;gap:4px 8px;padding:8px 10px}
+ .act-what{flex:1 1 auto;min-width:0}
+ .act-when{order:2;margin-left:auto}
+ .act-assets{flex-basis:100%;order:3}
+ .act-actor{order:4}
+ .act-sig{order:5;margin-left:auto;justify-self:auto}
+}
+@media(max-width:760px){
+ .act{margin-top:14px}
+ .act-list{padding-left:16px}
+ .act-dot{left:-15px}
+ .post-launch .act-filters button{min-height:36px;font-size:12px;padding:4px 10px}
+ .post-launch .act-more{min-height:44px}
+ .act-row{padding:8px 9px}
+ .act-asset{white-space:normal;overflow-wrap:anywhere}
+ .act-sig a{min-height:36px}
+}
+@media(prefers-reduced-motion:reduce){.post-launch .act-filters button{transition:none}}

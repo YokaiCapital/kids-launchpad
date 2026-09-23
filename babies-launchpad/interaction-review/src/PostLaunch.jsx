@@ -1,4 +1,4 @@
-import {netLabel,explorerTx,explorerAccount} from './network-label.mjs';
+import {netLabel,explorerAccount} from './network-label.mjs';
 import {walletForOwner} from './wallet-connection.mjs';
 import {friendlyError} from './friendly-errors.mjs';
 import {Suspense,lazy,useEffect,useRef,useState} from 'react';
@@ -15,7 +15,8 @@ import {resolveCoinDescription} from './coin-display';
 import './post-launch.css';
 import {LocalTradePanel} from './LocalTradePanel';
 import {ClaimPanel} from './ClaimPanel';
-import {activityLabel,compactUnits,formatSolAmount,formatUnits} from './flywheel-format.mjs';
+import {compactUnits} from './flywheel-format.mjs';
+import {ActivityFeed} from './ActivityFeed';
 import {formatUtc} from './launch-status.mjs';
 import {claimableItems,claimedAll,custodyFacts,networkFact,parentState,remainingRaw} from './claim-view.mjs';
 const formatWhole=(value,decimals=6)=>value==null?'—':Math.round(Number(value)/10**decimals).toLocaleString('en-GB');
@@ -23,31 +24,26 @@ const format=(value,decimals=6)=>value==null?'—':(Number(value)/10**decimals).
 function moveTab(event){const tabs=[...event.currentTarget.querySelectorAll('[role="tab"]')],index=tabs.indexOf(event.target);if(index<0)return;let next;if(event.key==='ArrowRight')next=(index+1)%tabs.length;else if(event.key==='ArrowLeft')next=(index+tabs.length-1)%tabs.length;else if(event.key==='Home')next=0;else if(event.key==='End')next=tabs.length-1;else return;event.preventDefault();tabs[next].focus();tabs[next].click();}
 const short=value=>value?`${value.slice(0,5)}…${value.slice(-5)}`:'Not connected';
 const PARENT_NAMES=['Fartcoin','Buttcoin'];
-const shortSig=v=>v?v.slice(0,6)+'…'+v.slice(-6):'';
 const Burn=()=><Fire size={14} weight="fill" aria-hidden="true"/>;
 const Figure=({raw,decimals,unit})=>{const v=compactUnits(raw,decimals,unit);return <strong title={v.exact||undefined}>{v.text} <small>{unit}</small></strong>;};
-const BURN_ROWS=3;
+/** The fee sentence reads the pool fee the API served; the LP share the program harvests is not a fixed number here, and the rest of the pool fee is Raydium's protocol and fund share. */
+function feeSentence(bps){const fee=Number(bps)>0?(bps/100).toLocaleString('en-GB')+' %':null;return (fee?'Every trade pays the pool fee of '+fee+'.':'Every trade pays the pool fee.')+' The program harvests the LP share of that fee. The rest of the pool fee is Raydium’s protocol and fund share. The SOL side is split: KIDS treasury, the dev, and buybacks of both parents that are burned. The coin side is burned outright, never sold.';}
 function Flywheel({data,verified}){
- const [copied,setCopied]=useState(''),[showAll,setShowAll]=useState(false);const f=verified?data.fees:null,events=(verified&&data.feeEvents)||[];
- const burns=events.filter(e=>e.kind==='buy-burn'),shown=showAll?burns:burns.slice(0,BURN_ROWS);
+ const f=verified?data.fees:null;
  // Token counters are raw base units: the child mint's decimals from the record (6), parents at 6. SOL is lamports.
  const childDecimals=Number.isInteger(data?.decimals)?data.decimals:6,parentDecimals=6;
- const copy=async v=>{try{await navigator.clipboard.writeText(v);setCopied(v);setTimeout(()=>setCopied(''),1500);}catch{}};
  const childBurned=compactUnits(f?.childBurned,childDecimals,'coins');
- return <section className="post-flywheel"><div className="post-flywheel-head"><div><h2>Every trade feeds the family.</h2><p>{'The '+(data?.tradeFeeBps?(data.tradeFeeBps/100)+' %':'pool')+' fee is collected by the program. The SOL side is split: KIDS treasury, the dev, and buybacks of both parents that are burned. The coin side is burned outright, never sold.'}</p></div><span className="post-preview-badge">{f?format(f.totalSol,9)+' SOL collected':'No fees yet'}</span></div>
+ const parentStats=Array.isArray(data?.parentStats)?data.parentStats:[];
+ const names={coin:verified?data.mint:null,parentMints:PARENT_NAMES.map((_,i)=>parentStats.find(p=>p?.index===i)?.mint||null),parents:PARENT_NAMES};
+ return <section className="post-flywheel"><div className="post-flywheel-head"><div><h2>Every trade feeds the family.</h2><p>{feeSentence(verified?data.tradeFeeBps:null)}</p></div><span className="post-preview-badge">{f?format(f.totalSol,9)+' SOL collected':'No fees yet'}</span></div>
   <div className="post-flywheel-grid">
    <div className="post-flywheel-tile is-burn"><span>$Shartcoin burned from fees</span><strong title={childBurned.exact||undefined}>{childBurned.text} <small>coins</small></strong><em><Burn/> never sold</em></div>
    <div className="post-flywheel-tile"><span>KIDS treasury</span><Figure raw={f?.treasuryPaid} decimals={9} unit="SOL"/></div>
    <div className="post-flywheel-tile"><span>Dev</span><Figure raw={f?.devPaid} decimals={9} unit="SOL"/></div>
    {PARENT_NAMES.map((name,i)=>{const spent=f?(i?f.parentBSpent:f.parentASpent):null,burned=compactUnits(f?(i?f.parentBBurned:f.parentABurned):null,parentDecimals,name+' burned');let queued=null;try{if(f){const q=BigInt(i?f.parentBAllocated:f.parentAAllocated)-BigInt(spent);if(q>0n)queued=q;}}catch{}
-    return <div key={name} className="post-flywheel-tile is-burn"><span><ParentIcon name={name}/> {name} buyback</span><Figure raw={spent} decimals={9} unit="SOL"/><em title={burned.exact||undefined}><Burn/> {burned.text} burned</em>{queued!=null&&<small>{format(queued,9)} SOL queued</small>}</div>;})}
+    return <div key={name} className="post-flywheel-tile is-burn"><span><ParentIcon name={name}/> {name} buyback</span><Figure raw={spent} decimals={9} unit="SOL"/><em title={burned.exact||undefined}><Burn/> {burned.text} burned</em>{queued!=null&&<small>{format(queued,9)} SOL queued, not yet bought</small>}</div>;})}
   </div>
-  <div className="post-burn-log"><div className="post-burn-log-head"><strong>Latest buybacks and burns</strong><span>{activityLabel(burns.length,shown.length)}</span></div>
-   {burns.length===0?<p>The first buyback runs after the first fees are collected.</p>:<ul>{shown.map(e=>{const sol=formatSolAmount(e.amount),delta=e.delta?.[e.index?'parentBBurned':'parentABurned'],burned=formatUnits(delta,parentDecimals),when=new Date(e.at*1000);
-    return <li key={e.id}><time className="post-burn-when" dateTime={when.toISOString()} title={when.toUTCString()}>{when.toLocaleString()}</time><span className="post-burn-what"><ParentIcon name={PARENT_NAMES[e.index]||'Parent'}/> {PARENT_NAMES[e.index]||'Parent'}: <b title={sol.exact||undefined}>{sol.text}</b> → <span className="post-burn-pair"><Burn/> <b title={delta!=null?formatUnits(delta,parentDecimals,parentDecimals)+' burned':undefined}>{burned}</b> burned</span></span><span className="post-burn-sig">{data.explorerUrl?<a href={explorerTx(data,e.signature)} target="_blank" rel="noopener noreferrer">{shortSig(e.signature)}</a>:<code title={e.signature}>{shortSig(e.signature)}</code>}<button type="button" onClick={()=>copy(e.signature)}>{copied===e.signature?'Copied':'Copy'}</button></span></li>;})}</ul>}
-   {burns.length>BURN_ROWS&&<button type="button" className="text-button post-burn-more" aria-expanded={showAll} onClick={()=>setShowAll(v=>!v)}>{showAll?'Show fewer':`View all activity (${burns.length})`}</button>}
-   <small>{data?.explorerUrl?'Signatures open on the explorer.':'Private test ledger: signatures are real on this ledger but not on public explorers.'}</small>
-  </div>
+  <ActivityFeed campaign={verified?data.campaign:null} data={verified?data:null} names={names} enabled={verified}/>
  </section>;
 }
 function Metric({label,value,unit,note,tone,fresh,title}){return <div className="post-metric"><span>{label}</span><strong className={tone?'is-'+tone:undefined} title={title||undefined}>{value}{unit&&<small>{unit}</small>}</strong>{(note||fresh)&&<small>{note&&<span>{note}</span>}{fresh&&<em className={`post-metric-fresh is-${fresh.tone}`}>{fresh.text}</em>}</small>}</div>;}
