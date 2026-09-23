@@ -29,7 +29,7 @@ if(checkOnly){console.log(JSON.stringify({deployed:!!programInfo?.executable,che
 if(balance<needed)throw Error('Operator wallet needs about '+(needed/1e9).toFixed(2)+' SOL (has '+(balance/1e9).toFixed(3)+'); fund '+operator.keypair.publicKey.toBase58());
 const tmp=mkdtempSync(join(tmpdir(),'kids-cli-'));const config=join(tmp,'cli.yml');writeFileSync(config,'json_rpc_url: "'+profile.rpcUrl+'"\nwebsocket_url: ""\nkeypair_path: '+operator.path+'\ncommitment: confirmed\n',{mode:0o600});
 try{
- if(extendBy){console.log('solana program extend');execFileSync(join(bin,'solana'),['program','extend',program.keypair.publicKey.toBase58(),String(extendBy),'--keypair',operator.path,'--config',config],{stdio:'inherit'});}
+ if(extendBy){console.log('solana program extend');execFileSync(join(bin,'solana'),['program','extend',program.keypair.publicKey.toBase58(),String(extendBy),'--authority',authorityPath,'--payer',operator.path,'--keypair',operator.path,'--config',config],{stdio:'inherit'});}
  const upgrade=!!programInfo?.executable;
  const args=upgrade?['program','deploy',binaryPath,'--program-id',program.keypair.publicKey.toBase58(),'--upgrade-authority',authorityPath,'--keypair',operator.path,'--config',config,'--commitment','confirmed','--use-rpc']:['program','deploy',binaryPath,'--program-id',program.path,'--upgrade-authority',authorityPath,'--keypair',operator.path,'--config',config,'--commitment','confirmed','--use-rpc','--max-len',String(bytes.length)];
  console.log(JSON.stringify({mode:upgrade?'upgrade':'first-deploy',upgradeAuthorityKey:authorityPath===governancePath?'governance':'operator'}));
