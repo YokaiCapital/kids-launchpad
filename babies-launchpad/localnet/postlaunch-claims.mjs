@@ -8,6 +8,13 @@ import {devPlan,unlockedRaw} from './vesting-plan.mjs';
 import {localKey,chainTime} from './dev-vesting.mjs';
 import {qualifiedCampaign} from './postlaunch-campaign.mjs';
 import {networkProfile} from './network.mjs';
+import {distributionAddress,claimReceiptAddress,decodeDistribution,distributionSummary,claimParticipantInstruction as vaultParticipantClaim,claimParentInstruction as vaultParentClaim,claimDevInstruction as vaultDevClaim} from './distribution.mjs';
+/** Vault-side view for an activated campaign: counters from the Distribution account and the owner's claim receipts. */
+async function vaultView(ctx,state,campaign,wallet,now){
+ const dp=state.distributionProgram;const infos=await ctx.connection.getMultipleAccountsInfo([distributionAddress(dp,campaign),...[0,1,2].map(p=>claimReceiptAddress(dp,campaign,p,wallet))],'confirmed');
+ const dist=decodeDistribution(infos[0],dp),summary=distributionSummary(dist,now),claimed=[1,2,3].map(i=>!!infos[i]&&infos[i].owner.equals(dp)&&infos[i].data.subarray(0,8).toString()==='KIDSDCL1');
+ return {dist,summary,claimed:{participant:claimed[0],parentA:claimed[1],parentB:claimed[2]}};
+}
 export {qualifiedCampaign};
 /** The fixture identity (alice or bob) that owns `owner`, or null. Never consulted outside the isolated localnet, and a
  * missing fixture file is 'no identity', not an error: on a real network every wallet is external. */
@@ -39,7 +46,15 @@ export async function postlaunchClaims(owner,expectedCampaign){
   return {name:index?'Buttcoin':'Fartcoin',eligible:!!entry,allocationRaw:entry?.allocation||'0',claimedRaw:claim?(entry?.allocation||'0'):'0'};
  });
  const plan=devPlan(state.supply,state.launchedAt),unlocked=BigInt(plan.immediateRaw)+unlockedRaw('linear',plan.linearRaw,plan.start,plan.end,now),isDev=state.dev.equals(wallet);
- return {owner:wallet.toBase58(),genesisHash:ctx.manifest.genesisHash,campaign:campaign.toBase58(),participant,refund,parents,dev:{isDev,totalRaw:plan.totalRaw,claimableRaw:isDev?(unlocked>state.devClaimed?unlocked-state.devClaimed:0n).toString():'0',claimedRaw:isDev?state.devClaimed.toString():'0',endUnix:plan.end},externalClaimEnabled:true,localClaimEnabled:!!localClaimIdentity(owner)};
+ let devClaimed=state.devClaimed,vault=null;
+ if(state.distributionActivated){
+  // Vault campaign: what was claimed lives in the distribution program, and parent claims close at the recorded expiry.
+  const v=await vaultView(ctx,state,campaign,wallet,now);vault={parentExpiryUnix:v.dist.parentExpiry,parentWindowOpen:v.summary.parentWindowOpen,parentExpired:v.summary.parentExpired,parentBurned:v.dist.parentBurned};
+  if(v.claimed.participant)participant={...participant,claimedRaw:participant.allocatedRaw};else participant={...participant,claimedRaw:'0'};
+  parents.forEach((row,index)=>{if(row.eligible===null)return;row.claimedRaw=v.claimed[index?'parentB':'parentA']?row.allocationRaw:'0';row.windowOpen=v.summary.parentWindowOpen;row.expiresAtUnix=v.dist.parentExpiry;if(!v.summary.parentWindowOpen&&row.claimedRaw==='0')row.expired=true;});
+  devClaimed=v.dist.claimed[3];
+ }
+ return {owner:wallet.toBase58(),genesisHash:ctx.manifest.genesisHash,campaign:campaign.toBase58(),participant,refund,parents,dev:{isDev,totalRaw:plan.totalRaw,claimableRaw:isDev?(unlocked>devClaimed?unlocked-devClaimed:0n).toString():'0',claimedRaw:isDev?devClaimed.toString():'0',endUnix:plan.end},vault,externalClaimEnabled:true,localClaimEnabled:!!localClaimIdentity(owner)};
 }
 const pending=new Map();
 export async function claimPostlaunch(owner,input){
@@ -65,18 +80,19 @@ export async function buildPostlaunchClaim(owner,action,expectedCampaign){
   let instruction;
   if(action==='participant'){
    if(BigInt(claims.participant.allocatedRaw)<=BigInt(claims.participant.claimedRaw))throw Error('No participant tokens remain to claim');
-   instruction=participantClaimInstruction(ctx,campaign,state.mint,wallet);
+   instruction=state.distributionActivated?vaultParticipantClaim({programId:state.distributionProgram,launchProgramId:ctx.programId,campaign,mint:state.mint,owner:wallet,receipt:receiptAddress(ctx.programId,campaign,wallet)}):participantClaimInstruction(ctx,campaign,state.mint,wallet);
   }else if(action==='refund'){
    if(BigInt(claims.refund.claimableLamports)<=0n)throw Error('No SOL refund remains');
    instruction=refundInstruction(ctx,campaign,wallet);
   }else if(action==='dev'){
    if(!claims.dev.isDev||BigInt(claims.dev.claimableRaw)<=0n)throw Error('No vested dev tokens are available');
-   instruction=devClaimInstruction(ctx,campaign,state.mint,wallet);
+   instruction=state.distributionActivated?vaultDevClaim({programId:state.distributionProgram,campaign,mint:state.mint,dev:wallet}):devClaimInstruction(ctx,campaign,state.mint,wallet);
   }else{
    const index=action==='parentA'?0:1,row=claims.parents[index];
    if(!row.eligible||BigInt(row.allocationRaw)<=BigInt(row.claimedRaw))throw Error('No parent tokens remain to claim');
+   if(row.windowOpen===false)throw Error('The parent claim window closed on '+new Date(row.expiresAtUnix*1000).toISOString().slice(0,16).replace('T',' ')+' UTC');
    const entry=snapshot(campaign).parents[index].entries.find(e=>e.owner===owner);
-   instruction=parentClaimInstruction(ctx,campaign,wallet,state.mint,index,wallet,BigInt(entry.balance),BigInt(entry.allocation),entry.proof.map(p=>Buffer.from(p,'hex')));
+   instruction=state.distributionActivated?vaultParentClaim({programId:state.distributionProgram,campaign,mint:state.mint,owner:wallet,index,balance:BigInt(entry.balance),allocation:BigInt(entry.allocation),proof:entry.proof.map(p=>Buffer.from(p,'hex'))}):parentClaimInstruction(ctx,campaign,wallet,state.mint,index,wallet,BigInt(entry.balance),BigInt(entry.allocation),entry.proof.map(p=>Buffer.from(p,'hex')));
   }
   const tx=new Transaction();
   if(action!=='refund')tx.add(createAssociatedTokenAccountIdempotentInstruction(wallet,getAssociatedTokenAddressSync(state.mint,wallet),wallet,state.mint));
