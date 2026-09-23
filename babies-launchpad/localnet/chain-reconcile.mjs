@@ -3,7 +3,9 @@
 // writes reopen. Outcomes are persisted so a restart never re-asks the same question. Classification:
 //   finalized/confirmed success  -> success field set (confirmedSignature or confirmed=true)
 //   finalized failure            -> closedReason 'failed' (+ chainError)
-//   not found, blockhash expired -> closedReason 'expired'   (cannot land any more)
+//   not found, blockhash expired -> closedReason 'expired' only when a service-specific `verifyAbsent(row)` proves the
+//   intended effect is absent on chain; without a verifier the row is closed as 'expired' but flagged
+//   expiryUnverified (missing history is not proof of non-execution: security audit SEC-03) and counted separately
 //   not found, still valid / processed / non-final error -> unresolvedSigned (keeps writes closed; resolves within the
 //   blockhash validity window, about 90 s, on the next pass)
 import {ARCHIVE_MARKER} from '../shared/intent-retention.mjs';import {VersionedTransaction} from '@solana/web3.js';import {encodeBase58} from '../shared/solana.mjs';
@@ -19,8 +21,8 @@ export function hasPendingSigned(intents,successField='confirmedSignature'){
  for(const [key,row] of Object.entries(intents)){if(key===ARCHIVE_MARKER||!row||typeof row!=='object')continue;const wasSigned=!!(row.submittedSignature||row.signedTransactionBase64||row.signature||row.signed===true||row.signed);if(wasSigned&&!isResolved(row,successField))return true;}
  return false;
 }
-export async function reconcileSignedIntents({service,intents,connection,successField='confirmedSignature',persist=()=>{},batchSize=100,deadlineMs=120000,now=Date.now,log=()=>{}}){
- const started=now();let hot=0,signed=0,checked=0,resolvedSuccess=0,resolvedFailed=0,expired=0,unresolvedSigned=0,unchecked=0;
+export async function reconcileSignedIntents({service,intents,connection,successField='confirmedSignature',persist=()=>{},batchSize=100,deadlineMs=120000,now=Date.now,log=()=>{},verifyAbsent=null}){
+ const started=now();let hot=0,signed=0,checked=0,resolvedSuccess=0,resolvedFailed=0,expired=0,expiredUnverified=0,effectPresent=0,unresolvedSigned=0,unchecked=0;
  const pending=[];
  for(const [key,row] of Object.entries(intents)){
   if(key===ARCHIVE_MARKER||!row||typeof row!=='object')continue;hot+=1;
@@ -36,17 +38,21 @@ export async function reconcileSignedIntents({service,intents,connection,success
   const statuses=(await connection.getSignatureStatuses(batch.map(p=>p.signature),{searchTransactionHistory:true})).value;
   for(let j=0;j<batch.length;j++){
    const {row,signature}=batch[j],status=statuses[j];checked+=1;
-   if(status&&!status.err&&['confirmed','finalized'].includes(status.confirmationStatus)){row[successField]=successField==='confirmed'?true:signature;resolvedSuccess+=1;continue;}
+   if(status&&!status.err&&['confirmed','finalized'].includes(status.confirmationStatus)){row[successField]=successField==='confirmed'?true:signature;row.finality=status.confirmationStatus;resolvedSuccess+=1;continue;}
    if(status?.err&&status.confirmationStatus==='finalized'){row.closedReason='failed';row.chainError=JSON.stringify(status.err).slice(0,200);resolvedFailed+=1;continue;}
    if(!status){
     const lastValid=Number(row.block?.lastValidBlockHeight);
-    if(Number.isFinite(lastValid)){if(finalizedHeight===null)finalizedHeight=await connection.getBlockHeight('finalized');if(finalizedHeight>lastValid){row.closedReason='expired';expired+=1;continue;}}
+    if(Number.isFinite(lastValid)){if(finalizedHeight===null)finalizedHeight=await connection.getBlockHeight('finalized');
+     if(finalizedHeight>lastValid){
+      if(verifyAbsent){const absent=await verifyAbsent(row);if(absent===true){row.closedReason='expired';expired+=1;continue;}row.chainNote='history missing but the intended effect is present or unverifiable';effectPresent+=1;unresolvedSigned+=1;continue;}
+      row.closedReason='expired';row.expiryUnverified=true;expired+=1;expiredUnverified+=1;continue;
+     }}
    }
    unresolvedSigned+=1;
   }
   persist();log({event:'chain-reconcile-progress',service,checked,of:pending.length});
  }
- const summary={service,hot,signed,checked,resolvedSuccess,resolvedFailed,expired,unresolvedSigned,unchecked,complete:unchecked===0,ms:now()-started};
+ const summary={service,hot,signed,checked,resolvedSuccess,resolvedFailed,expired,expiredUnverified,effectPresent,unresolvedSigned,unchecked,complete:unchecked===0,ms:now()-started};
  log({event:'chain-reconcile',...summary});return summary;
 }
 /** Operator journals ({attempts:{id:{signature,block,confirmed?,closedReason?}}}): same classification, same persistence rules as the sender. */

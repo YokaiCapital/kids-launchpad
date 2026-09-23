@@ -27,7 +27,7 @@ export async function reconcileJournals({log=()=>{},passes=defaultPasses()}={}){
   try{const summary=await run();const complete=summary?.complete!==false;services.push({...summary,service:summary?.service||name,status:complete?'reconciled':'partial',ms:Date.now()-t});log({event:'startup-reconcile',service:name,...summary,ms:Date.now()-t});}
   catch(error){services.push({service:name,status:'failed',category:error?.category||'error',message:String(error?.message||error).replace(/api[-_]?key=[^&\s"')]+/gi,'api-key=<redacted>').slice(0,160),ms:Date.now()-t});log({event:'startup-reconcile-failed',service:name,ms:Date.now()-t});}
  }
- const unresolvedSigned=services.reduce((n,s)=>n+(s.unresolvedSigned||0),0);
+ const unresolvedSigned=services.reduce((n,s)=>n+(s.unresolvedSigned||0),0),expiredUnverified=services.reduce((n,s)=>n+(s.expiredUnverified||0),0);
  const complete=services.every(s=>s.status==='reconciled')&&unresolvedSigned===0;
- return {complete,unresolvedSigned,services,ms:Date.now()-started,at:new Date().toISOString()};
+ return {complete,unresolvedSigned,expiredUnverified,services,ms:Date.now()-started,at:new Date().toISOString()};
 }

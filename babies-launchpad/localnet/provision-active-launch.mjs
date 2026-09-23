@@ -11,6 +11,8 @@ import {captureLocalParentSnapshot,publicSnapshot} from './parent-snapshot.mjs';
 import {localKey,chainTime} from './dev-vesting.mjs';
 import {operatorSigner} from './operator-signer.mjs';
 import {buildCampaignSnapshot} from './import-parent-snapshot.mjs';
+import {tokenBranding,pinTokenMetadata,createMetadataInstruction,metadataAddress,LOCALNET_TOKEN,TEST_TOKEN} from './token-metadata.mjs';
+const repoRoot=fileURLToPath(new URL('../',import.meta.url));
 const identitiesPath=fileURLToPath(new URL('../deployment/MAINNET-IDENTITIES.json',import.meta.url));
 /** Campaign plan for devnet/mainnet: nonce fixed in advance so the parent snapshot can name the campaign before it exists. */
 export function campaignPlanPath(network){return fileURLToPath(new URL('../deployment/'+network+'/campaign-plan.json',import.meta.url));}
@@ -53,7 +55,7 @@ async function provision(){
   if(local){
    const report=read(runtime+'atomic-launch-verification.json');
    if(report.network!=='localnet'||report.rpcUrl!=='http://127.0.0.1:19099'||report.genesisHash!==ctx.manifest.genesisHash||report.programId!==ctx.programId.toBase58()||!acceptedProgramHash(ctx.manifest,report.programSha256)||report.parentMints?.length!==2)throw Error('Verified parent fixture unavailable');
-   parentMints=report.parentMints;dev=localKey('alice').publicKey.toBase58();treasury=admin.publicKey.toBase58();nonce=randomBytes(8).readBigUInt64LE();
+   parentMints=report.parentMints;dev=localKey('alice').publicKey.toBase58();treasury=admin.publicKey.toBase58();nonce=randomBytes(8).readBigUInt64LE();var token=tokenBranding(LOCALNET_TOKEN);
   }else{
    // Real networks: parents, dev and treasury from the recorded identities; nonce and terms from the campaign plan.
    const identities=read(identitiesPath),plan=read(campaignPlanPath(PROFILE.network));
@@ -61,21 +63,34 @@ async function provision(){
    if(plan.network!==PROFILE.network||plan.creator!==admin.publicKey.toBase58()||plan.programId!==ctx.programId.toBase58())throw Error('Campaign plan does not match this network, operator or program');
    parentMints=identities.parents.map(p=>p.mint);dev=identities.devWallet.address;treasury=identities.treasuryWallet.address;nonce=BigInt(plan.nonce);terms={...terms,...plan.terms};
    if(campaignAddress(ctx.programId,admin.publicKey,nonce).toBase58()!==plan.campaign)throw Error('Campaign plan address mismatch');
+   // Branding comes from the plan (the public launch carries the real name and artwork); a plan without it is a test coin.
+   var token=tokenBranding(plan.token||TEST_TOKEN);
   }
   // Persist identities before any transaction; retries cannot create another coin.
   const mint=Keypair.generate(),nft=Keypair.generate();
   saveActiveFile(keysPath,{mint:Array.from(mint.secretKey),nft:Array.from(nft.secretKey)});
-  m={version:3,network:PROFILE.network,rpcUrl:PROFILE.rpcLabel,programId:ctx.programId.toBase58(),programSha256:ctx.manifest.sha256,genesisHash:ctx.manifest.genesisHash,creator:admin.publicKey.toBase58(),nonce:nonce.toString(),address:campaignAddress(ctx.programId,admin.publicKey,nonce).toBase58(),mint:mint.publicKey.toBase58(),feeNft:nft.publicKey.toBase58(),supply:'1000000000000000',soft:terms.soft,hard:terms.hard,deadline:now+terms.deadlineSeconds,launchDeadline:now+terms.deadlineSeconds+LAUNCH_WINDOW_SECONDS,dev,treasury,parentMints,ready:false};
+  m={version:3,network:PROFILE.network,rpcUrl:PROFILE.rpcLabel,programId:ctx.programId.toBase58(),programSha256:ctx.manifest.sha256,genesisHash:ctx.manifest.genesisHash,creator:admin.publicKey.toBase58(),nonce:nonce.toString(),address:campaignAddress(ctx.programId,admin.publicKey,nonce).toBase58(),mint:mint.publicKey.toBase58(),feeNft:nft.publicKey.toBase58(),supply:'1000000000000000',soft:terms.soft,hard:terms.hard,deadline:now+terms.deadlineSeconds,launchDeadline:now+terms.deadlineSeconds+LAUNCH_WINDOW_SECONDS,dev,treasury,parentMints,token,metadataUri:null,ready:false};
   saveActiveFile(activeManifestPath,m);
  }
  if(m.creator!==admin.publicKey.toBase58())throw Error('Provisioner creator mismatch');
  const keys=read(keysPath),mint=Keypair.fromSecretKey(Uint8Array.from(keys.mint));if(mint.publicKey.toBase58()!==m.mint)throw Error('Stored mint identity mismatch');
  const campaign=new PublicKey(m.address),authority=authorityAddress(ctx,campaign),child=getAssociatedTokenAddressSync(mint.publicKey,authority,true),wsol=getAssociatedTokenAddressSync(NATIVE_MINT,authority,true);
  if(!await c.getAccountInfo(mint.publicKey)){
+  // Metadata first (pinned once, remembered in the manifest so a retry never pins twice), then one atomic transaction:
+  // create + initialise the mint, mint the supply to custody, attach the immutable metadata, hand both authorities to the PDA.
+  const token=tokenBranding(m.token||(local?LOCALNET_TOKEN:TEST_TOKEN));m.token=token;
+  if(!m.metadataUri){
+   const jwt=process.env.KIDS_PINATA_JWT;
+   if(jwt){const imagePath=repoRoot+(token.image||TEST_TOKEN.image);const pinned=await pinTokenMetadata({jwt,token,imagePath});m.metadataUri=pinned.metadataUri;m.imageUri=pinned.imageUri;console.log(JSON.stringify({event:'token-metadata-pinned',symbol:token.symbol,metadataCid:pinned.metadataCid,imageCid:pinned.imageCid}));}
+   else if(local)m.metadataUri='https://kids.fun/rehearsal/'+mint.publicKey.toBase58()+'.json';
+   else throw Error('KIDS_PINATA_JWT is required to attach the coin metadata on '+PROFILE.network);
+   saveActiveFile(activeManifestPath,m);
+  }
   const rent=await c.getMinimumBalanceForRentExemption(MINT_SIZE);
-  const tx=new Transaction().add(SystemProgram.createAccount({fromPubkey:admin.publicKey,newAccountPubkey:mint.publicKey,lamports:rent,space:MINT_SIZE,programId:TOKEN_PROGRAM_ID}),createInitializeMint2Instruction(mint.publicKey,6,admin.publicKey,admin.publicKey),createAssociatedTokenAccountIdempotentInstruction(admin.publicKey,child,authority,mint.publicKey),createMintToInstruction(mint.publicKey,child,admin.publicKey,BigInt(m.supply)),createSetAuthorityInstruction(mint.publicKey,admin.publicKey,AuthorityType.MintTokens,authority),createSetAuthorityInstruction(mint.publicKey,admin.publicKey,AuthorityType.FreezeAccount,authority));
+  const tx=new Transaction().add(SystemProgram.createAccount({fromPubkey:admin.publicKey,newAccountPubkey:mint.publicKey,lamports:rent,space:MINT_SIZE,programId:TOKEN_PROGRAM_ID}),createInitializeMint2Instruction(mint.publicKey,6,admin.publicKey,admin.publicKey),createAssociatedTokenAccountIdempotentInstruction(admin.publicKey,child,authority,mint.publicKey),createMintToInstruction(mint.publicKey,child,admin.publicKey,BigInt(m.supply)),createMetadataInstruction({mint:mint.publicKey,mintAuthority:admin.publicKey,payer:admin.publicKey,name:m.token.name,symbol:m.token.symbol,uri:m.metadataUri}),createSetAuthorityInstruction(mint.publicKey,admin.publicKey,AuthorityType.MintTokens,authority),createSetAuthorityInstruction(mint.publicKey,admin.publicKey,AuthorityType.FreezeAccount,authority));
   m.mintSignature=await send(tx,[mint],'mint:'+m.address);saveActiveFile(activeManifestPath,m);
  }
+ if(!await c.getAccountInfo(metadataAddress(mint.publicKey)))throw Error('Coin metadata account missing after mint creation');
  const info=await getMint(c,mint.publicKey),holding=await getAccount(c,child);if(info.decimals!==6||info.supply!==BigInt(m.supply)||!info.mintAuthority?.equals(authority)||!info.freezeAuthority?.equals(authority)||holding.amount!==BigInt(m.supply)||!holding.owner.equals(authority))throw Error('Mint custody or fixed supply mismatch');
  await send(new Transaction().add(createAssociatedTokenAccountIdempotentInstruction(admin.publicKey,wsol,authority,NATIVE_MINT)),[],'wsol:'+m.address);
  // Launch authority funding: a mainnet launch used 0.18 SOL (pool creation fee, lookup table, rent); 0.22 SOL leaves a margin. Override with KIDS_LAUNCH_AUTHORITY_TOPUP_LAMPORTS.

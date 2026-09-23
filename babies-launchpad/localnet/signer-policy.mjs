@@ -3,17 +3,23 @@
 // operation template, the campaign must be one this signer serves, compute and priority fees are bounded, lookup tables
 // must be resolved, and every lamport the operator can lose (priority fee, transfers, rent) counts against a rolling
 // spending limit. Replay-safe operation ids: the same id may only ever sign the same message.
-import {PublicKey} from '@solana/web3.js';
-export const PROGRAMS={compute:'ComputeBudget111111111111111111111111111111',ata:'ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL',token:'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA',token2022:'TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb',alt:'AddressLookupTab1e1111111111111111111111111',system:'11111111111111111111111111111111'};
+import {PublicKey} from '@solana/web3.js';import {decodeMetadataInstruction,LIMITS as METADATA_LIMITS} from './token-metadata.mjs';
+export const PROGRAMS={compute:'ComputeBudget111111111111111111111111111111',ata:'ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL',token:'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA',token2022:'TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb',alt:'AddressLookupTab1e1111111111111111111111111',metadata:'metaqbxxUerdq28cj1RbAWkYQm3ybzjb6a8bt518x1s',system:'11111111111111111111111111111111'};
 export const KEEPER_TAGS=new Set([2,4,5,6,20,21,22,23,24,25,26]);// finalize, settle, ready, launch, fee cycle incl. burn
 export const PROVISIONING_TAGS=new Set([0,9]);// init campaign, configure parents
 export const USER_TAGS=new Set([1,3,7,8,10]);// commit, refund, claims: never operator-signed
 export const DEFAULT_LIMITS={maxComputeUnits:1_400_000,maxPriorityFeeLamports:50_000_000,maxTransferLamports:500_000_000,maxRentLamports:20_000_000,maxHourlyLamports:1_000_000_000,maxInstructions:24};
 const u32=(d,o=0)=>d.length>=o+4?d.readUInt32LE(o):null,u64=(d,o=0)=>d.length>=o+8?d.readBigUInt64LE(o):null;
+export function feeAuthority(programId,campaign){return PublicKey.findProgramAddressSync([Buffer.from('fee_authority'),new PublicKey(campaign).toBuffer()],new PublicKey(programId))[0].toBase58();}
+// Operator-funded costs that are not in the instruction data: ATA rent (reclaimable by the account owner, so it counts in
+// full), lookup-table rent by size, and the base fee per signature. Rent is estimated at the network rate with headroom.
+export const ATA_RENT_LAMPORTS=2_039_280n,BASE_FEE_LAMPORTS=5_000n;export const rentLamports=bytes=>BigInt(128+bytes)*6_960n;
 export function launchAuthority(programId,campaign){return PublicKey.findProgramAddressSync([Buffer.from('launch_authority'),new PublicKey(campaign).toBuffer()],new PublicKey(programId))[0].toBase58();}
 /** @returns {{ok:true,spendLamports:bigint,priorityFeeLamports:bigint,operations:string[]}|{ok:false,reason:string}} */
-export function evaluateOperatorMessage(message,{operator,programId,campaigns=null,limits=DEFAULT_LIMITS,loadedAddresses=null,provisioning=false}){
+export function evaluateOperatorMessage(message,{operator,programId,campaigns=null,limits=DEFAULT_LIMITS,loadedAddresses=null,provisioning=false,recipients=null,unrestricted=false}){
  const fail=reason=>({ok:false,reason});
+ // Fail closed: a production signer without a served-campaign list signs nothing (localnet rehearsals opt in).
+ if(!campaigns&&!unrestricted)return fail('signer campaigns not configured');
  const program=new PublicKey(programId).toBase58(),op=new PublicKey(operator).toBase58();
  const staticKeys=message.staticAccountKeys.map(k=>k.toBase58());
  if(staticKeys[0]!==op)return fail('fee payer is not the operator');
@@ -32,11 +38,18 @@ export function evaluateOperatorMessage(message,{operator,programId,campaigns=nu
    if(kind===4){operations.push('loaded-data-limit');continue;}
    return fail('compute budget instruction not allowed');
   }
-  if(pid===PROGRAMS.ata){if(data.length>1||(data.length===1&&data[0]>1))return fail('ata instruction not allowed');if(acc[0]!==op)return fail('ata payer is not the operator');operations.push('ata');continue;}
+  if(pid===PROGRAMS.ata){
+   if(data.length>1||(data.length===1&&data[0]>1))return fail('ata instruction not allowed');if(acc[0]!==op)return fail('ata payer is not the operator');
+   // The sponsored account's owner must be the operator, a served campaign's launch or fee authority, or a recorded
+   // recipient (treasury, dev): an attacker-owned recipient could close the account and keep the rent.
+   const owner=acc[2];if(!owner)return fail('ata owner missing');
+   if(campaigns){const allowed=new Set([op,...(recipients||[])]);for(const c of campaigns){allowed.add(launchAuthority(program,c));allowed.add(feeAuthority(program,c));}if(!allowed.has(owner))return fail('ata owner is not served by this signer');}
+   spend+=ATA_RENT_LAMPORTS;operations.push('ata');continue;
+  }
   if(pid===PROGRAMS.alt){
    const kind=u32(data,0);
-   if(kind===0){if(acc[1]!==op||acc[2]!==op)return fail('lookup table authority or payer is not the operator');operations.push('alt-create');continue;}
-   if(kind===2){if(acc[1]!==op)return fail('lookup table authority is not the operator');if(acc.length>2&&acc[2]!==op&&acc[2]!==PROGRAMS.system)return fail('lookup table payer is not the operator');operations.push('alt-extend');continue;}
+   if(kind===0){if(acc[1]!==op||acc[2]!==op)return fail('lookup table authority or payer is not the operator');spend+=rentLamports(56);operations.push('alt-create');continue;}
+   if(kind===2){if(acc[1]!==op)return fail('lookup table authority is not the operator');if(acc.length>2&&acc[2]!==op&&acc[2]!==PROGRAMS.system)return fail('lookup table payer is not the operator');const count=u64(data,4);if(count===null||count>256n)return fail('lookup table extension out of bounds');spend+=rentLamports(32*Number(count));operations.push('alt-extend');continue;}
    return fail('lookup table instruction not allowed');
   }
   if(pid===PROGRAMS.system){
@@ -50,6 +63,13 @@ export function evaluateOperatorMessage(message,{operator,programId,campaigns=nu
    if(kind===20){operations.push('init-mint');continue;}if(kind===7){operations.push('mint-to');continue;}if(kind===6){if(acc[1]!==op)return fail('set-authority signer is not the operator');operations.push('set-authority');continue;}
    return fail('token instruction not allowed');
   }
+  if(pid===PROGRAMS.metadata){
+   if(!provisioning)return fail('metadata instruction not allowed');const meta=decodeMetadataInstruction(data);
+   if(!meta||meta.isMutable||meta.creators!==0||meta.collection!==0||meta.uses!==0||meta.details!==0||meta.sellerFee!==0)return fail('metadata instruction not allowed');
+   if(Buffer.byteLength(meta.name)>METADATA_LIMITS.name||Buffer.byteLength(meta.symbol)>METADATA_LIMITS.symbol||Buffer.byteLength(meta.uri)>METADATA_LIMITS.uri||!/^https:\/\//.test(meta.uri))return fail('metadata fields out of bounds');
+   if(acc.length<6||acc[2]!==op||acc[3]!==op||acc[4]!==op)return fail('metadata authority or payer is not the operator');
+   operations.push('metadata');continue;
+  }
   if(pid===program){
    const tag=data[0];touchesProgram=true;
    if(USER_TAGS.has(tag))return fail('user-signed instruction offered to the operator');
@@ -60,20 +80,22 @@ export function evaluateOperatorMessage(message,{operator,programId,campaigns=nu
   }
   return fail('program not allowed');
  }
- const setup=new Set(['alt-create','alt-extend','ata']),prov=new Set(['create-account','init-mint','mint-to','set-authority','transfer']),budget=o=>o.startsWith('cu-')||o==='heap'||o==='loaded-data-limit';
+ const setup=new Set(['alt-create','alt-extend','ata']),prov=new Set(['create-account','init-mint','mint-to','set-authority','transfer','metadata']),budget=o=>o.startsWith('cu-')||o==='heap'||o==='loaded-data-limit';
  if(!touchesProgram){const real=operations.filter(o=>!budget(o));if(!real.length)return fail('transaction does nothing but set a budget');if(!real.every(o=>setup.has(o)||(provisioning&&prov.has(o))))return fail('transaction does not invoke the launch program');}
  const units=BigInt(cuLimit??Math.min(limits.maxComputeUnits,200_000*ixs.length));
  const priorityFeeLamports=(units*cuPrice+999_999n)/1_000_000n;
  if(priorityFeeLamports>BigInt(limits.maxPriorityFeeLamports))return fail('priority fee out of bounds');
- return {ok:true,spendLamports:spend+priorityFeeLamports,priorityFeeLamports,operations};
+ const baseFeeLamports=BASE_FEE_LAMPORTS*BigInt(message.header.numRequiredSignatures);
+ return {ok:true,spendLamports:spend+priorityFeeLamports+baseFeeLamports,priorityFeeLamports,baseFeeLamports,operations};
 }
 /** Rolling one-hour spending ledger for what the operator can lose by signing. */
-export function createSpendLedger({maxHourlyLamports=DEFAULT_LIMITS.maxHourlyLamports,now=Date.now}={}){
- const entries=[];
- return {charge(lamports,at=now()){while(entries.length&&at-entries[0].at>3_600_000)entries.shift();const total=entries.reduce((s,e)=>s+e.lamports,0n)+BigInt(lamports);if(total>BigInt(maxHourlyLamports))return false;entries.push({at,lamports:BigInt(lamports)});return true;},total(at=now()){while(entries.length&&at-entries[0].at>3_600_000)entries.shift();return entries.reduce((s,e)=>s+e.lamports,0n);}};
+export function createSpendLedger({maxHourlyLamports=DEFAULT_LIMITS.maxHourlyLamports,now=Date.now,entries=[],persist=()=>{}}={}){
+ return {entries,charge(lamports,at=now()){while(entries.length&&at-entries[0].at>3_600_000)entries.shift();const total=entries.reduce((s,e)=>s+e.lamports,0n)+BigInt(lamports);if(total>BigInt(maxHourlyLamports))return false;entries.push({at,lamports:BigInt(lamports)});persist();return true;},total(at=now()){while(entries.length&&at-entries[0].at>3_600_000)entries.shift();return entries.reduce((s,e)=>s+e.lamports,0n);}};
 }
-/** Operation ids: one id, one message. A retry re-signs the identical bytes; anything else is refused. */
-export function createOperationRegistry({ttlMs=86_400_000,now=Date.now}={}){
- const seen=new Map();
- return {check(id,messageHash,at=now()){for(const [k,v] of seen)if(at-v.at>ttlMs)seen.delete(k);const prior=seen.get(id);if(prior&&prior.hash!==messageHash)return false;const retry=!!prior;seen.set(id,{hash:messageHash,at});return retry?'retry':'new';}};
+/** Operation ids: one id, one message. `check` only classifies ('new', 'retry' of an APPROVED signing, or false for a
+ * different message); `approve` records the id after the spend was charged, so a refused request never turns its retry
+ * into a free signing (security audit SEC-01, 23 September 2026). */
+export function createOperationRegistry({ttlMs=86_400_000,now=Date.now,seen=new Map(),persist=()=>{}}={}){
+ const sweep=at=>{for(const [k,v] of seen)if(at-v.at>ttlMs)seen.delete(k);};
+ return {seen,check(id,messageHash,at=now()){sweep(at);const prior=seen.get(id);if(!prior)return 'new';return prior.hash===messageHash?'retry':false;},approve(id,messageHash,at=now()){sweep(at);seen.set(id,{hash:messageHash,at});persist();}};
 }

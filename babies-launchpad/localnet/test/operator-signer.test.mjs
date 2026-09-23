@@ -2,7 +2,7 @@ import test from 'node:test';import assert from 'node:assert/strict';import {Key
 import {createSignerService} from '../signer-service.mjs';import {createRemoteSigner,createLocalSigner,toSigner,operatorSigner} from '../operator-signer.mjs';
 const operator=Keypair.generate(),program=Keypair.generate().publicKey,token='t'.repeat(40),blockhash='EETubP5AKHgjPAhzPAFcb8BAY1hMH639CWCFTqi3hq1k';
 const launchIx=(payer)=>new TransactionInstruction({programId:program,keys:[{pubkey:payer,isSigner:true,isWritable:true}],data:Buffer.from([21])});
-async function serve(opts={}){const logs=[];const s=createSignerService({keypair:operator,token,programId:program,log:l=>logs.push(l),...opts});await new Promise(r=>s.server.listen(0,'127.0.0.1',r));return {url:'http://127.0.0.1:'+s.server.address().port,close:()=>new Promise(r=>s.server.close(r)),logs};}
+async function serve(opts={}){const logs=[];const s=createSignerService({keypair:operator,token,programId:program,unrestricted:true,log:l=>logs.push(l),...opts});await new Promise(r=>s.server.listen(0,'127.0.0.1',r));return {url:'http://127.0.0.1:'+s.server.address().port,close:()=>new Promise(r=>s.server.close(r)),logs};}
 test('remote signer signs legacy and v0 operator transactions through the service and the signatures verify',async()=>{
  const svc=await serve();try{
   const signer=createRemoteSigner({url:svc.url,token,publicKey:operator.publicKey});
