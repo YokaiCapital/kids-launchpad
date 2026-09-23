@@ -1,5 +1,5 @@
 import test from 'node:test';import assert from 'node:assert/strict';
-import {ALL_KINDS,FILTERS,activityChip,applyFilter,countsLine,deriveActivityState,describeAssets,fetchActivity,filterCount,formatAssetAmount,kindsParam,labelFor,mergeEvents,normaliseEvent,symbolFor,tagsFor} from '../src/activity-data.mjs';
+import {ACTIVITY_STEP,ACTIVITY_VISIBLE,ALL_KINDS,FILTERS,activityChip,applyFilter,countsLine,deriveActivityState,describeAssets,fetchActivity,filterCount,formatAssetAmount,hiddenMaintenance,isMaintenance,kindsParam,labelFor,mergeEvents,normaliseEvent,symbolFor,tagsFor} from '../src/activity-data.mjs';
 
 const COIN='M1ntAddr1111111111111111111111111111111111111',FART='FartMint111111111111111111111111111111111111',BUTT='ButtMint111111111111111111111111111111111111';
 const names={coin:COIN,parentMints:[FART,BUTT],parents:['Fartcoin','Buttcoin']};
@@ -67,7 +67,7 @@ test('served events are validated, accept both field spellings, and merge newest
  assert.equal(again.length,4);
 });
 test('chips map to server kinds; the Failed chip is picked out client-side and counts come from the served totals',()=>{
- assert.equal(FILTERS.length,8);assert.equal(kindsParam('all'),null);assert.equal(kindsParam('failed'),null);
+ assert.equal(FILTERS.length,9);assert.equal(kindsParam('all'),null);assert.equal(kindsParam('failed'),null);
  assert.equal(kindsParam('burns'),'buy-burn,buy-burn-routed,burn-child,vault-burn-expired,vault-sweep');
  assert.ok(kindsParam('claims').includes('vault-claim-parent'));assert.ok(kindsParam('vaults').includes('vault-claim-parent'));
  const rows=[ev({kind:'commit'}),ev({signature:'F',kind:'claim-participant',status:'failed'}),ev({signature:'V',kind:'vault-activate'})];
@@ -102,4 +102,17 @@ test('fetchActivity sends the cursor and kinds and refuses an answer without an 
  assert.equal(good.ok,true);assert.equal(calls[1],'/api/market/activity?campaign=C&cursor=c2&limit=10');
  const down=await fetchActivity({campaign:'C'},{fetchImpl:async()=>({ok:false,status:503,headers:{get:()=>'application/json'},json:async()=>({error:'x'})})});
  assert.deepEqual(down,{ok:false,reason:'unavailable',status:503});
+});
+test('an empty finalised fee harvest is maintenance: out of the default feed, under its own chip, signature kept',()=>{
+ const empty=ev({signature:'E1',kind:'fees-collect'}),moved=ev({signature:'M1',kind:'fees-collect',assets:[{mint:'SOL',amountRaw:'5',decimals:9,direction:'in',role:null}]});
+ const failed=ev({signature:'F1',kind:'fees-collect',status:'failed'}),confirming=ev({signature:'C1',kind:'fees-collect',status:'confirmed'}),commit=ev({signature:'K1',kind:'commit'});
+ assert.equal(isMaintenance(empty),true);assert.equal(isMaintenance(moved),false);assert.equal(isMaintenance(failed),false);assert.equal(isMaintenance(confirming),false);assert.equal(isMaintenance(commit),false);
+ const rows=[empty,moved,failed,confirming,commit];
+ assert.deepEqual(applyFilter(rows,'all').map(e=>e.signature),['M1','F1','C1','K1']);// confirming and failed harvests stay visible
+ assert.deepEqual(applyFilter(rows,'fees').map(e=>e.signature),['M1','F1','C1']);
+ assert.deepEqual(applyFilter(rows,'maintenance').map(e=>e.signature),['E1']);
+ assert.deepEqual(applyFilter(rows,'failed').map(e=>e.signature),['F1']);
+ assert.equal(hiddenMaintenance(rows,'all'),1);assert.equal(hiddenMaintenance(rows,'fees'),1);assert.equal(hiddenMaintenance(rows,'launch'),0);assert.equal(hiddenMaintenance(rows,'maintenance'),0);
+ assert.equal(kindsParam('maintenance'),'fees-collect');assert.equal(filterCount({total:9,failed:1,byKind:{'fees-collect':4}},'maintenance'),null);
+ assert.equal(ACTIVITY_VISIBLE,5);assert.ok(ACTIVITY_STEP>=ACTIVITY_VISIBLE);
 });

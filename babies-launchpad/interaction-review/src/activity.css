@@ -44,6 +44,8 @@
 .act-none{color:var(--post-muted);font-weight:400}
 .act-actor{font-family:monospace;font-size:11px;color:var(--post-muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .act-actor code{color:var(--post-muted)}
+/* The time and signer cells clip long text; while an exact-value panel is open the clip lifts so the panel can show. */
+.act-when:has(.exact-button[aria-expanded=true]),.act-actor:has(.exact-button[aria-expanded=true]){overflow:visible}
 .act-sig{justify-self:end;font-family:monospace;font-size:11px;white-space:nowrap}
 .act-sig a{color:#80e6e9;display:inline-flex;align-items:center;min-height:24px}.act-sig a:hover{color:var(--post-ink)}.act-sig code{color:var(--post-muted)}
 .act-empty{margin:0;padding:12px 4px 4px;font-size:13px;line-height:1.5;color:var(--post-muted)}
@@ -51,6 +53,11 @@
 .act-foot{display:flex;align-items:center;flex-wrap:wrap;gap:8px 14px;margin-top:10px;font-size:12px;color:var(--post-muted)}
 .act-foot .act-note{flex-basis:100%;font-size:11px}
 .post-launch .act-more{min-height:36px;font-size:12px;padding:6px 14px}
+.post-launch .act-fewer,.post-launch .act-maintenance-link{min-height:36px;font-size:12px;padding:0 4px}
+.act-shown{font-variant-numeric:tabular-nums}
+/* The Maintenance chip is the quiet one: same shape, dotted edge, so it reads as housekeeping rather than a category of movement. */
+.post-launch .act-filters button.is-maintenance{border-style:dashed}
+.post-launch .act-filters button.is-maintenance[aria-pressed=true]{border-style:solid}
 
 @media(max-width:1200px){.act-row{grid-template-columns:58px minmax(0,1.7fr) minmax(0,1.7fr) 74px 96px;gap:8px}}
 @media(max-width:900px){
@@ -66,7 +73,7 @@
  .act-list{padding-left:16px}
  .act-dot{left:-15px}
  .post-launch .act-filters button{min-height:36px;font-size:12px;padding:4px 10px}
- .post-launch .act-more{min-height:44px}
+ .post-launch .act-more,.post-launch .act-fewer,.post-launch .act-maintenance-link{min-height:44px}
  .act-row{padding:8px 9px}
  .act-asset{white-space:normal;overflow-wrap:anywhere}
  .act-sig a{min-height:36px}

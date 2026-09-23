@@ -19,7 +19,8 @@ import {compactUnits} from './flywheel-format.mjs';
 import {ActivityFeed} from './ActivityFeed';
 import {formatUtc} from './launch-status.mjs';
 import {claimableItems,claimedAll,custodyFacts,networkFact,parentState,remainingRaw} from './claim-view.mjs';
-import {Help} from './Help';
+import {Exact,Help} from './Help';
+import {CoinPfp,SHART_PFP} from './CoinPfp';
 import {parentStatsList} from './valuation.mjs';
 const formatWhole=(value,decimals=6)=>value==null?'—':Math.round(Number(value)/10**decimals).toLocaleString('en-GB');
 const format=(value,decimals=6)=>value==null?'—':(Number(value)/10**decimals).toLocaleString('en-GB',{maximumFractionDigits:decimals===9?4:2});
@@ -27,7 +28,8 @@ function moveTab(event){const tabs=[...event.currentTarget.querySelectorAll('[ro
 const short=value=>value?`${value.slice(0,5)}…${value.slice(-5)}`:'Not connected';
 const PARENT_NAMES=['Fartcoin','Buttcoin'];
 const Burn=()=><Fire size={14} weight="fill" aria-hidden="true"/>;
-const Figure=({raw,decimals,unit})=>{const v=compactUnits(raw,decimals,unit);return <strong title={v.exact||undefined}>{v.text} <small>{unit}</small></strong>;};
+/** A tile figure: the short number is an Exact toggle (tap, focus or hover shows the full value); nothing lives only in a title. */
+const Figure=({raw,decimals,unit,label})=>{const v=compactUnits(raw,decimals,unit);return <strong><Exact label={label} detail={v.exact}>{v.text}</Exact> <small>{unit}</small></strong>;};
 /** The fee sentence reads the pool fee the API served; the LP share the program harvests is not a fixed number here, and the rest of the pool fee is Raydium's protocol and fund share. */
 function feeSentence(bps){const fee=Number(bps)>0?(bps/100).toLocaleString('en-GB')+' %':null;return (fee?'Every trade pays the pool fee of '+fee+'.':'Every trade pays the pool fee.')+' The program harvests the LP share of that fee. The rest of the pool fee is Raydium’s protocol and fund share. The SOL side is split: KIDS treasury, the dev, and buybacks of both parents that are burned. The coin side is burned outright, never sold.';}
 function Flywheel({data,verified}){
@@ -39,16 +41,17 @@ function Flywheel({data,verified}){
  const names={coin:verified?data.mint:null,parentMints:PARENT_NAMES.map((_,i)=>parentStats.find(p=>p?.index===i)?.mint||null),parents:PARENT_NAMES};
  return <section className="post-flywheel"><div className="post-flywheel-head"><div><h2>Every trade feeds the family.</h2><p>{feeSentence(verified?data.tradeFeeBps:null)}</p></div><span className="post-preview-badge">{f?format(f.totalSol,9)+' SOL collected':'No fees yet'}<Help label="SOL collected">All the SOL the pool fee has brought in since launch. It is split between the KIDS treasury, the dev and buybacks of both parents.</Help></span></div>
   <div className="post-flywheel-grid">
-   <div className="post-flywheel-tile is-burn"><span>$Shartcoin burned from fees<Help label="$Shartcoin burned from fees">The coin side of the pool fee. These coins are destroyed for good, never sold back into the pool.</Help></span><strong title={childBurned.exact||undefined}>{childBurned.text} <small>coins</small></strong><em><Burn/> never sold</em></div>
-   <div className="post-flywheel-tile"><span>KIDS treasury<Help label="KIDS treasury">The part of the SOL fee that has been paid to the KIDS treasury so far.</Help></span><Figure raw={f?.treasuryPaid} decimals={9} unit="SOL"/></div>
-   <div className="post-flywheel-tile"><span>Dev<Help label="Dev">The part of the SOL fee that has been paid to the Shartcoin dev wallet so far.</Help></span><Figure raw={f?.devPaid} decimals={9} unit="SOL"/></div>
+   <div className="post-flywheel-tile is-burn"><span>$Shartcoin burned from fees<Help label="$Shartcoin burned from fees">The coin side of the pool fee. These coins are destroyed for good, never sold back into the pool.</Help></span><strong><Exact label="Exact $Shartcoin burned" detail={childBurned.exact}>{childBurned.text}</Exact> <small>coins</small></strong><em><Burn/> never sold</em></div>
+   <div className="post-flywheel-tile"><span>KIDS treasury<Help label="KIDS treasury">The part of the SOL fee that has been paid to the KIDS treasury so far.</Help></span><Figure raw={f?.treasuryPaid} decimals={9} unit="SOL" label="Exact SOL to KIDS treasury"/></div>
+   <div className="post-flywheel-tile"><span>Dev<Help label="Dev">The part of the SOL fee that has been paid to the Shartcoin dev wallet so far.</Help></span><Figure raw={f?.devPaid} decimals={9} unit="SOL" label="Exact SOL to dev"/></div>
    {PARENT_NAMES.map((name,i)=>{const spent=f?(i?f.parentBSpent:f.parentASpent):null,burned=compactUnits(f?(i?f.parentBBurned:f.parentABurned):null,parentDecimals,name+' burned');let queued=null;try{if(f){const q=BigInt(i?f.parentBAllocated:f.parentAAllocated)-BigInt(spent);if(q>0n)queued=q;}}catch{}
-    return <div key={name} className="post-flywheel-tile is-burn"><span><ParentIcon name={name}/> {name} buyback<Help label={name+' buyback'}>SOL from the fee that bought {name} on the open market. Every coin bought this way is burned.</Help></span><Figure raw={spent} decimals={9} unit="SOL"/><em title={burned.exact||undefined}><Burn/> {burned.text} burned</em>{queued!=null&&<small>{format(queued,9)} SOL queued, not yet bought</small>}</div>;})}
+    return <div key={name} className="post-flywheel-tile is-burn"><span><ParentIcon name={name}/> {name} buyback<Help label={name+' buyback'}>SOL from the fee that bought {name} on the open market. Every coin bought this way is burned.</Help></span><Figure raw={spent} decimals={9} unit="SOL" label={'Exact SOL spent on '+name}/><em><Burn/> <Exact label={'Exact '+name+' burned'} detail={burned.exact}>{burned.text}</Exact> burned</em>{queued!=null&&<small>{format(queued,9)} SOL queued, not yet bought</small>}</div>;})}
   </div>
   <ActivityFeed campaign={verified?data.campaign:null} data={verified?data:null} names={names} enabled={verified}/>
  </section>;
 }
-function Metric({label,value,unit,note,tone,fresh,title,help}){return <div className="post-metric"><span>{label}{help&&<Help label={label}>{help}</Help>}</span><strong className={tone?'is-'+tone:undefined} title={title||undefined}>{value}{unit&&<small>{unit}</small>}</strong>{(note||fresh)&&<small>{note&&<span>{note}</span>}{fresh&&<em className={`post-metric-fresh is-${fresh.tone}`}>{fresh.text}</em>}</small>}</div>;}
+/** One metric tile. `exact` is the full value behind the rounded one, shown by an Exact toggle instead of a hover-only title. */
+function Metric({label,value,unit,note,tone,fresh,exact,help}){return <div className="post-metric"><span>{label}{help&&<Help label={label}>{help}</Help>}</span><strong className={tone?'is-'+tone:undefined}>{exact?<Exact label={'Exact '+label.toLowerCase()} detail={exact}>{value}</Exact>:value}{unit&&<small>{unit}</small>}</strong>{(note||fresh)&&<small>{note&&<span>{note}</span>}{fresh&&<em className={`post-metric-fresh is-${fresh.tone}`}>{fresh.text}</em>}</small>}</div>;}
 /** Market summary for the metrics row: read every 10 s while the page is visible, last valid answer kept through failures. */
 function useMarketSummary(campaign,enabled){
  const [state,setState]=useState({summary:null,result:null,readAt:null,now:Math.floor(Date.now()/1000)});
@@ -123,10 +126,10 @@ export function PostLaunch({identity,onSignIn,profile,posts=[],go,preview=false}
     <div className="post-market-heading"><div><span className="post-kicker">The next chapter</span><h1>Shartcoin <span>$Shartcoin</span></h1></div><span className={`post-status ${verified?'is-verified':''}`}><span/>{verified?'Pool found '+net.on:loading?'Reading the pool…':'Pool not connected'}</span></div>
     {!preview&&<ClaimStrip owner={owner} claims={claims} verified={verified} loading={loading} error={error} onSignIn={onSignIn} onOpen={openClaims} decimals={decimals}/>}
     <div className="post-metrics is-six">
-     <Metric label="Price" value={price.text} unit={price.exact?' SOL':null} title={price.exact?price.exact+' SOL per $Shartcoin':undefined} note="SOL per $Shartcoin" fresh={feedFresh}/>
+     <Metric label="Price" value={price.text} unit={price.exact?' SOL':null} exact={price.exact?price.exact+' SOL per $Shartcoin':null} note="SOL per $Shartcoin" fresh={feedFresh}/>
      <Metric label="24h change" value={change.text} tone={change.tone==='up'||change.tone==='down'?change.tone:null} note="Against the price 24 hours ago" fresh={feedFresh}/>
-     <Metric label="24h volume" value={volume.text} unit={volume.exact?' SOL':null} title={volume.exact?volume.exact+' SOL traded in 24 hours':undefined} note={marketOk&&summary?.trades24h!=null?Number(summary.trades24h).toLocaleString('en-GB')+' trades':'Traded in the last 24 hours'} fresh={feedFresh}/>
-     <Metric label="Pool liquidity" value={liquidity?formatSol(liquidity.total??liquidity.solSide):'—'} unit={liquidity&&(liquidity.total??liquidity.solSide)!=null?' SOL':null} title={liquidity?.total!=null?formatSol(liquidity.solSide)+' SOL + '+formatSol(liquidity.coinSideSol)+' SOL in $Shartcoin at the last price':undefined} note={liquidity?.total!=null?`${formatSol(liquidity.solSide,2)} SOL + $Shartcoin worth ${formatSol(liquidity.coinSideSol,2)} SOL at the last price`:liquidity?.solSide!=null?'SOL side only; the coin side needs a price from the feed':'Both sides of the pool'} fresh={poolFresh} help="The SOL in the pool plus its $Shartcoin valued at the last trade price. A deeper pool moves less on each trade."/>
+     <Metric label="24h volume" value={volume.text} unit={volume.exact?' SOL':null} exact={volume.exact?volume.exact+' SOL traded in 24 hours':null} note={marketOk&&summary?.trades24h!=null?Number(summary.trades24h).toLocaleString('en-GB')+' trades':'Traded in the last 24 hours'} fresh={feedFresh}/>
+     <Metric label="Pool liquidity" value={liquidity?formatSol(liquidity.total??liquidity.solSide):'—'} unit={liquidity&&(liquidity.total??liquidity.solSide)!=null?' SOL':null} exact={liquidity?.total!=null?formatSol(liquidity.solSide)+' SOL + '+formatSol(liquidity.coinSideSol)+' SOL in $Shartcoin at the last price':null} note={liquidity?.total!=null?`${formatSol(liquidity.solSide,2)} SOL + $Shartcoin worth ${formatSol(liquidity.coinSideSol,2)} SOL at the last price`:liquidity?.solSide!=null?'SOL side only; the coin side needs a price from the feed':'Both sides of the pool'} fresh={poolFresh} help="The SOL in the pool plus its $Shartcoin valued at the last trade price. A deeper pool moves less on each trade."/>
      <Metric label="Token reserve" value={verified?formatWhole(data.baseReserveRaw,decimals):'—'} note="$Shartcoin in the pool" fresh={poolFresh} help="How many $Shartcoin sit in the pool right now. Buys take coins out of it, sells put coins back."/>
      <Metric label="Pool fee" value={verified&&data.tradeFeeBps?(data.tradeFeeBps/100).toLocaleString('en-GB')+'%':'—'} note={verified&&data.tradeFeeBps?'Read from the pool':'Not served'} fresh={verified&&data.tradeFeeBps?poolFresh:null} help="The share of every trade that goes to the pool, read from the pool itself. Part of it feeds the family; the rest is Raydium's share."/>
     </div>
@@ -154,7 +157,7 @@ export function PostLaunch({identity,onSignIn,profile,posts=[],go,preview=false}
    </div>
    <aside className="post-rail" ref={railRef}>
     <div className="post-banner"><img src={profile?.banner||"/assets/shart-cover.jpg"} alt="Shartcoin banner"/>{socials.length>0&&<div className="post-socials">{socials.map(({key,label,Icon})=><a key={key} href={profile[key]} target="_blank" rel="noopener noreferrer" aria-label={label} title={label}><Icon size={20} aria-hidden="true"/></a>)}</div>}</div>
-    <div className="post-identity"><img src={profile?.logo||"/assets/shart-pfp.png"} alt="Shartcoin logo"/><div><div className="post-inline-parents"><ParentIcon name="Fartcoin"/><span>Fartcoin</span><b>×</b><ParentIcon name="Buttcoin"/><span>Buttcoin</span></div><strong>Shartcoin</strong><small>$Shartcoin</small></div></div>
+    <div className="post-identity"><CoinPfp src={profile?.logo||SHART_PFP} alt="Shartcoin logo" size={56} preview/><div><div className="post-inline-parents"><ParentIcon name="Fartcoin"/><span>Fartcoin</span><b>×</b><ParentIcon name="Buttcoin"/><span>Buttcoin</span></div><strong>Shartcoin</strong><small>$Shartcoin</small></div></div>
     <p className="post-description">{resolveCoinDescription(profile?.description)}</p>
     <button className="post-contract" disabled={!verified} onClick={()=>copy(data.mint,'Mint address')}><span>CA</span><code>{verified?short(data.mint):'Available after connection'}</code><Copy size={16}/></button>
     <div className="post-rail-tabs" role="tablist" aria-label="Trade or claim" onKeyDown={moveTab}>{['Trade','Claims'].map(name=><button key={name} id={`post-rail-tab-${name}`} role="tab" tabIndex={railTab===name?0:-1} aria-selected={railTab===name} aria-controls="post-rail-panel" onClick={()=>setRailTab(name)}>{name}{name==='Claims'&&claims&&claimableItems(claims,decimals).length>0&&<i className="post-rail-dot" role="img" aria-label="something to claim"/>}</button>)}</div>

@@ -16,7 +16,7 @@ h1{font-size:44px;line-height:1;letter-spacing:-1.6px;font-weight:800;margin:0 0
 .sub{margin:0 0 24px;color:var(--muted);font-size:15px}
 label{display:block;font-size:13px;font-weight:600;color:var(--muted);margin:0 0 6px}
 input{display:block;width:100%;min-height:50px;padding:12px 14px;border-radius:12px;border:1px solid #6a4d80;background:#120c1a;color:var(--fg);font:inherit;font-size:17px;letter-spacing:.12em;transition:border-color .15s,box-shadow .15s}
-input::placeholder{color:#7c6690;letter-spacing:.12em}
+input::placeholder{color:#7c6690;letter-spacing:0}
 input:hover{border-color:#8a68a6}
 input:focus{outline:none;border-color:var(--ice)}
 input:focus-visible{outline:2px solid var(--ice);outline-offset:2px}
@@ -36,7 +36,7 @@ button:focus-visible{outline:3px solid var(--ice);outline-offset:3px;box-shadow:
 <p class="sub">${operator?'Second door. Site session first, then the operator password.':'If you know, you know.'}</p>
 <form method="post" action="/${operator?'__operator':'__access'}" novalidate>
 <label for="password">${operator?'Operator password':'Password'}</label>
-<input id="password" type="password" name="password" autocomplete="current-password" maxlength="256" required autofocus placeholder="••••••••"${error?' aria-invalid="true" aria-describedby="err"':''}>
+<input id="password" type="password" name="password" autocomplete="current-password" maxlength="256" required autofocus placeholder="Enter password"${error?' aria-invalid="true" aria-describedby="err"':''}>
 ${error?'<p class="err" id="err" role="alert"><svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="7" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M8 4.5v4M8 11.2v.3" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>That’s not it.</p>':''}
 <button type="submit">Enter<svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h13M13 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
 </form>

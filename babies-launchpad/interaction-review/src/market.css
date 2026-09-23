@@ -1,6 +1,7 @@
 /* Live market on the coin page (owner, 23 September 2026). Candles run hot and cold: buys and up-candles in the
    brand pink, sells and down-candles in the site's ice signal blue, so the pair reads without red/green vision. */
-.post-launch{--market-up:var(--post-pink);--market-down:#8cecff;--market-live:#7ddc9a;--market-grid:rgba(255,255,255,.045)}
+.post-launch{--market-up:var(--post-pink);--market-down:#8cecff;--market-live:#7ddc9a;--market-grid:rgba(255,255,255,.045);--market-carried:rgba(140,236,255,.5)}
+/* A carried bar (no trade in the interval, last price carried) is a hairline in the ice colour at half strength. */
 
 /* Metrics: six tiles, three across, two rows; two across on phones. Row two starts with a rule. */
 .post-metrics.is-six{grid-template-columns:repeat(3,minmax(0,1fr));row-gap:0;padding:0}
@@ -49,6 +50,9 @@
 .market-foot .market-credit{margin-left:auto;display:inline-flex;align-items:center;min-height:24px;color:var(--post-muted);text-decoration:underline;text-underline-offset:2px}
 .market-foot .market-credit:hover{color:var(--post-ink)}
 .market-gaps{color:var(--post-warn)}
+.market-carried-note{display:inline-flex;align-items:center;gap:6px}
+.market-carried-note i{width:12px;height:0;border-top:2px solid var(--market-carried);flex-shrink:0}
+.post-launch .market-fewer{min-height:36px;font-size:12px;padding:0 4px}
 
 /* Transactions */
 .market-trades{padding:12px 16px 16px;border-top:1px solid var(--post-line)}
@@ -98,7 +102,7 @@
  .market-chart{height:240px}
  .market-foot{padding:7px 12px}
  .market-trades{padding:10px 12px 14px}
- .post-launch .market-more{min-height:44px}
+ .post-launch .market-more,.post-launch .market-fewer{min-height:44px}
  .post-launch .market-banner .text-button{min-height:36px}
 }
 @media(prefers-reduced-motion:reduce){.market-fresh.is-live i{animation:none}.post-launch .market-intervals button{transition:none}}

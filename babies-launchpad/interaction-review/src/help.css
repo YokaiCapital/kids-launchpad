@@ -16,3 +16,16 @@
 /* Beside a large figure the ring sits on the baseline; inside metric labels it stays 12 px text-sized. */
 .post-flywheel-tile>span .help,.post-metric>span .help,.funding-cap-labels small .help,.claim-eligibility .help,.post-swap-terms .help,.post-swap-row>span .help,.claim-group-title .help{margin-left:4px}
 .post-preview-badge .help{margin-left:6px}
+
+/* Exact values (owner review, 23 September 2026): a rounded figure is a quiet button; tap, focus or hover shows the
+   exact value in the same panel. The dotted underline is the only visible hint, so rows stay as dense as before. */
+.exact{position:relative;display:inline;margin:0}
+.exact>.exact-button{all:unset;position:relative;display:inline;box-sizing:border-box;cursor:pointer;color:inherit;font:inherit;font-variant-numeric:inherit;letter-spacing:inherit;white-space:inherit;text-decoration:underline dotted;text-decoration-color:rgba(255,244,252,.38);text-decoration-thickness:1px;text-underline-offset:3px;border-radius:3px;touch-action:manipulation;-webkit-tap-highlight-color:transparent;transition:text-decoration-color .15s,color .15s}
+.exact>.exact-button::before{content:"";position:absolute;inset:-13px -5px}/* about 44 px of hit area without moving the text */
+.exact>.exact-button:hover,.exact>.exact-button[aria-expanded=true]{text-decoration-color:var(--help-accent,#ff77ce)}
+.exact>.exact-button:focus-visible{outline:2px solid var(--help-focus,#8cecff);outline-offset:2px}
+.exact>.exact-button:disabled{cursor:default}
+.help-sr{position:absolute;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0}
+.help-panel.is-exact{width:max-content;max-width:min(340px,calc(100vw - 24px));padding:8px 11px 9px;font-variant-numeric:tabular-nums;overflow-wrap:anywhere;word-break:break-all;font-size:12.5px}
+.help-panel.is-exact>b{margin-bottom:2px;font-size:11px;letter-spacing:.02em;text-transform:uppercase;color:#c9b6d8}
+@media(prefers-reduced-motion:reduce){.exact>.exact-button{transition:none}}

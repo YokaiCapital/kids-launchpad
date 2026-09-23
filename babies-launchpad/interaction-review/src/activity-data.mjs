@@ -5,6 +5,8 @@
 // shown with its raw name rather than dropped; a failed read keeps the last valid page and says so.
 import {fetchMarket,relativeTime} from './market-data.mjs';
 export const ACTIVITY_PAGE=30;
+/** Rows shown before the first "Show more", and how many each press adds. Pages stay bounded; the cursor keeps paging the feed. */
+export const ACTIVITY_VISIBLE=5,ACTIVITY_STEP=10;
 export const ACTIVITY_STALE_SECONDS=120;
 const SOL_DECIMALS=9,DUST_LAMPORTS=100000n;
 
@@ -18,7 +20,13 @@ export const FEE_KINDS=['fees-init','fees-collect','fees-sell','fees-distribute'
 export const BURN_KINDS=['buy-burn','buy-burn-routed','burn-child','vault-burn-expired','vault-sweep'];
 export const VAULT_KINDS=['vault-activate','vault-claim-participant','vault-claim-parent','vault-claim-dev','vault-burn-expired','vault-sweep'];
 export const ALL_KINDS=[...new Set([...LAUNCH_KINDS,...CLAIM_KINDS,...REFUND_KINDS,...FEE_KINDS,...BURN_KINDS,...VAULT_KINDS])];
-/** Filter chips. `kinds` null means "ask for everything"; `failedOnly` filters client-side because the server has no status filter. */
+/**
+ * A maintenance event: a finalised fee harvest that found nothing to move. It is a real transaction with a signature,
+ * but it says nothing about the coin, so it lives under the Maintenance chip instead of the default feed. A failed or
+ * still-confirming harvest is never maintenance: those stay visible where they happened.
+ */
+export const isMaintenance=e=>e?.kind==='fees-collect'&&e.status==='finalized'&&(!e.assets||e.assets.length===0);
+/** Filter chips. `kinds` null means "ask for everything"; `failedOnly` and `maintenanceOnly` filter client-side because the server has no status or movement filter. */
 export const FILTERS=[
  {key:'all',label:'All',kinds:null},
  {key:'launch',label:'Launch',kinds:LAUNCH_KINDS},
@@ -27,17 +35,27 @@ export const FILTERS=[
  {key:'fees',label:'Fees',kinds:FEE_KINDS},
  {key:'burns',label:'Buybacks and burns',kinds:BURN_KINDS},
  {key:'vaults',label:'Vaults',kinds:VAULT_KINDS},
- {key:'failed',label:'Failed',kinds:null,failedOnly:true}
+ {key:'failed',label:'Failed',kinds:null,failedOnly:true},
+ {key:'maintenance',label:'Maintenance',kinds:['fees-collect'],maintenanceOnly:true}
 ];
 export const filterFor=key=>FILTERS.find(f=>f.key===key)||FILTERS[0];
 /** The `kinds=` query value for a chip, or null for all. */
 export const kindsParam=key=>{const f=filterFor(key);return f.kinds?f.kinds.join(','):null;};
-/** Rows to show for a chip from what is loaded (the Failed chip is the only client-side one). */
-export function applyFilter(events,key){const f=filterFor(key);if(f.failedOnly)return (events||[]).filter(e=>e.status==='failed');if(!f.kinds)return events||[];const set=new Set(f.kinds);return (events||[]).filter(e=>set.has(e.kind));}
+/** Rows to show for a chip from what is loaded. Failed and Maintenance are picked out client-side; every other chip hides maintenance rows. */
+export function applyFilter(events,key){
+ const f=filterFor(key);const list=events||[];
+ if(f.failedOnly)return list.filter(e=>e.status==='failed');
+ if(f.maintenanceOnly)return list.filter(isMaintenance);
+ const set=f.kinds?new Set(f.kinds):null;
+ return list.filter(e=>!isMaintenance(e)&&(!set||set.has(e.kind)));
+}
+/** How many loaded rows a chip hides because they are maintenance, so the list can say so instead of quietly dropping them. */
+export function hiddenMaintenance(events,key){const f=filterFor(key);if(f.failedOnly||f.maintenanceOnly)return 0;const set=f.kinds?new Set(f.kinds):null;return (events||[]).filter(e=>isMaintenance(e)&&(!set||set.has(e.kind))).length;}
 /** Count for a chip from the served counts {total,failed,byKind}; null when the counts are not served. */
 export function filterCount(counts,key){
  if(!counts||typeof counts!=='object')return null;const f=filterFor(key);
  if(f.failedOnly)return Number.isFinite(Number(counts.failed))?Number(counts.failed):null;
+ if(f.maintenanceOnly)return null;// the server counts harvests, not empty ones
  if(!f.kinds)return Number.isFinite(Number(counts.total))?Number(counts.total):null;
  const byKind=counts.byKind||{};let n=0;for(const k of f.kinds)n+=Number(byKind[k]||0);return n;
 }

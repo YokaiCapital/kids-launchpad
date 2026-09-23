@@ -1,0 +1,22 @@
+/* Coin picture with preview (owner review, 23 September 2026). The avatar is a quiet zoom button; the larger copy opens
+   in a portal beside it at the image's real aspect ratio, so nothing in the page reflows. */
+.coin-pfp-trigger{all:unset;position:relative;display:inline-flex;flex-shrink:0;box-sizing:border-box;min-height:0;padding:0;margin:0;cursor:zoom-in;border-radius:12px;touch-action:manipulation;-webkit-tap-highlight-color:transparent}
+.coin-pfp-trigger>.coin-pfp{display:block;transition:box-shadow .15s}
+.coin-pfp-trigger:hover>.coin-pfp,.coin-pfp-trigger[aria-expanded=true]>.coin-pfp{box-shadow:0 0 0 2px rgba(140,236,255,.5)}
+.coin-pfp-trigger:focus-visible{outline:2px solid #8cecff;outline-offset:3px}
+/* Header sizes: modestly larger than before, still shorter than the text block beside them, so no row is added. */
+.post-identity .coin-pfp{width:56px;height:56px;border-radius:12px;object-fit:contain}
+.post-identity>.coin-pfp-trigger{border-radius:12px}
+.sidebar-campaign .prelaunch-heading .coin-pfp.coin-logo{width:52px;height:52px;border-radius:12px}
+.prelaunch-heading>.coin-pfp-trigger{border-radius:12px}
+
+.coin-pfp-preview{position:fixed;z-index:60;box-sizing:content-box;padding:0;border:1px solid #6d5385;border-radius:14px;background:#0f0a16;box-shadow:0 18px 48px rgba(0,0,0,.6),0 0 0 3px rgba(15,10,22,.6);overflow:hidden;animation:coin-pfp-in .16s ease-out;transform-origin:left top}
+.coin-pfp-preview.is-left{transform-origin:right top}
+.coin-pfp-preview.is-above{transform-origin:left bottom}
+.coin-pfp-preview>img{display:block;width:100%;height:100%;object-fit:contain;background:#1d1228;user-select:none}
+.coin-pfp-close{position:absolute;top:6px;right:6px;display:inline-grid;place-items:center;width:28px;height:28px;min-height:0;margin:0;padding:0;border:1px solid rgba(255,244,252,.28);border-radius:50%;background:rgba(15,10,22,.8);color:#fff4fc;cursor:pointer;touch-action:manipulation;transition:background .15s}
+.coin-pfp-close::before{content:"";position:absolute;inset:-8px;border-radius:50%}/* 44 px hit area */
+.coin-pfp-close:hover{background:rgba(255,119,206,.4)}
+.coin-pfp-close:focus-visible{outline:2px solid #8cecff;outline-offset:2px}
+@keyframes coin-pfp-in{from{opacity:0;transform:scale(.97)}to{opacity:1;transform:none}}
+@media(prefers-reduced-motion:reduce){.coin-pfp-preview{animation:none}.coin-pfp-trigger>.coin-pfp,.coin-pfp-close{transition:none}}

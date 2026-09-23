@@ -35,16 +35,32 @@ test('candles are validated, merged in time order and a provisional bar is repla
  assert.deepEqual(merged.map(b=>[b.time,b.close,b.provisional]),[[60,1.2,false],[120,2,false],[180,2,false]]);
  assert.deepEqual(mergeGaps([{fromUnix:10,toUnix:20}],[{fromUnix:10,toUnix:20},{fromUnix:5,toUnix:2},{fromUnix:30,toUnix:40}]),[{fromUnix:10,toUnix:20},{fromUnix:30,toUnix:40}]);
 });
-test('series data draws whitespace for missing buckets and gaps instead of fake bars',()=>{
- const candles=mergeCandles([],[{t:60,o:'1',h:'1',l:'1',c:'1'},{t:300,o:'1',h:'1',l:'1',c:'1'}]);
- const {points,filled}=seriesData(candles,{intervalSeconds:60,fromUnix:60,toUnix:420});
- assert.equal(filled,true);assert.deepEqual(points.map(p=>p.time),[60,120,180,240,300,360,420]);
- assert.deepEqual(points[1],{time:120});assert.equal(points[4].close,1);assert.equal('open' in points[6],false);
- assert.deepEqual(seriesData([],{intervalSeconds:60}),{points:[],filled:true});
- const wide=seriesData(candles,{intervalSeconds:1,fromUnix:0,toUnix:10**6});assert.equal(wide.filled,false);assert.equal(wide.points.length,2);
+test('series data: whitespace before the first trade, carried bars between real bars, whitespace inside coverage gaps',()=>{
+ const candles=mergeCandles([],[{t:120,o:'1',h:'1.5',l:'1',c:'1.5'},{t:300,o:'1',h:'1',l:'1',c:'1'}]);
+ const {points,filled,carried}=seriesData(candles,{intervalSeconds:60,fromUnix:0,toUnix:420});
+ assert.equal(filled,true);assert.deepEqual(points.map(p=>p.time),[0,60,120,180,240,300,360,420]);
+ assert.deepEqual(points[0],{time:0});assert.deepEqual(points[1],{time:60});// nothing before the first trade: no seeded price
+ assert.equal(points[2].carried,undefined);assert.equal(points[2].close,1.5);
+ assert.deepEqual(points[3],{time:180,open:1.5,high:1.5,low:1.5,close:1.5,volume:0,trades:0,carried:true});// previous close carried
+ assert.deepEqual(points[4],{time:240,open:1.5,high:1.5,low:1.5,close:1.5,volume:0,trades:0,carried:true});
+ assert.equal(points[5].close,1);assert.equal(points[5].carried,undefined);
+ assert.equal(points[6].carried,true);assert.equal(points[6].close,1);assert.equal(points[7].carried,true);// carried up to now
+ assert.equal(carried,4);
+ // a coverage gap stays whitespace and carrying only resumes at the next real bar
+ const gapped=seriesData(candles,{intervalSeconds:60,fromUnix:0,toUnix:420,gaps:[{fromUnix:180,toUnix:250}]});
+ assert.deepEqual(gapped.points[3],{time:180});assert.deepEqual(gapped.points[4],{time:240});
+ assert.equal(gapped.points[5].close,1);assert.equal(gapped.points[6].carried,true);assert.equal(gapped.carried,2);
+ const tail=seriesData(mergeCandles([],[{t:60,o:'1',h:'1',l:'1',c:'1'}]),{intervalSeconds:60,fromUnix:60,toUnix:300,gaps:[{fromUnix:200,toUnix:600}]});
+ assert.deepEqual(tail.points.map(p=>p.carried?'c':'open' in p?'r':'w'),['r','c','w','w','w']);// nothing is drawn past a gap without a new trade
+ // a real bar inside a listed gap is still drawn
+ const inside=seriesData(candles,{intervalSeconds:60,fromUnix:0,toUnix:300,gaps:[{fromUnix:100,toUnix:400}]});
+ assert.equal(inside.points[2].close,1.5);assert.equal(inside.points[5].close,1);assert.deepEqual(inside.points[3],{time:180});
+ assert.deepEqual(seriesData([],{intervalSeconds:60}),{points:[],filled:true,carried:0});
+ const wide=seriesData(candles,{intervalSeconds:1,fromUnix:0,toUnix:10**6});assert.equal(wide.filled,false);assert.equal(wide.points.length,2);assert.equal(wide.carried,0);
 });
 test('chart updates append or replace in place and only reset when the series start moved',()=>{
  const a=[{time:60,open:1,high:1,low:1,close:1},{time:120}];
+ const carriedBar={time:60,open:1,high:1,low:1,close:1,volume:0,trades:0,carried:true};assert.equal(diffForUpdate([carriedBar,{time:120}],a).updates.length,1);// carried → real repaints even at the same price
  const same={reset:false,updates:[]};assert.deepEqual(diffForUpdate(a,a.map(p=>({...p}))),same);
  const next=[{time:60,open:1,high:1,low:1,close:1},{time:120,open:1,high:2,low:1,close:2},{time:180}];
  assert.deepEqual(diffForUpdate(a,next),{reset:false,updates:[{point:next[1],historical:false},{point:next[2],historical:false}]});

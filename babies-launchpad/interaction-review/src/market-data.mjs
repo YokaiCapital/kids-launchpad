@@ -1,7 +1,8 @@
 // Market feed helpers for the coin page (owner, 23 September 2026): fetch, cache and pure state logic for the
 // summary, candle and trade endpoints. Everything here is framework-free so it runs under `node --test`.
-// Rules: never invent a price or a candle; a failed read keeps the last valid data and says so; a bucket with
-// no trades is drawn as empty space, never as a flat bar.
+// Rules: never invent a price or a candle; a failed read keeps the last valid data and says so. After the first real
+// trade a bucket with no trades carries the previous close forward as a flagged, visibly muted bar so the price line
+// reads continuously; before the first trade and inside a coverage gap nothing is drawn, so a price is never seeded.
 export const INTERVALS=[
  {key:'1m',seconds:60,window:6*3600,label:'1 minute'},
  {key:'5m',seconds:300,window:24*3600,label:'5 minutes'},
@@ -135,23 +136,36 @@ export function mergeGaps(existing,incoming){
 }
 export const alignDown=(unix,seconds)=>Math.floor(unix/seconds)*seconds;
 /**
- * Chart data: real bars plus whitespace for every bucket without one between the first bar (or `fromUnix`) and `toUnix`.
- * Whitespace keeps the time axis honest; coverage gaps get whitespace too and are listed separately for the caption.
+ * Chart data: real bars plus one point per bucket between the first bar (or `fromUnix`) and `toUnix`.
+ * Before the first real bar every bucket is whitespace (no price exists yet). After it, a bucket without a trade
+ * becomes a carried bar (open = high = low = close = previous close, volume 0, trades 0, `carried: true`) so the line
+ * reads continuously; the chart draws these muted. Buckets inside a coverage gap stay whitespace, and carrying only
+ * resumes at the next real bar after the gap: the feed does not know what traded there, so nothing is drawn.
  * When the range would exceed MAX_SERIES_POINTS the fill is skipped and `filled` is false (the axis becomes index-based).
+ * @returns {{points:object[],filled:boolean,carried:number}}  carried = how many carried bars were drawn
  */
-export function seriesData(candles,{intervalSeconds,fromUnix=null,toUnix=null}){
+export function seriesData(candles,{intervalSeconds,fromUnix=null,toUnix=null,gaps=[]}){
  const bars=(candles||[]).slice().sort((a,b)=>a.time-b.time);
- if(!bars.length)return {points:[],filled:true};
+ if(!bars.length)return {points:[],filled:true,carried:0};
  const start=alignDown(Math.min(bars[0].time,fromUnix==null?bars[0].time:fromUnix),intervalSeconds);
  const end=alignDown(Math.max(bars[bars.length-1].time,toUnix==null?bars[bars.length-1].time:toUnix),intervalSeconds);
  const count=Math.floor((end-start)/intervalSeconds)+1;
- if(count>MAX_SERIES_POINTS)return {points:bars.map(toPoint),filled:false};
+ if(count>MAX_SERIES_POINTS)return {points:bars.map(b=>toPoint(b)),filled:false,carried:0};
  const byTime=new Map(bars.map(b=>[alignDown(b.time,intervalSeconds),b]));
- const points=[];for(let t=start;t<=end;t+=intervalSeconds){const bar=byTime.get(t);points.push(bar?toPoint(bar,t):{time:t});}
- return {points,filled:true};
+ const ranges=(gaps||[]).map(g=>[Number(g?.fromUnix),Number(g?.toUnix)]).filter(([a,b])=>Number.isFinite(a)&&Number.isFinite(b)&&b>=a);
+ const inGap=t=>ranges.some(([a,b])=>t<b&&t+intervalSeconds>a);// the bucket overlaps a coverage gap
+ const points=[];let carry=null,carried=0;
+ for(let t=start;t<=end;t+=intervalSeconds){
+  const bar=byTime.get(t);
+  if(bar){points.push(toPoint(bar,t));carry=bar.close;continue;}
+  if(inGap(t)){points.push({time:t});carry=null;continue;}
+  if(carry==null){points.push({time:t});continue;}
+  points.push({time:t,open:carry,high:carry,low:carry,close:carry,volume:0,trades:0,carried:true});carried++;
+ }
+ return {points,filled:true,carried};
 }
 const toPoint=(bar,time=bar.time)=>({time,open:bar.open,high:bar.high,low:bar.low,close:bar.close});
-const samePoint=(a,b)=>a.time===b.time&&a.open===b.open&&a.high===b.high&&a.low===b.low&&a.close===b.close;
+const samePoint=(a,b)=>a.time===b.time&&a.open===b.open&&a.high===b.high&&a.low===b.low&&a.close===b.close&&!!a.carried===!!b.carried;// a carried bar that becomes a real one must repaint
 /**
  * How to move the chart from `applied` points to `next` without losing the reader's zoom: append or update bars in place
  * (historical updates for older buckets), or reset when the series start moved or shrank.
