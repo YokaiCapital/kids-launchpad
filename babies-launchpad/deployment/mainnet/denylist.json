@@ -1,6 +1,6 @@
 {
  "version": 1,
- "note": "Append-only journal of wallets refused by kids.fun (launch creation, commitments, trades through the site). Program-level enforcement follows in a later build; the page says which is live. Rows are never edited: a later row with status 'removed' or 'appealed' supersedes an earlier 'active' row for the same wallet.",
+ "note": "Append-only journal of wallets refused by kids.fun (launch creation, commitments, trades through the site). Program-level enforcement follows in a later build; the page says which is live. Rows are never edited: a later row with status 'removed' or 'appealed' supersedes an earlier 'active' row for the same wallet. 23 Sep 2026 20:50 UTC: the 271 rows journaled at 20:45 (three clusters carrying account handles) were replaced by the same wallets plus two more clusters, keyed cluster-1 to cluster-5 with no handles (owner: no names on the list); that earlier state remains only in the repository history.",
  "reasons": [
   "bundler",
   "fake-leaderboard",
@@ -10,3009 +10,5432 @@
  ],
  "entries": [
   {
-   "wallet": "498g1rVnFcnjBjpfw1xyqA1WvgQXUU8RWuELjxkjAayQ",
-   "clusterId": "frankdegods",
-   "clusterLabel": "@frankdegods",
+   "wallet": "suqh5sHtr8HyJ7q8scBimULPkPpA557prMG47xCHQfK",
+   "clusterId": "cluster-1",
    "role": "main",
    "reason": "bundler",
    "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
-   "addedAt": "2026-09-23T20:44:23Z",
+   "addedAt": "2026-09-23T20:48:32Z",
    "addedBy": "owner",
    "status": "active"
   },
   {
-   "wallet": "Fvkc2thk1YcAASdR2gi8uf9n67JW9Dqqr9iRd99MDhoB",
-   "clusterId": "frankdegods",
-   "clusterLabel": "@frankdegods",
+   "wallet": "FxN3VZ4BosL5urG2yoeQ156JSdmavm9K5fdLxjkPmaMR",
+   "clusterId": "cluster-1",
    "role": "bundle",
    "reason": "bundler",
    "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
-   "addedAt": "2026-09-23T20:44:23Z",
+   "addedAt": "2026-09-23T20:48:32Z",
+   "addedBy": "owner",
+   "status": "active"
+  },
+  {
+   "wallet": "2fg5QD1eD7rzNNCsvnhmXFm5hqNgwTTG8p7kQ6f3rx6f",
+   "clusterId": "cluster-1",
+   "role": "bundle",
+   "reason": "bundler",
+   "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
+   "addedAt": "2026-09-23T20:48:32Z",
+   "addedBy": "owner",
+   "status": "active"
+  },
+  {
+   "wallet": "7NAd2EpYGGeFofpyvgehSXhH5vg6Ry6VRMW2Y6jiqCu1",
+   "clusterId": "cluster-1",
+   "role": "bundle",
+   "reason": "bundler",
+   "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
+   "addedAt": "2026-09-23T20:48:32Z",
+   "addedBy": "owner",
+   "status": "active"
+  },
+  {
+   "wallet": "D7EG7216MsiUdyFmcoxCnhx6vaYZRiXFBGXZWh8PbwjA",
+   "clusterId": "cluster-1",
+   "role": "bundle",
+   "reason": "bundler",
+   "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
+   "addedAt": "2026-09-23T20:48:32Z",
+   "addedBy": "owner",
+   "status": "active"
+  },
+  {
+   "wallet": "AyoAc9NfLQD78vrFJfEuRJRCZaCnMfd6QzsNQWSucrLk",
+   "clusterId": "cluster-1",
+   "role": "bundle",
+   "reason": "bundler",
+   "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
+   "addedAt": "2026-09-23T20:48:32Z",
+   "addedBy": "owner",
+   "status": "active"
+  },
+  {
+   "wallet": "9DQjzLv7xwEYkFUZE7rDyRE5UqE3R1YHFSNyxASMzmYy",
+   "clusterId": "cluster-1",
+   "role": "bundle",
+   "reason": "bundler",
+   "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
+   "addedAt": "2026-09-23T20:48:32Z",
+   "addedBy": "owner",
+   "status": "active"
+  },
+  {
+   "wallet": "JAN5jJXEjrH3ZJeK1HGqxSRBZCxBMcJ8yT75acskeziz",
+   "clusterId": "cluster-1",
+   "role": "bundle",
+   "reason": "bundler",
+   "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
+   "addedAt": "2026-09-23T20:48:32Z",
+   "addedBy": "owner",
+   "status": "active"
+  },
+  {
+   "wallet": "EFykzWuV1ZxjA8oSBZGY6EUgcpbV2z9vQaD6oHD3ytbV",
+   "clusterId": "cluster-1",
+   "role": "bundle",
+   "reason": "bundler",
+   "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
+   "addedAt": "2026-09-23T20:48:32Z",
+   "addedBy": "owner",
+   "status": "active"
+  },
+  {
+   "wallet": "97aUSCdiVVZuRwWC9qS9ABCZU3X7HYtnyaub2uvwqqcq",
+   "clusterId": "cluster-1",
+   "role": "bundle",
+   "reason": "bundler",
+   "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
+   "addedAt": "2026-09-23T20:48:32Z",
+   "addedBy": "owner",
+   "status": "active"
+  },
+  {
+   "wallet": "D3M55PtK6EGmRA7aiEdBndJBpE8wZHuhCtaUkv7ozWG7",
+   "clusterId": "cluster-1",
+   "role": "bundle",
+   "reason": "bundler",
+   "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
+   "addedAt": "2026-09-23T20:48:32Z",
+   "addedBy": "owner",
+   "status": "active"
+  },
+  {
+   "wallet": "FrKWtUSEoiMyw4nZ2WbNkfjpuGbWSFSAx8haQsFxLQz4",
+   "clusterId": "cluster-1",
+   "role": "bundle",
+   "reason": "bundler",
+   "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
+   "addedAt": "2026-09-23T20:48:32Z",
+   "addedBy": "owner",
+   "status": "active"
+  },
+  {
+   "wallet": "BPV2RxxFpUMhesvoyeK4rGRjajwskcUsakzis2JG6NHg",
+   "clusterId": "cluster-1",
+   "role": "bundle",
+   "reason": "bundler",
+   "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
+   "addedAt": "2026-09-23T20:48:32Z",
+   "addedBy": "owner",
+   "status": "active"
+  },
+  {
+   "wallet": "7VhHrQ42PKVmojosCEvvF6KKdribaQUt6PFY1y97Fcg7",
+   "clusterId": "cluster-1",
+   "role": "bundle",
+   "reason": "bundler",
+   "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
+   "addedAt": "2026-09-23T20:48:32Z",
+   "addedBy": "owner",
+   "status": "active"
+  },
+  {
+   "wallet": "H3ACWJ1ctd4o7YfD7k26evLhRmnFcsedDP8VeGbe1yG2",
+   "clusterId": "cluster-1",
+   "role": "bundle",
+   "reason": "bundler",
+   "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
+   "addedAt": "2026-09-23T20:48:32Z",
+   "addedBy": "owner",
+   "status": "active"
+  },
+  {
+   "wallet": "ELrkHYDCzxGbnNvzLSCTmhR19JbLGMv9gKjaHbQx4N5u",
+   "clusterId": "cluster-1",
+   "role": "bundle",
+   "reason": "bundler",
+   "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
+   "addedAt": "2026-09-23T20:48:32Z",
+   "addedBy": "owner",
+   "status": "active"
+  },
+  {
+   "wallet": "BmYcA625yUotbgn7Et1irJ8syceSvZZCFi73o8owwwoa",
+   "clusterId": "cluster-1",
+   "role": "bundle",
+   "reason": "bundler",
+   "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
+   "addedAt": "2026-09-23T20:48:32Z",
+   "addedBy": "owner",
+   "status": "active"
+  },
+  {
+   "wallet": "83J8HrUNRBK8ZdwLGUUYDvoH4rgrD4gNwxXqXMpfMx62",
+   "clusterId": "cluster-1",
+   "role": "bundle",
+   "reason": "bundler",
+   "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
+   "addedAt": "2026-09-23T20:48:32Z",
+   "addedBy": "owner",
+   "status": "active"
+  },
+  {
+   "wallet": "666LtuZHcJ5ULzivfe32zriFcyvkEdjjbmgPofA6EJc6",
+   "clusterId": "cluster-1",
+   "role": "bundle",
+   "reason": "bundler",
+   "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
+   "addedAt": "2026-09-23T20:48:32Z",
+   "addedBy": "owner",
+   "status": "active"
+  },
+  {
+   "wallet": "EGFxnt89Lo69H2dA44CKVECnEwaKhYE5SkbHqvXRQSW",
+   "clusterId": "cluster-1",
+   "role": "bundle",
+   "reason": "bundler",
+   "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
+   "addedAt": "2026-09-23T20:48:32Z",
+   "addedBy": "owner",
+   "status": "active"
+  },
+  {
+   "wallet": "F6sZYGwaH9KA62fdqQDJ4DCb27wfyoGDLEU1UbjnY6mb",
+   "clusterId": "cluster-1",
+   "role": "bundle",
+   "reason": "bundler",
+   "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
+   "addedAt": "2026-09-23T20:48:32Z",
+   "addedBy": "owner",
+   "status": "active"
+  },
+  {
+   "wallet": "3HwxtXLeDgLN1LPMmMoeS6dLEKRv1VDFiV3SknjtwNfd",
+   "clusterId": "cluster-1",
+   "role": "bundle",
+   "reason": "bundler",
+   "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
+   "addedAt": "2026-09-23T20:48:32Z",
+   "addedBy": "owner",
+   "status": "active"
+  },
+  {
+   "wallet": "6tmz2WoLXaen91KEtiXgrk3PvdsmB4XDeuoVSVqWFKub",
+   "clusterId": "cluster-1",
+   "role": "bundle",
+   "reason": "bundler",
+   "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
+   "addedAt": "2026-09-23T20:48:32Z",
+   "addedBy": "owner",
+   "status": "active"
+  },
+  {
+   "wallet": "78Skii2nXb3oMB2gLh8Q9Sb5VqT4xBmtJn4TPqmRjwG1",
+   "clusterId": "cluster-1",
+   "role": "bundle",
+   "reason": "bundler",
+   "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
+   "addedAt": "2026-09-23T20:48:32Z",
+   "addedBy": "owner",
+   "status": "active"
+  },
+  {
+   "wallet": "tKqwiEbwLtkXDbJNVgBrPobp7wKEeFQuWKnTaEM3aRe",
+   "clusterId": "cluster-1",
+   "role": "bundle",
+   "reason": "bundler",
+   "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
+   "addedAt": "2026-09-23T20:48:32Z",
+   "addedBy": "owner",
+   "status": "active"
+  },
+  {
+   "wallet": "6XB7g6DnY463598VyXriC2TVfXR8AxJuTkb2GBAR66dQ",
+   "clusterId": "cluster-1",
+   "role": "bundle",
+   "reason": "bundler",
+   "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
+   "addedAt": "2026-09-23T20:48:32Z",
+   "addedBy": "owner",
+   "status": "active"
+  },
+  {
+   "wallet": "CqrME3QGDhE81tDZZxQZqYhYgvND3DpV63w43QwApDyq",
+   "clusterId": "cluster-1",
+   "role": "bundle",
+   "reason": "bundler",
+   "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
+   "addedAt": "2026-09-23T20:48:32Z",
+   "addedBy": "owner",
+   "status": "active"
+  },
+  {
+   "wallet": "ETuNzAJUtYneTnK17MQbzUzexxuoCsTGxnuJpPmBgrD7",
+   "clusterId": "cluster-1",
+   "role": "bundle",
+   "reason": "bundler",
+   "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
+   "addedAt": "2026-09-23T20:48:32Z",
+   "addedBy": "owner",
+   "status": "active"
+  },
+  {
+   "wallet": "E3rMiCxNhqxgyLAwBHbPnXEBz1qJYxGXyshExztkiSaS",
+   "clusterId": "cluster-1",
+   "role": "bundle",
+   "reason": "bundler",
+   "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
+   "addedAt": "2026-09-23T20:48:32Z",
+   "addedBy": "owner",
+   "status": "active"
+  },
+  {
+   "wallet": "FirnaridctWQ4TGuLeffpt9CjdDu7rHyMJ7XeJe5t4uJ",
+   "clusterId": "cluster-1",
+   "role": "bundle",
+   "reason": "bundler",
+   "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
+   "addedAt": "2026-09-23T20:48:32Z",
+   "addedBy": "owner",
+   "status": "active"
+  },
+  {
+   "wallet": "HKo1eG3scSdjqwKfByVPNfepFApTcP8MYniPwqfa1uJW",
+   "clusterId": "cluster-1",
+   "role": "bundle",
+   "reason": "bundler",
+   "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
+   "addedAt": "2026-09-23T20:48:32Z",
+   "addedBy": "owner",
+   "status": "active"
+  },
+  {
+   "wallet": "DmUfqp6jXKTBXJ3ey99KjPzknoZmK6TXB8bsERTXEssV",
+   "clusterId": "cluster-1",
+   "role": "bundle",
+   "reason": "bundler",
+   "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
+   "addedAt": "2026-09-23T20:48:32Z",
+   "addedBy": "owner",
+   "status": "active"
+  },
+  {
+   "wallet": "7T956tarG4qtheoHqWFimYTydLt5mL5EEziGpahtEFnp",
+   "clusterId": "cluster-1",
+   "role": "bundle",
+   "reason": "bundler",
+   "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
+   "addedAt": "2026-09-23T20:48:32Z",
+   "addedBy": "owner",
+   "status": "active"
+  },
+  {
+   "wallet": "BCa9x9w1rq3PMKhkWEN1RK7ta9b1RgEX1cXyxLj7Djtu",
+   "clusterId": "cluster-1",
+   "role": "bundle",
+   "reason": "bundler",
+   "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
+   "addedAt": "2026-09-23T20:48:32Z",
+   "addedBy": "owner",
+   "status": "active"
+  },
+  {
+   "wallet": "EVBz16AgxrLhcPAJ8uHHeJdKS5JTLvWatL9MuasmT9B9",
+   "clusterId": "cluster-1",
+   "role": "bundle",
+   "reason": "bundler",
+   "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
+   "addedAt": "2026-09-23T20:48:32Z",
+   "addedBy": "owner",
+   "status": "active"
+  },
+  {
+   "wallet": "GvrN6vGiFjgu1uNF6FjgxZ6KeQBQuD3Vh6yWHUR3zyuk",
+   "clusterId": "cluster-1",
+   "role": "bundle",
+   "reason": "bundler",
+   "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
+   "addedAt": "2026-09-23T20:48:32Z",
+   "addedBy": "owner",
+   "status": "active"
+  },
+  {
+   "wallet": "DT13PpzBsyoVihxzp97XoJygBXfqSj2n9Ghy5CQcu4s7",
+   "clusterId": "cluster-1",
+   "role": "bundle",
+   "reason": "bundler",
+   "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
+   "addedAt": "2026-09-23T20:48:32Z",
+   "addedBy": "owner",
+   "status": "active"
+  },
+  {
+   "wallet": "CPpNZ44AEpbRGvACitHZUFCiwAKqNSur4zKrQdBrvkdh",
+   "clusterId": "cluster-1",
+   "role": "bundle",
+   "reason": "bundler",
+   "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
+   "addedAt": "2026-09-23T20:48:32Z",
+   "addedBy": "owner",
+   "status": "active"
+  },
+  {
+   "wallet": "J2oFbbts9SGsffLKQC7mwCb9Q2xkrjvq5baDpNuGDas3",
+   "clusterId": "cluster-1",
+   "role": "bundle",
+   "reason": "bundler",
+   "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
+   "addedAt": "2026-09-23T20:48:32Z",
+   "addedBy": "owner",
+   "status": "active"
+  },
+  {
+   "wallet": "Bhmqs9K3sFL6gmHHYeLc1dTQzMvBM9V8UvYj8Wvndxz8",
+   "clusterId": "cluster-1",
+   "role": "bundle",
+   "reason": "bundler",
+   "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
+   "addedAt": "2026-09-23T20:48:32Z",
+   "addedBy": "owner",
+   "status": "active"
+  },
+  {
+   "wallet": "GE82vXGRqMbXUSpbXVdpcj39faRC3WCmJkdbkjM9gdVH",
+   "clusterId": "cluster-1",
+   "role": "bundle",
+   "reason": "bundler",
+   "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
+   "addedAt": "2026-09-23T20:48:32Z",
+   "addedBy": "owner",
+   "status": "active"
+  },
+  {
+   "wallet": "8JKaBxMhuG2BJ9HjrwbWfmNSV8zXjg9vVQyDBd8Pu2Az",
+   "clusterId": "cluster-1",
+   "role": "bundle",
+   "reason": "bundler",
+   "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
+   "addedAt": "2026-09-23T20:48:32Z",
+   "addedBy": "owner",
+   "status": "active"
+  },
+  {
+   "wallet": "FA93viBcraoUNWAsZJcVCz3pxWZFFNANo8FJazdmgqey",
+   "clusterId": "cluster-1",
+   "role": "bundle",
+   "reason": "bundler",
+   "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
+   "addedAt": "2026-09-23T20:48:32Z",
+   "addedBy": "owner",
+   "status": "active"
+  },
+  {
+   "wallet": "EA4MXkyF8C2NzY8fw2acJPuarmoU271KRCCAYpLzMBJr",
+   "clusterId": "cluster-1",
+   "role": "bundle",
+   "reason": "bundler",
+   "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
+   "addedAt": "2026-09-23T20:48:32Z",
+   "addedBy": "owner",
+   "status": "active"
+  },
+  {
+   "wallet": "7TDXpGVPFw5dThsL9rB7Mim8dqjUm4x6JbvbDgzwK9vm",
+   "clusterId": "cluster-1",
+   "role": "bundle",
+   "reason": "bundler",
+   "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
+   "addedAt": "2026-09-23T20:48:32Z",
+   "addedBy": "owner",
+   "status": "active"
+  },
+  {
+   "wallet": "AEqPi4RCD7uRXmMB5ec6V4ehT74Ra2kEdmqVqtHUmyLh",
+   "clusterId": "cluster-1",
+   "role": "bundle",
+   "reason": "bundler",
+   "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
+   "addedAt": "2026-09-23T20:48:32Z",
+   "addedBy": "owner",
+   "status": "active"
+  },
+  {
+   "wallet": "BsxcnNWYKURE7GumTNwUGmCTbHrWMaJaTLmN9u9sraLu",
+   "clusterId": "cluster-1",
+   "role": "bundle",
+   "reason": "bundler",
+   "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
+   "addedAt": "2026-09-23T20:48:32Z",
+   "addedBy": "owner",
+   "status": "active"
+  },
+  {
+   "wallet": "5rE7GKv3qCkMV5LqQS7KzHMJJPqMuXeATk8fzmhqTkfy",
+   "clusterId": "cluster-1",
+   "role": "bundle",
+   "reason": "bundler",
+   "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
+   "addedAt": "2026-09-23T20:48:32Z",
+   "addedBy": "owner",
+   "status": "active"
+  },
+  {
+   "wallet": "4dkHu2wmwireBWMo6ZkGSnYSBTvMgTppYC7BqHk6Gnm9",
+   "clusterId": "cluster-1",
+   "role": "bundle",
+   "reason": "bundler",
+   "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
+   "addedAt": "2026-09-23T20:48:32Z",
+   "addedBy": "owner",
+   "status": "active"
+  },
+  {
+   "wallet": "GaVxKs4ZeRV39LWLa7Gc6539DQhru9Q5Vs8ox57aj3C5",
+   "clusterId": "cluster-1",
+   "role": "bundle",
+   "reason": "bundler",
+   "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
+   "addedAt": "2026-09-23T20:48:32Z",
+   "addedBy": "owner",
+   "status": "active"
+  },
+  {
+   "wallet": "A1pFbfvQr8ZrBixgszzCkDtvaijMSqyVfCZivg7SQNPq",
+   "clusterId": "cluster-1",
+   "role": "bundle",
+   "reason": "bundler",
+   "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
+   "addedAt": "2026-09-23T20:48:32Z",
+   "addedBy": "owner",
+   "status": "active"
+  },
+  {
+   "wallet": "E8GwshkownDEjQkk9eFdePSaAv6j36nHFw5EwkSye68Q",
+   "clusterId": "cluster-1",
+   "role": "bundle",
+   "reason": "bundler",
+   "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
+   "addedAt": "2026-09-23T20:48:32Z",
+   "addedBy": "owner",
+   "status": "active"
+  },
+  {
+   "wallet": "77mDSQGeY2rA25WBeKCqpUU3XJ42sdNQkdUemy1t8EDr",
+   "clusterId": "cluster-1",
+   "role": "bundle",
+   "reason": "bundler",
+   "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
+   "addedAt": "2026-09-23T20:48:32Z",
+   "addedBy": "owner",
+   "status": "active"
+  },
+  {
+   "wallet": "2kv8X2a9bxnBM8NKLc6BBTX2z13GFNRL4oRotMUJRva9",
+   "clusterId": "cluster-1",
+   "role": "bundle",
+   "reason": "bundler",
+   "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
+   "addedAt": "2026-09-23T20:48:32Z",
+   "addedBy": "owner",
+   "status": "active"
+  },
+  {
+   "wallet": "6kDReHdMVmAfDhUAQhDWdndUQf4cYPHnN9U1BN4huUT8",
+   "clusterId": "cluster-1",
+   "role": "bundle",
+   "reason": "bundler",
+   "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
+   "addedAt": "2026-09-23T20:48:32Z",
+   "addedBy": "owner",
+   "status": "active"
+  },
+  {
+   "wallet": "D47VMjMYd45SBQ3mk6j4FMhZrRfEmuuxVL7APZF46yFn",
+   "clusterId": "cluster-1",
+   "role": "bundle",
+   "reason": "bundler",
+   "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
+   "addedAt": "2026-09-23T20:48:32Z",
+   "addedBy": "owner",
+   "status": "active"
+  },
+  {
+   "wallet": "Fp3NGFBSBY1Fy8m7QzwsBphJaJ6zRiVQXc5KySM7nJe5",
+   "clusterId": "cluster-1",
+   "role": "bundle",
+   "reason": "bundler",
+   "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
+   "addedAt": "2026-09-23T20:48:32Z",
+   "addedBy": "owner",
+   "status": "active"
+  },
+  {
+   "wallet": "9DAA6YBd4pGb4gdjhztVZf86ssiLexwyLZoGqJUMDc3j",
+   "clusterId": "cluster-1",
+   "role": "bundle",
+   "reason": "bundler",
+   "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
+   "addedAt": "2026-09-23T20:48:32Z",
+   "addedBy": "owner",
+   "status": "active"
+  },
+  {
+   "wallet": "CSZXHJApgkdm2W4VtJx1x3RJybtE5SdbtFAtgoKnw859",
+   "clusterId": "cluster-1",
+   "role": "bundle",
+   "reason": "bundler",
+   "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
+   "addedAt": "2026-09-23T20:48:32Z",
+   "addedBy": "owner",
+   "status": "active"
+  },
+  {
+   "wallet": "GeuN1BFHLphc9nBr1kSX99y496gtXpFniXFzhTuSXXM4",
+   "clusterId": "cluster-1",
+   "role": "bundle",
+   "reason": "bundler",
+   "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
+   "addedAt": "2026-09-23T20:48:32Z",
+   "addedBy": "owner",
+   "status": "active"
+  },
+  {
+   "wallet": "6HiZ9c6H6VbRgw6zcE3633q64Qs28ToDvFp3r7dTeDr8",
+   "clusterId": "cluster-1",
+   "role": "bundle",
+   "reason": "bundler",
+   "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
+   "addedAt": "2026-09-23T20:48:32Z",
+   "addedBy": "owner",
+   "status": "active"
+  },
+  {
+   "wallet": "67Nwfi9hgwqhxGoovT2JGLU67uxfomLwQAWncjXXzU6U",
+   "clusterId": "cluster-1",
+   "role": "bundle",
+   "reason": "bundler",
+   "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
+   "addedAt": "2026-09-23T20:48:32Z",
+   "addedBy": "owner",
+   "status": "active"
+  },
+  {
+   "wallet": "66B95ED19CLsJtsVYPkTBQT3EZPPpEawCimCPruVucSX",
+   "clusterId": "cluster-1",
+   "role": "bundle",
+   "reason": "bundler",
+   "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
+   "addedAt": "2026-09-23T20:48:32Z",
+   "addedBy": "owner",
+   "status": "active"
+  },
+  {
+   "wallet": "9KeBtVrJjMTDiYNeq2XWTysTFj3zs4nL1aiaC9F5BrNR",
+   "clusterId": "cluster-1",
+   "role": "bundle",
+   "reason": "bundler",
+   "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
+   "addedAt": "2026-09-23T20:48:32Z",
+   "addedBy": "owner",
+   "status": "active"
+  },
+  {
+   "wallet": "498g1rVnFcnjBjpfw1xyqA1WvgQXUU8RWuELjxkjAayQ",
+   "clusterId": "cluster-2",
+   "role": "main",
+   "reason": "bundler",
+   "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
+   "addedAt": "2026-09-23T20:48:32Z",
+   "addedBy": "owner",
+   "status": "active",
+   "alsoIn": [
+    "cluster-4",
+    "cluster-5"
+   ],
+   "note": "Also appears in cluster-4, cluster-5."
+  },
+  {
+   "wallet": "Fvkc2thk1YcAASdR2gi8uf9n67JW9Dqqr9iRd99MDhoB",
+   "clusterId": "cluster-2",
+   "role": "bundle",
+   "reason": "bundler",
+   "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
+   "addedAt": "2026-09-23T20:48:32Z",
    "addedBy": "owner",
    "status": "active"
   },
   {
    "wallet": "Dk4na3gi8HYrrnFDcRgVfET23Ltm7AxbzvPpGyHaXwQJ",
-   "clusterId": "frankdegods",
-   "clusterLabel": "@frankdegods",
+   "clusterId": "cluster-2",
    "role": "bundle",
    "reason": "bundler",
    "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
-   "addedAt": "2026-09-23T20:44:23Z",
+   "addedAt": "2026-09-23T20:48:32Z",
    "addedBy": "owner",
    "status": "active"
   },
   {
    "wallet": "2heJbC32Tpfcb3nbUb5ER61K11FGZVfVGtVnDm6LDogF",
-   "clusterId": "frankdegods",
-   "clusterLabel": "@frankdegods",
+   "clusterId": "cluster-2",
    "role": "bundle",
    "reason": "bundler",
    "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
-   "addedAt": "2026-09-23T20:44:23Z",
+   "addedAt": "2026-09-23T20:48:32Z",
    "addedBy": "owner",
-   "status": "active"
+   "status": "active",
+   "alsoIn": [
+    "cluster-5"
+   ],
+   "note": "Also appears in cluster-5."
   },
   {
    "wallet": "4GELppbfrevo3eQ8nAywmN2irRrCeGTSmQ19vwzyTS8P",
-   "clusterId": "frankdegods",
-   "clusterLabel": "@frankdegods",
+   "clusterId": "cluster-2",
    "role": "bundle",
    "reason": "bundler",
    "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
-   "addedAt": "2026-09-23T20:44:23Z",
+   "addedAt": "2026-09-23T20:48:32Z",
    "addedBy": "owner",
    "status": "active"
   },
   {
    "wallet": "HLnpSz9h2S4hiLQ43rnSD9XkcUThA7B8hQMKmDaiTLcC",
-   "clusterId": "frankdegods",
-   "clusterLabel": "@frankdegods",
+   "clusterId": "cluster-2",
    "role": "bundle",
    "reason": "bundler",
    "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
-   "addedAt": "2026-09-23T20:44:23Z",
+   "addedAt": "2026-09-23T20:48:32Z",
    "addedBy": "owner",
    "status": "active",
    "note": "Program-derived address (off-curve): it can hold tokens but cannot sign, so it cannot commit; listed for completeness, not a typo."
   },
   {
    "wallet": "EPDbKDcKefJpsyj1sMJVjE87w26gwkY5EfhVGYJuJrxz",
-   "clusterId": "frankdegods",
-   "clusterLabel": "@frankdegods",
+   "clusterId": "cluster-2",
    "role": "bundle",
    "reason": "bundler",
    "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
-   "addedAt": "2026-09-23T20:44:23Z",
+   "addedAt": "2026-09-23T20:48:32Z",
    "addedBy": "owner",
    "status": "active"
   },
   {
    "wallet": "3g4D4n67vUFSDUwW8NWvzkQSUqD4J5H8zW1sbKJrrczi",
-   "clusterId": "frankdegods",
-   "clusterLabel": "@frankdegods",
+   "clusterId": "cluster-2",
    "role": "bundle",
    "reason": "bundler",
    "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
-   "addedAt": "2026-09-23T20:44:23Z",
+   "addedAt": "2026-09-23T20:48:32Z",
    "addedBy": "owner",
    "status": "active"
   },
   {
    "wallet": "FXx73aRpuC4FEfjq9kgZscRvNzk6LYhRUS17fSKRa9Go",
-   "clusterId": "frankdegods",
-   "clusterLabel": "@frankdegods",
+   "clusterId": "cluster-2",
    "role": "bundle",
    "reason": "bundler",
    "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
-   "addedAt": "2026-09-23T20:44:23Z",
+   "addedAt": "2026-09-23T20:48:32Z",
    "addedBy": "owner",
    "status": "active"
   },
   {
    "wallet": "5yJqXzkMjTpzDFQ2JKMjQpLjypk341VtwVqgL5ite9qB",
-   "clusterId": "frankdegods",
-   "clusterLabel": "@frankdegods",
+   "clusterId": "cluster-2",
    "role": "bundle",
    "reason": "bundler",
    "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
-   "addedAt": "2026-09-23T20:44:23Z",
+   "addedAt": "2026-09-23T20:48:32Z",
    "addedBy": "owner",
    "status": "active"
   },
   {
    "wallet": "4MsfJKFHQWE7kUk79AgTRNf8icPgqxCaBVxnF8FzowpL",
-   "clusterId": "frankdegods",
-   "clusterLabel": "@frankdegods",
+   "clusterId": "cluster-2",
    "role": "bundle",
    "reason": "bundler",
    "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
-   "addedAt": "2026-09-23T20:44:23Z",
+   "addedAt": "2026-09-23T20:48:32Z",
    "addedBy": "owner",
-   "status": "active"
+   "status": "active",
+   "alsoIn": [
+    "cluster-4",
+    "cluster-5"
+   ],
+   "note": "Also appears in cluster-4, cluster-5."
   },
   {
    "wallet": "EC2f5DnHzuNRit1ExqghSifDbp1wgrzktsRRZCtU92MJ",
-   "clusterId": "frankdegods",
-   "clusterLabel": "@frankdegods",
+   "clusterId": "cluster-2",
    "role": "bundle",
    "reason": "bundler",
    "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
-   "addedAt": "2026-09-23T20:44:23Z",
+   "addedAt": "2026-09-23T20:48:32Z",
    "addedBy": "owner",
-   "status": "active"
+   "status": "active",
+   "alsoIn": [
+    "cluster-4",
+    "cluster-5"
+   ],
+   "note": "Also appears in cluster-4, cluster-5."
   },
   {
    "wallet": "8D9kqDELeVAVcFw6fz5Ag3imBTLu7NmZA7vDePSHTsjW",
-   "clusterId": "frankdegods",
-   "clusterLabel": "@frankdegods",
+   "clusterId": "cluster-2",
    "role": "bundle",
    "reason": "bundler",
    "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
-   "addedAt": "2026-09-23T20:44:23Z",
+   "addedAt": "2026-09-23T20:48:32Z",
    "addedBy": "owner",
    "status": "active"
   },
   {
    "wallet": "AUqvnhqn2TzNAUeArFQNmecMFiUNotBaSajKcUPVpjVr",
-   "clusterId": "frankdegods",
-   "clusterLabel": "@frankdegods",
+   "clusterId": "cluster-2",
    "role": "bundle",
    "reason": "bundler",
    "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
-   "addedAt": "2026-09-23T20:44:23Z",
+   "addedAt": "2026-09-23T20:48:32Z",
    "addedBy": "owner",
    "status": "active"
   },
   {
    "wallet": "8crdFdVP4bkmyNGFXHSCVAiKtDfzaWaWczdJaSVVFJF9",
-   "clusterId": "frankdegods",
-   "clusterLabel": "@frankdegods",
+   "clusterId": "cluster-2",
    "role": "bundle",
    "reason": "bundler",
    "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
-   "addedAt": "2026-09-23T20:44:23Z",
+   "addedAt": "2026-09-23T20:48:32Z",
    "addedBy": "owner",
    "status": "active"
   },
   {
    "wallet": "9ggkEFf3PK56dvP2yjm1N7X8Bxzty1BYfk3Rp68TyvQP",
-   "clusterId": "frankdegods",
-   "clusterLabel": "@frankdegods",
+   "clusterId": "cluster-2",
    "role": "bundle",
    "reason": "bundler",
    "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
-   "addedAt": "2026-09-23T20:44:23Z",
+   "addedAt": "2026-09-23T20:48:32Z",
    "addedBy": "owner",
    "status": "active"
   },
   {
    "wallet": "3b4ynXadfXSoxM9umJs5CxkbuTt9ULPMkgEiycM7Ce8c",
-   "clusterId": "frankdegods",
-   "clusterLabel": "@frankdegods",
+   "clusterId": "cluster-2",
    "role": "bundle",
    "reason": "bundler",
    "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
-   "addedAt": "2026-09-23T20:44:23Z",
+   "addedAt": "2026-09-23T20:48:32Z",
    "addedBy": "owner",
    "status": "active"
   },
   {
    "wallet": "EVywKh5N85YAebefrPdgvrtHZVm5ER41Z2J1TGWJAAeV",
-   "clusterId": "frankdegods",
-   "clusterLabel": "@frankdegods",
+   "clusterId": "cluster-2",
    "role": "bundle",
    "reason": "bundler",
    "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
-   "addedAt": "2026-09-23T20:44:23Z",
+   "addedAt": "2026-09-23T20:48:32Z",
    "addedBy": "owner",
-   "status": "active"
+   "status": "active",
+   "alsoIn": [
+    "cluster-4",
+    "cluster-5"
+   ],
+   "note": "Also appears in cluster-4, cluster-5."
   },
   {
    "wallet": "3kfRbS3HhkLyirFth2EfokCwQLvQA1LwWxrxca7U2C5T",
-   "clusterId": "frankdegods",
-   "clusterLabel": "@frankdegods",
+   "clusterId": "cluster-2",
    "role": "bundle",
    "reason": "bundler",
    "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
-   "addedAt": "2026-09-23T20:44:23Z",
+   "addedAt": "2026-09-23T20:48:32Z",
    "addedBy": "owner",
    "status": "active"
   },
   {
    "wallet": "4Be9CvxqHW6BYiRAxW9Q3xu1ycTMWaL5z8NX4HR3ha7t",
-   "clusterId": "frankdegods",
-   "clusterLabel": "@frankdegods",
+   "clusterId": "cluster-2",
    "role": "bundle",
    "reason": "bundler",
    "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
-   "addedAt": "2026-09-23T20:44:23Z",
+   "addedAt": "2026-09-23T20:48:32Z",
    "addedBy": "owner",
    "status": "active"
   },
   {
    "wallet": "3CooHUDfKf7SztmoSD8ivYNrXiC6c5xBJ8BtEqkuCUjZ",
-   "clusterId": "frankdegods",
-   "clusterLabel": "@frankdegods",
+   "clusterId": "cluster-2",
    "role": "bundle",
    "reason": "bundler",
    "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
-   "addedAt": "2026-09-23T20:44:23Z",
+   "addedAt": "2026-09-23T20:48:32Z",
    "addedBy": "owner",
    "status": "active"
   },
   {
    "wallet": "Ak6gsstZwaRDYKnzdyNg2HvCXDFvv21afjVix9VGRMQv",
-   "clusterId": "frankdegods",
-   "clusterLabel": "@frankdegods",
+   "clusterId": "cluster-2",
    "role": "bundle",
    "reason": "bundler",
    "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
-   "addedAt": "2026-09-23T20:44:23Z",
+   "addedAt": "2026-09-23T20:48:32Z",
    "addedBy": "owner",
    "status": "active"
   },
   {
    "wallet": "E74KaLR5Wh1JvNMoVzC3yyboyoCkwkgNCySN56QkAsku",
-   "clusterId": "frankdegods",
-   "clusterLabel": "@frankdegods",
+   "clusterId": "cluster-2",
    "role": "bundle",
    "reason": "bundler",
    "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
-   "addedAt": "2026-09-23T20:44:23Z",
+   "addedAt": "2026-09-23T20:48:32Z",
    "addedBy": "owner",
    "status": "active"
   },
   {
    "wallet": "3VGEieJLT1vmBDosZjRLPZ1QDtQRTN6cqhLRQAmT9vs4",
-   "clusterId": "frankdegods",
-   "clusterLabel": "@frankdegods",
+   "clusterId": "cluster-2",
    "role": "bundle",
    "reason": "bundler",
    "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
-   "addedAt": "2026-09-23T20:44:23Z",
+   "addedAt": "2026-09-23T20:48:32Z",
    "addedBy": "owner",
-   "status": "active"
+   "status": "active",
+   "alsoIn": [
+    "cluster-4",
+    "cluster-5"
+   ],
+   "note": "Also appears in cluster-4, cluster-5."
   },
   {
    "wallet": "Beqv6dzTcjV2eodo8RRXCiCcnSYrS1vkQKhfqwHXqeit",
-   "clusterId": "frankdegods",
-   "clusterLabel": "@frankdegods",
+   "clusterId": "cluster-2",
    "role": "bundle",
    "reason": "bundler",
    "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
-   "addedAt": "2026-09-23T20:44:23Z",
+   "addedAt": "2026-09-23T20:48:32Z",
    "addedBy": "owner",
-   "status": "active"
+   "status": "active",
+   "alsoIn": [
+    "cluster-4",
+    "cluster-5"
+   ],
+   "note": "Also appears in cluster-4, cluster-5."
   },
   {
    "wallet": "HcwQaQfLTgbF3VB94wfTNnjdvLrdWWSztReBHobE5CDz",
-   "clusterId": "frankdegods",
-   "clusterLabel": "@frankdegods",
+   "clusterId": "cluster-2",
    "role": "bundle",
    "reason": "bundler",
    "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
-   "addedAt": "2026-09-23T20:44:23Z",
+   "addedAt": "2026-09-23T20:48:32Z",
    "addedBy": "owner",
    "status": "active"
   },
   {
    "wallet": "8xL8S7P4QLdTGRquHas8NP5EVjp2qUGbmSgrkh97mvmq",
-   "clusterId": "frankdegods",
-   "clusterLabel": "@frankdegods",
+   "clusterId": "cluster-2",
    "role": "bundle",
    "reason": "bundler",
    "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
-   "addedAt": "2026-09-23T20:44:23Z",
+   "addedAt": "2026-09-23T20:48:32Z",
    "addedBy": "owner",
-   "status": "active"
+   "status": "active",
+   "alsoIn": [
+    "cluster-4",
+    "cluster-5"
+   ],
+   "note": "Also appears in cluster-4, cluster-5."
   },
   {
    "wallet": "6VAN619AsUhnsoAjnZTfYo8Whrrn92dfLFYK1rDxfZtn",
-   "clusterId": "frankdegods",
-   "clusterLabel": "@frankdegods",
+   "clusterId": "cluster-2",
    "role": "bundle",
    "reason": "bundler",
    "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
-   "addedAt": "2026-09-23T20:44:23Z",
+   "addedAt": "2026-09-23T20:48:32Z",
    "addedBy": "owner",
    "status": "active"
   },
   {
    "wallet": "JDFDma1TMb1tWNFY1pruwCsHBybMdzwxveythZB2dcaG",
-   "clusterId": "frankdegods",
-   "clusterLabel": "@frankdegods",
+   "clusterId": "cluster-2",
    "role": "bundle",
    "reason": "bundler",
    "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
-   "addedAt": "2026-09-23T20:44:23Z",
+   "addedAt": "2026-09-23T20:48:32Z",
    "addedBy": "owner",
-   "status": "active"
+   "status": "active",
+   "alsoIn": [
+    "cluster-4",
+    "cluster-5"
+   ],
+   "note": "Also appears in cluster-4, cluster-5."
   },
   {
    "wallet": "CDL22EuTKoWeXpiStMWu9pLqLNSn5NkMG3nKoz1YRVUf",
-   "clusterId": "frankdegods",
-   "clusterLabel": "@frankdegods",
+   "clusterId": "cluster-2",
    "role": "bundle",
    "reason": "bundler",
    "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
-   "addedAt": "2026-09-23T20:44:23Z",
+   "addedAt": "2026-09-23T20:48:32Z",
    "addedBy": "owner",
-   "status": "active"
+   "status": "active",
+   "alsoIn": [
+    "cluster-4",
+    "cluster-5"
+   ],
+   "note": "Also appears in cluster-4, cluster-5."
   },
   {
    "wallet": "42rF1i199PCminj3bwDWg7RPwhrHSKChVQ6QSSYxGUaS",
-   "clusterId": "frankdegods",
-   "clusterLabel": "@frankdegods",
+   "clusterId": "cluster-2",
    "role": "bundle",
    "reason": "bundler",
    "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
-   "addedAt": "2026-09-23T20:44:23Z",
+   "addedAt": "2026-09-23T20:48:32Z",
    "addedBy": "owner",
    "status": "active"
   },
   {
    "wallet": "EzDut5n9MqmsdzkbYYxFyT1W9kaqWHsmXT9nVf2uMynV",
-   "clusterId": "frankdegods",
-   "clusterLabel": "@frankdegods",
+   "clusterId": "cluster-2",
    "role": "bundle",
    "reason": "bundler",
    "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
-   "addedAt": "2026-09-23T20:44:23Z",
+   "addedAt": "2026-09-23T20:48:32Z",
    "addedBy": "owner",
    "status": "active"
   },
   {
    "wallet": "Cqu5uKfKh6mSfqasYKGDYghGc7J54FAp9WCus9QnQSsR",
-   "clusterId": "frankdegods",
-   "clusterLabel": "@frankdegods",
+   "clusterId": "cluster-2",
    "role": "bundle",
    "reason": "bundler",
    "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
-   "addedAt": "2026-09-23T20:44:23Z",
+   "addedAt": "2026-09-23T20:48:32Z",
    "addedBy": "owner",
-   "status": "active"
+   "status": "active",
+   "alsoIn": [
+    "cluster-4",
+    "cluster-5"
+   ],
+   "note": "Also appears in cluster-4, cluster-5."
   },
   {
    "wallet": "7UBjMaYsE3tKcanfgGrtso6aHAMhVNSVHkkX5j3t7f5y",
-   "clusterId": "frankdegods",
-   "clusterLabel": "@frankdegods",
+   "clusterId": "cluster-2",
    "role": "bundle",
    "reason": "bundler",
    "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
-   "addedAt": "2026-09-23T20:44:23Z",
+   "addedAt": "2026-09-23T20:48:32Z",
    "addedBy": "owner",
    "status": "active"
   },
   {
    "wallet": "DNfuF1L62WWyW3pNakVkyGGFzVVhj4Yr52jSmdTyeBHm",
-   "clusterId": "frankdegods",
-   "clusterLabel": "@frankdegods",
+   "clusterId": "cluster-2",
    "role": "bundle",
    "reason": "bundler",
    "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
-   "addedAt": "2026-09-23T20:44:23Z",
+   "addedAt": "2026-09-23T20:48:32Z",
    "addedBy": "owner",
    "status": "active",
    "alsoIn": [
-    "orangie"
+    "cluster-3"
    ],
-   "note": "Also appears in the orangie cluster."
+   "note": "Also appears in cluster-3."
   },
   {
    "wallet": "BMgsHTvcasRVtuevHJh8t6Vf5dmcWkDLAx6gSAQ3dsYm",
-   "clusterId": "frankdegods",
-   "clusterLabel": "@frankdegods",
+   "clusterId": "cluster-2",
    "role": "bundle",
    "reason": "bundler",
    "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
-   "addedAt": "2026-09-23T20:44:23Z",
+   "addedAt": "2026-09-23T20:48:32Z",
    "addedBy": "owner",
    "status": "active"
   },
   {
    "wallet": "2xUbYAVq1oJGj45d6JjnaYHAke3NQecUcqWvvVbwmYw8",
-   "clusterId": "frankdegods",
-   "clusterLabel": "@frankdegods",
+   "clusterId": "cluster-2",
    "role": "bundle",
    "reason": "bundler",
    "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
-   "addedAt": "2026-09-23T20:44:23Z",
+   "addedAt": "2026-09-23T20:48:32Z",
    "addedBy": "owner",
-   "status": "active"
+   "status": "active",
+   "alsoIn": [
+    "cluster-4",
+    "cluster-5"
+   ],
+   "note": "Also appears in cluster-4, cluster-5."
   },
   {
    "wallet": "6Js7mMJGXn6ryTbTN1ACYWNg4t1xSY1DqYzSwm1B94X",
-   "clusterId": "frankdegods",
-   "clusterLabel": "@frankdegods",
+   "clusterId": "cluster-2",
    "role": "bundle",
    "reason": "bundler",
    "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
-   "addedAt": "2026-09-23T20:44:23Z",
+   "addedAt": "2026-09-23T20:48:32Z",
    "addedBy": "owner",
    "status": "active"
   },
   {
    "wallet": "HUpPyLU8KWisCAr3mzWy2FKT6uuxQ2qGgJQxyTpDoes5",
-   "clusterId": "frankdegods",
-   "clusterLabel": "@frankdegods",
+   "clusterId": "cluster-2",
    "role": "bundle",
    "reason": "bundler",
    "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
-   "addedAt": "2026-09-23T20:44:23Z",
+   "addedAt": "2026-09-23T20:48:32Z",
    "addedBy": "owner",
    "status": "active"
   },
   {
    "wallet": "BouYUboRCV7sAPCiggWUKhSV2qmxGXmZXkL2erJSjBER",
-   "clusterId": "frankdegods",
-   "clusterLabel": "@frankdegods",
+   "clusterId": "cluster-2",
    "role": "bundle",
    "reason": "bundler",
    "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
-   "addedAt": "2026-09-23T20:44:23Z",
+   "addedAt": "2026-09-23T20:48:32Z",
    "addedBy": "owner",
    "status": "active"
   },
   {
    "wallet": "5yB7UoTDpCZ5excvsTJBivbDVHUCMnadAZmxWnAVQbA9",
-   "clusterId": "frankdegods",
-   "clusterLabel": "@frankdegods",
+   "clusterId": "cluster-2",
    "role": "bundle",
    "reason": "bundler",
    "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
-   "addedAt": "2026-09-23T20:44:23Z",
+   "addedAt": "2026-09-23T20:48:32Z",
    "addedBy": "owner",
    "status": "active"
   },
   {
    "wallet": "JLAhz46kzixKZsnyGAovKVGT577qetPPCqJQZBhJiEe",
-   "clusterId": "frankdegods",
-   "clusterLabel": "@frankdegods",
+   "clusterId": "cluster-2",
    "role": "bundle",
    "reason": "bundler",
    "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
-   "addedAt": "2026-09-23T20:44:23Z",
+   "addedAt": "2026-09-23T20:48:32Z",
    "addedBy": "owner",
    "status": "active"
   },
   {
    "wallet": "Yzh2t5NakpP1CXffRFAitfDJQvpjR8EkpyAZjpLGcEj",
-   "clusterId": "frankdegods",
-   "clusterLabel": "@frankdegods",
+   "clusterId": "cluster-2",
    "role": "bundle",
    "reason": "bundler",
    "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
-   "addedAt": "2026-09-23T20:44:23Z",
+   "addedAt": "2026-09-23T20:48:32Z",
    "addedBy": "owner",
    "status": "active"
   },
   {
    "wallet": "7C2N9ga5E5UBbXDCqQBuBUMpu3S72Qhghd1H5FPvnPek",
-   "clusterId": "frankdegods",
-   "clusterLabel": "@frankdegods",
+   "clusterId": "cluster-2",
    "role": "bundle",
    "reason": "bundler",
    "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
-   "addedAt": "2026-09-23T20:44:23Z",
+   "addedAt": "2026-09-23T20:48:32Z",
    "addedBy": "owner",
    "status": "active"
   },
   {
    "wallet": "ABwdPTnboY4rvWVFooKty2oc8fXtSKNrT9dcTzHYsRH3",
-   "clusterId": "frankdegods",
-   "clusterLabel": "@frankdegods",
+   "clusterId": "cluster-2",
    "role": "bundle",
    "reason": "bundler",
    "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
-   "addedAt": "2026-09-23T20:44:23Z",
+   "addedAt": "2026-09-23T20:48:32Z",
    "addedBy": "owner",
    "status": "active"
   },
   {
    "wallet": "GYZ5X2VZCGjXcPmLnjvk4Dun69eNGDqff2Lw94Q74PtU",
-   "clusterId": "frankdegods",
-   "clusterLabel": "@frankdegods",
+   "clusterId": "cluster-2",
    "role": "bundle",
    "reason": "bundler",
    "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
-   "addedAt": "2026-09-23T20:44:23Z",
+   "addedAt": "2026-09-23T20:48:32Z",
    "addedBy": "owner",
    "status": "active"
   },
   {
    "wallet": "btcf1R5sJNgZSwmkLNcKTsw15vGY3LZrXTqU2Ke7DfE",
-   "clusterId": "frankdegods",
-   "clusterLabel": "@frankdegods",
+   "clusterId": "cluster-2",
    "role": "bundle",
    "reason": "bundler",
    "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
-   "addedAt": "2026-09-23T20:44:23Z",
+   "addedAt": "2026-09-23T20:48:32Z",
    "addedBy": "owner",
    "status": "active"
   },
   {
    "wallet": "AkCyNQ7vxJeQRXx94VkM5xdcDz6KvhyvZSjk7Ztu85qq",
-   "clusterId": "frankdegods",
-   "clusterLabel": "@frankdegods",
+   "clusterId": "cluster-2",
    "role": "bundle",
    "reason": "bundler",
    "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
-   "addedAt": "2026-09-23T20:44:23Z",
+   "addedAt": "2026-09-23T20:48:32Z",
    "addedBy": "owner",
    "status": "active"
   },
   {
    "wallet": "AGqjivJr1dSv73TVUvdtqAwogzmThzvYMVXjGWg2FYLm",
-   "clusterId": "frankdegods",
-   "clusterLabel": "@frankdegods",
+   "clusterId": "cluster-2",
    "role": "bundle",
    "reason": "bundler",
    "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
-   "addedAt": "2026-09-23T20:44:23Z",
+   "addedAt": "2026-09-23T20:48:32Z",
    "addedBy": "owner",
    "status": "active"
   },
   {
    "wallet": "ETRm9JSMa4zCTy6G3XFkvAzAYrEBi9qK85XTmZHTmRyE",
-   "clusterId": "frankdegods",
-   "clusterLabel": "@frankdegods",
+   "clusterId": "cluster-2",
    "role": "bundle",
    "reason": "bundler",
    "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
-   "addedAt": "2026-09-23T20:44:23Z",
+   "addedAt": "2026-09-23T20:48:32Z",
    "addedBy": "owner",
    "status": "active"
   },
   {
    "wallet": "1V6ib5Mv4Vaoh3WNZyf7PBzYqfzpGJvoxQPdkGhnYqQ",
-   "clusterId": "frankdegods",
-   "clusterLabel": "@frankdegods",
+   "clusterId": "cluster-2",
    "role": "bundle",
    "reason": "bundler",
    "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
-   "addedAt": "2026-09-23T20:44:23Z",
+   "addedAt": "2026-09-23T20:48:32Z",
    "addedBy": "owner",
    "status": "active"
   },
   {
    "wallet": "BNahnx13rLru9zxuWNGBD7vVv1pGQXB11Q7qeTyupdWf",
-   "clusterId": "frankdegods",
-   "clusterLabel": "@frankdegods",
+   "clusterId": "cluster-2",
    "role": "bundle",
    "reason": "bundler",
    "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
-   "addedAt": "2026-09-23T20:44:23Z",
+   "addedAt": "2026-09-23T20:48:32Z",
    "addedBy": "owner",
    "status": "active"
   },
   {
    "wallet": "FNga7LbLFUqiPQcBLjM8cMA6rvTP9S2Ja44dDqLmoKYw",
-   "clusterId": "frankdegods",
-   "clusterLabel": "@frankdegods",
+   "clusterId": "cluster-2",
    "role": "bundle",
    "reason": "bundler",
    "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
-   "addedAt": "2026-09-23T20:44:23Z",
+   "addedAt": "2026-09-23T20:48:32Z",
    "addedBy": "owner",
    "status": "active"
   },
   {
    "wallet": "98bTNSZo7eNyYASDkeywE3BuhoHXEueWScEKVkwBdG6H",
-   "clusterId": "frankdegods",
-   "clusterLabel": "@frankdegods",
+   "clusterId": "cluster-2",
    "role": "bundle",
    "reason": "bundler",
    "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
-   "addedAt": "2026-09-23T20:44:23Z",
+   "addedAt": "2026-09-23T20:48:32Z",
    "addedBy": "owner",
    "status": "active"
   },
   {
    "wallet": "EJ1izM56eBS5baVLk7Q4iaQvsgCPa3W5bZgc44wwHz8U",
-   "clusterId": "frankdegods",
-   "clusterLabel": "@frankdegods",
+   "clusterId": "cluster-2",
    "role": "bundle",
    "reason": "bundler",
    "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
-   "addedAt": "2026-09-23T20:44:23Z",
+   "addedAt": "2026-09-23T20:48:32Z",
    "addedBy": "owner",
    "status": "active"
   },
   {
    "wallet": "4GmFQuqUpqqo3Zgo1UNXaQGA78vDtyYCrm4SbKkkSFpV",
-   "clusterId": "frankdegods",
-   "clusterLabel": "@frankdegods",
+   "clusterId": "cluster-2",
    "role": "bundle",
    "reason": "bundler",
    "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
-   "addedAt": "2026-09-23T20:44:23Z",
+   "addedAt": "2026-09-23T20:48:32Z",
    "addedBy": "owner",
    "status": "active"
   },
   {
    "wallet": "AXtQKizYXDipAzjzQ3pUiCZFb9V3pqJjBif1wW8jpJED",
-   "clusterId": "frankdegods",
-   "clusterLabel": "@frankdegods",
+   "clusterId": "cluster-2",
    "role": "bundle",
    "reason": "bundler",
    "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
-   "addedAt": "2026-09-23T20:44:23Z",
+   "addedAt": "2026-09-23T20:48:32Z",
    "addedBy": "owner",
    "status": "active"
   },
   {
    "wallet": "8qPrAGToJKj2KCmckofatQT23Uk9bPA8xqttS1R6znqr",
-   "clusterId": "frankdegods",
-   "clusterLabel": "@frankdegods",
+   "clusterId": "cluster-2",
    "role": "bundle",
    "reason": "bundler",
    "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
-   "addedAt": "2026-09-23T20:44:23Z",
+   "addedAt": "2026-09-23T20:48:32Z",
    "addedBy": "owner",
    "status": "active"
   },
   {
    "wallet": "CxM6wztBgUw37koR7sYWULoDgtK3bC2Q6whsRCWApMjp",
-   "clusterId": "frankdegods",
-   "clusterLabel": "@frankdegods",
+   "clusterId": "cluster-2",
    "role": "bundle",
    "reason": "bundler",
    "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
-   "addedAt": "2026-09-23T20:44:23Z",
+   "addedAt": "2026-09-23T20:48:32Z",
    "addedBy": "owner",
    "status": "active"
   },
   {
    "wallet": "9M1GF65fPdMR7LPCA9RBnHdFn6a8JLEZFMKozDHBJxr",
-   "clusterId": "frankdegods",
-   "clusterLabel": "@frankdegods",
+   "clusterId": "cluster-2",
    "role": "bundle",
    "reason": "bundler",
    "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
-   "addedAt": "2026-09-23T20:44:23Z",
+   "addedAt": "2026-09-23T20:48:32Z",
    "addedBy": "owner",
    "status": "active"
   },
   {
    "wallet": "CTq57AvvQmcwxaM8sMtDPWjFcCSre7iJSu3p36mZQmhM",
-   "clusterId": "frankdegods",
-   "clusterLabel": "@frankdegods",
+   "clusterId": "cluster-2",
    "role": "bundle",
    "reason": "bundler",
    "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
-   "addedAt": "2026-09-23T20:44:23Z",
+   "addedAt": "2026-09-23T20:48:32Z",
    "addedBy": "owner",
    "status": "active"
   },
   {
    "wallet": "4hC9CKKgdfo3mTRJHqSk6rwv89wc4ZquQKVpmaW5p6g1",
-   "clusterId": "frankdegods",
-   "clusterLabel": "@frankdegods",
+   "clusterId": "cluster-2",
    "role": "bundle",
    "reason": "bundler",
    "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
-   "addedAt": "2026-09-23T20:44:23Z",
+   "addedAt": "2026-09-23T20:48:32Z",
    "addedBy": "owner",
    "status": "active"
   },
   {
    "wallet": "93oFH7ec7bcrrRfrmNC8VQcC6Rt2WGnTbc7sXkwLQR4t",
-   "clusterId": "frankdegods",
-   "clusterLabel": "@frankdegods",
+   "clusterId": "cluster-2",
    "role": "bundle",
    "reason": "bundler",
    "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
-   "addedAt": "2026-09-23T20:44:23Z",
+   "addedAt": "2026-09-23T20:48:32Z",
    "addedBy": "owner",
    "status": "active"
   },
   {
    "wallet": "G3KKj95Z7hTxtB3XvZtvSzAUKW8Vwea6VJ2stBTJxwU8",
-   "clusterId": "frankdegods",
-   "clusterLabel": "@frankdegods",
+   "clusterId": "cluster-2",
    "role": "bundle",
    "reason": "bundler",
    "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
-   "addedAt": "2026-09-23T20:44:23Z",
+   "addedAt": "2026-09-23T20:48:32Z",
    "addedBy": "owner",
    "status": "active"
   },
   {
    "wallet": "Bncwt7FrRYPfZ28ormc8ShmpRgM1nFq5eaj4U3sT5MLF",
-   "clusterId": "frankdegods",
-   "clusterLabel": "@frankdegods",
+   "clusterId": "cluster-2",
    "role": "bundle",
    "reason": "bundler",
    "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
-   "addedAt": "2026-09-23T20:44:23Z",
+   "addedAt": "2026-09-23T20:48:32Z",
    "addedBy": "owner",
    "status": "active"
   },
   {
    "wallet": "2L627vZ64MPJQDmepTuSiWn8i9W6up2b3C9fmBF867tE",
-   "clusterId": "frankdegods",
-   "clusterLabel": "@frankdegods",
+   "clusterId": "cluster-2",
    "role": "bundle",
    "reason": "bundler",
    "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
-   "addedAt": "2026-09-23T20:44:23Z",
+   "addedAt": "2026-09-23T20:48:32Z",
    "addedBy": "owner",
    "status": "active"
   },
   {
    "wallet": "3hM2x8mE6CurPRCvd7MX4QqmR4ZPtqE42snY6aXmPAdo",
-   "clusterId": "frankdegods",
-   "clusterLabel": "@frankdegods",
+   "clusterId": "cluster-2",
    "role": "bundle",
    "reason": "bundler",
    "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
-   "addedAt": "2026-09-23T20:44:23Z",
+   "addedAt": "2026-09-23T20:48:32Z",
    "addedBy": "owner",
    "status": "active"
   },
   {
    "wallet": "85sdCKoK8nqGXz9qsQKVuj1Q2k2KP4J21dfMCJ7Fr1U2",
-   "clusterId": "frankdegods",
-   "clusterLabel": "@frankdegods",
+   "clusterId": "cluster-2",
    "role": "bundle",
    "reason": "bundler",
    "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
-   "addedAt": "2026-09-23T20:44:23Z",
+   "addedAt": "2026-09-23T20:48:32Z",
    "addedBy": "owner",
    "status": "active"
   },
   {
    "wallet": "AAcnkt8u8NgZBAPY5eUTSSc4oeHZNfB6dXsV1yWf8YSC",
-   "clusterId": "frankdegods",
-   "clusterLabel": "@frankdegods",
+   "clusterId": "cluster-2",
    "role": "bundle",
    "reason": "bundler",
    "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
-   "addedAt": "2026-09-23T20:44:23Z",
+   "addedAt": "2026-09-23T20:48:32Z",
    "addedBy": "owner",
    "status": "active"
   },
   {
    "wallet": "DXU65912VjiPUhKR37TLiHCrbp4uNHVNNZiBdLv1uAx1",
-   "clusterId": "frankdegods",
-   "clusterLabel": "@frankdegods",
+   "clusterId": "cluster-2",
    "role": "bundle",
    "reason": "bundler",
    "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
-   "addedAt": "2026-09-23T20:44:23Z",
+   "addedAt": "2026-09-23T20:48:32Z",
    "addedBy": "owner",
    "status": "active"
   },
   {
    "wallet": "EjSe3uttzb6HCSiCcSjYvcP2DK23u5f5vdYTqioBG2bs",
-   "clusterId": "frankdegods",
-   "clusterLabel": "@frankdegods",
+   "clusterId": "cluster-2",
    "role": "bundle",
    "reason": "bundler",
    "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
-   "addedAt": "2026-09-23T20:44:23Z",
+   "addedAt": "2026-09-23T20:48:32Z",
    "addedBy": "owner",
    "status": "active"
   },
   {
    "wallet": "7yZk44W2hVqAKaF3Z3CJvDVqLgJALYNmrnnNv4o4wuGk",
-   "clusterId": "frankdegods",
-   "clusterLabel": "@frankdegods",
+   "clusterId": "cluster-2",
    "role": "bundle",
    "reason": "bundler",
    "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
-   "addedAt": "2026-09-23T20:44:23Z",
+   "addedAt": "2026-09-23T20:48:32Z",
    "addedBy": "owner",
    "status": "active"
   },
   {
    "wallet": "FzHXtXqVEj6JvE3yu2aAT4oe88TN2fPyQrGkq4s5k7s5",
-   "clusterId": "frankdegods",
-   "clusterLabel": "@frankdegods",
+   "clusterId": "cluster-2",
    "role": "bundle",
    "reason": "bundler",
    "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
-   "addedAt": "2026-09-23T20:44:23Z",
+   "addedAt": "2026-09-23T20:48:32Z",
    "addedBy": "owner",
    "status": "active"
   },
   {
    "wallet": "2BajLdag8VbL1wZgXFmmE4H5Mr1RUyDSMBnQdmR1Bxqt",
-   "clusterId": "frankdegods",
-   "clusterLabel": "@frankdegods",
+   "clusterId": "cluster-2",
    "role": "bundle",
    "reason": "bundler",
    "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
-   "addedAt": "2026-09-23T20:44:23Z",
+   "addedAt": "2026-09-23T20:48:32Z",
    "addedBy": "owner",
    "status": "active"
   },
   {
    "wallet": "7U5Nb3Kc9WDDfWxfBQZD6oPPYbP9mGE2si62CGZMjRbr",
-   "clusterId": "frankdegods",
-   "clusterLabel": "@frankdegods",
+   "clusterId": "cluster-2",
    "role": "bundle",
    "reason": "bundler",
    "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
-   "addedAt": "2026-09-23T20:44:23Z",
+   "addedAt": "2026-09-23T20:48:32Z",
    "addedBy": "owner",
    "status": "active"
   },
   {
    "wallet": "AcP9RkAF7Bz35LUXdHaPqg9V6fMwN6sYu9nxoWmEJwfC",
-   "clusterId": "frankdegods",
-   "clusterLabel": "@frankdegods",
+   "clusterId": "cluster-2",
    "role": "bundle",
    "reason": "bundler",
    "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
-   "addedAt": "2026-09-23T20:44:23Z",
+   "addedAt": "2026-09-23T20:48:32Z",
    "addedBy": "owner",
    "status": "active"
   },
   {
    "wallet": "HWFwfm5927Yw9Q1vLMFKiBnCz6XbVXtmaZTeVp4xNMP",
-   "clusterId": "frankdegods",
-   "clusterLabel": "@frankdegods",
+   "clusterId": "cluster-2",
    "role": "bundle",
    "reason": "bundler",
    "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
-   "addedAt": "2026-09-23T20:44:23Z",
+   "addedAt": "2026-09-23T20:48:32Z",
    "addedBy": "owner",
    "status": "active"
   },
   {
    "wallet": "5ZY9hYE9qEVJcRqwxcWyDaBd9MLiFMQRn39TwSuLFsVK",
-   "clusterId": "frankdegods",
-   "clusterLabel": "@frankdegods",
+   "clusterId": "cluster-2",
    "role": "bundle",
    "reason": "bundler",
    "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
-   "addedAt": "2026-09-23T20:44:23Z",
+   "addedAt": "2026-09-23T20:48:32Z",
    "addedBy": "owner",
    "status": "active"
   },
   {
    "wallet": "3Tg2F3XJurKqytodY9vEGXJUwT49yJvUEQpiKaFiivzS",
-   "clusterId": "frankdegods",
-   "clusterLabel": "@frankdegods",
+   "clusterId": "cluster-2",
    "role": "bundle",
    "reason": "bundler",
    "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
-   "addedAt": "2026-09-23T20:44:23Z",
+   "addedAt": "2026-09-23T20:48:32Z",
    "addedBy": "owner",
    "status": "active"
   },
   {
    "wallet": "22JaXVXS7Bx47S6MAGuem9bduWLz37BcoenG4ot2DM7i",
-   "clusterId": "frankdegods",
-   "clusterLabel": "@frankdegods",
+   "clusterId": "cluster-2",
    "role": "bundle",
    "reason": "bundler",
    "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
-   "addedAt": "2026-09-23T20:44:23Z",
+   "addedAt": "2026-09-23T20:48:32Z",
    "addedBy": "owner",
    "status": "active"
   },
   {
    "wallet": "GdZaesBzcr2sSbtNn9j8Jdh6DeJGmcjYnJsitRWSLsQb",
-   "clusterId": "frankdegods",
-   "clusterLabel": "@frankdegods",
+   "clusterId": "cluster-2",
    "role": "bundle",
    "reason": "bundler",
    "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
-   "addedAt": "2026-09-23T20:44:23Z",
+   "addedAt": "2026-09-23T20:48:32Z",
    "addedBy": "owner",
    "status": "active"
   },
   {
    "wallet": "5fLWPfB8qjZ8ARUgzL4f7chBuKKj4Fg4EbsA9vW5YKHG",
-   "clusterId": "frankdegods",
-   "clusterLabel": "@frankdegods",
+   "clusterId": "cluster-2",
    "role": "bundle",
    "reason": "bundler",
    "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
-   "addedAt": "2026-09-23T20:44:23Z",
+   "addedAt": "2026-09-23T20:48:32Z",
    "addedBy": "owner",
    "status": "active"
   },
   {
    "wallet": "GMqroCnksrnnJcgW8aj9nZP1rbxQSbq5Urcnnyi6TnAQ",
-   "clusterId": "frankdegods",
-   "clusterLabel": "@frankdegods",
+   "clusterId": "cluster-2",
    "role": "bundle",
    "reason": "bundler",
    "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
-   "addedAt": "2026-09-23T20:44:23Z",
+   "addedAt": "2026-09-23T20:48:32Z",
    "addedBy": "owner",
    "status": "active"
   },
   {
    "wallet": "6451zSoUiy4GZeq2vEUHb73LcDJ8eeCHXEaGSqL8K6Fj",
-   "clusterId": "frankdegods",
-   "clusterLabel": "@frankdegods",
+   "clusterId": "cluster-2",
    "role": "bundle",
    "reason": "bundler",
    "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
-   "addedAt": "2026-09-23T20:44:23Z",
+   "addedAt": "2026-09-23T20:48:32Z",
    "addedBy": "owner",
    "status": "active"
   },
   {
    "wallet": "6eTGiFouqNE4AFZf7HM4zfdUE3G8EUodFEEL2snVwenm",
-   "clusterId": "frankdegods",
-   "clusterLabel": "@frankdegods",
+   "clusterId": "cluster-2",
    "role": "bundle",
    "reason": "bundler",
    "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
-   "addedAt": "2026-09-23T20:44:23Z",
+   "addedAt": "2026-09-23T20:48:32Z",
    "addedBy": "owner",
    "status": "active"
   },
   {
    "wallet": "AibDGN8V4hho1oZ16LsPB7FgAiRfbrS6hd7e8BgbHUJU",
-   "clusterId": "frankdegods",
-   "clusterLabel": "@frankdegods",
+   "clusterId": "cluster-2",
    "role": "bundle",
    "reason": "bundler",
    "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
-   "addedAt": "2026-09-23T20:44:23Z",
+   "addedAt": "2026-09-23T20:48:32Z",
    "addedBy": "owner",
    "status": "active"
   },
   {
    "wallet": "B7YedW9AohBQcY6bhYxtmDq5VsziBEJdvA1QzJF2yBc8",
-   "clusterId": "frankdegods",
-   "clusterLabel": "@frankdegods",
+   "clusterId": "cluster-2",
    "role": "bundle",
    "reason": "bundler",
    "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
-   "addedAt": "2026-09-23T20:44:23Z",
+   "addedAt": "2026-09-23T20:48:32Z",
    "addedBy": "owner",
    "status": "active"
   },
   {
    "wallet": "BJVdVGjEGiGeC96iKWhBHTQP6Qdm4ADVVSPMzHa62ZvG",
-   "clusterId": "frankdegods",
-   "clusterLabel": "@frankdegods",
+   "clusterId": "cluster-2",
    "role": "bundle",
    "reason": "bundler",
    "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
-   "addedAt": "2026-09-23T20:44:23Z",
+   "addedAt": "2026-09-23T20:48:32Z",
    "addedBy": "owner",
    "status": "active"
   },
   {
    "wallet": "HEye34TsKiksdfSppNp2PYQFqUZb7gCnd3X5etQUK7Dq",
-   "clusterId": "frankdegods",
-   "clusterLabel": "@frankdegods",
+   "clusterId": "cluster-2",
    "role": "bundle",
    "reason": "bundler",
    "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
-   "addedAt": "2026-09-23T20:44:23Z",
+   "addedAt": "2026-09-23T20:48:32Z",
    "addedBy": "owner",
    "status": "active"
   },
   {
    "wallet": "CRffjzugaCtZjmdxNNGy3jPHMtjMqxYnbS2FVW7tkXQ9",
-   "clusterId": "frankdegods",
-   "clusterLabel": "@frankdegods",
+   "clusterId": "cluster-2",
    "role": "bundle",
    "reason": "bundler",
    "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
-   "addedAt": "2026-09-23T20:44:23Z",
+   "addedAt": "2026-09-23T20:48:32Z",
    "addedBy": "owner",
    "status": "active"
   },
   {
    "wallet": "7Aeqf7ypVFDSkFtHcouLQWH9UKG3mmuYVEw1a4J4XhY6",
-   "clusterId": "frankdegods",
-   "clusterLabel": "@frankdegods",
+   "clusterId": "cluster-2",
    "role": "bundle",
    "reason": "bundler",
    "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
-   "addedAt": "2026-09-23T20:44:23Z",
+   "addedAt": "2026-09-23T20:48:32Z",
    "addedBy": "owner",
    "status": "active"
   },
   {
    "wallet": "8GBpEBsUFfxY1MkXCKams4tkGjFhHJTo5CYQLXQvTioB",
-   "clusterId": "frankdegods",
-   "clusterLabel": "@frankdegods",
+   "clusterId": "cluster-2",
    "role": "bundle",
    "reason": "bundler",
    "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
-   "addedAt": "2026-09-23T20:44:23Z",
+   "addedAt": "2026-09-23T20:48:32Z",
    "addedBy": "owner",
    "status": "active"
   },
   {
    "wallet": "RDDSiaFVoFeSuqJsGX3zj7pWmXN97fKxp4AiRJRNhgR",
-   "clusterId": "frankdegods",
-   "clusterLabel": "@frankdegods",
+   "clusterId": "cluster-2",
    "role": "bundle",
    "reason": "bundler",
    "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
-   "addedAt": "2026-09-23T20:44:23Z",
+   "addedAt": "2026-09-23T20:48:32Z",
    "addedBy": "owner",
    "status": "active"
   },
   {
    "wallet": "Bvupc78cLnaJi1KHZXE68NCwrJQXs51FEcXQZmRTECVb",
-   "clusterId": "frankdegods",
-   "clusterLabel": "@frankdegods",
+   "clusterId": "cluster-2",
    "role": "bundle",
    "reason": "bundler",
    "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
-   "addedAt": "2026-09-23T20:44:23Z",
+   "addedAt": "2026-09-23T20:48:32Z",
    "addedBy": "owner",
    "status": "active"
   },
   {
    "wallet": "H7PKyDYaESrpuZEMcPv7wjCnSjYA5R3n4i11bRKZFB2E",
-   "clusterId": "frankdegods",
-   "clusterLabel": "@frankdegods",
+   "clusterId": "cluster-2",
    "role": "bundle",
    "reason": "bundler",
    "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
-   "addedAt": "2026-09-23T20:44:23Z",
+   "addedAt": "2026-09-23T20:48:32Z",
    "addedBy": "owner",
-   "status": "active"
+   "status": "active",
+   "alsoIn": [
+    "cluster-4",
+    "cluster-5"
+   ],
+   "note": "Also appears in cluster-4, cluster-5."
   },
   {
    "wallet": "4ugDhHJ8XDXAeABmrNmGffFaLbJb9BkPyiFGVSV9ocwo",
-   "clusterId": "frankdegods",
-   "clusterLabel": "@frankdegods",
+   "clusterId": "cluster-2",
    "role": "bundle",
    "reason": "bundler",
    "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
-   "addedAt": "2026-09-23T20:44:23Z",
+   "addedAt": "2026-09-23T20:48:32Z",
    "addedBy": "owner",
-   "status": "active"
+   "status": "active",
+   "alsoIn": [
+    "cluster-4",
+    "cluster-5"
+   ],
+   "note": "Also appears in cluster-4, cluster-5."
   },
   {
    "wallet": "GmSYPuJAjKTYDQdYkmC4fXtxRKr3v8B7eBPF86fDX3gN",
-   "clusterId": "frankdegods",
-   "clusterLabel": "@frankdegods",
+   "clusterId": "cluster-2",
    "role": "bundle",
    "reason": "bundler",
    "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
-   "addedAt": "2026-09-23T20:44:23Z",
+   "addedAt": "2026-09-23T20:48:32Z",
    "addedBy": "owner",
    "status": "active"
   },
   {
    "wallet": "6qHT36uUkf8C87fpFwRLHowAjvzuYSYkub8ukVeffpJk",
-   "clusterId": "frankdegods",
-   "clusterLabel": "@frankdegods",
+   "clusterId": "cluster-2",
    "role": "bundle",
    "reason": "bundler",
    "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
-   "addedAt": "2026-09-23T20:44:23Z",
+   "addedAt": "2026-09-23T20:48:32Z",
    "addedBy": "owner",
    "status": "active"
   },
   {
    "wallet": "GZPbSoWLb4vZfz71CWao3quZBfZq7S4qRghTQSH55f48",
-   "clusterId": "frankdegods",
-   "clusterLabel": "@frankdegods",
+   "clusterId": "cluster-2",
    "role": "bundle",
    "reason": "bundler",
    "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
-   "addedAt": "2026-09-23T20:44:23Z",
+   "addedAt": "2026-09-23T20:48:32Z",
    "addedBy": "owner",
    "status": "active"
   },
   {
    "wallet": "3JcrEP9593MKg2mV27aH7gkhBJ6xk9ot6hJbAk9Jvuxh",
-   "clusterId": "frankdegods",
-   "clusterLabel": "@frankdegods",
+   "clusterId": "cluster-2",
    "role": "bundle",
    "reason": "bundler",
    "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
-   "addedAt": "2026-09-23T20:44:23Z",
+   "addedAt": "2026-09-23T20:48:32Z",
    "addedBy": "owner",
    "status": "active"
   },
   {
    "wallet": "5WyFSiHWa3LzU43D92R76uEHBiyMjALtwDFA3JP9aS23",
-   "clusterId": "frankdegods",
-   "clusterLabel": "@frankdegods",
+   "clusterId": "cluster-2",
    "role": "bundle",
    "reason": "bundler",
    "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
-   "addedAt": "2026-09-23T20:44:23Z",
+   "addedAt": "2026-09-23T20:48:32Z",
    "addedBy": "owner",
    "status": "active"
   },
   {
    "wallet": "DAgjN2G1G66X2snw46E6RxErfkqAamZH668byZxckmtd",
-   "clusterId": "frankdegods",
-   "clusterLabel": "@frankdegods",
+   "clusterId": "cluster-2",
    "role": "bundle",
    "reason": "bundler",
    "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
-   "addedAt": "2026-09-23T20:44:23Z",
+   "addedAt": "2026-09-23T20:48:32Z",
    "addedBy": "owner",
    "status": "active"
   },
   {
    "wallet": "EB8BGJXXWcQEu3LhiynihcsHj298iDCjFCHDCVSYt1ND",
-   "clusterId": "frankdegods",
-   "clusterLabel": "@frankdegods",
+   "clusterId": "cluster-2",
    "role": "bundle",
    "reason": "bundler",
    "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
-   "addedAt": "2026-09-23T20:44:23Z",
+   "addedAt": "2026-09-23T20:48:32Z",
    "addedBy": "owner",
    "status": "active"
   },
   {
    "wallet": "EKDB7EyLPD7a2Mqo7Kh8Y4aR7gD26VErY3yj41eZjwCJ",
-   "clusterId": "frankdegods",
-   "clusterLabel": "@frankdegods",
+   "clusterId": "cluster-2",
    "role": "bundle",
    "reason": "bundler",
    "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
-   "addedAt": "2026-09-23T20:44:23Z",
+   "addedAt": "2026-09-23T20:48:32Z",
    "addedBy": "owner",
    "status": "active"
   },
   {
    "wallet": "3thib8VutXWv9fMes6yjPkMr7Zo1NscbETGe49SRL9zK",
-   "clusterId": "frankdegods",
-   "clusterLabel": "@frankdegods",
+   "clusterId": "cluster-2",
    "role": "bundle",
    "reason": "bundler",
    "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
-   "addedAt": "2026-09-23T20:44:23Z",
+   "addedAt": "2026-09-23T20:48:32Z",
    "addedBy": "owner",
    "status": "active"
   },
   {
    "wallet": "6QmKtxvDUZRPyEHeH3au1nWU7wA8SS93utTMmHEb8pR7",
-   "clusterId": "frankdegods",
-   "clusterLabel": "@frankdegods",
+   "clusterId": "cluster-2",
    "role": "bundle",
    "reason": "bundler",
    "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
-   "addedAt": "2026-09-23T20:44:23Z",
+   "addedAt": "2026-09-23T20:48:32Z",
    "addedBy": "owner",
    "status": "active"
   },
   {
    "wallet": "4V91ZLynwdwXh9rAP8iF1LCqoQ5j4ShyZSpt6jHwo1bm",
-   "clusterId": "frankdegods",
-   "clusterLabel": "@frankdegods",
+   "clusterId": "cluster-2",
    "role": "bundle",
    "reason": "bundler",
    "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
-   "addedAt": "2026-09-23T20:44:23Z",
+   "addedAt": "2026-09-23T20:48:32Z",
    "addedBy": "owner",
    "status": "active"
   },
   {
    "wallet": "A1ECE86o3tz6UWmwMWicrqZmwRZ7RCRzmYYa9okNQRBw",
-   "clusterId": "frankdegods",
-   "clusterLabel": "@frankdegods",
+   "clusterId": "cluster-2",
    "role": "bundle",
    "reason": "bundler",
    "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
-   "addedAt": "2026-09-23T20:44:23Z",
+   "addedAt": "2026-09-23T20:48:32Z",
    "addedBy": "owner",
    "status": "active"
   },
   {
    "wallet": "B3v7X8sRMB1E1mzKLu6PAhGrLvuJY1dfnJxKD68w1w9n",
-   "clusterId": "frankdegods",
-   "clusterLabel": "@frankdegods",
+   "clusterId": "cluster-2",
    "role": "bundle",
    "reason": "bundler",
    "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
-   "addedAt": "2026-09-23T20:44:23Z",
+   "addedAt": "2026-09-23T20:48:32Z",
    "addedBy": "owner",
    "status": "active"
   },
   {
    "wallet": "4LFyzPyYejEpcQpAstByHBb8XY9TyNvLL4AnJm1Mqc96",
-   "clusterId": "frankdegods",
-   "clusterLabel": "@frankdegods",
+   "clusterId": "cluster-2",
    "role": "bundle",
    "reason": "bundler",
    "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
-   "addedAt": "2026-09-23T20:44:23Z",
+   "addedAt": "2026-09-23T20:48:32Z",
    "addedBy": "owner",
    "status": "active"
   },
   {
    "wallet": "BC8yiFFQWFEKrEEj75zYsuK3ZDCfv6QEeMRif9oZZ9TW",
-   "clusterId": "frankdegods",
-   "clusterLabel": "@frankdegods",
+   "clusterId": "cluster-2",
    "role": "bundle",
    "reason": "bundler",
    "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
-   "addedAt": "2026-09-23T20:44:23Z",
+   "addedAt": "2026-09-23T20:48:32Z",
    "addedBy": "owner",
    "status": "active"
   },
   {
    "wallet": "2NQL35HeUw2vVgNjWuKQJsoWQT2tzVpfo6FwCSJmGNv3",
-   "clusterId": "frankdegods",
-   "clusterLabel": "@frankdegods",
+   "clusterId": "cluster-2",
    "role": "bundle",
    "reason": "bundler",
    "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
-   "addedAt": "2026-09-23T20:44:23Z",
+   "addedAt": "2026-09-23T20:48:32Z",
    "addedBy": "owner",
    "status": "active"
   },
   {
    "wallet": "7TGPxhZwf4kgrJoULs2cdiXe98MHHCsZ7y65dTMtcmH4",
-   "clusterId": "frankdegods",
-   "clusterLabel": "@frankdegods",
+   "clusterId": "cluster-2",
    "role": "bundle",
    "reason": "bundler",
    "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
-   "addedAt": "2026-09-23T20:44:23Z",
+   "addedAt": "2026-09-23T20:48:32Z",
    "addedBy": "owner",
    "status": "active"
   },
   {
    "wallet": "71CPXu3TvH3iUKaY1bNkAAow24k6tjH473SsKprQBABC",
-   "clusterId": "frankdegods",
-   "clusterLabel": "@frankdegods",
+   "clusterId": "cluster-2",
    "role": "bundle",
    "reason": "bundler",
    "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
-   "addedAt": "2026-09-23T20:44:23Z",
+   "addedAt": "2026-09-23T20:48:32Z",
    "addedBy": "owner",
    "status": "active"
   },
   {
    "wallet": "E167VuSkzyxkpoWe2ZcHSEP7ApypZTSQcAz3BttAWhFF",
-   "clusterId": "frankdegods",
-   "clusterLabel": "@frankdegods",
+   "clusterId": "cluster-2",
    "role": "bundle",
    "reason": "bundler",
    "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
-   "addedAt": "2026-09-23T20:44:23Z",
+   "addedAt": "2026-09-23T20:48:32Z",
    "addedBy": "owner",
    "status": "active"
   },
   {
    "wallet": "2WYTwT4jR5dqveEpqXFtvWUyyPoh2w7k5DRJJNnX5HrG",
-   "clusterId": "frankdegods",
-   "clusterLabel": "@frankdegods",
+   "clusterId": "cluster-2",
    "role": "bundle",
    "reason": "bundler",
    "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
-   "addedAt": "2026-09-23T20:44:23Z",
+   "addedAt": "2026-09-23T20:48:32Z",
    "addedBy": "owner",
    "status": "active"
   },
   {
    "wallet": "2NjCP2scRi1mMJ632vZ4KSNswh3T5pR98NBEqrFmfjWX",
-   "clusterId": "frankdegods",
-   "clusterLabel": "@frankdegods",
+   "clusterId": "cluster-2",
    "role": "bundle",
    "reason": "bundler",
    "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
-   "addedAt": "2026-09-23T20:44:23Z",
+   "addedAt": "2026-09-23T20:48:32Z",
    "addedBy": "owner",
    "status": "active"
   },
   {
    "wallet": "DpkSo9LQHbJqGZZtwhFTbaW3oRCnxfoZS9oo1iaAmxse",
-   "clusterId": "frankdegods",
-   "clusterLabel": "@frankdegods",
+   "clusterId": "cluster-2",
    "role": "bundle",
    "reason": "bundler",
    "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
-   "addedAt": "2026-09-23T20:44:23Z",
+   "addedAt": "2026-09-23T20:48:32Z",
    "addedBy": "owner",
    "status": "active"
   },
   {
    "wallet": "HdxkiXqeN6qpK2YbG51W23QSWj3Yygc1eEk2zwmKJExp",
-   "clusterId": "frankdegods",
-   "clusterLabel": "@frankdegods",
+   "clusterId": "cluster-2",
    "role": "bundle",
    "reason": "bundler",
    "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
-   "addedAt": "2026-09-23T20:44:23Z",
+   "addedAt": "2026-09-23T20:48:32Z",
    "addedBy": "owner",
    "status": "active"
   },
   {
    "wallet": "59G5jgM1ZcYCv2DyuKKkSw8apcnUgte9tgxiKnWetsTY",
-   "clusterId": "frankdegods",
-   "clusterLabel": "@frankdegods",
+   "clusterId": "cluster-2",
    "role": "bundle",
    "reason": "bundler",
    "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
-   "addedAt": "2026-09-23T20:44:23Z",
+   "addedAt": "2026-09-23T20:48:32Z",
    "addedBy": "owner",
    "status": "active"
   },
   {
    "wallet": "4cXnf2z85UiZ5cyKsPMEULq1yufAtpkatmX4j4DBZqj2",
-   "clusterId": "frankdegods",
-   "clusterLabel": "@frankdegods",
+   "clusterId": "cluster-2",
    "role": "bundle",
    "reason": "bundler",
    "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
-   "addedAt": "2026-09-23T20:44:23Z",
+   "addedAt": "2026-09-23T20:48:32Z",
    "addedBy": "owner",
    "status": "active"
   },
   {
    "wallet": "GgG65z3MXpmGnV3ZapKv5ayDqox1x7CJnqP1LD8FaZdt",
-   "clusterId": "frankdegods",
-   "clusterLabel": "@frankdegods",
+   "clusterId": "cluster-2",
    "role": "bundle",
    "reason": "bundler",
    "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
-   "addedAt": "2026-09-23T20:44:23Z",
+   "addedAt": "2026-09-23T20:48:32Z",
    "addedBy": "owner",
    "status": "active"
   },
   {
    "wallet": "Eeo8N4tQkXPGfwtUovGmtYGHyiXG7RKzNoZjMgBj78Z2",
-   "clusterId": "frankdegods",
-   "clusterLabel": "@frankdegods",
+   "clusterId": "cluster-2",
    "role": "bundle",
    "reason": "bundler",
    "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
-   "addedAt": "2026-09-23T20:44:23Z",
+   "addedAt": "2026-09-23T20:48:32Z",
    "addedBy": "owner",
    "status": "active"
   },
   {
    "wallet": "2hiaWps9HzCB1SYCfweLaqCSqFtHfQ4ajQqiyPefKDsk",
-   "clusterId": "frankdegods",
-   "clusterLabel": "@frankdegods",
+   "clusterId": "cluster-2",
    "role": "bundle",
    "reason": "bundler",
    "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
-   "addedAt": "2026-09-23T20:44:23Z",
+   "addedAt": "2026-09-23T20:48:32Z",
    "addedBy": "owner",
    "status": "active"
   },
   {
    "wallet": "CBaM2xaPdDdhaopd8dD93LJAvextJoPngdKFz8QFP7JD",
-   "clusterId": "frankdegods",
-   "clusterLabel": "@frankdegods",
+   "clusterId": "cluster-2",
    "role": "bundle",
    "reason": "bundler",
    "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
-   "addedAt": "2026-09-23T20:44:23Z",
+   "addedAt": "2026-09-23T20:48:32Z",
    "addedBy": "owner",
    "status": "active"
   },
   {
    "wallet": "G5nxEXuFMfV74DSnsrSatqCW32F34XUnBeq3PfDS7w5E",
-   "clusterId": "frankdegods",
-   "clusterLabel": "@frankdegods",
+   "clusterId": "cluster-2",
    "role": "bundle",
    "reason": "bundler",
    "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
-   "addedAt": "2026-09-23T20:44:23Z",
+   "addedAt": "2026-09-23T20:48:32Z",
    "addedBy": "owner",
    "status": "active"
   },
   {
    "wallet": "BLhQ4fWgkNAJ4MWXSdXaTnxwZxwHh7QTnMQb6i3Z2QYy",
-   "clusterId": "frankdegods",
-   "clusterLabel": "@frankdegods",
+   "clusterId": "cluster-2",
    "role": "bundle",
    "reason": "bundler",
    "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
-   "addedAt": "2026-09-23T20:44:23Z",
+   "addedAt": "2026-09-23T20:48:32Z",
    "addedBy": "owner",
    "status": "active"
   },
   {
    "wallet": "2WuGLhbp8oVq3LGnf9kvRaot62zxBbw7RKYnBF3kTvuJ",
-   "clusterId": "frankdegods",
-   "clusterLabel": "@frankdegods",
+   "clusterId": "cluster-2",
    "role": "bundle",
    "reason": "bundler",
    "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
-   "addedAt": "2026-09-23T20:44:23Z",
+   "addedAt": "2026-09-23T20:48:32Z",
    "addedBy": "owner",
    "status": "active"
   },
   {
    "wallet": "HghFU8aW47RVMtGM8mp2gVVEe3L7Ciq6AnywWQbnNEAu",
-   "clusterId": "frankdegods",
-   "clusterLabel": "@frankdegods",
+   "clusterId": "cluster-2",
    "role": "bundle",
    "reason": "bundler",
    "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
-   "addedAt": "2026-09-23T20:44:23Z",
+   "addedAt": "2026-09-23T20:48:32Z",
    "addedBy": "owner",
    "status": "active"
   },
   {
    "wallet": "FyMx8kaqweuhDjPo68fZsKffbXcJF9Pk423YjXJYEaPn",
-   "clusterId": "frankdegods",
-   "clusterLabel": "@frankdegods",
+   "clusterId": "cluster-2",
    "role": "bundle",
    "reason": "bundler",
    "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
-   "addedAt": "2026-09-23T20:44:23Z",
+   "addedAt": "2026-09-23T20:48:32Z",
    "addedBy": "owner",
    "status": "active"
   },
   {
    "wallet": "9gbCVg3HNWKHxiBpP9RnQn3AGERgBZp8w8b3Bzy8ruVV",
-   "clusterId": "frankdegods",
-   "clusterLabel": "@frankdegods",
+   "clusterId": "cluster-2",
    "role": "bundle",
    "reason": "bundler",
    "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
-   "addedAt": "2026-09-23T20:44:23Z",
+   "addedAt": "2026-09-23T20:48:32Z",
    "addedBy": "owner",
    "status": "active"
   },
   {
    "wallet": "ERyi7cVQn2HAidRANwAqiN2AjxqFqrxWRfcnztLVRtYV",
-   "clusterId": "frankdegods",
-   "clusterLabel": "@frankdegods",
+   "clusterId": "cluster-2",
    "role": "bundle",
    "reason": "bundler",
    "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
-   "addedAt": "2026-09-23T20:44:23Z",
+   "addedAt": "2026-09-23T20:48:32Z",
    "addedBy": "owner",
    "status": "active"
   },
   {
    "wallet": "GZetT3iRmhuzuT1gkSk69MXMe8hRJZJGz1PPdKW1J2vq",
-   "clusterId": "frankdegods",
-   "clusterLabel": "@frankdegods",
+   "clusterId": "cluster-2",
    "role": "bundle",
    "reason": "bundler",
    "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
-   "addedAt": "2026-09-23T20:44:23Z",
+   "addedAt": "2026-09-23T20:48:32Z",
    "addedBy": "owner",
    "status": "active"
   },
   {
    "wallet": "FYRyjviVHwCwq5D8Zavywb85nwk7oT41MKECc4Mfm5K",
-   "clusterId": "frankdegods",
-   "clusterLabel": "@frankdegods",
+   "clusterId": "cluster-2",
    "role": "bundle",
    "reason": "bundler",
    "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
-   "addedAt": "2026-09-23T20:44:23Z",
+   "addedAt": "2026-09-23T20:48:32Z",
    "addedBy": "owner",
    "status": "active"
   },
   {
    "wallet": "8juYa1S92KmGHYM7jNpGvS84r4qqGX4zu9LKCwESYtDy",
-   "clusterId": "frankdegods",
-   "clusterLabel": "@frankdegods",
+   "clusterId": "cluster-2",
    "role": "bundle",
    "reason": "bundler",
    "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
-   "addedAt": "2026-09-23T20:44:23Z",
+   "addedAt": "2026-09-23T20:48:32Z",
    "addedBy": "owner",
    "status": "active"
   },
   {
    "wallet": "6poCMz4x4bpUcR6qGKXnYjee988aZyEF2qteYfHsVnP9",
-   "clusterId": "frankdegods",
-   "clusterLabel": "@frankdegods",
+   "clusterId": "cluster-2",
    "role": "bundle",
    "reason": "bundler",
    "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
-   "addedAt": "2026-09-23T20:44:23Z",
+   "addedAt": "2026-09-23T20:48:32Z",
    "addedBy": "owner",
    "status": "active"
   },
   {
    "wallet": "5JMim4GakhwFM8BNAbNqWKeeaFABSWFhuvo7nygi6rQ1",
-   "clusterId": "frankdegods",
-   "clusterLabel": "@frankdegods",
+   "clusterId": "cluster-2",
    "role": "bundle",
    "reason": "bundler",
    "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
-   "addedAt": "2026-09-23T20:44:23Z",
+   "addedAt": "2026-09-23T20:48:32Z",
    "addedBy": "owner",
    "status": "active"
   },
   {
    "wallet": "3YfXCHqsJxa77XVKnhrJD8jXyH9grzUz8zuwhFVwaLeB",
-   "clusterId": "frankdegods",
-   "clusterLabel": "@frankdegods",
+   "clusterId": "cluster-2",
    "role": "bundle",
    "reason": "bundler",
    "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
-   "addedAt": "2026-09-23T20:44:23Z",
+   "addedAt": "2026-09-23T20:48:32Z",
    "addedBy": "owner",
    "status": "active"
   },
   {
    "wallet": "G48zEBJ1z3ywGWNWN5vABnLXRQiqBqyNPR6KRqMxzT72",
-   "clusterId": "frankdegods",
-   "clusterLabel": "@frankdegods",
+   "clusterId": "cluster-2",
    "role": "bundle",
    "reason": "bundler",
    "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
-   "addedAt": "2026-09-23T20:44:23Z",
+   "addedAt": "2026-09-23T20:48:32Z",
    "addedBy": "owner",
    "status": "active"
   },
   {
    "wallet": "8KRbnJJDqqmR75GEnNFixxgkfQdNsAYvLjEgR5NYPHvG",
-   "clusterId": "frankdegods",
-   "clusterLabel": "@frankdegods",
+   "clusterId": "cluster-2",
    "role": "bundle",
    "reason": "bundler",
    "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
-   "addedAt": "2026-09-23T20:44:23Z",
+   "addedAt": "2026-09-23T20:48:32Z",
    "addedBy": "owner",
    "status": "active"
   },
   {
    "wallet": "4h6wQzbSZfRWg8sx9Aw9nsCHwQ86SbmAampBVfyxskSd",
-   "clusterId": "frankdegods",
-   "clusterLabel": "@frankdegods",
+   "clusterId": "cluster-2",
    "role": "bundle",
    "reason": "bundler",
    "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
-   "addedAt": "2026-09-23T20:44:23Z",
+   "addedAt": "2026-09-23T20:48:32Z",
    "addedBy": "owner",
    "status": "active"
   },
   {
    "wallet": "E5A5Sw7q7PoPyvhnf9HdVESDf1pTbVjWG3HRrtdHoE5H",
-   "clusterId": "frankdegods",
-   "clusterLabel": "@frankdegods",
+   "clusterId": "cluster-2",
    "role": "bundle",
    "reason": "bundler",
    "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
-   "addedAt": "2026-09-23T20:44:23Z",
+   "addedAt": "2026-09-23T20:48:32Z",
    "addedBy": "owner",
    "status": "active"
   },
   {
    "wallet": "6xuMV6W6QVxrVmsZxEdLfV6kfhuBsg3ah1X8rydLfQvy",
-   "clusterId": "frankdegods",
-   "clusterLabel": "@frankdegods",
+   "clusterId": "cluster-2",
    "role": "bundle",
    "reason": "bundler",
    "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
-   "addedAt": "2026-09-23T20:44:23Z",
+   "addedAt": "2026-09-23T20:48:32Z",
    "addedBy": "owner",
    "status": "active"
   },
   {
    "wallet": "HokZt26xr2siDCHeMRAngqoGVPEndXNw7MTmTY537zU1",
-   "clusterId": "frankdegods",
-   "clusterLabel": "@frankdegods",
+   "clusterId": "cluster-2",
    "role": "bundle",
    "reason": "bundler",
    "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
-   "addedAt": "2026-09-23T20:44:23Z",
+   "addedAt": "2026-09-23T20:48:32Z",
    "addedBy": "owner",
    "status": "active"
   },
   {
    "wallet": "6oFWJwez4zzcLoNNEbKfmY3NeEXgH6R6sJVVTPQWTAQs",
-   "clusterId": "frankdegods",
-   "clusterLabel": "@frankdegods",
+   "clusterId": "cluster-2",
    "role": "bundle",
    "reason": "bundler",
    "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
-   "addedAt": "2026-09-23T20:44:23Z",
+   "addedAt": "2026-09-23T20:48:32Z",
    "addedBy": "owner",
    "status": "active"
   },
   {
    "wallet": "GJT2NAKG1tqaxyWupcSQh1vpZhqWfonV1KtSq1J4BcFN",
-   "clusterId": "frankdegods",
-   "clusterLabel": "@frankdegods",
+   "clusterId": "cluster-2",
    "role": "bundle",
    "reason": "bundler",
    "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
-   "addedAt": "2026-09-23T20:44:23Z",
+   "addedAt": "2026-09-23T20:48:32Z",
    "addedBy": "owner",
    "status": "active"
   },
   {
    "wallet": "Ck1cqb23d7rhoyVRvLxzK5kpU7W5yzqthjFtUZEcexMq",
-   "clusterId": "frankdegods",
-   "clusterLabel": "@frankdegods",
+   "clusterId": "cluster-2",
    "role": "bundle",
    "reason": "bundler",
    "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
-   "addedAt": "2026-09-23T20:44:23Z",
+   "addedAt": "2026-09-23T20:48:32Z",
    "addedBy": "owner",
    "status": "active"
   },
   {
    "wallet": "G6TPxUcTQmdtDUmMKcXc8NphBFB7c9GSpDaKmCgr6U6n",
-   "clusterId": "frankdegods",
-   "clusterLabel": "@frankdegods",
+   "clusterId": "cluster-2",
    "role": "bundle",
    "reason": "bundler",
    "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
-   "addedAt": "2026-09-23T20:44:23Z",
+   "addedAt": "2026-09-23T20:48:32Z",
    "addedBy": "owner",
    "status": "active"
   },
   {
    "wallet": "CjC52A4CMJ7zCi4UaP6f6cEsbdKG5pdk9oK3rTZFWBMB",
-   "clusterId": "frankdegods",
-   "clusterLabel": "@frankdegods",
+   "clusterId": "cluster-2",
    "role": "bundle",
    "reason": "bundler",
    "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
-   "addedAt": "2026-09-23T20:44:23Z",
+   "addedAt": "2026-09-23T20:48:32Z",
    "addedBy": "owner",
    "status": "active"
   },
   {
    "wallet": "zV18RQeme9fDZUbCGf7skSWNz6Vphs5j3PQUHjHdcgi",
-   "clusterId": "frankdegods",
-   "clusterLabel": "@frankdegods",
+   "clusterId": "cluster-2",
    "role": "bundle",
    "reason": "bundler",
    "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
-   "addedAt": "2026-09-23T20:44:23Z",
+   "addedAt": "2026-09-23T20:48:32Z",
    "addedBy": "owner",
    "status": "active"
   },
   {
    "wallet": "Bk5JfA7TttZgxzhJogpsVc8Ro8a7y32XaVkAsda6Y8nX",
-   "clusterId": "frankdegods",
-   "clusterLabel": "@frankdegods",
+   "clusterId": "cluster-2",
    "role": "bundle",
    "reason": "bundler",
    "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
-   "addedAt": "2026-09-23T20:44:23Z",
+   "addedAt": "2026-09-23T20:48:32Z",
    "addedBy": "owner",
    "status": "active"
   },
   {
    "wallet": "88ubSkX4g8TVR4wGVEfbEWxsGzRacYvykKpydvKjr2sR",
-   "clusterId": "frankdegods",
-   "clusterLabel": "@frankdegods",
+   "clusterId": "cluster-2",
    "role": "bundle",
    "reason": "bundler",
    "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
-   "addedAt": "2026-09-23T20:44:23Z",
+   "addedAt": "2026-09-23T20:48:32Z",
    "addedBy": "owner",
    "status": "active"
   },
   {
    "wallet": "Cpsj1hcaz5XEFb3uGBDnTAHKNr6Pg2pY3fJPkHiMJaFz",
-   "clusterId": "frankdegods",
-   "clusterLabel": "@frankdegods",
+   "clusterId": "cluster-2",
    "role": "bundle",
    "reason": "bundler",
    "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
-   "addedAt": "2026-09-23T20:44:23Z",
+   "addedAt": "2026-09-23T20:48:32Z",
    "addedBy": "owner",
    "status": "active"
   },
   {
    "wallet": "BDfKjJ3FGMceYUYJERH6HTVEmPe3HzydTn7SbAprNVfy",
-   "clusterId": "frankdegods",
-   "clusterLabel": "@frankdegods",
+   "clusterId": "cluster-2",
    "role": "bundle",
    "reason": "bundler",
    "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
-   "addedAt": "2026-09-23T20:44:23Z",
+   "addedAt": "2026-09-23T20:48:32Z",
    "addedBy": "owner",
    "status": "active"
   },
   {
    "wallet": "D7351rWjsawpsAaU3bxE92pWR3zM5zV1PCDEX5VLoro1",
-   "clusterId": "frankdegods",
-   "clusterLabel": "@frankdegods",
+   "clusterId": "cluster-2",
    "role": "bundle",
    "reason": "bundler",
    "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
-   "addedAt": "2026-09-23T20:44:23Z",
+   "addedAt": "2026-09-23T20:48:32Z",
    "addedBy": "owner",
    "status": "active"
   },
   {
    "wallet": "GH5f4hYyNb5yXfwiKHWJgi4ibeXzZZEFvDQ7WRGA4nmj",
-   "clusterId": "frankdegods",
-   "clusterLabel": "@frankdegods",
+   "clusterId": "cluster-2",
    "role": "bundle",
    "reason": "bundler",
    "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
-   "addedAt": "2026-09-23T20:44:23Z",
+   "addedAt": "2026-09-23T20:48:32Z",
    "addedBy": "owner",
    "status": "active"
   },
   {
    "wallet": "9Lou5nKUDfydCcHsxScbNhSa3SrbTVGD7SVYM9XwHDDP",
-   "clusterId": "frankdegods",
-   "clusterLabel": "@frankdegods",
+   "clusterId": "cluster-2",
    "role": "bundle",
    "reason": "bundler",
    "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
-   "addedAt": "2026-09-23T20:44:23Z",
+   "addedAt": "2026-09-23T20:48:32Z",
    "addedBy": "owner",
    "status": "active"
   },
   {
    "wallet": "9uKFbHuuqtXVGX5WmRGoUHY4NwzC6C9NG7SwqwGkKkh9",
-   "clusterId": "frankdegods",
-   "clusterLabel": "@frankdegods",
+   "clusterId": "cluster-2",
    "role": "bundle",
    "reason": "bundler",
    "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
-   "addedAt": "2026-09-23T20:44:23Z",
+   "addedAt": "2026-09-23T20:48:32Z",
    "addedBy": "owner",
    "status": "active"
   },
   {
    "wallet": "GWVv4JxdW8ohTpWvGnwQid6Y8AzZya2kSCCDoPKCULhi",
-   "clusterId": "frankdegods",
-   "clusterLabel": "@frankdegods",
+   "clusterId": "cluster-2",
    "role": "bundle",
    "reason": "bundler",
    "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
-   "addedAt": "2026-09-23T20:44:23Z",
+   "addedAt": "2026-09-23T20:48:32Z",
    "addedBy": "owner",
    "status": "active"
   },
   {
    "wallet": "2MkLcU6hKyBLcYuX3TQoHe9WWbW52QU1tRQWKgSkxLC4",
-   "clusterId": "frankdegods",
-   "clusterLabel": "@frankdegods",
+   "clusterId": "cluster-2",
    "role": "bundle",
    "reason": "bundler",
    "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
-   "addedAt": "2026-09-23T20:44:23Z",
+   "addedAt": "2026-09-23T20:48:32Z",
    "addedBy": "owner",
    "status": "active"
   },
   {
    "wallet": "ANJZwqnAdUH2pYKKmAN8hdjFtWqgMAfn3Xnbynaf2Na",
-   "clusterId": "frankdegods",
-   "clusterLabel": "@frankdegods",
+   "clusterId": "cluster-2",
    "role": "bundle",
    "reason": "bundler",
    "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
-   "addedAt": "2026-09-23T20:44:23Z",
+   "addedAt": "2026-09-23T20:48:32Z",
    "addedBy": "owner",
    "status": "active"
   },
   {
    "wallet": "2wFNRFkYqBpSjMtrAMJs5DCE4p7gkZcuj7wxR4iXXTmY",
-   "clusterId": "frankdegods",
-   "clusterLabel": "@frankdegods",
+   "clusterId": "cluster-2",
    "role": "bundle",
    "reason": "bundler",
    "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
-   "addedAt": "2026-09-23T20:44:23Z",
+   "addedAt": "2026-09-23T20:48:32Z",
    "addedBy": "owner",
    "status": "active"
   },
   {
    "wallet": "AxahCum8eB2pV46Rq8jpuTTJ7L12Sb19jpihbrEt3AEG",
-   "clusterId": "frankdegods",
-   "clusterLabel": "@frankdegods",
+   "clusterId": "cluster-2",
    "role": "bundle",
    "reason": "bundler",
    "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
-   "addedAt": "2026-09-23T20:44:23Z",
+   "addedAt": "2026-09-23T20:48:32Z",
    "addedBy": "owner",
    "status": "active"
   },
   {
    "wallet": "69r1Em7xGH9aMRaUu6ZdByFxnqgBbp8iE9a5qR7wzPgS",
-   "clusterId": "frankdegods",
-   "clusterLabel": "@frankdegods",
+   "clusterId": "cluster-2",
    "role": "bundle",
    "reason": "bundler",
    "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
-   "addedAt": "2026-09-23T20:44:23Z",
+   "addedAt": "2026-09-23T20:48:32Z",
    "addedBy": "owner",
    "status": "active"
   },
   {
    "wallet": "8oABzp5YVzZPANf8CqFmMuGQY9JBJEWyVepf8PpGJHMJ",
-   "clusterId": "frankdegods",
-   "clusterLabel": "@frankdegods",
+   "clusterId": "cluster-2",
    "role": "bundle",
    "reason": "bundler",
    "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
-   "addedAt": "2026-09-23T20:44:23Z",
+   "addedAt": "2026-09-23T20:48:32Z",
    "addedBy": "owner",
    "status": "active"
   },
   {
    "wallet": "3q3J8MBmiMFDmqVzNt717NSrb6AGWoYxvH16rMhF4bCb",
-   "clusterId": "frankdegods",
-   "clusterLabel": "@frankdegods",
+   "clusterId": "cluster-2",
    "role": "bundle",
    "reason": "bundler",
    "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
-   "addedAt": "2026-09-23T20:44:23Z",
+   "addedAt": "2026-09-23T20:48:32Z",
    "addedBy": "owner",
    "status": "active"
   },
   {
    "wallet": "Fy2SdfputZzNQFBiMnKU4UY86KgAJCoeFktigRXabGXi",
-   "clusterId": "frankdegods",
-   "clusterLabel": "@frankdegods",
+   "clusterId": "cluster-2",
    "role": "bundle",
    "reason": "bundler",
    "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
-   "addedAt": "2026-09-23T20:44:23Z",
+   "addedAt": "2026-09-23T20:48:32Z",
    "addedBy": "owner",
    "status": "active"
   },
   {
    "wallet": "GDuHcZ2GDy1P2bGhPLVFu98y1hb15nbnCx7SzeJQ3aye",
-   "clusterId": "frankdegods",
-   "clusterLabel": "@frankdegods",
+   "clusterId": "cluster-2",
    "role": "bundle",
    "reason": "bundler",
    "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
-   "addedAt": "2026-09-23T20:44:23Z",
+   "addedAt": "2026-09-23T20:48:32Z",
    "addedBy": "owner",
    "status": "active"
   },
   {
    "wallet": "5itYoxfkseRgcHwiAJKHGG5pYbtbUPRr3AAcsKKya1G",
-   "clusterId": "frankdegods",
-   "clusterLabel": "@frankdegods",
+   "clusterId": "cluster-2",
    "role": "bundle",
    "reason": "bundler",
    "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
-   "addedAt": "2026-09-23T20:44:23Z",
+   "addedAt": "2026-09-23T20:48:32Z",
    "addedBy": "owner",
    "status": "active"
   },
   {
    "wallet": "HRaTtzSKEozx2PyTDoggG7KKNaozfJkZ86dWJAuNvzhr",
-   "clusterId": "frankdegods",
-   "clusterLabel": "@frankdegods",
+   "clusterId": "cluster-2",
    "role": "bundle",
    "reason": "bundler",
    "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
-   "addedAt": "2026-09-23T20:44:23Z",
+   "addedAt": "2026-09-23T20:48:32Z",
    "addedBy": "owner",
    "status": "active"
   },
   {
    "wallet": "DGwgcjpL3WjfKaTUVUVHALWp5WzPvVQpGtPfYTrqeQdB",
-   "clusterId": "frankdegods",
-   "clusterLabel": "@frankdegods",
+   "clusterId": "cluster-2",
    "role": "bundle",
    "reason": "bundler",
    "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
-   "addedAt": "2026-09-23T20:44:23Z",
+   "addedAt": "2026-09-23T20:48:32Z",
    "addedBy": "owner",
    "status": "active"
   },
   {
    "wallet": "5R2wYpctGz1UHkrqnDXq4QrQ9JoxNEenFDnkRo55iZdu",
-   "clusterId": "frankdegods",
-   "clusterLabel": "@frankdegods",
+   "clusterId": "cluster-2",
    "role": "bundle",
    "reason": "bundler",
    "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
-   "addedAt": "2026-09-23T20:44:23Z",
+   "addedAt": "2026-09-23T20:48:32Z",
    "addedBy": "owner",
    "status": "active"
   },
   {
    "wallet": "6Hh7zdbWeepsjzBgzPPH98wPYVekGV8yF5pvRnAdjhBu",
-   "clusterId": "frankdegods",
-   "clusterLabel": "@frankdegods",
+   "clusterId": "cluster-2",
    "role": "bundle",
    "reason": "bundler",
    "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
-   "addedAt": "2026-09-23T20:44:23Z",
+   "addedAt": "2026-09-23T20:48:32Z",
    "addedBy": "owner",
    "status": "active"
   },
   {
    "wallet": "FUE7sHmy55nVPj3kDYxwg21qbFdnY1jRiitWHEe42wKv",
-   "clusterId": "frankdegods",
-   "clusterLabel": "@frankdegods",
+   "clusterId": "cluster-2",
    "role": "bundle",
    "reason": "bundler",
    "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
-   "addedAt": "2026-09-23T20:44:23Z",
+   "addedAt": "2026-09-23T20:48:32Z",
    "addedBy": "owner",
    "status": "active"
   },
   {
    "wallet": "CRzpBtFwjGkYKjwPSBzC4mn8qF2eb7XpjfPemubT4dgE",
-   "clusterId": "frankdegods",
-   "clusterLabel": "@frankdegods",
+   "clusterId": "cluster-2",
    "role": "bundle",
    "reason": "bundler",
    "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
-   "addedAt": "2026-09-23T20:44:23Z",
+   "addedAt": "2026-09-23T20:48:32Z",
    "addedBy": "owner",
    "status": "active"
   },
   {
    "wallet": "twixMpLrse2Kknq8RD6crF5qD1XgNfHg3g1QMebuDgo",
-   "clusterId": "frankdegods",
-   "clusterLabel": "@frankdegods",
+   "clusterId": "cluster-2",
    "role": "bundle",
    "reason": "bundler",
    "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
-   "addedAt": "2026-09-23T20:44:23Z",
+   "addedAt": "2026-09-23T20:48:32Z",
    "addedBy": "owner",
    "status": "active"
   },
   {
    "wallet": "CfBs22i8MRaKFq4ATChZAjG271oz2iFovmDfuWgzJ2dc",
-   "clusterId": "frankdegods",
-   "clusterLabel": "@frankdegods",
+   "clusterId": "cluster-2",
    "role": "bundle",
    "reason": "bundler",
    "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
-   "addedAt": "2026-09-23T20:44:23Z",
+   "addedAt": "2026-09-23T20:48:32Z",
    "addedBy": "owner",
    "status": "active"
   },
   {
    "wallet": "FNhJCt9smgDVABeYGzAX6FrjuJxpauVG1mKRMa6P4AXm",
-   "clusterId": "frankdegods",
-   "clusterLabel": "@frankdegods",
+   "clusterId": "cluster-2",
    "role": "bundle",
    "reason": "bundler",
    "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
-   "addedAt": "2026-09-23T20:44:23Z",
+   "addedAt": "2026-09-23T20:48:32Z",
    "addedBy": "owner",
    "status": "active"
   },
   {
    "wallet": "7uU4LdPr7Qwmmvx5jfLgVuFN2Qq8F9CzNmkQpdFYZRQm",
-   "clusterId": "frankdegods",
-   "clusterLabel": "@frankdegods",
+   "clusterId": "cluster-2",
    "role": "bundle",
    "reason": "bundler",
    "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
-   "addedAt": "2026-09-23T20:44:23Z",
+   "addedAt": "2026-09-23T20:48:32Z",
    "addedBy": "owner",
    "status": "active"
   },
   {
    "wallet": "5Zsc4EcH5BVTot1Akc5f6DyEPgEyJywQeETQqzASTukU",
-   "clusterId": "frankdegods",
-   "clusterLabel": "@frankdegods",
+   "clusterId": "cluster-2",
    "role": "bundle",
    "reason": "bundler",
    "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
-   "addedAt": "2026-09-23T20:44:23Z",
+   "addedAt": "2026-09-23T20:48:32Z",
    "addedBy": "owner",
    "status": "active"
   },
   {
    "wallet": "73LnJ7G9ffBDjEBGgJDdgvLUhD5APLonKrNiHsKDCw5B",
-   "clusterId": "frankdegods",
-   "clusterLabel": "@frankdegods",
+   "clusterId": "cluster-2",
    "role": "bundle",
    "reason": "bundler",
    "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
-   "addedAt": "2026-09-23T20:44:23Z",
+   "addedAt": "2026-09-23T20:48:32Z",
    "addedBy": "owner",
    "status": "active"
   },
   {
    "wallet": "AvzzD7SnRHb8Kv8dRk1JFYdWVcNtYhTybk2KbDWKB5ki",
-   "clusterId": "frankdegods",
-   "clusterLabel": "@frankdegods",
+   "clusterId": "cluster-2",
    "role": "bundle",
    "reason": "bundler",
    "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
-   "addedAt": "2026-09-23T20:44:23Z",
+   "addedAt": "2026-09-23T20:48:32Z",
    "addedBy": "owner",
    "status": "active"
   },
   {
    "wallet": "BcNk6Cz3N2SShWEKPwSQKR8BGwWTXREucMibp22Vosfg",
-   "clusterId": "frankdegods",
-   "clusterLabel": "@frankdegods",
+   "clusterId": "cluster-2",
    "role": "bundle",
    "reason": "bundler",
    "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
-   "addedAt": "2026-09-23T20:44:23Z",
+   "addedAt": "2026-09-23T20:48:32Z",
    "addedBy": "owner",
    "status": "active"
   },
   {
    "wallet": "Aj7cmvHffj7X5UozN5j1Uwq4s31MHSCB6TCZTBxGYsf2",
-   "clusterId": "frankdegods",
-   "clusterLabel": "@frankdegods",
+   "clusterId": "cluster-2",
    "role": "bundle",
    "reason": "bundler",
    "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
-   "addedAt": "2026-09-23T20:44:23Z",
+   "addedAt": "2026-09-23T20:48:32Z",
    "addedBy": "owner",
    "status": "active"
   },
   {
    "wallet": "6T2dZmznVB51nmvjCVaQrjEZRrmE57kSJzh6QSWbxBW4",
-   "clusterId": "frankdegods",
-   "clusterLabel": "@frankdegods",
+   "clusterId": "cluster-2",
    "role": "bundle",
    "reason": "bundler",
    "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
-   "addedAt": "2026-09-23T20:44:23Z",
+   "addedAt": "2026-09-23T20:48:32Z",
    "addedBy": "owner",
    "status": "active"
   },
   {
    "wallet": "4Vo5snUKki4c7jWkjGD3vUCXnHTDhKbrJvszsJ3TEzDN",
-   "clusterId": "frankdegods",
-   "clusterLabel": "@frankdegods",
+   "clusterId": "cluster-2",
    "role": "bundle",
    "reason": "bundler",
    "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
-   "addedAt": "2026-09-23T20:44:23Z",
+   "addedAt": "2026-09-23T20:48:32Z",
    "addedBy": "owner",
    "status": "active"
   },
   {
    "wallet": "zfjVAUxxb4sDiqs3rhakUfUbk9qx9sFq9tRMZmmaEZ5",
-   "clusterId": "frankdegods",
-   "clusterLabel": "@frankdegods",
+   "clusterId": "cluster-2",
    "role": "bundle",
    "reason": "bundler",
    "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
-   "addedAt": "2026-09-23T20:44:23Z",
+   "addedAt": "2026-09-23T20:48:32Z",
    "addedBy": "owner",
    "status": "active"
   },
   {
    "wallet": "Ar7nLrWhmZZPpJboiycmaqmPsMYpugXMxY1eTVxASZx8",
-   "clusterId": "frankdegods",
-   "clusterLabel": "@frankdegods",
+   "clusterId": "cluster-2",
    "role": "bundle",
    "reason": "bundler",
    "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
-   "addedAt": "2026-09-23T20:44:23Z",
+   "addedAt": "2026-09-23T20:48:32Z",
    "addedBy": "owner",
    "status": "active"
   },
   {
    "wallet": "3v9G67q361eJtMLD8vwFRB2nGQv1pZYLGN1bXc3NXuJL",
-   "clusterId": "frankdegods",
-   "clusterLabel": "@frankdegods",
+   "clusterId": "cluster-2",
    "role": "bundle",
    "reason": "bundler",
    "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
-   "addedAt": "2026-09-23T20:44:23Z",
+   "addedAt": "2026-09-23T20:48:32Z",
    "addedBy": "owner",
    "status": "active"
   },
   {
    "wallet": "GzdF9rTPhmUuG2E4kq6JXjB8mPngHsvqMJGHdmk9j3aQ",
-   "clusterId": "frankdegods",
-   "clusterLabel": "@frankdegods",
+   "clusterId": "cluster-2",
    "role": "bundle",
    "reason": "bundler",
    "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
-   "addedAt": "2026-09-23T20:44:23Z",
+   "addedAt": "2026-09-23T20:48:32Z",
    "addedBy": "owner",
    "status": "active"
   },
   {
    "wallet": "7Pfx8ELLPsoT9Q3vnX2Gb8e7VRHiKFwWP3URaAArLjGQ",
-   "clusterId": "frankdegods",
-   "clusterLabel": "@frankdegods",
+   "clusterId": "cluster-2",
    "role": "bundle",
    "reason": "bundler",
    "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
-   "addedAt": "2026-09-23T20:44:23Z",
+   "addedAt": "2026-09-23T20:48:32Z",
    "addedBy": "owner",
    "status": "active"
   },
   {
    "wallet": "6Npx3Qe9pYEKqrXcFtpDvA1ZpkKdKXpcbtrUVbe58ixn",
-   "clusterId": "frankdegods",
-   "clusterLabel": "@frankdegods",
+   "clusterId": "cluster-2",
    "role": "bundle",
    "reason": "bundler",
    "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
-   "addedAt": "2026-09-23T20:44:23Z",
+   "addedAt": "2026-09-23T20:48:32Z",
    "addedBy": "owner",
    "status": "active"
   },
   {
    "wallet": "9HCTuTPEiQvkUtLmTZvK6uch4E3pDynwJTbNw6jLhp9z",
-   "clusterId": "frankdegods",
-   "clusterLabel": "@frankdegods",
+   "clusterId": "cluster-2",
    "role": "bundle",
    "reason": "bundler",
    "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
-   "addedAt": "2026-09-23T20:44:23Z",
+   "addedAt": "2026-09-23T20:48:32Z",
    "addedBy": "owner",
    "status": "active"
   },
   {
    "wallet": "7uLJ6GSpC3eLFv997BoMH9M2qcN7Tqt5RmiMFE6AgHY5",
-   "clusterId": "frankdegods",
-   "clusterLabel": "@frankdegods",
+   "clusterId": "cluster-2",
    "role": "bundle",
    "reason": "bundler",
    "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
-   "addedAt": "2026-09-23T20:44:23Z",
+   "addedAt": "2026-09-23T20:48:32Z",
    "addedBy": "owner",
    "status": "active"
   },
   {
    "wallet": "Dt2BuKzHaNmm2hkYDiuRgu4NDpE7RitaMi2KjJ7KCSWY",
-   "clusterId": "frankdegods",
-   "clusterLabel": "@frankdegods",
+   "clusterId": "cluster-2",
    "role": "bundle",
    "reason": "bundler",
    "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
-   "addedAt": "2026-09-23T20:44:23Z",
+   "addedAt": "2026-09-23T20:48:32Z",
    "addedBy": "owner",
    "status": "active"
   },
   {
    "wallet": "CxnBuEzASYGDCbCaseofkKoZdqgMzxhEshE3q3MaxBZV",
-   "clusterId": "frankdegods",
-   "clusterLabel": "@frankdegods",
+   "clusterId": "cluster-2",
    "role": "bundle",
    "reason": "bundler",
    "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
-   "addedAt": "2026-09-23T20:44:23Z",
+   "addedAt": "2026-09-23T20:48:32Z",
    "addedBy": "owner",
    "status": "active"
   },
   {
    "wallet": "9E6Vb6hY2jwy173Jr31aXxrBEEJwKye1Et57zvufuRwh",
-   "clusterId": "frankdegods",
-   "clusterLabel": "@frankdegods",
+   "clusterId": "cluster-2",
    "role": "bundle",
    "reason": "bundler",
    "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
-   "addedAt": "2026-09-23T20:44:23Z",
+   "addedAt": "2026-09-23T20:48:32Z",
    "addedBy": "owner",
    "status": "active"
   },
   {
    "wallet": "G1VWdyiXnTkRHBjUEwhkpX6vdEYKKj3DJbKHSc7a2p7u",
-   "clusterId": "frankdegods",
-   "clusterLabel": "@frankdegods",
+   "clusterId": "cluster-2",
    "role": "bundle",
    "reason": "bundler",
    "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
-   "addedAt": "2026-09-23T20:44:23Z",
+   "addedAt": "2026-09-23T20:48:32Z",
    "addedBy": "owner",
    "status": "active"
   },
   {
    "wallet": "CSDBWajZLBGFCxwSXNCqLsNa3YeexcfAY5St1YRxFcNH",
-   "clusterId": "frankdegods",
-   "clusterLabel": "@frankdegods",
+   "clusterId": "cluster-2",
    "role": "bundle",
    "reason": "bundler",
    "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
-   "addedAt": "2026-09-23T20:44:23Z",
+   "addedAt": "2026-09-23T20:48:32Z",
    "addedBy": "owner",
    "status": "active"
   },
   {
    "wallet": "4T836F8sgtYLHmPpP2MmPvfZiiCeRyQCi1orgv7kTfV6",
-   "clusterId": "frankdegods",
-   "clusterLabel": "@frankdegods",
+   "clusterId": "cluster-2",
    "role": "bundle",
    "reason": "bundler",
    "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
-   "addedAt": "2026-09-23T20:44:23Z",
+   "addedAt": "2026-09-23T20:48:32Z",
    "addedBy": "owner",
    "status": "active"
   },
   {
    "wallet": "DuQabFqdC9eeBULVa7TTdZYxe8vK8ct5DZr4Xcf7docy",
-   "clusterId": "orangie",
-   "clusterLabel": "@orangie",
+   "clusterId": "cluster-3",
    "role": "main",
    "reason": "bundler",
    "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
-   "addedAt": "2026-09-23T20:44:23Z",
+   "addedAt": "2026-09-23T20:48:32Z",
    "addedBy": "owner",
    "status": "active"
   },
   {
    "wallet": "2UwD3WCCndHxCRekDQgvZbM1H2M7qVuxLGKaWXqg8cVK",
-   "clusterId": "orangie",
-   "clusterLabel": "@orangie",
+   "clusterId": "cluster-3",
    "role": "bundle",
    "reason": "bundler",
    "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
-   "addedAt": "2026-09-23T20:44:23Z",
+   "addedAt": "2026-09-23T20:48:32Z",
    "addedBy": "owner",
    "status": "active"
   },
   {
    "wallet": "2CXbN6nuTTb4vCrtYM89SfQHMMKGPAW4mvFe6Ht4Yo6z",
-   "clusterId": "orangie",
-   "clusterLabel": "@orangie",
+   "clusterId": "cluster-3",
    "role": "bundle",
    "reason": "bundler",
    "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
-   "addedAt": "2026-09-23T20:44:23Z",
+   "addedAt": "2026-09-23T20:48:32Z",
    "addedBy": "owner",
    "status": "active"
   },
   {
    "wallet": "2V54c75rjibgh6NsDWP88tbpu8KjQ3APRrK5zNQVqx1T",
-   "clusterId": "orangie",
-   "clusterLabel": "@orangie",
+   "clusterId": "cluster-3",
    "role": "bundle",
    "reason": "bundler",
    "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
-   "addedAt": "2026-09-23T20:44:23Z",
+   "addedAt": "2026-09-23T20:48:32Z",
    "addedBy": "owner",
    "status": "active"
   },
   {
    "wallet": "55MEqsCstTn3ysfxQFjr49GbP7WxeeFJHtGA4wr8uCEs",
-   "clusterId": "orangie",
-   "clusterLabel": "@orangie",
+   "clusterId": "cluster-3",
    "role": "bundle",
    "reason": "bundler",
    "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
-   "addedAt": "2026-09-23T20:44:23Z",
+   "addedAt": "2026-09-23T20:48:32Z",
    "addedBy": "owner",
    "status": "active"
   },
   {
    "wallet": "26kZ9rg8Y5pd4j1tdT4cbT8BQRu5uDbXkaVs3L5QasHy",
-   "clusterId": "orangie",
-   "clusterLabel": "@orangie",
+   "clusterId": "cluster-3",
    "role": "bundle",
    "reason": "bundler",
    "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
-   "addedAt": "2026-09-23T20:44:23Z",
+   "addedAt": "2026-09-23T20:48:32Z",
    "addedBy": "owner",
    "status": "active"
   },
   {
    "wallet": "96sErVjEN7LNJ6Uvj63bdRWZxNuBngj56fnT9biHLKBf",
-   "clusterId": "orangie",
-   "clusterLabel": "@orangie",
+   "clusterId": "cluster-3",
    "role": "bundle",
    "reason": "bundler",
    "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
-   "addedAt": "2026-09-23T20:44:23Z",
+   "addedAt": "2026-09-23T20:48:32Z",
    "addedBy": "owner",
    "status": "active"
   },
   {
-   "wallet": "suqh5sHtr8HyJ7q8scBimULPkPpA557prMG47xCHQfK",
-   "clusterId": "cupseyy",
-   "clusterLabel": "@cupseyy",
+   "wallet": "GV6UUmNxz2RpKxmNAPadYKb7uQpszwqQAu3qLJxVdC52",
+   "clusterId": "cluster-4",
    "role": "main",
    "reason": "bundler",
    "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
-   "addedAt": "2026-09-23T20:44:23Z",
+   "addedAt": "2026-09-23T20:48:32Z",
    "addedBy": "owner",
-   "status": "active"
+   "status": "active",
+   "alsoIn": [
+    "cluster-5"
+   ],
+   "note": "Also appears in cluster-5."
   },
   {
-   "wallet": "FxN3VZ4BosL5urG2yoeQ156JSdmavm9K5fdLxjkPmaMR",
-   "clusterId": "cupseyy",
-   "clusterLabel": "@cupseyy",
+   "wallet": "4TSaoBtmuBePUAcFubtSqN98QE7moi3ZqwJCaMkAV9Sp",
+   "clusterId": "cluster-4",
    "role": "bundle",
    "reason": "bundler",
    "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
-   "addedAt": "2026-09-23T20:44:23Z",
+   "addedAt": "2026-09-23T20:48:32Z",
    "addedBy": "owner",
-   "status": "active"
+   "status": "active",
+   "alsoIn": [
+    "cluster-5"
+   ],
+   "note": "Also appears in cluster-5."
   },
   {
-   "wallet": "2fg5QD1eD7rzNNCsvnhmXFm5hqNgwTTG8p7kQ6f3rx6f",
-   "clusterId": "cupseyy",
-   "clusterLabel": "@cupseyy",
+   "wallet": "4CRX74nxAdmFY4Eh1WhTrmYqHoxwxGzwXfgzTWvhUfFn",
+   "clusterId": "cluster-4",
    "role": "bundle",
    "reason": "bundler",
    "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
-   "addedAt": "2026-09-23T20:44:23Z",
+   "addedAt": "2026-09-23T20:48:32Z",
    "addedBy": "owner",
-   "status": "active"
+   "status": "active",
+   "alsoIn": [
+    "cluster-5"
+   ],
+   "note": "Also appears in cluster-5."
   },
   {
-   "wallet": "7NAd2EpYGGeFofpyvgehSXhH5vg6Ry6VRMW2Y6jiqCu1",
-   "clusterId": "cupseyy",
-   "clusterLabel": "@cupseyy",
+   "wallet": "BCrTEXmWutwPz8qv6w1S5gDbaLnSLpXKM5kSGVWyyfxu",
+   "clusterId": "cluster-4",
    "role": "bundle",
    "reason": "bundler",
    "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
-   "addedAt": "2026-09-23T20:44:23Z",
+   "addedAt": "2026-09-23T20:48:32Z",
    "addedBy": "owner",
-   "status": "active"
+   "status": "active",
+   "alsoIn": [
+    "cluster-5"
+   ],
+   "note": "Also appears in cluster-5."
   },
   {
-   "wallet": "D7EG7216MsiUdyFmcoxCnhx6vaYZRiXFBGXZWh8PbwjA",
-   "clusterId": "cupseyy",
-   "clusterLabel": "@cupseyy",
+   "wallet": "4GG1LRNUtpwfBnoVoAnsnHGUx6ockgkibhbFG19Nn7Rk",
+   "clusterId": "cluster-4",
    "role": "bundle",
    "reason": "bundler",
    "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
-   "addedAt": "2026-09-23T20:44:23Z",
+   "addedAt": "2026-09-23T20:48:32Z",
    "addedBy": "owner",
-   "status": "active"
+   "status": "active",
+   "alsoIn": [
+    "cluster-5"
+   ],
+   "note": "Also appears in cluster-5."
   },
   {
-   "wallet": "AyoAc9NfLQD78vrFJfEuRJRCZaCnMfd6QzsNQWSucrLk",
-   "clusterId": "cupseyy",
-   "clusterLabel": "@cupseyy",
+   "wallet": "5NvZydzQk4qTMgYvs5JqbZEt9EP4hM79JmPxsztDqmJN",
+   "clusterId": "cluster-4",
    "role": "bundle",
    "reason": "bundler",
    "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
-   "addedAt": "2026-09-23T20:44:23Z",
+   "addedAt": "2026-09-23T20:48:32Z",
    "addedBy": "owner",
-   "status": "active"
+   "status": "active",
+   "alsoIn": [
+    "cluster-5"
+   ],
+   "note": "Also appears in cluster-5."
   },
   {
-   "wallet": "9DQjzLv7xwEYkFUZE7rDyRE5UqE3R1YHFSNyxASMzmYy",
-   "clusterId": "cupseyy",
-   "clusterLabel": "@cupseyy",
+   "wallet": "49MHZz9c1mE1ePTcLxBWPjf7KKzt3Ntd25JnspKvV8vL",
+   "clusterId": "cluster-4",
    "role": "bundle",
    "reason": "bundler",
    "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
-   "addedAt": "2026-09-23T20:44:23Z",
+   "addedAt": "2026-09-23T20:48:32Z",
    "addedBy": "owner",
-   "status": "active"
+   "status": "active",
+   "alsoIn": [
+    "cluster-5"
+   ],
+   "note": "Also appears in cluster-5."
   },
   {
-   "wallet": "JAN5jJXEjrH3ZJeK1HGqxSRBZCxBMcJ8yT75acskeziz",
-   "clusterId": "cupseyy",
-   "clusterLabel": "@cupseyy",
+   "wallet": "6inFvQguQYykRUbQfscWp5bm5fBmcAmqsJtjXisv4wqg",
+   "clusterId": "cluster-4",
    "role": "bundle",
    "reason": "bundler",
    "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
-   "addedAt": "2026-09-23T20:44:23Z",
+   "addedAt": "2026-09-23T20:48:32Z",
    "addedBy": "owner",
-   "status": "active"
+   "status": "active",
+   "alsoIn": [
+    "cluster-5"
+   ],
+   "note": "Also appears in cluster-5."
   },
   {
-   "wallet": "EFykzWuV1ZxjA8oSBZGY6EUgcpbV2z9vQaD6oHD3ytbV",
-   "clusterId": "cupseyy",
-   "clusterLabel": "@cupseyy",
+   "wallet": "AcUJM6Aq6M2aojWiit7P2Ed48VN6k3XqJG9gT3datSss",
+   "clusterId": "cluster-4",
    "role": "bundle",
    "reason": "bundler",
    "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
-   "addedAt": "2026-09-23T20:44:23Z",
+   "addedAt": "2026-09-23T20:48:32Z",
    "addedBy": "owner",
-   "status": "active"
+   "status": "active",
+   "alsoIn": [
+    "cluster-5"
+   ],
+   "note": "Also appears in cluster-5."
   },
   {
-   "wallet": "97aUSCdiVVZuRwWC9qS9ABCZU3X7HYtnyaub2uvwqqcq",
-   "clusterId": "cupseyy",
-   "clusterLabel": "@cupseyy",
+   "wallet": "9BvPQTeipmg7UZvBtknQkadPdgZ5ekyWVPg1LrSbTYP8",
+   "clusterId": "cluster-4",
    "role": "bundle",
    "reason": "bundler",
    "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
-   "addedAt": "2026-09-23T20:44:23Z",
+   "addedAt": "2026-09-23T20:48:32Z",
    "addedBy": "owner",
-   "status": "active"
+   "status": "active",
+   "alsoIn": [
+    "cluster-5"
+   ],
+   "note": "Also appears in cluster-5."
   },
   {
-   "wallet": "D3M55PtK6EGmRA7aiEdBndJBpE8wZHuhCtaUkv7ozWG7",
-   "clusterId": "cupseyy",
-   "clusterLabel": "@cupseyy",
+   "wallet": "GVwA6wT66qeu9puiJZYczATUFKM9SAVwHSMZGnhacGZe",
+   "clusterId": "cluster-4",
    "role": "bundle",
    "reason": "bundler",
    "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
-   "addedAt": "2026-09-23T20:44:23Z",
+   "addedAt": "2026-09-23T20:48:32Z",
    "addedBy": "owner",
-   "status": "active"
+   "status": "active",
+   "alsoIn": [
+    "cluster-5"
+   ],
+   "note": "Also appears in cluster-5."
   },
   {
-   "wallet": "FrKWtUSEoiMyw4nZ2WbNkfjpuGbWSFSAx8haQsFxLQz4",
-   "clusterId": "cupseyy",
-   "clusterLabel": "@cupseyy",
+   "wallet": "9CNyLECt2j8tnDhqxtjYk5HUhZ2b8Nwnyb7sfYN7vND2",
+   "clusterId": "cluster-4",
    "role": "bundle",
    "reason": "bundler",
    "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
-   "addedAt": "2026-09-23T20:44:23Z",
+   "addedAt": "2026-09-23T20:48:32Z",
    "addedBy": "owner",
-   "status": "active"
+   "status": "active",
+   "alsoIn": [
+    "cluster-5"
+   ],
+   "note": "Also appears in cluster-5."
   },
   {
-   "wallet": "BPV2RxxFpUMhesvoyeK4rGRjajwskcUsakzis2JG6NHg",
-   "clusterId": "cupseyy",
-   "clusterLabel": "@cupseyy",
+   "wallet": "CpKuhcFHogvrq7Fx3enu57xTRkh1WyzER1TVVBimC5mo",
+   "clusterId": "cluster-4",
    "role": "bundle",
    "reason": "bundler",
    "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
-   "addedAt": "2026-09-23T20:44:23Z",
+   "addedAt": "2026-09-23T20:48:32Z",
    "addedBy": "owner",
-   "status": "active"
+   "status": "active",
+   "alsoIn": [
+    "cluster-5"
+   ],
+   "note": "Also appears in cluster-5."
   },
   {
-   "wallet": "7VhHrQ42PKVmojosCEvvF6KKdribaQUt6PFY1y97Fcg7",
-   "clusterId": "cupseyy",
-   "clusterLabel": "@cupseyy",
+   "wallet": "3Yfh7KG8PHxZmjp2wx7c74sxTCfmgp5fnWdvbUKj2ggx",
+   "clusterId": "cluster-4",
    "role": "bundle",
    "reason": "bundler",
    "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
-   "addedAt": "2026-09-23T20:44:23Z",
+   "addedAt": "2026-09-23T20:48:32Z",
    "addedBy": "owner",
-   "status": "active"
+   "status": "active",
+   "alsoIn": [
+    "cluster-5"
+   ],
+   "note": "Also appears in cluster-5."
   },
   {
-   "wallet": "H3ACWJ1ctd4o7YfD7k26evLhRmnFcsedDP8VeGbe1yG2",
-   "clusterId": "cupseyy",
-   "clusterLabel": "@cupseyy",
+   "wallet": "6DmbT8rYfdFDbndrQ6zpYc1rdtAy7irAU3qGameQfryk",
+   "clusterId": "cluster-4",
    "role": "bundle",
    "reason": "bundler",
    "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
-   "addedAt": "2026-09-23T20:44:23Z",
+   "addedAt": "2026-09-23T20:48:32Z",
    "addedBy": "owner",
-   "status": "active"
+   "status": "active",
+   "alsoIn": [
+    "cluster-5"
+   ],
+   "note": "Also appears in cluster-5."
   },
   {
-   "wallet": "ELrkHYDCzxGbnNvzLSCTmhR19JbLGMv9gKjaHbQx4N5u",
-   "clusterId": "cupseyy",
-   "clusterLabel": "@cupseyy",
+   "wallet": "8uzQpvR6nuvjz1v7uinsHgtaRfJhVdqpSjjaU8643LfP",
+   "clusterId": "cluster-4",
    "role": "bundle",
    "reason": "bundler",
    "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
-   "addedAt": "2026-09-23T20:44:23Z",
+   "addedAt": "2026-09-23T20:48:32Z",
    "addedBy": "owner",
-   "status": "active"
+   "status": "active",
+   "alsoIn": [
+    "cluster-5"
+   ],
+   "note": "Also appears in cluster-5."
   },
   {
-   "wallet": "BmYcA625yUotbgn7Et1irJ8syceSvZZCFi73o8owwwoa",
-   "clusterId": "cupseyy",
-   "clusterLabel": "@cupseyy",
+   "wallet": "9REqbJePmLzc5DzPzTw26PNj4YVeSzHSBfwyesMUaZnS",
+   "clusterId": "cluster-4",
    "role": "bundle",
    "reason": "bundler",
    "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
-   "addedAt": "2026-09-23T20:44:23Z",
+   "addedAt": "2026-09-23T20:48:32Z",
    "addedBy": "owner",
-   "status": "active"
+   "status": "active",
+   "alsoIn": [
+    "cluster-5"
+   ],
+   "note": "Also appears in cluster-5."
   },
   {
-   "wallet": "83J8HrUNRBK8ZdwLGUUYDvoH4rgrD4gNwxXqXMpfMx62",
-   "clusterId": "cupseyy",
-   "clusterLabel": "@cupseyy",
+   "wallet": "BduHPTVSSv3vsE8GMrtCRqGhe7mBecCdUgm7wE4ZNsAr",
+   "clusterId": "cluster-4",
    "role": "bundle",
    "reason": "bundler",
    "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
-   "addedAt": "2026-09-23T20:44:23Z",
+   "addedAt": "2026-09-23T20:48:32Z",
    "addedBy": "owner",
-   "status": "active"
+   "status": "active",
+   "alsoIn": [
+    "cluster-5"
+   ],
+   "note": "Also appears in cluster-5."
   },
   {
-   "wallet": "666LtuZHcJ5ULzivfe32zriFcyvkEdjjbmgPofA6EJc6",
-   "clusterId": "cupseyy",
-   "clusterLabel": "@cupseyy",
+   "wallet": "EcJgAMoMm6b7wYY1A8S8qJBk8cQ9FVBdnWeeWCASQH8p",
+   "clusterId": "cluster-4",
    "role": "bundle",
    "reason": "bundler",
    "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
-   "addedAt": "2026-09-23T20:44:23Z",
+   "addedAt": "2026-09-23T20:48:32Z",
    "addedBy": "owner",
-   "status": "active"
+   "status": "active",
+   "alsoIn": [
+    "cluster-5"
+   ],
+   "note": "Also appears in cluster-5."
   },
   {
-   "wallet": "EGFxnt89Lo69H2dA44CKVECnEwaKhYE5SkbHqvXRQSW",
-   "clusterId": "cupseyy",
-   "clusterLabel": "@cupseyy",
+   "wallet": "BALx8y8oXpcf1eUkTMLPTrheT3zd66V9S8XJFT3WqHV5",
+   "clusterId": "cluster-4",
    "role": "bundle",
    "reason": "bundler",
    "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
-   "addedAt": "2026-09-23T20:44:23Z",
+   "addedAt": "2026-09-23T20:48:32Z",
    "addedBy": "owner",
-   "status": "active"
+   "status": "active",
+   "alsoIn": [
+    "cluster-5"
+   ],
+   "note": "Also appears in cluster-5."
   },
   {
-   "wallet": "F6sZYGwaH9KA62fdqQDJ4DCb27wfyoGDLEU1UbjnY6mb",
-   "clusterId": "cupseyy",
-   "clusterLabel": "@cupseyy",
+   "wallet": "FSCEzfV975tV6PDZVf8U1ArM3PYVLHXENkB2gkTsGQte",
+   "clusterId": "cluster-4",
    "role": "bundle",
    "reason": "bundler",
    "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
-   "addedAt": "2026-09-23T20:44:23Z",
+   "addedAt": "2026-09-23T20:48:32Z",
    "addedBy": "owner",
-   "status": "active"
+   "status": "active",
+   "alsoIn": [
+    "cluster-5"
+   ],
+   "note": "Also appears in cluster-5."
   },
   {
-   "wallet": "3HwxtXLeDgLN1LPMmMoeS6dLEKRv1VDFiV3SknjtwNfd",
-   "clusterId": "cupseyy",
-   "clusterLabel": "@cupseyy",
+   "wallet": "36856LkzQt43A2WuAkyjeAbe5SS2QFw9J3gQu7wJejQS",
+   "clusterId": "cluster-4",
    "role": "bundle",
    "reason": "bundler",
    "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
-   "addedAt": "2026-09-23T20:44:23Z",
+   "addedAt": "2026-09-23T20:48:32Z",
    "addedBy": "owner",
-   "status": "active"
+   "status": "active",
+   "alsoIn": [
+    "cluster-5"
+   ],
+   "note": "Also appears in cluster-5."
   },
   {
-   "wallet": "6tmz2WoLXaen91KEtiXgrk3PvdsmB4XDeuoVSVqWFKub",
-   "clusterId": "cupseyy",
-   "clusterLabel": "@cupseyy",
+   "wallet": "5Kw2bpYfiZv29h4xpZX98hdwd7GzffZXxmwzardqNKfs",
+   "clusterId": "cluster-4",
    "role": "bundle",
    "reason": "bundler",
    "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
-   "addedAt": "2026-09-23T20:44:23Z",
+   "addedAt": "2026-09-23T20:48:32Z",
    "addedBy": "owner",
-   "status": "active"
+   "status": "active",
+   "alsoIn": [
+    "cluster-5"
+   ],
+   "note": "Also appears in cluster-5."
   },
   {
-   "wallet": "78Skii2nXb3oMB2gLh8Q9Sb5VqT4xBmtJn4TPqmRjwG1",
-   "clusterId": "cupseyy",
-   "clusterLabel": "@cupseyy",
+   "wallet": "DWft5ypnwMU2vJq9qckpwfVjQ2G4ghnrSa4uq8EYRkAP",
+   "clusterId": "cluster-4",
    "role": "bundle",
    "reason": "bundler",
    "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
-   "addedAt": "2026-09-23T20:44:23Z",
+   "addedAt": "2026-09-23T20:48:32Z",
    "addedBy": "owner",
-   "status": "active"
+   "status": "active",
+   "alsoIn": [
+    "cluster-5"
+   ],
+   "note": "Also appears in cluster-5."
   },
   {
-   "wallet": "tKqwiEbwLtkXDbJNVgBrPobp7wKEeFQuWKnTaEM3aRe",
-   "clusterId": "cupseyy",
-   "clusterLabel": "@cupseyy",
+   "wallet": "DEL44RcAKb36BkbL287DT6aQXLFBEr7tJAdJ6x9x8jR5",
+   "clusterId": "cluster-4",
    "role": "bundle",
    "reason": "bundler",
    "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
-   "addedAt": "2026-09-23T20:44:23Z",
+   "addedAt": "2026-09-23T20:48:32Z",
    "addedBy": "owner",
-   "status": "active"
+   "status": "active",
+   "alsoIn": [
+    "cluster-5"
+   ],
+   "note": "Also appears in cluster-5."
   },
   {
-   "wallet": "6XB7g6DnY463598VyXriC2TVfXR8AxJuTkb2GBAR66dQ",
-   "clusterId": "cupseyy",
-   "clusterLabel": "@cupseyy",
+   "wallet": "5EMxXQLdGuXEwuStgYcKsk7JAJpFiP9Xg3ZLkK4ooXCL",
+   "clusterId": "cluster-4",
    "role": "bundle",
    "reason": "bundler",
    "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
-   "addedAt": "2026-09-23T20:44:23Z",
+   "addedAt": "2026-09-23T20:48:32Z",
    "addedBy": "owner",
-   "status": "active"
+   "status": "active",
+   "alsoIn": [
+    "cluster-5"
+   ],
+   "note": "Also appears in cluster-5."
   },
   {
-   "wallet": "CqrME3QGDhE81tDZZxQZqYhYgvND3DpV63w43QwApDyq",
-   "clusterId": "cupseyy",
-   "clusterLabel": "@cupseyy",
+   "wallet": "94APUeLVtLsMmSLatyJwsNXSvXHJf676oqMwb2JR6py9",
+   "clusterId": "cluster-4",
    "role": "bundle",
    "reason": "bundler",
    "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
-   "addedAt": "2026-09-23T20:44:23Z",
+   "addedAt": "2026-09-23T20:48:32Z",
    "addedBy": "owner",
-   "status": "active"
+   "status": "active",
+   "alsoIn": [
+    "cluster-5"
+   ],
+   "note": "Also appears in cluster-5."
   },
   {
-   "wallet": "ETuNzAJUtYneTnK17MQbzUzexxuoCsTGxnuJpPmBgrD7",
-   "clusterId": "cupseyy",
-   "clusterLabel": "@cupseyy",
+   "wallet": "8DAETo8nkSsrvZz5WxyV48PS5PpipYJdBhu4jQGqtahh",
+   "clusterId": "cluster-4",
    "role": "bundle",
    "reason": "bundler",
    "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
-   "addedAt": "2026-09-23T20:44:23Z",
+   "addedAt": "2026-09-23T20:48:32Z",
    "addedBy": "owner",
-   "status": "active"
+   "status": "active",
+   "alsoIn": [
+    "cluster-5"
+   ],
+   "note": "Also appears in cluster-5."
   },
   {
-   "wallet": "E3rMiCxNhqxgyLAwBHbPnXEBz1qJYxGXyshExztkiSaS",
-   "clusterId": "cupseyy",
-   "clusterLabel": "@cupseyy",
+   "wallet": "9AXbXk4BziUHPEDdhxhzBnrtXYdd86b55F6zunHKxQZn",
+   "clusterId": "cluster-4",
    "role": "bundle",
    "reason": "bundler",
    "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
-   "addedAt": "2026-09-23T20:44:23Z",
+   "addedAt": "2026-09-23T20:48:32Z",
    "addedBy": "owner",
-   "status": "active"
+   "status": "active",
+   "alsoIn": [
+    "cluster-5"
+   ],
+   "note": "Also appears in cluster-5."
   },
   {
-   "wallet": "FirnaridctWQ4TGuLeffpt9CjdDu7rHyMJ7XeJe5t4uJ",
-   "clusterId": "cupseyy",
-   "clusterLabel": "@cupseyy",
+   "wallet": "FpnE5irkKjVQwrW4ukCPdtp7oY4cN82Je3AvdyuXKsjz",
+   "clusterId": "cluster-4",
    "role": "bundle",
    "reason": "bundler",
    "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
-   "addedAt": "2026-09-23T20:44:23Z",
+   "addedAt": "2026-09-23T20:48:32Z",
    "addedBy": "owner",
-   "status": "active"
+   "status": "active",
+   "alsoIn": [
+    "cluster-5"
+   ],
+   "note": "Also appears in cluster-5."
   },
   {
-   "wallet": "HKo1eG3scSdjqwKfByVPNfepFApTcP8MYniPwqfa1uJW",
-   "clusterId": "cupseyy",
-   "clusterLabel": "@cupseyy",
+   "wallet": "5Wrsf5MyusnT8rrBHzZLD2u4C6piGoHKvv5k8yQk3cJj",
+   "clusterId": "cluster-4",
    "role": "bundle",
    "reason": "bundler",
    "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
-   "addedAt": "2026-09-23T20:44:23Z",
+   "addedAt": "2026-09-23T20:48:32Z",
    "addedBy": "owner",
-   "status": "active"
+   "status": "active",
+   "alsoIn": [
+    "cluster-5"
+   ],
+   "note": "Also appears in cluster-5."
   },
   {
-   "wallet": "DmUfqp6jXKTBXJ3ey99KjPzknoZmK6TXB8bsERTXEssV",
-   "clusterId": "cupseyy",
-   "clusterLabel": "@cupseyy",
+   "wallet": "HUdREdTdkaPPzEFJw7mjADZQhEhseVYvjHg9T4oeG8bX",
+   "clusterId": "cluster-4",
    "role": "bundle",
    "reason": "bundler",
    "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
-   "addedAt": "2026-09-23T20:44:23Z",
+   "addedAt": "2026-09-23T20:48:32Z",
    "addedBy": "owner",
-   "status": "active"
+   "status": "active",
+   "alsoIn": [
+    "cluster-5"
+   ],
+   "note": "Also appears in cluster-5."
   },
   {
-   "wallet": "7T956tarG4qtheoHqWFimYTydLt5mL5EEziGpahtEFnp",
-   "clusterId": "cupseyy",
-   "clusterLabel": "@cupseyy",
+   "wallet": "HryimUndwx7GPnNQngp1Nx2kpaESjtp4UxdkcnxuwUpu",
+   "clusterId": "cluster-4",
    "role": "bundle",
    "reason": "bundler",
    "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
-   "addedAt": "2026-09-23T20:44:23Z",
+   "addedAt": "2026-09-23T20:48:32Z",
    "addedBy": "owner",
-   "status": "active"
+   "status": "active",
+   "alsoIn": [
+    "cluster-5"
+   ],
+   "note": "Also appears in cluster-5."
   },
   {
-   "wallet": "BCa9x9w1rq3PMKhkWEN1RK7ta9b1RgEX1cXyxLj7Djtu",
-   "clusterId": "cupseyy",
-   "clusterLabel": "@cupseyy",
+   "wallet": "HCZUAH6rSYGnh7Lt8SXUyqKJvHDcoF5Z24SuDeCYvdgX",
+   "clusterId": "cluster-4",
    "role": "bundle",
    "reason": "bundler",
    "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
-   "addedAt": "2026-09-23T20:44:23Z",
+   "addedAt": "2026-09-23T20:48:32Z",
    "addedBy": "owner",
-   "status": "active"
+   "status": "active",
+   "alsoIn": [
+    "cluster-5"
+   ],
+   "note": "Also appears in cluster-5."
   },
   {
-   "wallet": "EVBz16AgxrLhcPAJ8uHHeJdKS5JTLvWatL9MuasmT9B9",
-   "clusterId": "cupseyy",
-   "clusterLabel": "@cupseyy",
+   "wallet": "7wVTE2oNbdsC9gtt3sQ8qapM5uVobvnx2hYTLUDPE4Vp",
+   "clusterId": "cluster-4",
    "role": "bundle",
    "reason": "bundler",
    "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
-   "addedAt": "2026-09-23T20:44:23Z",
+   "addedAt": "2026-09-23T20:48:32Z",
    "addedBy": "owner",
-   "status": "active"
+   "status": "active",
+   "alsoIn": [
+    "cluster-5"
+   ],
+   "note": "Also appears in cluster-5."
   },
   {
-   "wallet": "GvrN6vGiFjgu1uNF6FjgxZ6KeQBQuD3Vh6yWHUR3zyuk",
-   "clusterId": "cupseyy",
-   "clusterLabel": "@cupseyy",
+   "wallet": "4gZrQFuGqAzTeCxnc2cWk3HGQSy8SUdvw9TLxQmaMVDN",
+   "clusterId": "cluster-4",
    "role": "bundle",
    "reason": "bundler",
    "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
-   "addedAt": "2026-09-23T20:44:23Z",
+   "addedAt": "2026-09-23T20:48:32Z",
    "addedBy": "owner",
-   "status": "active"
+   "status": "active",
+   "alsoIn": [
+    "cluster-5"
+   ],
+   "note": "Also appears in cluster-5."
   },
   {
-   "wallet": "DT13PpzBsyoVihxzp97XoJygBXfqSj2n9Ghy5CQcu4s7",
-   "clusterId": "cupseyy",
-   "clusterLabel": "@cupseyy",
+   "wallet": "6sCzpv5hq3hsJPAwq5y4dL5BB6var8EUuNjqzYELtPMV",
+   "clusterId": "cluster-4",
    "role": "bundle",
    "reason": "bundler",
    "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
-   "addedAt": "2026-09-23T20:44:23Z",
+   "addedAt": "2026-09-23T20:48:32Z",
    "addedBy": "owner",
-   "status": "active"
+   "status": "active",
+   "alsoIn": [
+    "cluster-5"
+   ],
+   "note": "Also appears in cluster-5."
   },
   {
-   "wallet": "CPpNZ44AEpbRGvACitHZUFCiwAKqNSur4zKrQdBrvkdh",
-   "clusterId": "cupseyy",
-   "clusterLabel": "@cupseyy",
+   "wallet": "qp9hL3rZH2uWQChPtQsx5aEmNY6K2LDPdFUnkfTokgP",
+   "clusterId": "cluster-4",
    "role": "bundle",
    "reason": "bundler",
    "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
-   "addedAt": "2026-09-23T20:44:23Z",
+   "addedAt": "2026-09-23T20:48:32Z",
    "addedBy": "owner",
-   "status": "active"
+   "status": "active",
+   "alsoIn": [
+    "cluster-5"
+   ],
+   "note": "Also appears in cluster-5."
   },
   {
-   "wallet": "J2oFbbts9SGsffLKQC7mwCb9Q2xkrjvq5baDpNuGDas3",
-   "clusterId": "cupseyy",
-   "clusterLabel": "@cupseyy",
+   "wallet": "9XQufEi864nwXr1aVQ21Fe2Tzb8W6Uh2dyqm5Mb6qXMK",
+   "clusterId": "cluster-4",
    "role": "bundle",
    "reason": "bundler",
    "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
-   "addedAt": "2026-09-23T20:44:23Z",
+   "addedAt": "2026-09-23T20:48:32Z",
    "addedBy": "owner",
-   "status": "active"
+   "status": "active",
+   "alsoIn": [
+    "cluster-5"
+   ],
+   "note": "Also appears in cluster-5."
   },
   {
-   "wallet": "Bhmqs9K3sFL6gmHHYeLc1dTQzMvBM9V8UvYj8Wvndxz8",
-   "clusterId": "cupseyy",
-   "clusterLabel": "@cupseyy",
+   "wallet": "6bYyGAjkF78gHCKHShwDya7NcPHosqJs33dcpb3o2FtH",
+   "clusterId": "cluster-4",
    "role": "bundle",
    "reason": "bundler",
    "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
-   "addedAt": "2026-09-23T20:44:23Z",
+   "addedAt": "2026-09-23T20:48:32Z",
    "addedBy": "owner",
-   "status": "active"
+   "status": "active",
+   "alsoIn": [
+    "cluster-5"
+   ],
+   "note": "Also appears in cluster-5."
   },
   {
-   "wallet": "GE82vXGRqMbXUSpbXVdpcj39faRC3WCmJkdbkjM9gdVH",
-   "clusterId": "cupseyy",
-   "clusterLabel": "@cupseyy",
+   "wallet": "E1f8JXH87j9bo3AJ7vazqZCbHBrGx7zSmyA5TJe4FAm8",
+   "clusterId": "cluster-4",
    "role": "bundle",
    "reason": "bundler",
    "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
-   "addedAt": "2026-09-23T20:44:23Z",
+   "addedAt": "2026-09-23T20:48:32Z",
    "addedBy": "owner",
-   "status": "active"
+   "status": "active",
+   "alsoIn": [
+    "cluster-5"
+   ],
+   "note": "Also appears in cluster-5."
   },
   {
-   "wallet": "8JKaBxMhuG2BJ9HjrwbWfmNSV8zXjg9vVQyDBd8Pu2Az",
-   "clusterId": "cupseyy",
-   "clusterLabel": "@cupseyy",
+   "wallet": "BHBSnUqPwfxqgXhnbZiBFyR2Z6c6XLTHZrqjaUSX3XcM",
+   "clusterId": "cluster-4",
    "role": "bundle",
    "reason": "bundler",
    "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
-   "addedAt": "2026-09-23T20:44:23Z",
+   "addedAt": "2026-09-23T20:48:32Z",
    "addedBy": "owner",
-   "status": "active"
+   "status": "active",
+   "alsoIn": [
+    "cluster-5"
+   ],
+   "note": "Also appears in cluster-5."
   },
   {
-   "wallet": "FA93viBcraoUNWAsZJcVCz3pxWZFFNANo8FJazdmgqey",
-   "clusterId": "cupseyy",
-   "clusterLabel": "@cupseyy",
+   "wallet": "ELrgo4H1iaA9QPWiJybkr5GiSSqg93VeDqZ1mrV3Vr6H",
+   "clusterId": "cluster-4",
    "role": "bundle",
    "reason": "bundler",
    "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
-   "addedAt": "2026-09-23T20:44:23Z",
+   "addedAt": "2026-09-23T20:48:32Z",
    "addedBy": "owner",
-   "status": "active"
+   "status": "active",
+   "alsoIn": [
+    "cluster-5"
+   ],
+   "note": "Also appears in cluster-5."
   },
   {
-   "wallet": "EA4MXkyF8C2NzY8fw2acJPuarmoU271KRCCAYpLzMBJr",
-   "clusterId": "cupseyy",
-   "clusterLabel": "@cupseyy",
+   "wallet": "7is4cwKJimAdsNjN7gVhD2zxX4ugbEf87XVMxE9mDQxE",
+   "clusterId": "cluster-4",
    "role": "bundle",
    "reason": "bundler",
    "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
-   "addedAt": "2026-09-23T20:44:23Z",
+   "addedAt": "2026-09-23T20:48:32Z",
    "addedBy": "owner",
-   "status": "active"
+   "status": "active",
+   "alsoIn": [
+    "cluster-5"
+   ],
+   "note": "Also appears in cluster-5."
   },
   {
-   "wallet": "7TDXpGVPFw5dThsL9rB7Mim8dqjUm4x6JbvbDgzwK9vm",
-   "clusterId": "cupseyy",
-   "clusterLabel": "@cupseyy",
+   "wallet": "NzsLCf64muzE95GVtT77D8Ts16HPxvUiJ8LR231opAr",
+   "clusterId": "cluster-4",
    "role": "bundle",
    "reason": "bundler",
    "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
-   "addedAt": "2026-09-23T20:44:23Z",
+   "addedAt": "2026-09-23T20:48:32Z",
    "addedBy": "owner",
-   "status": "active"
+   "status": "active",
+   "alsoIn": [
+    "cluster-5"
+   ],
+   "note": "Also appears in cluster-5."
   },
   {
-   "wallet": "AEqPi4RCD7uRXmMB5ec6V4ehT74Ra2kEdmqVqtHUmyLh",
-   "clusterId": "cupseyy",
-   "clusterLabel": "@cupseyy",
+   "wallet": "BgK26tdnRVDanikXFPLMPDhK97qj4C7FFGG2svsLZxwk",
+   "clusterId": "cluster-4",
    "role": "bundle",
    "reason": "bundler",
    "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
-   "addedAt": "2026-09-23T20:44:23Z",
+   "addedAt": "2026-09-23T20:48:32Z",
    "addedBy": "owner",
-   "status": "active"
+   "status": "active",
+   "alsoIn": [
+    "cluster-5"
+   ],
+   "note": "Also appears in cluster-5."
   },
   {
-   "wallet": "BsxcnNWYKURE7GumTNwUGmCTbHrWMaJaTLmN9u9sraLu",
-   "clusterId": "cupseyy",
-   "clusterLabel": "@cupseyy",
+   "wallet": "GbUCxRcvYJEfbbeHbt9m7fLYoicaqDaC4kPuFrwTkxJK",
+   "clusterId": "cluster-4",
    "role": "bundle",
    "reason": "bundler",
    "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
-   "addedAt": "2026-09-23T20:44:23Z",
+   "addedAt": "2026-09-23T20:48:32Z",
    "addedBy": "owner",
-   "status": "active"
+   "status": "active",
+   "alsoIn": [
+    "cluster-5"
+   ],
+   "note": "Also appears in cluster-5."
   },
   {
-   "wallet": "5rE7GKv3qCkMV5LqQS7KzHMJJPqMuXeATk8fzmhqTkfy",
-   "clusterId": "cupseyy",
-   "clusterLabel": "@cupseyy",
+   "wallet": "5L1ZbnRX6NsX8FeRSb1dCv1rYpswjPgpNzXMxHb86wpA",
+   "clusterId": "cluster-4",
    "role": "bundle",
    "reason": "bundler",
    "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
-   "addedAt": "2026-09-23T20:44:23Z",
+   "addedAt": "2026-09-23T20:48:32Z",
    "addedBy": "owner",
-   "status": "active"
+   "status": "active",
+   "alsoIn": [
+    "cluster-5"
+   ],
+   "note": "Also appears in cluster-5."
   },
   {
-   "wallet": "4dkHu2wmwireBWMo6ZkGSnYSBTvMgTppYC7BqHk6Gnm9",
-   "clusterId": "cupseyy",
-   "clusterLabel": "@cupseyy",
+   "wallet": "D21aY68QevToq33hAJ5so324GmdgbLWMDqHRSCqvPyvv",
+   "clusterId": "cluster-4",
    "role": "bundle",
    "reason": "bundler",
    "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
-   "addedAt": "2026-09-23T20:44:23Z",
+   "addedAt": "2026-09-23T20:48:32Z",
    "addedBy": "owner",
-   "status": "active"
+   "status": "active",
+   "alsoIn": [
+    "cluster-5"
+   ],
+   "note": "Also appears in cluster-5."
   },
   {
-   "wallet": "GaVxKs4ZeRV39LWLa7Gc6539DQhru9Q5Vs8ox57aj3C5",
-   "clusterId": "cupseyy",
-   "clusterLabel": "@cupseyy",
+   "wallet": "CwSPbMc6V5UgaZis34CCDQqMYHz2Zpwi26KauA1k36kg",
+   "clusterId": "cluster-4",
    "role": "bundle",
    "reason": "bundler",
    "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
-   "addedAt": "2026-09-23T20:44:23Z",
+   "addedAt": "2026-09-23T20:48:32Z",
    "addedBy": "owner",
-   "status": "active"
+   "status": "active",
+   "alsoIn": [
+    "cluster-5"
+   ],
+   "note": "Also appears in cluster-5."
   },
   {
-   "wallet": "A1pFbfvQr8ZrBixgszzCkDtvaijMSqyVfCZivg7SQNPq",
-   "clusterId": "cupseyy",
-   "clusterLabel": "@cupseyy",
+   "wallet": "9htn56bk8pdGLr84462ZRdwsYSjVDEyX8eAk1xCbGwVe",
+   "clusterId": "cluster-4",
    "role": "bundle",
    "reason": "bundler",
    "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
-   "addedAt": "2026-09-23T20:44:23Z",
+   "addedAt": "2026-09-23T20:48:32Z",
    "addedBy": "owner",
-   "status": "active"
+   "status": "active",
+   "alsoIn": [
+    "cluster-5"
+   ],
+   "note": "Also appears in cluster-5."
   },
   {
-   "wallet": "E8GwshkownDEjQkk9eFdePSaAv6j36nHFw5EwkSye68Q",
-   "clusterId": "cupseyy",
-   "clusterLabel": "@cupseyy",
+   "wallet": "4WdgT6njTjd2GTthw2azfTD7jsznyKHa1Gahxk5BndAh",
+   "clusterId": "cluster-4",
    "role": "bundle",
    "reason": "bundler",
    "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
-   "addedAt": "2026-09-23T20:44:23Z",
+   "addedAt": "2026-09-23T20:48:32Z",
    "addedBy": "owner",
-   "status": "active"
+   "status": "active",
+   "alsoIn": [
+    "cluster-5"
+   ],
+   "note": "Also appears in cluster-5."
   },
   {
-   "wallet": "77mDSQGeY2rA25WBeKCqpUU3XJ42sdNQkdUemy1t8EDr",
-   "clusterId": "cupseyy",
-   "clusterLabel": "@cupseyy",
+   "wallet": "4bzM6CqidXTQEAkaGxwh8FkYgt8phpSEA3w5ewS56xc9",
+   "clusterId": "cluster-4",
    "role": "bundle",
    "reason": "bundler",
    "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
-   "addedAt": "2026-09-23T20:44:23Z",
+   "addedAt": "2026-09-23T20:48:32Z",
    "addedBy": "owner",
-   "status": "active"
+   "status": "active",
+   "alsoIn": [
+    "cluster-5"
+   ],
+   "note": "Also appears in cluster-5."
   },
   {
-   "wallet": "2kv8X2a9bxnBM8NKLc6BBTX2z13GFNRL4oRotMUJRva9",
-   "clusterId": "cupseyy",
-   "clusterLabel": "@cupseyy",
+   "wallet": "CKw9RdfMX5AhUtNMdESxBLU73WkS49C12rjFjwYHXh7a",
+   "clusterId": "cluster-4",
    "role": "bundle",
    "reason": "bundler",
    "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
-   "addedAt": "2026-09-23T20:44:23Z",
+   "addedAt": "2026-09-23T20:48:32Z",
    "addedBy": "owner",
-   "status": "active"
+   "status": "active",
+   "alsoIn": [
+    "cluster-5"
+   ],
+   "note": "Also appears in cluster-5."
   },
   {
-   "wallet": "6kDReHdMVmAfDhUAQhDWdndUQf4cYPHnN9U1BN4huUT8",
-   "clusterId": "cupseyy",
-   "clusterLabel": "@cupseyy",
+   "wallet": "59NeSYuXHYxGH3V7MiLUnsvA6iogzdWs7RSg6XmWvDxL",
+   "clusterId": "cluster-4",
    "role": "bundle",
    "reason": "bundler",
    "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
-   "addedAt": "2026-09-23T20:44:23Z",
+   "addedAt": "2026-09-23T20:48:32Z",
    "addedBy": "owner",
-   "status": "active"
+   "status": "active",
+   "alsoIn": [
+    "cluster-5"
+   ],
+   "note": "Also appears in cluster-5."
   },
   {
-   "wallet": "D47VMjMYd45SBQ3mk6j4FMhZrRfEmuuxVL7APZF46yFn",
-   "clusterId": "cupseyy",
-   "clusterLabel": "@cupseyy",
+   "wallet": "6xn6iTrXcdrvMJA7boB7RtnVcJtEP5CkWiwYLxKdjR8",
+   "clusterId": "cluster-4",
    "role": "bundle",
    "reason": "bundler",
    "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
-   "addedAt": "2026-09-23T20:44:23Z",
+   "addedAt": "2026-09-23T20:48:32Z",
    "addedBy": "owner",
-   "status": "active"
+   "status": "active",
+   "alsoIn": [
+    "cluster-5"
+   ],
+   "note": "Also appears in cluster-5."
   },
   {
-   "wallet": "Fp3NGFBSBY1Fy8m7QzwsBphJaJ6zRiVQXc5KySM7nJe5",
-   "clusterId": "cupseyy",
-   "clusterLabel": "@cupseyy",
+   "wallet": "5TyEyuJkvDnPtdgshZoGZSJz9gKdeVUYUVXJed4ihwhX",
+   "clusterId": "cluster-4",
    "role": "bundle",
    "reason": "bundler",
    "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
-   "addedAt": "2026-09-23T20:44:23Z",
+   "addedAt": "2026-09-23T20:48:32Z",
    "addedBy": "owner",
-   "status": "active"
+   "status": "active",
+   "alsoIn": [
+    "cluster-5"
+   ],
+   "note": "Also appears in cluster-5."
   },
   {
-   "wallet": "9DAA6YBd4pGb4gdjhztVZf86ssiLexwyLZoGqJUMDc3j",
-   "clusterId": "cupseyy",
-   "clusterLabel": "@cupseyy",
+   "wallet": "E4kp8YBTcZ2tyuPM8bZjYykqK8Xoip1W7kCcUphVUKBd",
+   "clusterId": "cluster-4",
    "role": "bundle",
    "reason": "bundler",
    "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
-   "addedAt": "2026-09-23T20:44:23Z",
+   "addedAt": "2026-09-23T20:48:32Z",
    "addedBy": "owner",
-   "status": "active"
+   "status": "active",
+   "alsoIn": [
+    "cluster-5"
+   ],
+   "note": "Also appears in cluster-5."
   },
   {
-   "wallet": "CSZXHJApgkdm2W4VtJx1x3RJybtE5SdbtFAtgoKnw859",
-   "clusterId": "cupseyy",
-   "clusterLabel": "@cupseyy",
+   "wallet": "4wgP3mvmwhJPbu111cVYZE5VzEEAsJRETq1Uy1LLDrCw",
+   "clusterId": "cluster-4",
    "role": "bundle",
    "reason": "bundler",
    "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
-   "addedAt": "2026-09-23T20:44:23Z",
+   "addedAt": "2026-09-23T20:48:32Z",
    "addedBy": "owner",
-   "status": "active"
+   "status": "active",
+   "alsoIn": [
+    "cluster-5"
+   ],
+   "note": "Also appears in cluster-5."
   },
   {
-   "wallet": "GeuN1BFHLphc9nBr1kSX99y496gtXpFniXFzhTuSXXM4",
-   "clusterId": "cupseyy",
-   "clusterLabel": "@cupseyy",
+   "wallet": "DyXg3Xp6BoMq5K6Nmdb7hEzPMpkRWH2aXHHZhUgN1gd6",
+   "clusterId": "cluster-4",
    "role": "bundle",
    "reason": "bundler",
    "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
-   "addedAt": "2026-09-23T20:44:23Z",
+   "addedAt": "2026-09-23T20:48:32Z",
    "addedBy": "owner",
-   "status": "active"
+   "status": "active",
+   "alsoIn": [
+    "cluster-5"
+   ],
+   "note": "Also appears in cluster-5."
   },
   {
-   "wallet": "6HiZ9c6H6VbRgw6zcE3633q64Qs28ToDvFp3r7dTeDr8",
-   "clusterId": "cupseyy",
-   "clusterLabel": "@cupseyy",
+   "wallet": "Cny7Brip3BgLYJi6MWn3oNw6NQvKQH25xSjFkKE2Ax2J",
+   "clusterId": "cluster-4",
    "role": "bundle",
    "reason": "bundler",
    "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
-   "addedAt": "2026-09-23T20:44:23Z",
+   "addedAt": "2026-09-23T20:48:32Z",
    "addedBy": "owner",
-   "status": "active"
+   "status": "active",
+   "alsoIn": [
+    "cluster-5"
+   ],
+   "note": "Also appears in cluster-5."
   },
   {
-   "wallet": "67Nwfi9hgwqhxGoovT2JGLU67uxfomLwQAWncjXXzU6U",
-   "clusterId": "cupseyy",
-   "clusterLabel": "@cupseyy",
+   "wallet": "JCLRmm7Go8jsUQp9XBKBm4qJtyeJQFYGdunQq6HgJdeU",
+   "clusterId": "cluster-4",
    "role": "bundle",
    "reason": "bundler",
    "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
-   "addedAt": "2026-09-23T20:44:23Z",
+   "addedAt": "2026-09-23T20:48:32Z",
    "addedBy": "owner",
-   "status": "active"
+   "status": "active",
+   "alsoIn": [
+    "cluster-5"
+   ],
+   "note": "Also appears in cluster-5."
   },
   {
-   "wallet": "66B95ED19CLsJtsVYPkTBQT3EZPPpEawCimCPruVucSX",
-   "clusterId": "cupseyy",
-   "clusterLabel": "@cupseyy",
+   "wallet": "CgEsUiGgRLo19rtRYCxVibZ3WDag3WbubwHLBv14YS17",
+   "clusterId": "cluster-4",
    "role": "bundle",
    "reason": "bundler",
    "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
-   "addedAt": "2026-09-23T20:44:23Z",
+   "addedAt": "2026-09-23T20:48:32Z",
    "addedBy": "owner",
-   "status": "active"
+   "status": "active",
+   "alsoIn": [
+    "cluster-5"
+   ],
+   "note": "Also appears in cluster-5."
   },
   {
-   "wallet": "9KeBtVrJjMTDiYNeq2XWTysTFj3zs4nL1aiaC9F5BrNR",
-   "clusterId": "cupseyy",
-   "clusterLabel": "@cupseyy",
+   "wallet": "5ioF1kj7RyFbtARwUhRSi9tFYc7nMoo46V4nFJeqGFsW",
+   "clusterId": "cluster-4",
    "role": "bundle",
    "reason": "bundler",
    "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
-   "addedAt": "2026-09-23T20:44:23Z",
+   "addedAt": "2026-09-23T20:48:32Z",
    "addedBy": "owner",
-   "status": "active"
+   "status": "active",
+   "alsoIn": [
+    "cluster-5"
+   ],
+   "note": "Also appears in cluster-5."
+  },
+  {
+   "wallet": "FVfVuhW1p9vhq41jx5y2AB1RiNNQ7UxTovpo3NBvQrYT",
+   "clusterId": "cluster-4",
+   "role": "bundle",
+   "reason": "bundler",
+   "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
+   "addedAt": "2026-09-23T20:48:32Z",
+   "addedBy": "owner",
+   "status": "active",
+   "alsoIn": [
+    "cluster-5"
+   ],
+   "note": "Also appears in cluster-5."
+  },
+  {
+   "wallet": "GxvxmRi4iGe4WZTiBXzicfiJ2LKSjFzngguQTNsg4sxm",
+   "clusterId": "cluster-4",
+   "role": "bundle",
+   "reason": "bundler",
+   "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
+   "addedAt": "2026-09-23T20:48:32Z",
+   "addedBy": "owner",
+   "status": "active",
+   "alsoIn": [
+    "cluster-5"
+   ],
+   "note": "Also appears in cluster-5."
+  },
+  {
+   "wallet": "FNKf7DmvU3hkbtpLDw1LctZ63Cou6Nte9cPSsayKmdtZ",
+   "clusterId": "cluster-4",
+   "role": "bundle",
+   "reason": "bundler",
+   "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
+   "addedAt": "2026-09-23T20:48:32Z",
+   "addedBy": "owner",
+   "status": "active",
+   "alsoIn": [
+    "cluster-5"
+   ],
+   "note": "Also appears in cluster-5."
+  },
+  {
+   "wallet": "83QpSeVuT2T1YhyRZ8ce5joLe6TBF7PjvyCPWhdFvzYt",
+   "clusterId": "cluster-4",
+   "role": "bundle",
+   "reason": "bundler",
+   "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
+   "addedAt": "2026-09-23T20:48:32Z",
+   "addedBy": "owner",
+   "status": "active",
+   "alsoIn": [
+    "cluster-5"
+   ],
+   "note": "Also appears in cluster-5."
+  },
+  {
+   "wallet": "HWqEZRckD9ZC2qPRKjzWkQKBdzUfVKTx9rPDEPEfiPJZ",
+   "clusterId": "cluster-4",
+   "role": "bundle",
+   "reason": "bundler",
+   "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
+   "addedAt": "2026-09-23T20:48:32Z",
+   "addedBy": "owner",
+   "status": "active",
+   "alsoIn": [
+    "cluster-5"
+   ],
+   "note": "Also appears in cluster-5."
+  },
+  {
+   "wallet": "72aN3oGd1JXDasuCBpi1mPvPRw8eyebevxC9QMtP9Yti",
+   "clusterId": "cluster-4",
+   "role": "bundle",
+   "reason": "bundler",
+   "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
+   "addedAt": "2026-09-23T20:48:32Z",
+   "addedBy": "owner",
+   "status": "active",
+   "alsoIn": [
+    "cluster-5"
+   ],
+   "note": "Also appears in cluster-5."
+  },
+  {
+   "wallet": "Fhg4k5sNcMS4YTsu1gqdd3GWmG1dTT1pyQeaTbfye2Gf",
+   "clusterId": "cluster-4",
+   "role": "bundle",
+   "reason": "bundler",
+   "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
+   "addedAt": "2026-09-23T20:48:32Z",
+   "addedBy": "owner",
+   "status": "active",
+   "alsoIn": [
+    "cluster-5"
+   ],
+   "note": "Also appears in cluster-5."
+  },
+  {
+   "wallet": "3tF8TiMiZk74ivbX35xyLKACgdpzDV5mKQfg2hNMfXow",
+   "clusterId": "cluster-4",
+   "role": "bundle",
+   "reason": "bundler",
+   "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
+   "addedAt": "2026-09-23T20:48:32Z",
+   "addedBy": "owner",
+   "status": "active",
+   "alsoIn": [
+    "cluster-5"
+   ],
+   "note": "Also appears in cluster-5."
+  },
+  {
+   "wallet": "27F9pmWwbEMmzBaj6gESiqxnVxAA6mo9pijFjiqjTgrx",
+   "clusterId": "cluster-4",
+   "role": "bundle",
+   "reason": "bundler",
+   "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
+   "addedAt": "2026-09-23T20:48:32Z",
+   "addedBy": "owner",
+   "status": "active",
+   "alsoIn": [
+    "cluster-5"
+   ],
+   "note": "Also appears in cluster-5."
+  },
+  {
+   "wallet": "9yrWp45doAXGp7bARTuk6tEYWNTcWKY6gWMF1UFgm6v",
+   "clusterId": "cluster-4",
+   "role": "bundle",
+   "reason": "bundler",
+   "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
+   "addedAt": "2026-09-23T20:48:32Z",
+   "addedBy": "owner",
+   "status": "active",
+   "alsoIn": [
+    "cluster-5"
+   ],
+   "note": "Also appears in cluster-5."
+  },
+  {
+   "wallet": "EUW4yTnWS3uCxC41q1B4GLWbUJuuiyeeTaVMdfyG3vKK",
+   "clusterId": "cluster-4",
+   "role": "bundle",
+   "reason": "bundler",
+   "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
+   "addedAt": "2026-09-23T20:48:32Z",
+   "addedBy": "owner",
+   "status": "active",
+   "alsoIn": [
+    "cluster-5"
+   ],
+   "note": "Also appears in cluster-5."
+  },
+  {
+   "wallet": "8sfbKCYFvKuzG6vE5dAyHrSVxEgRWgMrcjUEvfhYr4ng",
+   "clusterId": "cluster-4",
+   "role": "bundle",
+   "reason": "bundler",
+   "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
+   "addedAt": "2026-09-23T20:48:32Z",
+   "addedBy": "owner",
+   "status": "active",
+   "alsoIn": [
+    "cluster-5"
+   ],
+   "note": "Also appears in cluster-5."
+  },
+  {
+   "wallet": "3xypgswFheRmSLWNwedVQ9Qj9QUmAn4BZmBwHZt6PuV2",
+   "clusterId": "cluster-4",
+   "role": "bundle",
+   "reason": "bundler",
+   "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
+   "addedAt": "2026-09-23T20:48:32Z",
+   "addedBy": "owner",
+   "status": "active",
+   "alsoIn": [
+    "cluster-5"
+   ],
+   "note": "Also appears in cluster-5."
+  },
+  {
+   "wallet": "5URyNUmhcuWdZiiQrtNdFrSbQPfq72UV2gqQasr9c19Y",
+   "clusterId": "cluster-4",
+   "role": "bundle",
+   "reason": "bundler",
+   "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
+   "addedAt": "2026-09-23T20:48:32Z",
+   "addedBy": "owner",
+   "status": "active",
+   "alsoIn": [
+    "cluster-5"
+   ],
+   "note": "Also appears in cluster-5."
+  },
+  {
+   "wallet": "J9HtjCY8UwMjgeqnCCMSffKEtVK4s1x9dz7W1tkJsDrB",
+   "clusterId": "cluster-4",
+   "role": "bundle",
+   "reason": "bundler",
+   "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
+   "addedAt": "2026-09-23T20:48:32Z",
+   "addedBy": "owner",
+   "status": "active",
+   "alsoIn": [
+    "cluster-5"
+   ],
+   "note": "Also appears in cluster-5."
+  },
+  {
+   "wallet": "5dB6rj9CoXMLQCAymoC5UXCb1LtFjbM5rbut3MNuj9Q",
+   "clusterId": "cluster-4",
+   "role": "bundle",
+   "reason": "bundler",
+   "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
+   "addedAt": "2026-09-23T20:48:32Z",
+   "addedBy": "owner",
+   "status": "active",
+   "alsoIn": [
+    "cluster-5"
+   ],
+   "note": "Also appears in cluster-5."
+  },
+  {
+   "wallet": "BcXk1a1WqZpKJp6BbiU1Zj2UxHkmkcxLdPCWQKh4REWY",
+   "clusterId": "cluster-4",
+   "role": "bundle",
+   "reason": "bundler",
+   "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
+   "addedAt": "2026-09-23T20:48:32Z",
+   "addedBy": "owner",
+   "status": "active",
+   "alsoIn": [
+    "cluster-5"
+   ],
+   "note": "Also appears in cluster-5."
+  },
+  {
+   "wallet": "9zZCjLr9xfXfp3qdqvPh6YeaEaagepz21khLhca69B18",
+   "clusterId": "cluster-4",
+   "role": "bundle",
+   "reason": "bundler",
+   "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
+   "addedAt": "2026-09-23T20:48:32Z",
+   "addedBy": "owner",
+   "status": "active",
+   "alsoIn": [
+    "cluster-5"
+   ],
+   "note": "Also appears in cluster-5."
+  },
+  {
+   "wallet": "GpHkiRzoJDNPpDVgMx2E3xamrxogHKGaZg4HahQxhRVB",
+   "clusterId": "cluster-4",
+   "role": "bundle",
+   "reason": "bundler",
+   "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
+   "addedAt": "2026-09-23T20:48:32Z",
+   "addedBy": "owner",
+   "status": "active",
+   "alsoIn": [
+    "cluster-5"
+   ],
+   "note": "Also appears in cluster-5."
+  },
+  {
+   "wallet": "3e2Aw8wKpg22ViEMHrrxeeMGEHTZuptsduMffa37UpMy",
+   "clusterId": "cluster-4",
+   "role": "bundle",
+   "reason": "bundler",
+   "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
+   "addedAt": "2026-09-23T20:48:32Z",
+   "addedBy": "owner",
+   "status": "active",
+   "alsoIn": [
+    "cluster-5"
+   ],
+   "note": "Also appears in cluster-5."
+  },
+  {
+   "wallet": "DqDr2G9S1UUr9kTVhuqnXzdaKPiEnvom1TByrrxZzbk6",
+   "clusterId": "cluster-4",
+   "role": "bundle",
+   "reason": "bundler",
+   "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
+   "addedAt": "2026-09-23T20:48:32Z",
+   "addedBy": "owner",
+   "status": "active",
+   "alsoIn": [
+    "cluster-5"
+   ],
+   "note": "Also appears in cluster-5."
+  },
+  {
+   "wallet": "HmLwYRdPE3QsSexagobJdjxcWFZgqrSXtsQUrRZLWqnB",
+   "clusterId": "cluster-4",
+   "role": "bundle",
+   "reason": "bundler",
+   "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
+   "addedAt": "2026-09-23T20:48:32Z",
+   "addedBy": "owner",
+   "status": "active",
+   "alsoIn": [
+    "cluster-5"
+   ],
+   "note": "Also appears in cluster-5."
+  },
+  {
+   "wallet": "7MjWHGVQNo9SAsAQqK2rAjoeCjefhwYQEy3UhggxakTU",
+   "clusterId": "cluster-4",
+   "role": "bundle",
+   "reason": "bundler",
+   "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
+   "addedAt": "2026-09-23T20:48:32Z",
+   "addedBy": "owner",
+   "status": "active",
+   "alsoIn": [
+    "cluster-5"
+   ],
+   "note": "Also appears in cluster-5."
+  },
+  {
+   "wallet": "8eqUfb3c7eqfGMnPAbHyLqHJNcu4bcYk1gYkbqBdBYQY",
+   "clusterId": "cluster-4",
+   "role": "bundle",
+   "reason": "bundler",
+   "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
+   "addedAt": "2026-09-23T20:48:32Z",
+   "addedBy": "owner",
+   "status": "active",
+   "alsoIn": [
+    "cluster-5"
+   ],
+   "note": "Also appears in cluster-5."
+  },
+  {
+   "wallet": "BhVALHGsjYbbn2vVnMEdPpFpcJFSmWDKaD32X8PNogJv",
+   "clusterId": "cluster-4",
+   "role": "bundle",
+   "reason": "bundler",
+   "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
+   "addedAt": "2026-09-23T20:48:32Z",
+   "addedBy": "owner",
+   "status": "active",
+   "alsoIn": [
+    "cluster-5"
+   ],
+   "note": "Also appears in cluster-5."
+  },
+  {
+   "wallet": "DmopudSGaQQenK4cW5NgmHUsexMB3sEJNn6n1EfLKs28",
+   "clusterId": "cluster-4",
+   "role": "bundle",
+   "reason": "bundler",
+   "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
+   "addedAt": "2026-09-23T20:48:32Z",
+   "addedBy": "owner",
+   "status": "active",
+   "alsoIn": [
+    "cluster-5"
+   ],
+   "note": "Also appears in cluster-5."
+  },
+  {
+   "wallet": "HfWKhg54aprRqW7WZhnGHK8CEiV7A2X96b7MUp1N4NVr",
+   "clusterId": "cluster-4",
+   "role": "bundle",
+   "reason": "bundler",
+   "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
+   "addedAt": "2026-09-23T20:48:32Z",
+   "addedBy": "owner",
+   "status": "active",
+   "alsoIn": [
+    "cluster-5"
+   ],
+   "note": "Also appears in cluster-5."
+  },
+  {
+   "wallet": "H4xva4nrLWQyBxyC81SysULEcgqs4tcEAE4bSumVYivt",
+   "clusterId": "cluster-4",
+   "role": "bundle",
+   "reason": "bundler",
+   "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
+   "addedAt": "2026-09-23T20:48:32Z",
+   "addedBy": "owner",
+   "status": "active",
+   "alsoIn": [
+    "cluster-5"
+   ],
+   "note": "Also appears in cluster-5."
+  },
+  {
+   "wallet": "Did75VyeMJ4tKfXq9qnKWcD9DSp7HPasQvXZWjvQeVFN",
+   "clusterId": "cluster-4",
+   "role": "bundle",
+   "reason": "bundler",
+   "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
+   "addedAt": "2026-09-23T20:48:32Z",
+   "addedBy": "owner",
+   "status": "active",
+   "alsoIn": [
+    "cluster-5"
+   ],
+   "note": "Also appears in cluster-5."
+  },
+  {
+   "wallet": "F1a7cR49s7VsKz8XGanFBfsbNE2M91hgKkkDhDjv44w6",
+   "clusterId": "cluster-4",
+   "role": "bundle",
+   "reason": "bundler",
+   "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
+   "addedAt": "2026-09-23T20:48:32Z",
+   "addedBy": "owner",
+   "status": "active",
+   "alsoIn": [
+    "cluster-5"
+   ],
+   "note": "Also appears in cluster-5."
+  },
+  {
+   "wallet": "685QT5XNDHs1GbRFFZwE19npC1WqsXJJdE3XqtC3TYhH",
+   "clusterId": "cluster-4",
+   "role": "bundle",
+   "reason": "bundler",
+   "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
+   "addedAt": "2026-09-23T20:48:32Z",
+   "addedBy": "owner",
+   "status": "active",
+   "alsoIn": [
+    "cluster-5"
+   ],
+   "note": "Also appears in cluster-5."
+  },
+  {
+   "wallet": "8j59Eo5dqiZJntsQkUH63CSSnYYEMFSUQEDdYz9ZZxNe",
+   "clusterId": "cluster-4",
+   "role": "bundle",
+   "reason": "bundler",
+   "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
+   "addedAt": "2026-09-23T20:48:32Z",
+   "addedBy": "owner",
+   "status": "active",
+   "alsoIn": [
+    "cluster-5"
+   ],
+   "note": "Also appears in cluster-5."
+  },
+  {
+   "wallet": "5gqkEn9zHxYz5mzSm23FYy29awsyCb15ybDn2T8AZ5Yu",
+   "clusterId": "cluster-4",
+   "role": "bundle",
+   "reason": "bundler",
+   "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
+   "addedAt": "2026-09-23T20:48:32Z",
+   "addedBy": "owner",
+   "status": "active",
+   "alsoIn": [
+    "cluster-5"
+   ],
+   "note": "Also appears in cluster-5."
+  },
+  {
+   "wallet": "52LWmpeuQNY8cXsPSwnH29Wx6Q61HtokSdgL7BFSTZng",
+   "clusterId": "cluster-4",
+   "role": "bundle",
+   "reason": "bundler",
+   "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
+   "addedAt": "2026-09-23T20:48:32Z",
+   "addedBy": "owner",
+   "status": "active",
+   "alsoIn": [
+    "cluster-5"
+   ],
+   "note": "Also appears in cluster-5."
+  },
+  {
+   "wallet": "EJG4vMPsJNZVW2vPmaSaCptWepKFQTMwjb5g2sK8EVhr",
+   "clusterId": "cluster-4",
+   "role": "bundle",
+   "reason": "bundler",
+   "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
+   "addedAt": "2026-09-23T20:48:32Z",
+   "addedBy": "owner",
+   "status": "active",
+   "alsoIn": [
+    "cluster-5"
+   ],
+   "note": "Also appears in cluster-5."
+  },
+  {
+   "wallet": "99uShPiDqJjZfd9h2HCbzWZpSAHPNFxJXxAZi6uPcNTV",
+   "clusterId": "cluster-4",
+   "role": "bundle",
+   "reason": "bundler",
+   "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
+   "addedAt": "2026-09-23T20:48:32Z",
+   "addedBy": "owner",
+   "status": "active",
+   "alsoIn": [
+    "cluster-5"
+   ],
+   "note": "Also appears in cluster-5."
+  },
+  {
+   "wallet": "ESvaRqZfW5UN6EnNQNMLWk8LPTxGYEUuG5AAQMa2i9pw",
+   "clusterId": "cluster-4",
+   "role": "bundle",
+   "reason": "bundler",
+   "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
+   "addedAt": "2026-09-23T20:48:32Z",
+   "addedBy": "owner",
+   "status": "active",
+   "alsoIn": [
+    "cluster-5"
+   ],
+   "note": "Also appears in cluster-5."
+  },
+  {
+   "wallet": "yM5QCVWrjMUHdEeMU1noHB3SVAXaRZzg5g9Wh9T7oeK",
+   "clusterId": "cluster-4",
+   "role": "bundle",
+   "reason": "bundler",
+   "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
+   "addedAt": "2026-09-23T20:48:32Z",
+   "addedBy": "owner",
+   "status": "active",
+   "alsoIn": [
+    "cluster-5"
+   ],
+   "note": "Also appears in cluster-5."
+  },
+  {
+   "wallet": "6i4baBbauDnPZrJeXUWbedQGfbfEpc3ZEGnhU7ZdytJH",
+   "clusterId": "cluster-4",
+   "role": "bundle",
+   "reason": "bundler",
+   "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
+   "addedAt": "2026-09-23T20:48:32Z",
+   "addedBy": "owner",
+   "status": "active",
+   "alsoIn": [
+    "cluster-5"
+   ],
+   "note": "Also appears in cluster-5."
+  },
+  {
+   "wallet": "6iAreojF2KgXoRzYwec9JL6kQQXN7fc4Z4CgZKxFWRzG",
+   "clusterId": "cluster-4",
+   "role": "bundle",
+   "reason": "bundler",
+   "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
+   "addedAt": "2026-09-23T20:48:32Z",
+   "addedBy": "owner",
+   "status": "active",
+   "alsoIn": [
+    "cluster-5"
+   ],
+   "note": "Also appears in cluster-5."
+  },
+  {
+   "wallet": "FwHrHKFbPo9KVhFKgoTGLjhrVaMqd9V7yd8PZuThvyPq",
+   "clusterId": "cluster-4",
+   "role": "bundle",
+   "reason": "bundler",
+   "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
+   "addedAt": "2026-09-23T20:48:32Z",
+   "addedBy": "owner",
+   "status": "active",
+   "alsoIn": [
+    "cluster-5"
+   ],
+   "note": "Also appears in cluster-5."
+  },
+  {
+   "wallet": "59mWSDjx5VFQz15FGJio8BJzupKorK5SVHSbaJaZGAxC",
+   "clusterId": "cluster-4",
+   "role": "bundle",
+   "reason": "bundler",
+   "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
+   "addedAt": "2026-09-23T20:48:32Z",
+   "addedBy": "owner",
+   "status": "active",
+   "alsoIn": [
+    "cluster-5"
+   ],
+   "note": "Also appears in cluster-5."
+  },
+  {
+   "wallet": "ALfWDr9jxPCSTZ3WZyoa4UGYuM7LqnLgg28yd5kzak7G",
+   "clusterId": "cluster-4",
+   "role": "bundle",
+   "reason": "bundler",
+   "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
+   "addedAt": "2026-09-23T20:48:32Z",
+   "addedBy": "owner",
+   "status": "active",
+   "alsoIn": [
+    "cluster-5"
+   ],
+   "note": "Also appears in cluster-5."
+  },
+  {
+   "wallet": "8iiZyZFTX8inocWqX57Ya17aknWVBJyUNQmqJVXF2AAv",
+   "clusterId": "cluster-4",
+   "role": "bundle",
+   "reason": "bundler",
+   "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
+   "addedAt": "2026-09-23T20:48:32Z",
+   "addedBy": "owner",
+   "status": "active",
+   "alsoIn": [
+    "cluster-5"
+   ],
+   "note": "Also appears in cluster-5."
+  },
+  {
+   "wallet": "8oQL7QEuGuy88mCC2gwyfRLy92PghchQpRwgvfRMaPxb",
+   "clusterId": "cluster-4",
+   "role": "bundle",
+   "reason": "bundler",
+   "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
+   "addedAt": "2026-09-23T20:48:32Z",
+   "addedBy": "owner",
+   "status": "active",
+   "alsoIn": [
+    "cluster-5"
+   ],
+   "note": "Also appears in cluster-5."
+  },
+  {
+   "wallet": "FRT8YuLJ9q8PPX2o4RUiJ9hWL427hNmMJ2M6JdgGgzwK",
+   "clusterId": "cluster-4",
+   "role": "bundle",
+   "reason": "bundler",
+   "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
+   "addedAt": "2026-09-23T20:48:32Z",
+   "addedBy": "owner",
+   "status": "active",
+   "alsoIn": [
+    "cluster-5"
+   ],
+   "note": "Also appears in cluster-5."
+  },
+  {
+   "wallet": "8Af51rUywn8DRJrWKgf4HbRpVSVSnbLSNWfxYAegmnMj",
+   "clusterId": "cluster-4",
+   "role": "bundle",
+   "reason": "bundler",
+   "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
+   "addedAt": "2026-09-23T20:48:32Z",
+   "addedBy": "owner",
+   "status": "active",
+   "alsoIn": [
+    "cluster-5"
+   ],
+   "note": "Also appears in cluster-5."
+  },
+  {
+   "wallet": "6KUDoXFnT8GpKEfhQnwH3BeFzw1bHTCCXRL9DNn1Y8vE",
+   "clusterId": "cluster-4",
+   "role": "bundle",
+   "reason": "bundler",
+   "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
+   "addedAt": "2026-09-23T20:48:32Z",
+   "addedBy": "owner",
+   "status": "active",
+   "alsoIn": [
+    "cluster-5"
+   ],
+   "note": "Also appears in cluster-5."
+  },
+  {
+   "wallet": "EnfLcs6t7ZgsWRf1t1tnC9vs1NPT8zzPk6uikB555M9A",
+   "clusterId": "cluster-4",
+   "role": "bundle",
+   "reason": "bundler",
+   "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
+   "addedAt": "2026-09-23T20:48:32Z",
+   "addedBy": "owner",
+   "status": "active",
+   "alsoIn": [
+    "cluster-5"
+   ],
+   "note": "Also appears in cluster-5."
+  },
+  {
+   "wallet": "4vER1GJQs73HtN9oYRswHZV4PSe2dvWQ8NLFoDhXeZjm",
+   "clusterId": "cluster-4",
+   "role": "bundle",
+   "reason": "bundler",
+   "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
+   "addedAt": "2026-09-23T20:48:32Z",
+   "addedBy": "owner",
+   "status": "active",
+   "alsoIn": [
+    "cluster-5"
+   ],
+   "note": "Also appears in cluster-5."
+  },
+  {
+   "wallet": "4ES75TfYib35XqpSTcvhsWBgWZSJRpLh1D1YUeM3HHoe",
+   "clusterId": "cluster-4",
+   "role": "bundle",
+   "reason": "bundler",
+   "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
+   "addedAt": "2026-09-23T20:48:32Z",
+   "addedBy": "owner",
+   "status": "active",
+   "alsoIn": [
+    "cluster-5"
+   ],
+   "note": "Also appears in cluster-5."
+  },
+  {
+   "wallet": "H5y3GAxqz9cs9iXsXVvEsm81bE6E7kKnVUus3dLzBR5q",
+   "clusterId": "cluster-4",
+   "role": "bundle",
+   "reason": "bundler",
+   "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
+   "addedAt": "2026-09-23T20:48:32Z",
+   "addedBy": "owner",
+   "status": "active",
+   "alsoIn": [
+    "cluster-5"
+   ],
+   "note": "Also appears in cluster-5."
+  },
+  {
+   "wallet": "C3TJXgEV2c2VrFhjmGw19uxvJkWW3NqYriFmvkRDh8cU",
+   "clusterId": "cluster-4",
+   "role": "bundle",
+   "reason": "bundler",
+   "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
+   "addedAt": "2026-09-23T20:48:32Z",
+   "addedBy": "owner",
+   "status": "active",
+   "alsoIn": [
+    "cluster-5"
+   ],
+   "note": "Also appears in cluster-5."
+  },
+  {
+   "wallet": "EHdUKz2S2Qp1Nc4M5GVMYLgL8Y479LCkmbjdFwsNjH4E",
+   "clusterId": "cluster-4",
+   "role": "bundle",
+   "reason": "bundler",
+   "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
+   "addedAt": "2026-09-23T20:48:32Z",
+   "addedBy": "owner",
+   "status": "active",
+   "alsoIn": [
+    "cluster-5"
+   ],
+   "note": "Also appears in cluster-5."
+  },
+  {
+   "wallet": "3cBB2ZyoNy8YEquSSzR2Rpggp9vcrfz4NcbCKHp7BzvT",
+   "clusterId": "cluster-4",
+   "role": "bundle",
+   "reason": "bundler",
+   "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
+   "addedAt": "2026-09-23T20:48:32Z",
+   "addedBy": "owner",
+   "status": "active",
+   "alsoIn": [
+    "cluster-5"
+   ],
+   "note": "Also appears in cluster-5."
+  },
+  {
+   "wallet": "T93NmkmNEU3nTuissSYV44uG5bigd4uvw1NJkFeRu9U",
+   "clusterId": "cluster-4",
+   "role": "bundle",
+   "reason": "bundler",
+   "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
+   "addedAt": "2026-09-23T20:48:32Z",
+   "addedBy": "owner",
+   "status": "active",
+   "alsoIn": [
+    "cluster-5"
+   ],
+   "note": "Also appears in cluster-5."
+  },
+  {
+   "wallet": "9dbcLC76Cr32kkSt2ayEzkYxxptwtkyAnSYNUsnnzK8A",
+   "clusterId": "cluster-4",
+   "role": "bundle",
+   "reason": "bundler",
+   "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
+   "addedAt": "2026-09-23T20:48:32Z",
+   "addedBy": "owner",
+   "status": "active",
+   "alsoIn": [
+    "cluster-5"
+   ],
+   "note": "Also appears in cluster-5."
+  },
+  {
+   "wallet": "CosNXRfWcA17jodvUQpsDVH73mmscv5iXLbRrztYbcwA",
+   "clusterId": "cluster-4",
+   "role": "bundle",
+   "reason": "bundler",
+   "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
+   "addedAt": "2026-09-23T20:48:32Z",
+   "addedBy": "owner",
+   "status": "active",
+   "alsoIn": [
+    "cluster-5"
+   ],
+   "note": "Also appears in cluster-5."
+  },
+  {
+   "wallet": "72ske1p84pfj4yyC4qunvUK7CPuDhNcHPa79cA1fnx4B",
+   "clusterId": "cluster-4",
+   "role": "bundle",
+   "reason": "bundler",
+   "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
+   "addedAt": "2026-09-23T20:48:32Z",
+   "addedBy": "owner",
+   "status": "active",
+   "alsoIn": [
+    "cluster-5"
+   ],
+   "note": "Also appears in cluster-5."
+  },
+  {
+   "wallet": "AhBiRccw5LFFvTf1ViRCm6VA4TBmy75DZkzdV7A9beQq",
+   "clusterId": "cluster-4",
+   "role": "bundle",
+   "reason": "bundler",
+   "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
+   "addedAt": "2026-09-23T20:48:32Z",
+   "addedBy": "owner",
+   "status": "active",
+   "alsoIn": [
+    "cluster-5"
+   ],
+   "note": "Also appears in cluster-5."
+  },
+  {
+   "wallet": "6ahPrzrZmB61bmD3DSKPY9kCeoTrzrHhL1iGEuoxTw2y",
+   "clusterId": "cluster-4",
+   "role": "bundle",
+   "reason": "bundler",
+   "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
+   "addedAt": "2026-09-23T20:48:32Z",
+   "addedBy": "owner",
+   "status": "active",
+   "alsoIn": [
+    "cluster-5"
+   ],
+   "note": "Also appears in cluster-5."
+  },
+  {
+   "wallet": "4h7UwWZ7XsefRELbCP771Qmsx2sm7KJmGGNyscp8SyGd",
+   "clusterId": "cluster-4",
+   "role": "bundle",
+   "reason": "bundler",
+   "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
+   "addedAt": "2026-09-23T20:48:32Z",
+   "addedBy": "owner",
+   "status": "active",
+   "alsoIn": [
+    "cluster-5"
+   ],
+   "note": "Also appears in cluster-5."
+  },
+  {
+   "wallet": "H2DiQoGa3DEqwh2zJcNhD617TnCEgNnyaTBG8c1KK3Du",
+   "clusterId": "cluster-4",
+   "role": "bundle",
+   "reason": "bundler",
+   "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
+   "addedAt": "2026-09-23T20:48:32Z",
+   "addedBy": "owner",
+   "status": "active",
+   "alsoIn": [
+    "cluster-5"
+   ],
+   "note": "Also appears in cluster-5."
+  },
+  {
+   "wallet": "FZ2qehTrckG4SzBQRDUmGKo3PjS4NX9SA7hUkBSvwHrL",
+   "clusterId": "cluster-4",
+   "role": "bundle",
+   "reason": "bundler",
+   "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
+   "addedAt": "2026-09-23T20:48:32Z",
+   "addedBy": "owner",
+   "status": "active",
+   "alsoIn": [
+    "cluster-5"
+   ],
+   "note": "Also appears in cluster-5."
+  },
+  {
+   "wallet": "CvFy26yh6hoWJsdX9Kh9piZzpur2kFs2KUQQnTJFy2kX",
+   "clusterId": "cluster-4",
+   "role": "bundle",
+   "reason": "bundler",
+   "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
+   "addedAt": "2026-09-23T20:48:32Z",
+   "addedBy": "owner",
+   "status": "active",
+   "alsoIn": [
+    "cluster-5"
+   ],
+   "note": "Also appears in cluster-5."
+  },
+  {
+   "wallet": "GX6FwGWQ4DaeTZHuKWm3uWjpnNq9RSBpMzqedyqM1TyX",
+   "clusterId": "cluster-4",
+   "role": "bundle",
+   "reason": "bundler",
+   "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
+   "addedAt": "2026-09-23T20:48:32Z",
+   "addedBy": "owner",
+   "status": "active",
+   "alsoIn": [
+    "cluster-5"
+   ],
+   "note": "Also appears in cluster-5."
+  },
+  {
+   "wallet": "4CPQqg2GeUiyykB5Vz5VHMSDbGa6ztjk5RcpdMdm3Hu1",
+   "clusterId": "cluster-4",
+   "role": "bundle",
+   "reason": "bundler",
+   "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
+   "addedAt": "2026-09-23T20:48:32Z",
+   "addedBy": "owner",
+   "status": "active",
+   "alsoIn": [
+    "cluster-5"
+   ],
+   "note": "Also appears in cluster-5."
+  },
+  {
+   "wallet": "F2GfuBB1KcBft9EDdfb4jMWWFo2sFQg4EFmQmeXncGSd",
+   "clusterId": "cluster-4",
+   "role": "bundle",
+   "reason": "bundler",
+   "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
+   "addedAt": "2026-09-23T20:48:32Z",
+   "addedBy": "owner",
+   "status": "active",
+   "alsoIn": [
+    "cluster-5"
+   ],
+   "note": "Also appears in cluster-5."
+  },
+  {
+   "wallet": "31UAXz6g9sUCjmCwy1b3FdUwz59JMQdRmnrnrKbrV2TH",
+   "clusterId": "cluster-4",
+   "role": "bundle",
+   "reason": "bundler",
+   "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
+   "addedAt": "2026-09-23T20:48:32Z",
+   "addedBy": "owner",
+   "status": "active",
+   "alsoIn": [
+    "cluster-5"
+   ],
+   "note": "Also appears in cluster-5."
+  },
+  {
+   "wallet": "HAwiWQnFY4vuEfWaZbF6LAvLuGUsrk5mtdQF8rDNYh3b",
+   "clusterId": "cluster-4",
+   "role": "bundle",
+   "reason": "bundler",
+   "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
+   "addedAt": "2026-09-23T20:48:32Z",
+   "addedBy": "owner",
+   "status": "active",
+   "alsoIn": [
+    "cluster-5"
+   ],
+   "note": "Also appears in cluster-5."
+  },
+  {
+   "wallet": "2EGcqkFurLAtATX5it9CkMdrU1vocwTEjGuLEq5syGiU",
+   "clusterId": "cluster-4",
+   "role": "bundle",
+   "reason": "bundler",
+   "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
+   "addedAt": "2026-09-23T20:48:32Z",
+   "addedBy": "owner",
+   "status": "active",
+   "alsoIn": [
+    "cluster-5"
+   ],
+   "note": "Also appears in cluster-5."
+  },
+  {
+   "wallet": "2dmf9mvSdqXEnvhBBEDUU3q93egXAgLuaZNcNJQfxKuK",
+   "clusterId": "cluster-4",
+   "role": "bundle",
+   "reason": "bundler",
+   "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
+   "addedAt": "2026-09-23T20:48:32Z",
+   "addedBy": "owner",
+   "status": "active",
+   "alsoIn": [
+    "cluster-5"
+   ],
+   "note": "Also appears in cluster-5."
+  },
+  {
+   "wallet": "5XTBYRxyQA7Q9rqnaCppeA9Quxs8GUDzHQqTgH73rMkS",
+   "clusterId": "cluster-4",
+   "role": "bundle",
+   "reason": "bundler",
+   "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
+   "addedAt": "2026-09-23T20:48:32Z",
+   "addedBy": "owner",
+   "status": "active",
+   "alsoIn": [
+    "cluster-5"
+   ],
+   "note": "Program-derived address (off-curve): it can hold tokens but cannot sign, so it cannot commit; listed for completeness, not a typo. Also appears in cluster-5."
+  },
+  {
+   "wallet": "JDmWhcAx7TJp58PV1UTFmoyRTKyMdNoF1ApF4aTEnJMW",
+   "clusterId": "cluster-4",
+   "role": "bundle",
+   "reason": "bundler",
+   "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
+   "addedAt": "2026-09-23T20:48:32Z",
+   "addedBy": "owner",
+   "status": "active",
+   "alsoIn": [
+    "cluster-5"
+   ],
+   "note": "Also appears in cluster-5."
+  },
+  {
+   "wallet": "GdraWt2wrnvqjxajz7YJCArUpVW7iJ3f27G7A5ZQuVDy",
+   "clusterId": "cluster-4",
+   "role": "bundle",
+   "reason": "bundler",
+   "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
+   "addedAt": "2026-09-23T20:48:32Z",
+   "addedBy": "owner",
+   "status": "active",
+   "alsoIn": [
+    "cluster-5"
+   ],
+   "note": "Also appears in cluster-5."
+  },
+  {
+   "wallet": "BoAdPDLSFSWf8SBt5JbEJthfgF4XJjxKfHfdV6k5Ng3d",
+   "clusterId": "cluster-4",
+   "role": "bundle",
+   "reason": "bundler",
+   "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
+   "addedAt": "2026-09-23T20:48:32Z",
+   "addedBy": "owner",
+   "status": "active",
+   "alsoIn": [
+    "cluster-5"
+   ],
+   "note": "Also appears in cluster-5."
+  },
+  {
+   "wallet": "GNrofdsDcBZ9iK4Kg67nZAZfXawHyGUR9s3G8K4h82j8",
+   "clusterId": "cluster-4",
+   "role": "bundle",
+   "reason": "bundler",
+   "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
+   "addedAt": "2026-09-23T20:48:32Z",
+   "addedBy": "owner",
+   "status": "active",
+   "alsoIn": [
+    "cluster-5"
+   ],
+   "note": "Also appears in cluster-5."
+  },
+  {
+   "wallet": "4PDXKBJKYAvV7jauGdaWDeGzfJZLnrmrDvibuczB1UZc",
+   "clusterId": "cluster-4",
+   "role": "bundle",
+   "reason": "bundler",
+   "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
+   "addedAt": "2026-09-23T20:48:32Z",
+   "addedBy": "owner",
+   "status": "active",
+   "alsoIn": [
+    "cluster-5"
+   ],
+   "note": "Also appears in cluster-5."
+  },
+  {
+   "wallet": "42tNUWknuwmhJ4mHU9xi3QkvoyHrT3XTi42AAEFm3Xw1",
+   "clusterId": "cluster-4",
+   "role": "bundle",
+   "reason": "bundler",
+   "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
+   "addedAt": "2026-09-23T20:48:32Z",
+   "addedBy": "owner",
+   "status": "active",
+   "alsoIn": [
+    "cluster-5"
+   ],
+   "note": "Also appears in cluster-5."
+  },
+  {
+   "wallet": "EVEeKqb3Tdxp2cfobhz1riTkdzFLEfEDVKErXcf95XSX",
+   "clusterId": "cluster-4",
+   "role": "bundle",
+   "reason": "bundler",
+   "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
+   "addedAt": "2026-09-23T20:48:32Z",
+   "addedBy": "owner",
+   "status": "active",
+   "alsoIn": [
+    "cluster-5"
+   ],
+   "note": "Also appears in cluster-5."
+  },
+  {
+   "wallet": "FnUinLQDttYCJFkfMv2jouGKhkWajsKGrb8GZrgtEoN2",
+   "clusterId": "cluster-4",
+   "role": "bundle",
+   "reason": "bundler",
+   "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
+   "addedAt": "2026-09-23T20:48:32Z",
+   "addedBy": "owner",
+   "status": "active",
+   "alsoIn": [
+    "cluster-5"
+   ],
+   "note": "Program-derived address (off-curve): it can hold tokens but cannot sign, so it cannot commit; listed for completeness, not a typo. Also appears in cluster-5."
+  },
+  {
+   "wallet": "8FVvH7gcv3shAvqTtekACJL9eiefjsS8NQV22SDFcjMy",
+   "clusterId": "cluster-4",
+   "role": "bundle",
+   "reason": "bundler",
+   "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
+   "addedAt": "2026-09-23T20:48:32Z",
+   "addedBy": "owner",
+   "status": "active",
+   "alsoIn": [
+    "cluster-5"
+   ],
+   "note": "Program-derived address (off-curve): it can hold tokens but cannot sign, so it cannot commit; listed for completeness, not a typo. Also appears in cluster-5."
+  },
+  {
+   "wallet": "5dNNVaRiXimiWkwjewafsEXs5Zgai9rKB8aVV3S9kqja",
+   "clusterId": "cluster-4",
+   "role": "bundle",
+   "reason": "bundler",
+   "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
+   "addedAt": "2026-09-23T20:48:32Z",
+   "addedBy": "owner",
+   "status": "active",
+   "alsoIn": [
+    "cluster-5"
+   ],
+   "note": "Also appears in cluster-5."
+  },
+  {
+   "wallet": "56pcbFdxMb72wry2yc8rovESdhEcLJGDMaD22oUix3Lx",
+   "clusterId": "cluster-4",
+   "role": "bundle",
+   "reason": "bundler",
+   "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
+   "addedAt": "2026-09-23T20:48:32Z",
+   "addedBy": "owner",
+   "status": "active",
+   "alsoIn": [
+    "cluster-5"
+   ],
+   "note": "Also appears in cluster-5."
+  },
+  {
+   "wallet": "FeK15P2zPAjpLHyayeZdh4wvtfUAxPXZsdDmknGysutU",
+   "clusterId": "cluster-4",
+   "role": "bundle",
+   "reason": "bundler",
+   "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
+   "addedAt": "2026-09-23T20:48:32Z",
+   "addedBy": "owner",
+   "status": "active",
+   "alsoIn": [
+    "cluster-5"
+   ],
+   "note": "Also appears in cluster-5."
+  },
+  {
+   "wallet": "AELXf17pgNHdLAf31UUK2V9Dq5jRQhYGiuVnfFmUd434",
+   "clusterId": "cluster-4",
+   "role": "bundle",
+   "reason": "bundler",
+   "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
+   "addedAt": "2026-09-23T20:48:32Z",
+   "addedBy": "owner",
+   "status": "active",
+   "alsoIn": [
+    "cluster-5"
+   ],
+   "note": "Also appears in cluster-5."
+  },
+  {
+   "wallet": "4BVtiEHJhFJq3xQSovxQX5LopLLu5Fw4B2rUfCDeKciw",
+   "clusterId": "cluster-4",
+   "role": "bundle",
+   "reason": "bundler",
+   "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
+   "addedAt": "2026-09-23T20:48:32Z",
+   "addedBy": "owner",
+   "status": "active",
+   "alsoIn": [
+    "cluster-5"
+   ],
+   "note": "Also appears in cluster-5."
+  },
+  {
+   "wallet": "H3WottZ3263rZXjgR3ZPSiEryZdiohbDHLXGcyz3yBEN",
+   "clusterId": "cluster-4",
+   "role": "bundle",
+   "reason": "bundler",
+   "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
+   "addedAt": "2026-09-23T20:48:32Z",
+   "addedBy": "owner",
+   "status": "active",
+   "alsoIn": [
+    "cluster-5"
+   ],
+   "note": "Also appears in cluster-5."
+  },
+  {
+   "wallet": "64D36vqxsz4Qjtcn1FBxpQd3A3eQySFc2ppfHuFnX2zD",
+   "clusterId": "cluster-4",
+   "role": "bundle",
+   "reason": "bundler",
+   "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
+   "addedAt": "2026-09-23T20:48:32Z",
+   "addedBy": "owner",
+   "status": "active",
+   "alsoIn": [
+    "cluster-5"
+   ],
+   "note": "Also appears in cluster-5."
+  },
+  {
+   "wallet": "BbAqktA8yL4rcbGJjwEFmSbTxaNaCfvaxH6UPhcyCn2f",
+   "clusterId": "cluster-4",
+   "role": "bundle",
+   "reason": "bundler",
+   "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
+   "addedAt": "2026-09-23T20:48:32Z",
+   "addedBy": "owner",
+   "status": "active",
+   "alsoIn": [
+    "cluster-5"
+   ],
+   "note": "Also appears in cluster-5."
+  },
+  {
+   "wallet": "84wSd9y7vDjj4zYQU5jM69beTW2oxfUYRDfvq2LE2non",
+   "clusterId": "cluster-4",
+   "role": "bundle",
+   "reason": "bundler",
+   "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
+   "addedAt": "2026-09-23T20:48:32Z",
+   "addedBy": "owner",
+   "status": "active",
+   "alsoIn": [
+    "cluster-5"
+   ],
+   "note": "Also appears in cluster-5."
+  },
+  {
+   "wallet": "THE93rPzEKugufRbUwSiY3wiZU5RSv2AJGpLRbbtfuz",
+   "clusterId": "cluster-4",
+   "role": "bundle",
+   "reason": "bundler",
+   "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
+   "addedAt": "2026-09-23T20:48:32Z",
+   "addedBy": "owner",
+   "status": "active",
+   "alsoIn": [
+    "cluster-5"
+   ],
+   "note": "Also appears in cluster-5."
+  },
+  {
+   "wallet": "B49EJbXftQUysHurZf1coUX8Mp1tWVBB17K6LqbPCBng",
+   "clusterId": "cluster-4",
+   "role": "bundle",
+   "reason": "bundler",
+   "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
+   "addedAt": "2026-09-23T20:48:32Z",
+   "addedBy": "owner",
+   "status": "active",
+   "alsoIn": [
+    "cluster-5"
+   ],
+   "note": "Also appears in cluster-5."
+  },
+  {
+   "wallet": "5z29VkhU3xDvkPy6P1PrbfSgcPciES7g5Sf7NqqLpeVQ",
+   "clusterId": "cluster-4",
+   "role": "bundle",
+   "reason": "bundler",
+   "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
+   "addedAt": "2026-09-23T20:48:32Z",
+   "addedBy": "owner",
+   "status": "active",
+   "alsoIn": [
+    "cluster-5"
+   ],
+   "note": "Also appears in cluster-5."
+  },
+  {
+   "wallet": "EMiziyTfVk5YvKodkknqhM5VJCUxa8fZDCyANtBGaWUq",
+   "clusterId": "cluster-4",
+   "role": "bundle",
+   "reason": "bundler",
+   "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
+   "addedAt": "2026-09-23T20:48:32Z",
+   "addedBy": "owner",
+   "status": "active",
+   "alsoIn": [
+    "cluster-5"
+   ],
+   "note": "Also appears in cluster-5."
+  },
+  {
+   "wallet": "2EJyEeMdgwdVr7DRGWUAbwmd92PQfjPW6YTdzV1Wa4zR",
+   "clusterId": "cluster-4",
+   "role": "bundle",
+   "reason": "bundler",
+   "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
+   "addedAt": "2026-09-23T20:48:32Z",
+   "addedBy": "owner",
+   "status": "active",
+   "alsoIn": [
+    "cluster-5"
+   ],
+   "note": "Also appears in cluster-5."
+  },
+  {
+   "wallet": "2yzHXFPPswj5yDz8jrmge8W3EXEahmPPGqWrqVy4ru1Y",
+   "clusterId": "cluster-4",
+   "role": "bundle",
+   "reason": "bundler",
+   "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
+   "addedAt": "2026-09-23T20:48:32Z",
+   "addedBy": "owner",
+   "status": "active",
+   "alsoIn": [
+    "cluster-5"
+   ],
+   "note": "Also appears in cluster-5."
+  },
+  {
+   "wallet": "9WkfRoJphXXR2hvpYCWH2pQ1MWMsyCgcB2ubeuirXkF8",
+   "clusterId": "cluster-4",
+   "role": "bundle",
+   "reason": "bundler",
+   "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
+   "addedAt": "2026-09-23T20:48:32Z",
+   "addedBy": "owner",
+   "status": "active",
+   "alsoIn": [
+    "cluster-5"
+   ],
+   "note": "Also appears in cluster-5."
+  },
+  {
+   "wallet": "AtdwZhx3yU5KYA8zES9gubhtfxADFEHZLeM5fLFFWitA",
+   "clusterId": "cluster-4",
+   "role": "bundle",
+   "reason": "bundler",
+   "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
+   "addedAt": "2026-09-23T20:48:32Z",
+   "addedBy": "owner",
+   "status": "active",
+   "alsoIn": [
+    "cluster-5"
+   ],
+   "note": "Also appears in cluster-5."
+  },
+  {
+   "wallet": "H39QusekztaA94SJDwN6nXizwf4VnZVsPHyE2wfUWHz4",
+   "clusterId": "cluster-4",
+   "role": "bundle",
+   "reason": "bundler",
+   "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
+   "addedAt": "2026-09-23T20:48:32Z",
+   "addedBy": "owner",
+   "status": "active",
+   "alsoIn": [
+    "cluster-5"
+   ],
+   "note": "Also appears in cluster-5."
+  },
+  {
+   "wallet": "5QQZAE3EFyt5iLxieNgaCW9yWqS6Fo6uVoF4yLi1pJY4",
+   "clusterId": "cluster-4",
+   "role": "bundle",
+   "reason": "bundler",
+   "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
+   "addedAt": "2026-09-23T20:48:32Z",
+   "addedBy": "owner",
+   "status": "active",
+   "alsoIn": [
+    "cluster-5"
+   ],
+   "note": "Also appears in cluster-5."
+  },
+  {
+   "wallet": "GMssHp6CbAvPujyHRRRBQktJRxRB7Cj73pJTjCL91MU3",
+   "clusterId": "cluster-4",
+   "role": "bundle",
+   "reason": "bundler",
+   "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
+   "addedAt": "2026-09-23T20:48:32Z",
+   "addedBy": "owner",
+   "status": "active",
+   "alsoIn": [
+    "cluster-5"
+   ],
+   "note": "Also appears in cluster-5."
+  },
+  {
+   "wallet": "14YA7jEZ23DW3bVoJ8DSHkZiu9K37rwJXHrgjR7NNkry",
+   "clusterId": "cluster-4",
+   "role": "bundle",
+   "reason": "bundler",
+   "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
+   "addedAt": "2026-09-23T20:48:32Z",
+   "addedBy": "owner",
+   "status": "active",
+   "alsoIn": [
+    "cluster-5"
+   ],
+   "note": "Also appears in cluster-5."
+  },
+  {
+   "wallet": "4PWaksfn9uM2c5oHQQ16odCazKp3KkLMD4Bhtmg5qCVg",
+   "clusterId": "cluster-4",
+   "role": "bundle",
+   "reason": "bundler",
+   "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
+   "addedAt": "2026-09-23T20:48:32Z",
+   "addedBy": "owner",
+   "status": "active",
+   "alsoIn": [
+    "cluster-5"
+   ],
+   "note": "Also appears in cluster-5."
+  },
+  {
+   "wallet": "Cnyb1f9hwBmyp6Uigy8iXyitFPvTEfpJ9tKg86up5BRj",
+   "clusterId": "cluster-4",
+   "role": "bundle",
+   "reason": "bundler",
+   "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
+   "addedAt": "2026-09-23T20:48:32Z",
+   "addedBy": "owner",
+   "status": "active",
+   "alsoIn": [
+    "cluster-5"
+   ],
+   "note": "Also appears in cluster-5."
+  },
+  {
+   "wallet": "2dTgyPxdhmKwnU6jUiKn8apKHdd5hB5V1vhW7kpmEVcP",
+   "clusterId": "cluster-4",
+   "role": "bundle",
+   "reason": "bundler",
+   "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
+   "addedAt": "2026-09-23T20:48:32Z",
+   "addedBy": "owner",
+   "status": "active",
+   "alsoIn": [
+    "cluster-5"
+   ],
+   "note": "Also appears in cluster-5."
+  },
+  {
+   "wallet": "xeEENXb3dFh18hMReKqD55PfUbZrXWPxpo6zgjbR3oy",
+   "clusterId": "cluster-4",
+   "role": "bundle",
+   "reason": "bundler",
+   "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
+   "addedAt": "2026-09-23T20:48:32Z",
+   "addedBy": "owner",
+   "status": "active",
+   "alsoIn": [
+    "cluster-5"
+   ],
+   "note": "Also appears in cluster-5."
+  },
+  {
+   "wallet": "9B8enjFAQbPBHB8UsLXfFV9shuZyM6GVBBAuWL9jpY31",
+   "clusterId": "cluster-4",
+   "role": "bundle",
+   "reason": "bundler",
+   "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
+   "addedAt": "2026-09-23T20:48:32Z",
+   "addedBy": "owner",
+   "status": "active",
+   "alsoIn": [
+    "cluster-5"
+   ],
+   "note": "Also appears in cluster-5."
+  },
+  {
+   "wallet": "4zxAdgpkBuRCkVKJr9tKjrDtJHM77v3VDQuoLswwLZY",
+   "clusterId": "cluster-4",
+   "role": "bundle",
+   "reason": "bundler",
+   "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
+   "addedAt": "2026-09-23T20:48:32Z",
+   "addedBy": "owner",
+   "status": "active",
+   "alsoIn": [
+    "cluster-5"
+   ],
+   "note": "Also appears in cluster-5."
+  },
+  {
+   "wallet": "9cH3LNF14UDxQdejTryZg7fBcFumGBXj4wdedtsTcJ41",
+   "clusterId": "cluster-4",
+   "role": "bundle",
+   "reason": "bundler",
+   "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
+   "addedAt": "2026-09-23T20:48:32Z",
+   "addedBy": "owner",
+   "status": "active",
+   "alsoIn": [
+    "cluster-5"
+   ],
+   "note": "Also appears in cluster-5."
+  },
+  {
+   "wallet": "24oSSXuFu5trrW1DSujFw4JUZGgFkMCabLFvGuPhK8sq",
+   "clusterId": "cluster-4",
+   "role": "bundle",
+   "reason": "bundler",
+   "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
+   "addedAt": "2026-09-23T20:48:32Z",
+   "addedBy": "owner",
+   "status": "active",
+   "alsoIn": [
+    "cluster-5"
+   ],
+   "note": "Also appears in cluster-5."
+  },
+  {
+   "wallet": "5s5mihiML3c1DXUcxjDnBbSmGA7BdzJzLxmjeaBn4AGr",
+   "clusterId": "cluster-4",
+   "role": "bundle",
+   "reason": "bundler",
+   "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
+   "addedAt": "2026-09-23T20:48:32Z",
+   "addedBy": "owner",
+   "status": "active",
+   "alsoIn": [
+    "cluster-5"
+   ],
+   "note": "Also appears in cluster-5."
+  },
+  {
+   "wallet": "PhJTqZXrchwDKfTBQfgDdrMMREJXrYWtTwFJ8Gbp7HF",
+   "clusterId": "cluster-4",
+   "role": "bundle",
+   "reason": "bundler",
+   "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
+   "addedAt": "2026-09-23T20:48:32Z",
+   "addedBy": "owner",
+   "status": "active",
+   "alsoIn": [
+    "cluster-5"
+   ],
+   "note": "Also appears in cluster-5."
+  },
+  {
+   "wallet": "76hmvUMpW6RXym6bfgktyTwcYMktzGFKKsSRKHpgNJb",
+   "clusterId": "cluster-4",
+   "role": "bundle",
+   "reason": "bundler",
+   "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
+   "addedAt": "2026-09-23T20:48:32Z",
+   "addedBy": "owner",
+   "status": "active",
+   "alsoIn": [
+    "cluster-5"
+   ],
+   "note": "Also appears in cluster-5."
+  },
+  {
+   "wallet": "ENUXigqDhMwG8i1Z6odCXx7ia9VSNPJh2G6mM7tFG4mL",
+   "clusterId": "cluster-4",
+   "role": "bundle",
+   "reason": "bundler",
+   "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
+   "addedAt": "2026-09-23T20:48:32Z",
+   "addedBy": "owner",
+   "status": "active",
+   "alsoIn": [
+    "cluster-5"
+   ],
+   "note": "Also appears in cluster-5."
+  },
+  {
+   "wallet": "BGqVs2L3Ri3H7K9Yck4yEoCW7LuoMmFME76tgQs3xFjk",
+   "clusterId": "cluster-4",
+   "role": "bundle",
+   "reason": "bundler",
+   "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
+   "addedAt": "2026-09-23T20:48:32Z",
+   "addedBy": "owner",
+   "status": "active",
+   "alsoIn": [
+    "cluster-5"
+   ],
+   "note": "Also appears in cluster-5."
+  },
+  {
+   "wallet": "4HFWSzKgGBbjV9afFSwLpT3muirhDduzgs7oiX9pdxoL",
+   "clusterId": "cluster-4",
+   "role": "bundle",
+   "reason": "bundler",
+   "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
+   "addedAt": "2026-09-23T20:48:32Z",
+   "addedBy": "owner",
+   "status": "active",
+   "alsoIn": [
+    "cluster-5"
+   ],
+   "note": "Also appears in cluster-5."
+  },
+  {
+   "wallet": "A4CNm8tn22LTkE74jLaUMrar7NgVHXzkSQqJJ3oFqPbx",
+   "clusterId": "cluster-4",
+   "role": "bundle",
+   "reason": "bundler",
+   "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
+   "addedAt": "2026-09-23T20:48:32Z",
+   "addedBy": "owner",
+   "status": "active",
+   "alsoIn": [
+    "cluster-5"
+   ],
+   "note": "Also appears in cluster-5."
+  },
+  {
+   "wallet": "Bp88udWtxwBwEXAVvADroqHuDC1gmdDcUCTv2nt2jWKc",
+   "clusterId": "cluster-4",
+   "role": "bundle",
+   "reason": "bundler",
+   "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
+   "addedAt": "2026-09-23T20:48:32Z",
+   "addedBy": "owner",
+   "status": "active",
+   "alsoIn": [
+    "cluster-5"
+   ],
+   "note": "Also appears in cluster-5."
+  },
+  {
+   "wallet": "4pnKqbinJ1uA745jt7kuewHwppActey6HEToj8oMKW8a",
+   "clusterId": "cluster-4",
+   "role": "bundle",
+   "reason": "bundler",
+   "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
+   "addedAt": "2026-09-23T20:48:32Z",
+   "addedBy": "owner",
+   "status": "active",
+   "alsoIn": [
+    "cluster-5"
+   ],
+   "note": "Also appears in cluster-5."
+  },
+  {
+   "wallet": "4BW2R9rs9annKNizkKuTMZX6qm58fsi6RpvbgmLzjcoo",
+   "clusterId": "cluster-4",
+   "role": "bundle",
+   "reason": "bundler",
+   "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
+   "addedAt": "2026-09-23T20:48:32Z",
+   "addedBy": "owner",
+   "status": "active",
+   "alsoIn": [
+    "cluster-5"
+   ],
+   "note": "Also appears in cluster-5."
+  },
+  {
+   "wallet": "HsPbAiZVEYB3A8J6xsV8zm3pYebmzvCKFmBeHLvEjCFy",
+   "clusterId": "cluster-4",
+   "role": "bundle",
+   "reason": "bundler",
+   "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
+   "addedAt": "2026-09-23T20:48:32Z",
+   "addedBy": "owner",
+   "status": "active",
+   "alsoIn": [
+    "cluster-5"
+   ],
+   "note": "Also appears in cluster-5."
+  },
+  {
+   "wallet": "6Mp1TiapJXyF2WYN6Q27fBE941ys2HXg87xwkZHfwNVA",
+   "clusterId": "cluster-4",
+   "role": "bundle",
+   "reason": "bundler",
+   "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202",
+   "addedAt": "2026-09-23T20:48:32Z",
+   "addedBy": "owner",
+   "status": "active",
+   "alsoIn": [
+    "cluster-5"
+   ],
+   "note": "Also appears in cluster-5."
   }
  ],
  "clusters": {
-  "frankdegods": {
-   "label": "@frankdegods",
+  "cluster-1": {
+   "main": "suqh5sHtr8HyJ7q8scBimULPkPpA557prMG47xCHQfK",
+   "bundles": 63,
+   "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202"
+  },
+  "cluster-2": {
    "main": "498g1rVnFcnjBjpfw1xyqA1WvgQXUU8RWuELjxkjAayQ",
    "bundles": 199,
    "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202"
   },
-  "orangie": {
-   "label": "@orangie",
+  "cluster-3": {
    "main": "DuQabFqdC9eeBULVa7TTdZYxe8vK8ct5DZr4Xcf7docy",
    "bundles": 7,
    "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202"
   },
-  "cupseyy": {
-   "label": "@cupseyy",
-   "main": "suqh5sHtr8HyJ7q8scBimULPkPpA557prMG47xCHQfK",
-   "bundles": 63,
+  "cluster-4": {
+   "main": "GV6UUmNxz2RpKxmNAPadYKb7uQpszwqQAu3qLJxVdC52",
+   "bundles": 199,
+   "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202"
+  },
+  "cluster-5": {
+   "main": "2heJbC32Tpfcb3nbUb5ER61K11FGZVfVGtVnDm6LDogF",
+   "bundles": 200,
    "evidenceUrl": "https://x.com/YokaiCapital/status/2101747601494147202"
   }
  }
