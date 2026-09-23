@@ -59,7 +59,9 @@ if(existsSync(new URL('./campaign-plan.json',import.meta.url))){
   catch(error){
    if(error.code==='campaign-scheduled'){console.log(JSON.stringify({event:'campaign-scheduled',opensAt:error.opensAt,seconds:error.seconds}));setTimeout(()=>provisionUntilReady(0),Math.min(error.seconds,3600)*1000+1000).unref();return false;}
    console.log(JSON.stringify({event:'campaign-not-provisioned',reason:String(error.message).slice(0,300),attempt}));
-   if(attempt>0&&attempt<240)setTimeout(()=>provisionUntilReady(attempt+1),15000).unref();
+   // Every failure is retried, the first one included (23 Sep 2026: a 20 s read timeout at boot left a scheduled
+   // opening unarmed). Every 15 s for four hours; each attempt re-checks the chain, so nothing is created twice.
+   if(attempt<960)setTimeout(()=>provisionUntilReady(attempt+1),15000).unref();
    if(process.env.KIDS_REQUIRE_CAMPAIGN==='1'&&attempt===0)throw error;return false;
   }
  };
