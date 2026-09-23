@@ -55,6 +55,9 @@ pub const E_INVALID_TOKEN_ACCOUNT:u32=17;
 pub const E_INVALID_MINT:u32=18;
 pub const E_INVALID_PURPOSE:u32=19;
 pub const E_INVALID_ACCOUNT:u32=20;
+/// A vault token account does not exist yet. `activate` runs inside the launch instruction, close to the runtime's
+/// nested-instruction limit, so the four vaults are created before the launch and only validated here.
+pub const E_VAULT_MISSING:u32=21;
 pub fn err(n:u32)->ProgramError{ProgramError::Custom(n)}
 pub fn require(b:bool,code:u32)->ProgramResult{if b{Ok(())}else{Err(err(code))}}
 pub fn read64(d:&[u8],at:usize)->Result<u64,ProgramError>{Ok(u64::from_le_bytes(d.get(at..at+8).ok_or(ProgramError::InvalidInstructionData)?.try_into().unwrap()))}
@@ -130,13 +133,15 @@ impl Distribution{
 }
 /// Fields of the launch program's campaign account (384 bytes, `KIDSESC3`) that the distribution reads.
 #[derive(Clone,Copy,Debug)]
-pub struct LaunchCampaign{pub creator:Pubkey,pub nonce:u64,pub phase:u8,pub bump:u8,pub settled_accepted:u64,pub child_mint:Pubkey,pub supply:u64,pub dev:Pubkey,pub launch_time:i64,pub dev_claimed:u64}
+pub struct LaunchCampaign{pub creator:Pubkey,pub nonce:u64,pub phase:u8,pub bump:u8,pub settled_accepted:u64,pub child_mint:Pubkey,pub supply:u64,pub dev:Pubkey,pub launch_time:i64,pub dev_claimed:u64,pub distribution_program:Pubkey}
+/// Campaign offset of the distribution program the launch program recorded at creation (zero when none).
+pub const LAUNCH_CAMPAIGN_OFF_DISTRIBUTION_PROGRAM:usize=312;
 impl LaunchCampaign{
  pub fn read(account:&AccountInfo,launch_program:&Pubkey)->Result<Self,ProgramError>{
   if account.owner!=launch_program{return Err(ProgramError::IncorrectProgramId)}
   let d=account.try_borrow_data()?;
   if d.len()!=LAUNCH_CAMPAIGN_LEN||&d[..8]!=LAUNCH_CAMPAIGN_MAGIC{return Err(ProgramError::InvalidAccountData)}
-  let s=Self{creator:read_key(&d,8)?,nonce:read64(&d,40)?,phase:d[96],bump:d[97],settled_accepted:read64(&d,120)?,child_mint:read_key(&d,128)?,supply:read64(&d,160)?,dev:read_key(&d,168)?,launch_time:read64(&d,232)? as i64,dev_claimed:read64(&d,304)?};
+  let s=Self{creator:read_key(&d,8)?,nonce:read64(&d,40)?,phase:d[96],bump:d[97],settled_accepted:read64(&d,120)?,child_mint:read_key(&d,128)?,supply:read64(&d,160)?,dev:read_key(&d,168)?,launch_time:read64(&d,232)? as i64,dev_claimed:read64(&d,304)?,distribution_program:read_key(&d,LAUNCH_CAMPAIGN_OFF_DISTRIBUTION_PROGRAM)?};
   let (expected,bump)=Pubkey::find_program_address(&[b"campaign",s.creator.as_ref(),&s.nonce.to_le_bytes()],launch_program);
   if expected!=*account.key||bump!=s.bump{return Err(ProgramError::InvalidSeeds)}
   Ok(s)
@@ -173,9 +178,14 @@ impl LaunchReceipt{
 }
 pub fn system(a:&AccountInfo)->ProgramResult{if *a.key!=system_program::id(){Err(ProgramError::IncorrectProgramId)}else{Ok(())}}
 pub fn create_pda<'a>(payer:&AccountInfo<'a>,target:&AccountInfo<'a>,system_info:&AccountInfo<'a>,program:&Pubkey,len:usize,seeds:&[&[u8]])->ProgramResult{
- // A third party can pre-fund a PDA. Allocate/assign rather than letting that donation block creation.
  if target.owner!=&system_program::id()||!target.data_is_empty(){return Err(ProgramError::AccountAlreadyInitialized)}
- let rent=Rent::get()?.minimum_balance(len);let needed=rent.saturating_sub(target.lamports());
+ let rent=Rent::get()?.minimum_balance(len);
+ // An unfunded account takes a single System CPI. A third party can pre-fund a PDA; that donation must not block
+ // creation, so a funded account is topped up, allocated and assigned instead.
+ if target.lamports()==0{
+  return invoke_signed(&system_instruction::create_account(payer.key,target.key,rent,len as u64,program),&[payer.clone(),target.clone(),system_info.clone()],&[seeds])
+ }
+ let needed=rent.saturating_sub(target.lamports());
  if needed>0{invoke(&system_instruction::transfer(payer.key,target.key,needed),&[payer.clone(),target.clone(),system_info.clone()])?;}
  invoke_signed(&system_instruction::allocate(target.key,len as u64),&[target.clone(),system_info.clone()],&[seeds])?;
  invoke_signed(&system_instruction::assign(target.key,program),&[target.clone(),system_info.clone()],&[seeds])
@@ -274,22 +284,26 @@ pub fn process_instruction(program:&Pubkey,accounts:&[AccountInfo],data:&[u8])->
   InstructionData::SweepDonationToBurn{purpose}=>claims::sweep_donation_to_burn(program,accounts,purpose),
  }
 }
-/// Tag 0. Accounts: 0 signer (launch authority PDA of the launch program, or the campaign creator; must own the
-/// source token account), 1 payer (signer, rent for the distribution and the vaults), 2 campaign, 3 parents,
-/// 4 child mint, 5 source token account, 6 distribution PDA, 7..10 vault authorities 0..3, 11..14 vaults 0..3,
-/// 15 Token program, 16 Associated Token program, 17 System program.
-/// Moves allocation minus prior into each vault from the source, then requires each vault to hold exactly that.
-/// Any balance a vault held beforehand is a donation and is burned first, so a pre-funded vault cannot block
-/// activation and cannot inflate an entitlement.
+/// Tag 0. Accounts: 0 signer (launch authority PDA of the launch program, or the campaign creator), 1 payer
+/// (signer, rent for the distribution record), 2 campaign, 3 parents, 4 child mint, 5 source: the signer's
+/// associated token account for the child mint (the launch custody ATA on the launch authority path),
+/// 6 distribution PDA, 7..10 vault authorities 0..3, 11..14 vaults 0..3, 15 Token program, 16 System program.
+/// A campaign that recorded a distribution program at creation may only be activated by that program.
+/// Each vault is its authority's associated token account for the child mint and must already exist, initialised,
+/// owned by the authority, without delegate or close authority (`E_VAULT_MISSING` when absent,
+/// `E_INVALID_TOKEN_ACCOUNT` otherwise). Every check runs before the first CPI. Then the distribution record is
+/// created, any balance a vault held beforehand is burned (a donation cannot inflate an entitlement), and
+/// `allocation − prior` moves into each vault from the source, which must leave each vault holding exactly that.
+/// CPIs on a fresh launch: one System `create_account` and four Token transfers, plus one burn per donated vault.
 pub fn activate(program:&Pubkey,accounts:&[AccountInfo],prior:[u64;4])->ProgramResult{
- require(accounts.len()==18,E_INVALID_ACCOUNT)?;
+ require(accounts.len()==17,E_INVALID_ACCOUNT)?;
  let iter=&mut accounts.iter();
  let signer=next_account_info(iter)?;let payer=next_account_info(iter)?;let campaign=next_account_info(iter)?;let parents=next_account_info(iter)?;
  let mint=next_account_info(iter)?;let source=next_account_info(iter)?;let distribution=next_account_info(iter)?;
  let authorities:Vec<&AccountInfo>=(0..4).map(|_|next_account_info(iter)).collect::<Result<_,_>>()?;
  let vaults:Vec<&AccountInfo>=(0..4).map(|_|next_account_info(iter)).collect::<Result<_,_>>()?;
- let token_program=next_account_info(iter)?;let ata_program=next_account_info(iter)?;let sys=next_account_info(iter)?;
- system(sys)?;require(*token_program.key==TOKEN&&token_program.executable&&*ata_program.key==ATA&&ata_program.executable,E_INVALID_ACCOUNT)?;
+ let token_program=next_account_info(iter)?;let sys=next_account_info(iter)?;
+ system(sys)?;require(*token_program.key==TOKEN&&token_program.executable,E_INVALID_ACCOUNT)?;
  if !signer.is_signer||!payer.is_signer{return Err(ProgramError::MissingRequiredSignature)}
  let launch_program=*campaign.owner;
  let c=LaunchCampaign::read(campaign,&launch_program)?;
@@ -297,25 +311,26 @@ pub fn activate(program:&Pubkey,accounts:&[AccountInfo],prior:[u64;4])->ProgramR
  let p=LaunchParents::read(parents,&launch_program,campaign.key)?;
  let launch_authority=Pubkey::find_program_address(&[b"launch_authority",campaign.key.as_ref()],&launch_program).0;
  require(*signer.key==launch_authority||*signer.key==c.creator,E_UNAUTHORIZED)?;
+ require(c.distribution_program==Pubkey::default()||c.distribution_program==*program,E_INVALID_ACCOUNT)?;
  child_mint(mint,&c.child_mint,c.supply)?;
+ ata(source,&c.child_mint,signer.key)?;let source_balance=token(source,&c.child_mint,signer.key)?;
  let allocation=allocations(c.supply);
  require(prior[1]==p.claimed[0]&&prior[2]==p.claimed[1]&&prior[3]==c.dev_claimed,E_PRIOR_COUNTER_MISMATCH)?;
- for purpose in 0..4{require(prior[purpose]<=allocation[purpose],E_PRIOR_COUNTER_MISMATCH)?;}
+ let mut owed=0u64;for purpose in 0..4{require(prior[purpose]<=allocation[purpose],E_PRIOR_COUNTER_MISMATCH)?;owed=add(owed,sub(allocation[purpose],prior[purpose])?)?;}
+ require(source_balance>=owed,E_VAULT_BALANCE_MISMATCH)?;
  let (distribution_key,distribution_bump)=Pubkey::find_program_address(&[b"distribution",campaign.key.as_ref()],program);
  require(*distribution.key==distribution_key,E_INVALID_ACCOUNT)?;
  let mut bumps=[distribution_bump,0,0,0,0];
  let mut d=Distribution{campaign:*campaign.key,mint:c.child_mint,launch_program,supply:c.supply,settled_accepted:c.settled_accepted,launch_time:c.launch_time,parent_expiry:parent_expiry(c.launch_time)?,dev_start:c.launch_time,dev_end:three_month_end(c.launch_time)?,roots:p.roots,parent_supply:p.supply,eligible:p.eligible,allocation,claimed:prior,burned:[0;2],dev_prior:prior[3],flags:FLAG_ACTIVATED,bumps,dev:c.dev};
  for purpose in 0..4u8{
   let (authority_key,bump)=vault_authority(program,campaign.key,purpose);bumps[1+purpose as usize]=bump;
-  require(*authorities[purpose as usize].key==authority_key,E_INVALID_ACCOUNT)?;ata(vaults[purpose as usize],&c.child_mint,&authority_key)?;
-  require(source.key!=vaults[purpose as usize].key,E_INVALID_TOKEN_ACCOUNT)?;
+  let vault=vaults[purpose as usize];
+  require(*authorities[purpose as usize].key==authority_key,E_INVALID_ACCOUNT)?;ata(vault,&c.child_mint,&authority_key)?;
+  require(source.key!=vault.key,E_INVALID_TOKEN_ACCOUNT)?;
+  require(!(*vault.owner==system_program::id()&&vault.data_is_empty()),E_VAULT_MISSING)?;
+  token(vault,&c.child_mint,&authority_key)?;
  }
  d.bumps=bumps;
- for purpose in 0..4usize{
-  let authority=authorities[purpose];let vault=vaults[purpose];
-  // Associated Token program instruction 1 (CreateIdempotent): payer, ata, owner, mint, System, Token.
-  invoke(&Instruction{program_id:ATA,accounts:vec![AccountMeta::new(*payer.key,true),AccountMeta::new(*vault.key,false),AccountMeta::new_readonly(*authority.key,false),AccountMeta::new_readonly(c.child_mint,false),AccountMeta::new_readonly(system_program::id(),false),AccountMeta::new_readonly(TOKEN,false)],data:vec![1]},&[payer.clone(),vault.clone(),authority.clone(),mint.clone(),sys.clone(),token_program.clone(),ata_program.clone()])?;
- }
  create_pda(payer,distribution,sys,program,DISTRIBUTION_LEN,&[b"distribution",campaign.key.as_ref(),&[distribution_bump]])?;
  for purpose in 0..4u8{
   let authority=authorities[purpose as usize];let vault=vaults[purpose as usize];

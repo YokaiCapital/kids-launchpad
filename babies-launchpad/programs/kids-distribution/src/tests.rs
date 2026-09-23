@@ -1,14 +1,18 @@
 //! Host-side handler tests. A syscall stub serves the clock and rent, emulates the Token program's Transfer and
-//! Burn on the passed account data (checking the vault authority is signed with the right seeds) and refuses
-//! every other CPI with `HOST_CPI_UNSUPPORTED`. Account creation (System, Associated Token) therefore stops a
-//! host test at the point where every validation before it has passed; those paths are covered on localnet.
+//! Burn on the passed account data (checking the vault authority is signed with the right seeds), emulates the
+//! System program's CreateAccount, Allocate, Assign and Transfer (checking every signer named by the instruction),
+//! logs every CPI and refuses any other with `HOST_CPI_UNSUPPORTED`. Accounts the System emulation creates are
+//! committed back into the test's accounts after a successful call, as the runtime would, so every handler runs
+//! end to end here. The launch itself (pool, lock, the launch program's tag 6) is covered on localnet.
 use super::*;
 use claims::ClaimReceipt;
 use solana_program::program_stubs::{set_syscall_stubs,SyscallStubs};
 use std::cell::RefCell;
 use std::sync::Once;
 pub const HOST_CPI_UNSUPPORTED:u32=0xF00D;
-thread_local!{static NOW:RefCell<i64>=RefCell::new(0);static PROGRAM:RefCell<Pubkey>=RefCell::new(Pubkey::default());static CPI_LOG:RefCell<Vec<(Pubkey,Vec<u8>)>>=RefCell::new(vec![]);}
+/// An account the System emulation allocated during one call: its buffer and, once assigned, its owner.
+struct Created{key:Pubkey,data:*mut u8,len:usize,owner:Option<Pubkey>}
+thread_local!{static NOW:RefCell<i64>=RefCell::new(0);static PROGRAM:RefCell<Pubkey>=RefCell::new(Pubkey::default());static CPI_LOG:RefCell<Vec<(Pubkey,Vec<u8>)>>=RefCell::new(vec![]);static CREATED:RefCell<Vec<Created>>=RefCell::new(vec![]);}
 struct HostStubs;
 impl SyscallStubs for HostStubs{
  fn sol_log(&self,_message:&str){}
@@ -16,12 +20,14 @@ impl SyscallStubs for HostStubs{
  fn sol_get_rent_sysvar(&self,var_addr:*mut u8)->u64{unsafe{std::ptr::write(var_addr as *mut Rent,Rent::default())};0}
  fn sol_invoke_signed(&self,instruction:&Instruction,infos:&[AccountInfo],signers_seeds:&[&[&[u8]]])->ProgramResult{
   CPI_LOG.with(|l|l.borrow_mut().push((instruction.program_id,instruction.data.clone())));
-  if instruction.program_id!=TOKEN{return Err(err(HOST_CPI_UNSUPPORTED))}
   let find=|k:&Pubkey|infos.iter().find(|i|i.key==k).expect("CPI account passed").clone();
   let program=PROGRAM.with(|p|*p.borrow());
+  let signed=|k:&Pubkey|find(k).is_signer||signers_seeds.iter().any(|seeds|Pubkey::create_program_address(seeds,&program)==Ok(*k));
+  for meta in &instruction.accounts{if meta.is_signer{assert!(signed(&meta.pubkey),"CPI account {} is not signed",meta.pubkey);}}
+  if instruction.program_id==system_program::id(){return emulate_system(instruction,infos)}
+  if instruction.program_id!=TOKEN{return Err(err(HOST_CPI_UNSUPPORTED))}
   let authority=instruction.accounts[2].pubkey;
-  let signed=find(&authority).is_signer||signers_seeds.iter().any(|seeds|Pubkey::create_program_address(seeds,&program)==Ok(authority));
-  assert!(signed,"token CPI authority {authority} is not signed");
+  assert!(signed(&authority),"token CPI authority {authority} is not signed");
   let amount=read64(&instruction.data,1).unwrap();
   let source=find(&instruction.accounts[0].pubkey);
   match instruction.data[0]{
@@ -35,16 +41,48 @@ impl SyscallStubs for HostStubs{
   }
  }
 }
+/// System program instructions as the program issues them (bincode: u32 tag, then the fields):
+/// 0 CreateAccount (lamports, space, owner), 1 Assign (owner), 2 Transfer (lamports), 8 Allocate (space).
+fn emulate_system<'a>(instruction:&Instruction,infos:&[AccountInfo<'a>])->ProgramResult{
+ let d=&instruction.data;let tag=u32::from_le_bytes(d[..4].try_into().unwrap());
+ let account=|i:usize|infos.iter().find(|info|*info.key==instruction.accounts[i].pubkey).expect("CPI account passed").clone();
+ let move_lamports=|from:&AccountInfo,to:&AccountInfo,amount:u64|{
+  {let mut f=from.try_borrow_mut_lamports().unwrap();assert!(**f>=amount,"system transfer overdraw");**f-=amount;}
+  **to.try_borrow_mut_lamports().unwrap()+=amount;
+ };
+ match tag{
+  0=>{let to=account(1);assert_eq!(to.lamports(),0,"create_account on a funded account");move_lamports(&account(0),&to,read64(d,4).unwrap());allocate(&to,read64(d,12).unwrap() as usize);assign(&to,read_key(d,20).unwrap());Ok(())},
+  1=>{assign(&account(0),read_key(d,4).unwrap());Ok(())},
+  2=>{move_lamports(&account(0),&account(1),read64(d,4).unwrap());Ok(())},
+  8=>{allocate(&account(0),read64(d,4).unwrap() as usize);Ok(())},
+  _=>Err(err(HOST_CPI_UNSUPPORTED)),
+ }
+}
+/// Gives the account a zeroed buffer of `space` bytes for the rest of the call. The buffer is leaked so that it
+/// outlives the borrowed `AccountInfo`; `run` copies it back once no `AccountInfo` references it any more.
+fn allocate(info:&AccountInfo,space:usize){
+ assert!(info.data_is_empty(),"allocate on a non-empty account");
+ let buffer:&'static mut [u8]=Box::leak(vec![0u8;space].into_boxed_slice());let data=buffer.as_mut_ptr();
+ *info.data.borrow_mut()=buffer;
+ CREATED.with(|c|{let mut c=c.borrow_mut();match c.iter_mut().find(|x|x.key==*info.key){Some(x)=>{x.data=data;x.len=space}None=>c.push(Created{key:*info.key,data,len:space,owner:None})}});
+}
+fn assign(info:&AccountInfo,owner:Pubkey){
+ CREATED.with(|c|{let mut c=c.borrow_mut();match c.iter_mut().find(|x|x.key==*info.key){Some(x)=>x.owner=Some(owner),None=>c.push(Created{key:*info.key,data:std::ptr::null_mut(),len:0,owner:Some(owner)})}});
+}
 static INSTALL:Once=Once::new();
-fn install(program:&Pubkey,now:i64){INSTALL.call_once(||{set_syscall_stubs(Box::new(HostStubs));});PROGRAM.with(|p|*p.borrow_mut()=*program);NOW.with(|n|*n.borrow_mut()=now);CPI_LOG.with(|l|l.borrow_mut().clear());}
+fn install(program:&Pubkey,now:i64){INSTALL.call_once(||{set_syscall_stubs(Box::new(HostStubs));});PROGRAM.with(|p|*p.borrow_mut()=*program);NOW.with(|n|*n.borrow_mut()=now);clear_cpis();}
 fn set_now(now:i64){NOW.with(|n|*n.borrow_mut()=now);}
 fn cpi_count()->usize{CPI_LOG.with(|l|l.borrow().len())}
+fn cpis()->Vec<(Pubkey,Vec<u8>)>{CPI_LOG.with(|l|l.borrow().clone())}
+fn clear_cpis(){CPI_LOG.with(|l|l.borrow_mut().clear());}
 struct Acc{key:Pubkey,lamports:u64,data:Vec<u8>,owner:Pubkey,signer:bool,writable:bool,executable:bool}
 impl Acc{
  fn new(key:Pubkey,owner:Pubkey,data:Vec<u8>)->Self{Self{key,lamports:1_000_000_000,data,owner,signer:false,writable:true,executable:false}}
  fn signer(mut self)->Self{self.signer=true;self}
  fn program(key:Pubkey)->Self{let mut a=Self::new(key,Pubkey::default(),vec![]);a.executable=true;a.writable=false;a}
  fn empty(key:Pubkey)->Self{Self::new(key,system_program::id(),vec![])}
+ /// An address nobody has touched: no lamports, no data, System-owned. What a PDA looks like before creation.
+ fn unfunded(key:Pubkey)->Self{let mut a=Self::empty(key);a.lamports=0;a}
 }
 fn infos<'a>(accounts:&'a mut [Acc])->Vec<AccountInfo<'a>>{accounts.iter_mut().map(|a|AccountInfo::new(&a.key,a.signer,a.writable,&mut a.lamports,&mut a.data,&a.owner,a.executable,0)).collect()}
 fn mint_data(supply:u64)->Vec<u8>{let mut d=vec![0u8;82];put64(&mut d,36,supply);d[44]=CHILD_DECIMALS;d[45]=1;d}
@@ -94,7 +132,18 @@ impl World{
   let mut d=vec![0u8;CLAIM_LEN];ClaimReceipt{campaign:self.campaign,owner:*owner,purpose,bump,amount}.encode(&mut d);Acc::new(key,self.program,d)
  }
 }
-fn run(world:&World,accounts:&mut [Acc],data:&[u8])->ProgramResult{PROGRAM.with(|p|*p.borrow_mut()=world.program);let infos=infos(accounts);process_instruction(&world.program,&infos,data)}
+fn run(world:&World,accounts:&mut [Acc],data:&[u8])->ProgramResult{
+ PROGRAM.with(|p|*p.borrow_mut()=world.program);CREATED.with(|c|c.borrow_mut().clear());
+ let result={let infos=infos(accounts);process_instruction(&world.program,&infos,data)};
+ // Every AccountInfo is gone, so nothing references the leaked buffers any more; commit them as the runtime
+ // commits a successful instruction. A failed call leaves the created accounts uncommitted.
+ if result.is_ok(){CREATED.with(|c|for created in c.borrow().iter(){
+  let acc=accounts.iter_mut().find(|a|a.key==created.key).expect("created account was passed to the call");
+  if !created.data.is_null(){acc.data=unsafe{std::slice::from_raw_parts(created.data,created.len)}.to_vec();}
+  if let Some(owner)=created.owner{acc.owner=owner;}
+ })}
+ result
+}
 fn balance(acc:&Acc)->u64{read64(&acc.data,64).unwrap()}
 fn parent_body(index:u8,balance:u64,allocation:u64,proof:&[u8])->Vec<u8>{let mut b=vec![TAG_CLAIM_PARENT,index];b.extend_from_slice(&balance.to_le_bytes());b.extend_from_slice(&allocation.to_le_bytes());b.push((proof.len()/32) as u8);b.extend_from_slice(proof);b}
 #[test]fn distribution_layout_round_trips_and_offsets_match_the_design(){
@@ -215,7 +264,11 @@ fn parent_body(index:u8,balance:u64,allocation:u64,proof:&[u8])->Vec<u8>{let mut
  set_now(expiry);assert_eq!(run(&w,&mut accounts,&good).unwrap_err(),err(E_EXPIRED));
  set_now(expiry+1);assert_eq!(run(&w,&mut accounts,&good).unwrap_err(),err(E_EXPIRED));
  assert_eq!(cpi_count(),0);
- for now in [LAUNCH,expiry-1]{set_now(now);assert_eq!(run(&w,&mut accounts,&good).unwrap_err(),err(HOST_CPI_UNSUPPORTED),"valid at {now}: every check passed up to receipt creation");}
+ set_now(LAUNCH);run(&w,&mut accounts,&good).unwrap();
+ assert_eq!(balance(&accounts[6]),entitled,"paid at the first second of the window");assert_eq!(balance(&accounts[5]),allocation[1]-entitled);
+ assert_eq!(accounts[2].owner,w.program);let receipt=ClaimReceipt::decode(&accounts[2].data).unwrap();assert_eq!((receipt.campaign,receipt.owner,receipt.purpose,receipt.amount),(w.campaign,owner,1,entitled));
+ assert_eq!(Distribution::decode(&accounts[1].data).unwrap().claimed,[0,entitled,0,0]);
+ let count=cpi_count();set_now(expiry-1);run(&w,&mut accounts,&good).unwrap();assert_eq!(cpi_count(),count,"a repeat inside the window is a no-op");assert_eq!(balance(&accounts[6]),entitled);
  set_now(LAUNCH+1);
  assert_eq!(run(&w,&mut accounts,&parent_body(0,balance_a,entitled,&[8u8;32])).unwrap_err(),err(E_PROOF_MISMATCH));
  assert_eq!(run(&w,&mut accounts,&parent_body(0,balance_a,entitled+1,&sibling)).unwrap_err(),err(E_ALLOCATION_MISMATCH));
@@ -229,7 +282,7 @@ fn parent_body(index:u8,balance:u64,allocation:u64,proof:&[u8])->Vec<u8>{let mut
  let mut burned=w.clone();burned.distribution.flags=FLAG_ACTIVATED|burned_flag(0);let mut accounts_b=fresh(&burned);
  assert_eq!(run(&burned,&mut accounts_b,&good).unwrap_err(),err(E_EXPIRED),"burned parent refuses even inside the window");
  burned.distribution.flags=FLAG_ACTIVATED|burned_flag(1);let mut accounts_c=fresh(&burned);
- assert_eq!(run(&burned,&mut accounts_c,&good).unwrap_err(),err(HOST_CPI_UNSUPPORTED),"parent B burned leaves parent A claimable");
+ run(&burned,&mut accounts_c,&good).unwrap();assert_eq!(balance(&accounts_c[6]),entitled,"parent B burned leaves parent A claimable");
  let mut overdrawn=w.clone();overdrawn.distribution.claimed[1]=allocation[1]-entitled+1;
  let mut accounts_d=fresh(&overdrawn);assert_eq!(run(&overdrawn,&mut accounts_d,&good).unwrap_err(),err(E_OVERDRAW));
  let mut replay=fresh(&w);replay[2]=w.claim_acc(1,&owner,entitled);let count=cpi_count();
@@ -246,7 +299,11 @@ fn parent_body(index:u8,balance:u64,allocation:u64,proof:&[u8])->Vec<u8>{let mut
  let fresh=|receipt:Acc|vec![Acc::empty(owner).signer(),w.distribution_acc(),receipt,Acc::empty(w.claim_key(0,&owner)),w.mint_acc(SUPPLY),w.authority_acc(0),w.vault_acc(0,allocation[0]),w.holder_ata_acc(&owner,0),Acc::program(TOKEN),Acc::program(system_program::id())];
  set_now(LAUNCH);
  let mut accounts=fresh(w.receipt_acc(&owner,accepted,true,false));
- assert_eq!(run(&w,&mut accounts,&[TAG_CLAIM_PARTICIPANT]).unwrap_err(),err(HOST_CPI_UNSUPPORTED),"valid: every check passed up to receipt creation");
+ run(&w,&mut accounts,&[TAG_CLAIM_PARTICIPANT]).unwrap();
+ assert_eq!(balance(&accounts[7]),expected);assert_eq!(balance(&accounts[6]),allocation[0]-expected);
+ assert_eq!(accounts[3].owner,w.program);let receipt=ClaimReceipt::decode(&accounts[3].data).unwrap();assert_eq!((receipt.campaign,receipt.owner,receipt.purpose,receipt.amount),(w.campaign,owner,0,expected));
+ assert_eq!(Distribution::decode(&accounts[1].data).unwrap().claimed,[expected,0,0,0]);
+ let count=cpi_count();run(&w,&mut accounts,&[TAG_CLAIM_PARTICIPANT]).unwrap();assert_eq!(cpi_count(),count,"a repeat is a no-op");assert_eq!(balance(&accounts[7]),expected);
  let mut unsettled=fresh(w.receipt_acc(&owner,accepted,false,false));assert_eq!(run(&w,&mut unsettled,&[TAG_CLAIM_PARTICIPANT]).unwrap_err(),err(E_NOT_SETTLED));
  let mut paid_before=fresh(w.receipt_acc(&owner,accepted,true,true));assert_eq!(run(&w,&mut paid_before,&[TAG_CLAIM_PARTICIPANT]).unwrap_err(),err(E_ALREADY_CLAIMED),"paid under the launch program");
  let mut other=fresh(w.receipt_acc(&Pubkey::new_unique(),accepted,true,false));assert_eq!(run(&w,&mut other,&[TAG_CLAIM_PARTICIPANT]).unwrap_err(),err(E_UNAUTHORIZED),"someone else's receipt");
@@ -276,22 +333,36 @@ fn parent_body(index:u8,balance:u64,allocation:u64,proof:&[u8])->Vec<u8>{let mut
  let mut wrong_vault=vec![w.distribution_acc(),w.mint_acc(SUPPLY),w.authority_acc(1),w.vault_acc(2,allocation[2]+1),Acc::program(TOKEN)];
  assert_eq!(run(&w,&mut wrong_vault,&[TAG_SWEEP_DONATION_TO_BURN,1]).unwrap_err(),err(E_INVALID_TOKEN_ACCOUNT));
 }
+/// The seventeen `activate` accounts as they stand inside the launch: the record PDA untouched, every vault
+/// created beforehand and empty, the source holding everything but the liquidity share.
 fn activation_accounts(w:&World,signer:Pubkey,campaign:Acc,parents:Acc,mint:Acc,source_amount:u64)->Vec<Acc>{
- let mut accounts=vec![Acc::empty(signer).signer(),Acc::empty(Pubkey::new_unique()).signer(),campaign,parents,mint,Acc::new(Pubkey::new_unique(),TOKEN,token_data(&w.mint,&signer,source_amount)),Acc::empty(w.distribution_key())];
+ let mut accounts=vec![Acc::empty(signer).signer(),Acc::empty(Pubkey::new_unique()).signer(),campaign,parents,mint,Acc::new(ata_key(&signer,&w.mint),TOKEN,token_data(&w.mint,&signer,source_amount)),Acc::unfunded(w.distribution_key())];
  for p in 0..4u8{accounts.push(w.authority_acc(p));}for p in 0..4u8{accounts.push(w.vault_acc(p,0));}
- accounts.push(Acc::program(TOKEN));accounts.push(Acc::program(ATA));accounts.push(Acc::program(system_program::id()));accounts
+ accounts.push(Acc::program(TOKEN));accounts.push(Acc::program(system_program::id()));accounts
 }
 fn activate_body(prior:[u64;4])->Vec<u8>{let mut b=vec![TAG_ACTIVATE];for p in prior{b.extend_from_slice(&p.to_le_bytes());}b}
-#[test]fn activate_checks_campaign_parents_signer_mint_and_prior_counters_before_creating_anything(){
+fn burn_cpis()->usize{cpis().iter().filter(|(program,data)|*program==TOKEN&&data[0]==8).count()}
+#[test]fn activate_checks_campaign_parents_signer_mint_and_prior_counters_then_funds_every_vault(){
  let w=World::new();let launch_authority=Pubkey::find_program_address(&[b"launch_authority",w.campaign.as_ref()],&w.launch_program).0;
- let custody=SUPPLY-share(SUPPLY,LIQUIDITY_BPS);
+ let custody=SUPPLY-share(SUPPLY,LIQUIDITY_BPS);let allocation=allocations(SUPPLY);let rent=Rent::default().minimum_balance(DISTRIBUTION_LEN);
  let mut valid=activation_accounts(&w,launch_authority,w.campaign_acc(3,0),w.parents_acc(),w.mint_acc(SUPPLY),custody);
- assert_eq!(run(&w,&mut valid,&activate_body([0;4])).unwrap_err(),err(HOST_CPI_UNSUPPORTED),"launch authority: every check passed up to vault creation");
- assert!(valid[6].data.is_empty(),"nothing written when creation is refused");
+ let payer_before=valid[1].lamports;
+ run(&w,&mut valid,&activate_body([0;4])).unwrap();
+ assert_eq!(valid[6].owner,w.program);assert_eq!(valid[6].lamports,rent);assert_eq!(valid[1].lamports,payer_before-rent,"the payer funds the record");
+ assert_eq!(Distribution::decode(&valid[6].data).unwrap(),w.distribution,"terms copied from the campaign and the parents account");
+ for p in 0..4{assert_eq!(balance(&valid[11+p]),allocation[p],"vault {p} holds its allocation");}
+ assert_eq!(balance(&valid[5]),0,"the fixed supply leaves nothing in custody");
+ assert_eq!(read64(&valid[4].data,36).unwrap(),SUPPLY,"nothing burned");
+ let count=cpi_count();
+ assert_eq!(run(&w,&mut valid,&activate_body([0;4])).unwrap_err(),err(E_VAULT_BALANCE_MISMATCH),"a repeat finds custody empty");
+ put64(&mut valid[5].data,64,custody);
+ assert_eq!(run(&w,&mut valid,&activate_body([0;4])).unwrap_err(),ProgramError::AccountAlreadyInitialized,"even with custody refilled the existing record stops a second activation");
+ assert_eq!(cpi_count(),count);assert_eq!(Distribution::decode(&valid[6].data).unwrap(),w.distribution);for p in 0..4{assert_eq!(balance(&valid[11+p]),allocation[p]);}
  let mut by_creator=activation_accounts(&w,w.creator,w.campaign_acc(3,0),w.parents_acc(),w.mint_acc(SUPPLY),custody);
- assert_eq!(run(&w,&mut by_creator,&activate_body([0;4])).unwrap_err(),err(HOST_CPI_UNSUPPORTED),"creator may activate");
+ run(&w,&mut by_creator,&activate_body([0;4])).unwrap();assert_eq!(Distribution::decode(&by_creator[6].data).unwrap(),w.distribution,"creator may activate");
  let mut stranger=activation_accounts(&w,Pubkey::new_unique(),w.campaign_acc(3,0),w.parents_acc(),w.mint_acc(SUPPLY),custody);
  assert_eq!(run(&w,&mut stranger,&activate_body([0;4])).unwrap_err(),err(E_UNAUTHORIZED));
+ assert!(stranger[6].data.is_empty()&&stranger[6].owner==system_program::id(),"nothing written when refused");
  for phase in [0u8,1,2]{let mut early=activation_accounts(&w,launch_authority,w.campaign_acc(phase,0),w.parents_acc(),w.mint_acc(SUPPLY),custody);assert_eq!(run(&w,&mut early,&activate_body([0;4])).unwrap_err(),err(E_CAMPAIGN_NOT_LAUNCHED),"phase {phase}");}
  let mut foreign_parents=activation_accounts(&w,launch_authority,w.campaign_acc(3,0),w.parents_acc(),w.mint_acc(SUPPLY),custody);foreign_parents[3].owner=Pubkey::new_unique();
  assert_eq!(run(&w,&mut foreign_parents,&activate_body([0;4])).unwrap_err(),ProgramError::IncorrectProgramId);
@@ -302,18 +373,86 @@ fn activate_body(prior:[u64;4])->Vec<u8>{let mut b=vec![TAG_ACTIVATE];for p in p
  let mut wrong_prior=activation_accounts(&w,launch_authority,w.campaign_acc(3,0),w.parents_acc(),w.mint_acc(SUPPLY),custody);
  assert_eq!(run(&w,&mut wrong_prior,&activate_body([0,0,0,1])).unwrap_err(),err(E_PRIOR_COUNTER_MISMATCH),"dev prior must match the campaign counter");
  let mut migrated=activation_accounts(&w,launch_authority,w.campaign_acc(3,SUPPLY/100),w.parents_acc(),w.mint_acc(SUPPLY),custody);
- assert_eq!(run(&w,&mut migrated,&activate_body([0,0,0,SUPPLY/100])).unwrap_err(),err(HOST_CPI_UNSUPPORTED),"matching dev prior accepted");
  assert_eq!(run(&w,&mut migrated,&activate_body([0,0,0,0])).unwrap_err(),err(E_PRIOR_COUNTER_MISMATCH));
+ run(&w,&mut migrated,&activate_body([0,0,0,SUPPLY/100])).unwrap();
+ let d=Distribution::decode(&migrated[6].data).unwrap();assert_eq!((d.claimed,d.dev_prior),([0,0,0,SUPPLY/100],SUPPLY/100),"matching dev prior accepted and recorded");
+ assert_eq!(balance(&migrated[14]),allocation[3]-SUPPLY/100,"the dev vault holds what is still owed");assert_eq!(balance(&migrated[5]),SUPPLY/100,"what the launch program already paid stays out of the vaults");
  let mut too_much=activation_accounts(&w,launch_authority,w.campaign_acc(3,0),w.parents_acc(),w.mint_acc(SUPPLY),custody);
  assert_eq!(run(&w,&mut too_much,&activate_body([allocations(SUPPLY)[0]+1,0,0,0])).unwrap_err(),err(E_PRIOR_COUNTER_MISMATCH),"prior above the allocation");
  let mut unsigned=activation_accounts(&w,launch_authority,w.campaign_acc(3,0),w.parents_acc(),w.mint_acc(SUPPLY),custody);unsigned[0].signer=false;
  assert_eq!(run(&w,&mut unsigned,&activate_body([0;4])).unwrap_err(),ProgramError::MissingRequiredSignature);
- let mut wrong_distribution=activation_accounts(&w,launch_authority,w.campaign_acc(3,0),w.parents_acc(),w.mint_acc(SUPPLY),custody);wrong_distribution[6]=Acc::empty(Pubkey::new_unique());
+ let mut wrong_distribution=activation_accounts(&w,launch_authority,w.campaign_acc(3,0),w.parents_acc(),w.mint_acc(SUPPLY),custody);wrong_distribution[6]=Acc::unfunded(Pubkey::new_unique());
  assert_eq!(run(&w,&mut wrong_distribution,&activate_body([0;4])).unwrap_err(),err(E_INVALID_ACCOUNT));
  let mut wrong_vault=activation_accounts(&w,launch_authority,w.campaign_acc(3,0),w.parents_acc(),w.mint_acc(SUPPLY),custody);wrong_vault[11]=Acc::new(Pubkey::new_unique(),TOKEN,vec![0u8;165]);
  assert_eq!(run(&w,&mut wrong_vault,&activate_body([0;4])).unwrap_err(),err(E_INVALID_TOKEN_ACCOUNT),"vault must be the authority's associated token account");
  let mut wrong_authority=activation_accounts(&w,launch_authority,w.campaign_acc(3,0),w.parents_acc(),w.mint_acc(SUPPLY),custody);wrong_authority[8]=w.authority_acc(2);
  assert_eq!(run(&w,&mut wrong_authority,&activate_body([0;4])).unwrap_err(),err(E_INVALID_ACCOUNT));
+ let count=cpi_count();
+ let mut not_ata=activation_accounts(&w,launch_authority,w.campaign_acc(3,0),w.parents_acc(),w.mint_acc(SUPPLY),custody);not_ata[5].key=Pubkey::new_unique();
+ assert_eq!(run(&w,&mut not_ata,&activate_body([0;4])).unwrap_err(),err(E_INVALID_TOKEN_ACCOUNT),"source must be the signer's associated token account");
+ let mut foreign_source=activation_accounts(&w,launch_authority,w.campaign_acc(3,0),w.parents_acc(),w.mint_acc(SUPPLY),custody);foreign_source[5]=Acc::new(ata_key(&w.creator,&w.mint),TOKEN,token_data(&w.mint,&w.creator,custody));
+ assert_eq!(run(&w,&mut foreign_source,&activate_body([0;4])).unwrap_err(),err(E_INVALID_TOKEN_ACCOUNT),"the creator's ATA is not the launch authority's custody");
+ let mut delegated=activation_accounts(&w,launch_authority,w.campaign_acc(3,0),w.parents_acc(),w.mint_acc(SUPPLY),custody);delegated[5].data[72]=1;
+ assert_eq!(run(&w,&mut delegated,&activate_body([0;4])).unwrap_err(),err(E_INVALID_TOKEN_ACCOUNT),"a delegated custody account is refused before anything is created");
+ let mut short_source=activation_accounts(&w,launch_authority,w.campaign_acc(3,0),w.parents_acc(),w.mint_acc(SUPPLY),custody);put64(&mut short_source[5].data,64,custody-1);
+ assert_eq!(run(&w,&mut short_source[..],&activate_body([0;4])).unwrap_err(),err(E_VAULT_BALANCE_MISMATCH),"custody short by one token");assert!(short_source[6].data.is_empty());
+ assert_eq!(cpi_count(),count,"a refused source runs no CPI");
+}
+#[test]fn activate_needs_existing_vaults_burns_only_donations_and_runs_at_most_six_cpis_on_a_fresh_launch(){
+ let w=World::new();let launch_authority=Pubkey::find_program_address(&[b"launch_authority",w.campaign.as_ref()],&w.launch_program).0;
+ let custody=SUPPLY-share(SUPPLY,LIQUIDITY_BPS);let allocation=allocations(SUPPLY);let rent=Rent::default().minimum_balance(DISTRIBUTION_LEN);
+ let fresh=||activation_accounts(&w,launch_authority,w.campaign_acc(3,0),w.parents_acc(),w.mint_acc(SUPPLY),custody);
+ // Fresh launch: one System create_account for the record, then four transfers. The launch instruction around
+ // this call already carries the pool creation and the LP lock, so activation must stay within six CPIs.
+ let mut accounts=fresh();clear_cpis();run(&w,&mut accounts,&activate_body([0;4])).unwrap();
+ let log=cpis();assert_eq!(log.len(),5);assert!(log.len()<=6);assert_eq!(burn_cpis(),0,"no burn CPI when every vault starts empty");
+ let (program,create)=&log[0];assert_eq!(*program,system_program::id());
+ assert_eq!(u32::from_le_bytes(create[..4].try_into().unwrap()),0,"System CreateAccount");
+ assert_eq!((read64(create,4).unwrap(),read64(create,12).unwrap(),read_key(create,20).unwrap()),(rent,DISTRIBUTION_LEN as u64,w.program));
+ for (purpose,(program,transfer)) in log[1..].iter().enumerate(){assert_eq!(*program,TOKEN);assert_eq!(transfer[0],3,"Token Transfer");assert_eq!(read64(transfer,1).unwrap(),allocation[purpose],"vault {purpose}");}
+ assert!(log.iter().all(|(program,_)|*program!=ATA),"the Associated Token program is never called");
+ // A vault that already holds tokens: exactly one burn more; the donation leaves the supply, not an entitlement.
+ let mut donated=fresh();donated[13]=w.vault_acc(2,777);clear_cpis();run(&w,&mut donated,&activate_body([0;4])).unwrap();
+ assert_eq!(cpi_count(),6);assert_eq!(burn_cpis(),1);
+ assert_eq!(balance(&donated[13]),allocation[2]);assert_eq!(read64(&donated[4].data,36).unwrap(),SUPPLY-777);
+ assert_eq!(Distribution::decode(&donated[6].data).unwrap(),w.distribution,"a donation changes no term");
+ let mut two_donated=fresh();two_donated[11]=w.vault_acc(0,1);two_donated[14]=w.vault_acc(3,5);clear_cpis();run(&w,&mut two_donated,&activate_body([0;4])).unwrap();
+ assert_eq!((cpi_count(),burn_cpis()),(7,2));assert_eq!(balance(&two_donated[11]),allocation[0]);assert_eq!(balance(&two_donated[14]),allocation[3]);
+ // A pre-funded record PDA takes the top-up, allocate and assign path instead of create_account.
+ let mut prefunded=fresh();prefunded[6].lamports=1;clear_cpis();run(&w,&mut prefunded,&activate_body([0;4])).unwrap();
+ assert_eq!(cpi_count(),7);assert_eq!(cpis().iter().filter(|(program,_)|*program==system_program::id()).count(),3,"transfer, allocate, assign");
+ assert_eq!((prefunded[6].lamports,prefunded[6].owner),(rent,w.program));assert_eq!(Distribution::decode(&prefunded[6].data).unwrap(),w.distribution);
+ let mut rent_funded=fresh();rent_funded[6].lamports=rent+5;clear_cpis();run(&w,&mut rent_funded,&activate_body([0;4])).unwrap();
+ assert_eq!(cpi_count(),6);assert_eq!((rent_funded[6].lamports,rent_funded[6].owner),(rent+5,w.program),"nothing to top up: allocate and assign only");
+ // A vault that does not exist is refused with its own error before any CPI.
+ for purpose in 0..4u8{
+  let mut missing=fresh();missing[11+purpose as usize]=Acc::unfunded(ata_key(&vault_authority(&w.program,&w.campaign,purpose).0,&w.mint));clear_cpis();
+  assert_eq!(run(&w,&mut missing,&activate_body([0;4])).unwrap_err(),err(E_VAULT_MISSING),"vault {purpose} missing");
+  assert_eq!(cpi_count(),0);assert!(missing[6].data.is_empty(),"the record is not created");assert_eq!(balance(&missing[5]),custody,"nothing moved");
+ }
+ // A vault that exists but is not a clean token account of the authority is invalid rather than missing.
+ let cases:[(&str,Box<dyn Fn(&mut Acc)>);5]=[("under another program",Box::new(|a|a.owner=Pubkey::new_unique())),("delegated",Box::new(|a|a.data[72]=1)),("with a close authority",Box::new(|a|a.data[129]=1)),("uninitialised",Box::new(|a|a.data[108]=0)),("frozen",Box::new(|a|a.data[108]=2))];
+ for (label,mutate) in cases.iter(){let mut bad=fresh();mutate(&mut bad[12]);clear_cpis();assert_eq!(run(&w,&mut bad,&activate_body([0;4])).unwrap_err(),err(E_INVALID_TOKEN_ACCOUNT),"vault 1 {label}");assert_eq!(cpi_count(),0);}
+ let mut wrong_owner=fresh();wrong_owner[12]=Acc::new(wrong_owner[12].key,TOKEN,token_data(&w.mint,&Pubkey::new_unique(),0));
+ assert_eq!(run(&w,&mut wrong_owner,&activate_body([0;4])).unwrap_err(),err(E_INVALID_TOKEN_ACCOUNT),"vault owned by someone else");
+ // Exactly seventeen accounts: the Associated Token program has no place in the list.
+ let mut eighteen=fresh();eighteen.insert(16,Acc::program(ATA));assert_eq!(run(&w,&mut eighteen,&activate_body([0;4])).unwrap_err(),err(E_INVALID_ACCOUNT));
+ let mut sixteen=fresh();sixteen.pop();assert_eq!(run(&w,&mut sixteen,&activate_body([0;4])).unwrap_err(),err(E_INVALID_ACCOUNT));
+ let mut ata_for_system=fresh();ata_for_system[16]=Acc::program(ATA);assert_eq!(run(&w,&mut ata_for_system,&activate_body([0;4])).unwrap_err(),ProgramError::IncorrectProgramId);
+}
+#[test]fn activate_honours_the_distribution_program_recorded_on_the_campaign(){
+ let w=World::new();let launch_authority=Pubkey::find_program_address(&[b"launch_authority",w.campaign.as_ref()],&w.launch_program).0;
+ let custody=SUPPLY-share(SUPPLY,LIQUIDITY_BPS);
+ let recorded=|program:Pubkey|{let mut c=w.campaign_acc(3,0);c.data[LAUNCH_CAMPAIGN_OFF_DISTRIBUTION_PROGRAM..LAUNCH_CAMPAIGN_OFF_DISTRIBUTION_PROGRAM+32].copy_from_slice(program.as_ref());c};
+ let mut this_program=activation_accounts(&w,launch_authority,recorded(w.program),w.parents_acc(),w.mint_acc(SUPPLY),custody);
+ run(&w,&mut this_program,&activate_body([0;4])).unwrap();assert_eq!(Distribution::decode(&this_program[6].data).unwrap(),w.distribution,"the recorded program is this one");
+ assert_eq!(LaunchCampaign::read(&infos(std::slice::from_mut(&mut this_program[2]))[0],&w.launch_program).unwrap().distribution_program,w.program);
+ let mut other_program=activation_accounts(&w,launch_authority,recorded(Pubkey::new_unique()),w.parents_acc(),w.mint_acc(SUPPLY),custody);
+ assert_eq!(run(&w,&mut other_program,&activate_body([0;4])).unwrap_err(),err(E_INVALID_ACCOUNT),"a campaign bound to another distribution program is refused");
+ let mut by_creator=activation_accounts(&w,w.creator,recorded(Pubkey::new_unique()),w.parents_acc(),w.mint_acc(SUPPLY),custody);
+ assert_eq!(run(&w,&mut by_creator,&activate_body([0;4])).unwrap_err(),err(E_INVALID_ACCOUNT),"the creator path is bound too");
+ let mut none=activation_accounts(&w,w.creator,w.campaign_acc(3,0),w.parents_acc(),w.mint_acc(SUPPLY),custody);
+ run(&w,&mut none,&activate_body([0;4])).unwrap();assert_eq!(Distribution::decode(&none[6].data).unwrap(),w.distribution,"no recorded program: the creator may activate (migration path)");
 }
 #[test]fn token_account_and_mint_validation_reject_every_substitution(){
  let mint=Pubkey::new_unique();let owner=Pubkey::new_unique();let key=Pubkey::new_unique();

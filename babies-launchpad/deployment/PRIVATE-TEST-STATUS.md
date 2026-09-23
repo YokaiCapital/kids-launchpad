@@ -187,3 +187,10 @@ Owner decisions after the first mainnet launch: coin-side trading fees are burne
 - kids-api deployment a18729fd and kids-signer 38945427 both built from YokaiCapital/kids-launchpad, branch release, commit 1f37128 (owner connected both services; the CLI upload is retired).
 - Live after the deploy: ready, writes open, signer reachable, keepers running (active: launched, fees: completed), reconciliation complete.
 - FIRST COIN-SIDE BURN on mainnet (build 2): 670,345.318218 coins burned at 04:17:57 UTC, signature `3iFTQBFjvkxGGFq397HG4NkbSGo1eRMGKkzccvSQwgsiypFyXJXHwJga3r6XL3vVimLz3D7wvrzAuzD3w4mA1YNQ`; childPending 0, childBurned 670345318218 raw.
+
+## 23 September 2026, ~04:25 UTC: claim vaults proven on the local ledger (not deployed)
+
+- `node localnet/verify-distribution-launch.mjs` on the desktop localnet: campaign 7JirULm5…, launch 34WNH2gE… funded the four vaults inside the launch (43.5 % / 5 % / 5 % / 3 % exactly, custody empty), old claim paths refused (0x28), participant, both parent and dev claims paid from their vaults with repeats paying nothing, forged leaf / altered proof / foreign receipt / below-threshold refused, burn before the 30-day expiry refused, a 1,000-unit donation swept to burn with the supply reduced by exactly that. Parent expiry recorded 2026-10-23T04:09:10Z (launch + 2,592,000 s).
+- The classic path (campaign without a distribution program) re-verified on the same build with `atomic-launch-verify.mjs`.
+- Builds: kids_atomic_launch.so 210,440 bytes `1f8d3dbe…2de5`; kids_distribution.so 128,576 bytes `75252cab…13d9` (local builds; CI reproducible hashes follow the push). Program tests 29 + 19.
+- Still owed before mainnet: independent review of both programs, CI hashes, deployment of kids-distribution (governance key), recording its id in MAINNET-IDENTITIES.json (`distribution.programId`), a mainnet test launch on the vault path, then revocation of the distribution program's upgrade authority.

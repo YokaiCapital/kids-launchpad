@@ -7,11 +7,32 @@ entrypoint!(process_instruction);
 mod launch;
 mod claims;
 mod fees;
+#[cfg(test)]mod host_tests;
 const FIXED_SUPPLY:u64=1_000_000_000_000_000;
 const CAMPAIGN_LEN:usize=384;
 const RECEIPT_LEN:usize=112;
 const CAMPAIGN_MAGIC:&[u8;8]=b"KIDSESC3";
 const RECEIPT_MAGIC:&[u8;8]=b"KIDSREC3";
+// Campaign layout (384 bytes). 0 magic, 8 creator, 40 nonce, 48 soft, 56 hard, 64 deadline, 72 launch deadline,
+// 80 total, 88 refunded, 96 phase, 97 bump, 98 parents-configured flag (tag 9), 104 receipt count, 112 settled
+// count, 120 settled accepted, 128 child mint, 160 supply, 168 dev, 200 treasury, 232 launch time, 240 pool,
+// 272 fee NFT, 304 dev claimed (tag 8), 312 distribution program (32 bytes, all zero = none, tag 0),
+// 344 distribution activated (1 byte, tag 6). 345..384 unused.
+const OFF_DISTRIBUTION_PROGRAM:usize=312;
+const OFF_DISTRIBUTION_ACTIVATED:usize=344;
+/// Programs deployed through the upgradeable loader keep this owner after their upgrade authority is revoked.
+const BPF_LOADER_UPGRADEABLE:Pubkey=solana_program::pubkey!("BPFLoaderUpgradeab1e11111111111111111111111");
+/// Custom error codes added for the claim vaults (docs/CLAIM-VAULTS-DESIGN.md §4).
+/// 40: the campaign's claims live in the distribution program; tags 7, 8 and 10 are refused.
+/// 41: the optional distribution program account of tag 0 is not an executable program under the upgradeable loader.
+/// 42: after the activation CPI a vault, the custody or the distribution account does not hold what the allocation table says.
+/// 43: tag 6 account count does not match the campaign (29 without a distribution, 40 with one).
+/// 44: a vault token account (tag 6 accounts 36..39) does not exist; the keeper creates the four vaults before the launch.
+const E_DISTRIBUTION_ACTIVATED:u32=40;
+const E_DISTRIBUTION_PROGRAM_INVALID:u32=41;
+const E_DISTRIBUTION_FUNDING_MISMATCH:u32=42;
+const E_LAUNCH_ACCOUNT_COUNT:u32=43;
+const E_VAULT_NOT_CREATED:u32=44;
 fn err(n:u32)->ProgramError{ProgramError::Custom(n)}
 fn read64(d:&[u8],at:usize)->Result<u64,ProgramError>{Ok(u64::from_le_bytes(d.get(at..at+8).ok_or(ProgramError::InvalidInstructionData)?.try_into().unwrap()))}
 fn read_key(d:&[u8],at:usize)->Result<Pubkey,ProgramError>{Ok(Pubkey::new_from_array(d.get(at..at+32).ok_or(ProgramError::InvalidAccountData)?.try_into().unwrap()))}
@@ -81,19 +102,30 @@ fn parent_ata(a:&AccountInfo,owner:&Pubkey,mint:&Pubkey,token_program:&Pubkey)->
   let mut delegated=base.clone();delegated[72]=1;assert!(parent_token(&info(&key,&TOKEN_PROGRAM,&mut delegated,&mut l),&mint,&owner,&TOKEN_PROGRAM).is_err());
  }
 }
-#[derive(Clone,Copy)]
-struct Campaign{creator:Pubkey,nonce:u64,soft:u64,hard:u64,deadline:i64,launch_deadline:i64,total:u64,refunded:u64,phase:u8,bump:u8,receipt_count:u64,settled_count:u64,settled_accepted:u64,child_mint:Pubkey,supply:u64,dev:Pubkey,treasury:Pubkey,launch_time:i64,pool:Pubkey,fee_nft:Pubkey}
+#[derive(Clone,Copy,Debug,PartialEq,Eq)]
+struct Campaign{creator:Pubkey,nonce:u64,soft:u64,hard:u64,deadline:i64,launch_deadline:i64,total:u64,refunded:u64,phase:u8,bump:u8,receipt_count:u64,settled_count:u64,settled_accepted:u64,child_mint:Pubkey,supply:u64,dev:Pubkey,treasury:Pubkey,launch_time:i64,pool:Pubkey,fee_nft:Pubkey,distribution_program:Pubkey,distribution_activated:bool}
 impl Campaign{
  fn read(account:&AccountInfo,program:&Pubkey)->Result<Self,ProgramError>{
   if account.owner!=program{return Err(ProgramError::IncorrectProgramId)}
   let d=account.try_borrow_data()?;
   if d.len()!=CAMPAIGN_LEN||&d[..8]!=CAMPAIGN_MAGIC{return Err(ProgramError::InvalidAccountData)}
-  let s=Self{creator:Pubkey::new_from_array(d[8..40].try_into().unwrap()),nonce:read64(&d,40)?,soft:read64(&d,48)?,hard:read64(&d,56)?,deadline:read64(&d,64)? as i64,launch_deadline:read64(&d,72)? as i64,total:read64(&d,80)?,refunded:read64(&d,88)?,phase:d[96],bump:d[97],receipt_count:read64(&d,104)?,settled_count:read64(&d,112)?,settled_accepted:read64(&d,120)?,child_mint:read_key(&d,128)?,supply:read64(&d,160)?,dev:read_key(&d,168)?,treasury:read_key(&d,200)?,launch_time:read64(&d,232)? as i64,pool:read_key(&d,240)?,fee_nft:read_key(&d,272)?};
+  let s=Self{creator:Pubkey::new_from_array(d[8..40].try_into().unwrap()),nonce:read64(&d,40)?,soft:read64(&d,48)?,hard:read64(&d,56)?,deadline:read64(&d,64)? as i64,launch_deadline:read64(&d,72)? as i64,total:read64(&d,80)?,refunded:read64(&d,88)?,phase:d[96],bump:d[97],receipt_count:read64(&d,104)?,settled_count:read64(&d,112)?,settled_accepted:read64(&d,120)?,child_mint:read_key(&d,128)?,supply:read64(&d,160)?,dev:read_key(&d,168)?,treasury:read_key(&d,200)?,launch_time:read64(&d,232)? as i64,pool:read_key(&d,240)?,fee_nft:read_key(&d,272)?,distribution_program:read_key(&d,OFF_DISTRIBUTION_PROGRAM)?,distribution_activated:d[OFF_DISTRIBUTION_ACTIVATED]!=0};
   let (expected,bump)=Pubkey::find_program_address(&[b"campaign",s.creator.as_ref(),&s.nonce.to_le_bytes()],program);
   if expected!=*account.key||bump!=s.bump{return Err(ProgramError::InvalidSeeds)}
   Ok(s)
  }
- fn write(&self,a:&AccountInfo)->ProgramResult{let mut d=a.try_borrow_mut_data()?;d[..8].copy_from_slice(CAMPAIGN_MAGIC);d[8..40].copy_from_slice(self.creator.as_ref());for(at,n)in[(40,self.nonce),(48,self.soft),(56,self.hard),(64,self.deadline as u64),(72,self.launch_deadline as u64),(80,self.total),(88,self.refunded)]{put64(&mut d,at,n)}d[96]=self.phase;d[97]=self.bump;put64(&mut d,104,self.receipt_count);put64(&mut d,112,self.settled_count);put64(&mut d,120,self.settled_accepted);put64(&mut d,160,self.supply);put64(&mut d,232,self.launch_time as u64);for(at,key)in[(128,self.child_mint),(168,self.dev),(200,self.treasury),(240,self.pool),(272,self.fee_nft)]{d[at..at+32].copy_from_slice(key.as_ref());}Ok(())}
+ fn write(&self,a:&AccountInfo)->ProgramResult{let mut d=a.try_borrow_mut_data()?;d[..8].copy_from_slice(CAMPAIGN_MAGIC);d[8..40].copy_from_slice(self.creator.as_ref());for(at,n)in[(40,self.nonce),(48,self.soft),(56,self.hard),(64,self.deadline as u64),(72,self.launch_deadline as u64),(80,self.total),(88,self.refunded)]{put64(&mut d,at,n)}d[96]=self.phase;d[97]=self.bump;put64(&mut d,104,self.receipt_count);put64(&mut d,112,self.settled_count);put64(&mut d,120,self.settled_accepted);put64(&mut d,160,self.supply);put64(&mut d,232,self.launch_time as u64);for(at,key)in[(128,self.child_mint),(168,self.dev),(200,self.treasury),(240,self.pool),(272,self.fee_nft),(OFF_DISTRIBUTION_PROGRAM,self.distribution_program)]{d[at..at+32].copy_from_slice(key.as_ref());}d[OFF_DISTRIBUTION_ACTIVATED]=self.distribution_activated as u8;Ok(())}
+ /// Claims for this campaign are paid by the distribution program once tag 6 has activated it.
+ fn refuse_claims_after_activation(&self)->ProgramResult{if self.distribution_activated{Err(err(E_DISTRIBUTION_ACTIVATED))}else{Ok(())}}
+}
+/// Tag 0 may name a distribution program as its optional fourth account. It must be an executable program under the
+/// upgradeable loader and not this program. Absent, no distribution is recorded (zero key) and tag 6 keeps the
+/// custody claims of tags 7, 8 and 10.
+fn distribution_program_of(program:&Pubkey,extra:Option<&AccountInfo>)->Result<Pubkey,ProgramError>{
+ match extra{
+  None=>Ok(Pubkey::default()),
+  Some(a)=>{if a.executable&&*a.owner==BPF_LOADER_UPGRADEABLE&&*a.key!=*program&&*a.key!=Pubkey::default(){Ok(*a.key)}else{Err(err(E_DISTRIBUTION_PROGRAM_INVALID))}}
+ }
 }
 #[derive(Clone,Copy)]
 struct Receipt{campaign:Pubkey,owner:Pubkey,committed:u64,refunded:u64,sequence:u64,bump:u8,settled:bool,accepted:u64,claimed:bool}
@@ -136,6 +168,15 @@ fn ready(c:&Campaign,now:i64)->bool{
  now>=c.deadline&&now<c.launch_deadline&&c.phase!=2&&c.phase!=3&&c.total>=c.soft
  &&c.receipt_count>0&&c.settled_count==c.receipt_count&&c.settled_accepted>=c.soft
 }
+/// Fixed terms of a new campaign from the 144-byte tag 0 body: nonce, soft, hard, deadline, launch deadline,
+/// child mint, supply (must be the fixed supply), dev, treasury.
+fn campaign_terms(creator:&Pubkey,bump:u8,body:&[u8],distribution_program:Pubkey,now:i64)->Result<Campaign,ProgramError>{
+ let nonce=read64(body,0)?;let soft=read64(body,8)?;let hard=read64(body,16)?;let deadline=read64(body,24)? as i64;let launch_deadline=read64(body,32)? as i64;
+ let child_mint=read_key(body,40)?;let supply=read64(body,72)?;let dev=read_key(body,80)?;let treasury=read_key(body,112)?;
+ if supply!=FIXED_SUPPLY||child_mint==Pubkey::default()||dev==Pubkey::default()||treasury==Pubkey::default(){return Err(err(20))}
+ if soft==0||soft>hard||deadline<=now||launch_deadline<=deadline{return Err(err(1))}
+ Ok(Campaign{creator:*creator,nonce,soft,hard,deadline,launch_deadline,total:0,refunded:0,phase:0,bump,receipt_count:0,settled_count:0,settled_accepted:0,child_mint,supply,dev,treasury,launch_time:0,pool:Pubkey::default(),fee_nft:Pubkey::default(),distribution_program,distribution_activated:false})
+}
 pub fn process_instruction(program:&Pubkey,accounts:&[AccountInfo],data:&[u8])->ProgramResult{
  let (&tag,body)=data.split_first().ok_or(ProgramError::InvalidInstructionData)?;
  let iter=&mut accounts.iter();
@@ -144,13 +185,14 @@ pub fn process_instruction(program:&Pubkey,accounts:&[AccountInfo],data:&[u8])->
    if body.len()!=144{return Err(ProgramError::InvalidInstructionData)}
    let creator=next_account_info(iter)?;let campaign=next_account_info(iter)?;let sys=next_account_info(iter)?;system(sys)?;
    if !creator.is_signer{return Err(ProgramError::MissingRequiredSignature)}
-   let nonce=read64(body,0)?;let soft=read64(body,8)?;let hard=read64(body,16)?;let deadline=read64(body,24)? as i64;let launch_deadline=read64(body,32)? as i64;
-   let child_mint=read_key(body,40)?;let supply=read64(body,72)?;let dev=read_key(body,80)?;let treasury=read_key(body,112)?;
-   if supply!=FIXED_SUPPLY||child_mint==Pubkey::default()||dev==Pubkey::default()||treasury==Pubkey::default(){return Err(err(20))}
-   if soft==0||soft>hard||deadline<=Clock::get()?.unix_timestamp||launch_deadline<=deadline{return Err(err(1))}
-   let (expected,bump)=Pubkey::find_program_address(&[b"campaign",creator.key.as_ref(),&nonce.to_le_bytes()],program);if expected!=*campaign.key{return Err(ProgramError::InvalidSeeds)}
+   if accounts.len()>4{return Err(err(E_DISTRIBUTION_PROGRAM_INVALID))}
+   let distribution_program=distribution_program_of(program,accounts.get(3))?;
+   let nonce=read64(body,0)?;
+   let (expected,bump)=Pubkey::find_program_address(&[b"campaign",creator.key.as_ref(),&nonce.to_le_bytes()],program);
+   let terms=campaign_terms(creator.key,bump,body,distribution_program,Clock::get()?.unix_timestamp)?;
+   if expected!=*campaign.key{return Err(ProgramError::InvalidSeeds)}
    create_pda(creator,campaign,sys,program,CAMPAIGN_LEN,&[b"campaign",creator.key.as_ref(),&nonce.to_le_bytes(),&[bump]])?;
-   Campaign{creator:*creator.key,nonce,soft,hard,deadline,launch_deadline,total:0,refunded:0,phase:0,bump,receipt_count:0,settled_count:0,settled_accepted:0,child_mint,supply,dev,treasury,launch_time:0,pool:Pubkey::default(),fee_nft:Pubkey::default()}.write(campaign)
+   terms.write(campaign)
   },
   1=>{
    if body.len()!=16{return Err(ProgramError::InvalidInstructionData)}
@@ -227,7 +269,7 @@ pub fn process_instruction(program:&Pubkey,accounts:&[AccountInfo],data:&[u8])->
 }
 
 #[cfg(test)]mod settlement_tests{use super::*;
- fn campaign()->Campaign{Campaign{creator:Pubkey::new_unique(),nonce:1,soft:1,hard:3,deadline:10,launch_deadline:20,total:4,refunded:0,phase:1,bump:0,receipt_count:2,settled_count:0,settled_accepted:0,child_mint:Pubkey::new_unique(),supply:10000,dev:Pubkey::new_unique(),treasury:Pubkey::new_unique(),launch_time:0,pool:Pubkey::default(),fee_nft:Pubkey::default()}}
+ fn campaign()->Campaign{Campaign{creator:Pubkey::new_unique(),nonce:1,soft:1,hard:3,deadline:10,launch_deadline:20,total:4,refunded:0,phase:1,bump:0,receipt_count:2,settled_count:0,settled_accepted:0,child_mint:Pubkey::new_unique(),supply:10000,dev:Pubkey::new_unique(),treasury:Pubkey::new_unique(),launch_time:0,pool:Pubkey::default(),fee_nft:Pubkey::default(),distribution_program:Pubkey::default(),distribution_activated:false}}
  fn receipt()->Receipt{Receipt{campaign:Pubkey::new_unique(),owner:Pubkey::new_unique(),committed:2,refunded:0,sequence:1,bump:0,settled:false,accepted:0,claimed:false}}
  #[test]fn exact_rounding_idempotence_and_complete_count(){let mut c=campaign();let mut a=receipt();let mut b=receipt();assert!(!ready(&c,10));settle(&mut c,&mut a,10).unwrap();assert_eq!(a.accepted,1);assert!(!ready(&c,10));settle(&mut c,&mut a,10).unwrap();assert_eq!(c.settled_count,1);settle(&mut c,&mut b,10).unwrap();assert_eq!(c.settled_accepted,2);assert_eq!(c.total-c.settled_accepted,2);assert!(ready(&c,10));assert!(!ready(&c,20));}
  #[test]fn premature_settlement_and_unregistered_count_rejected(){let mut c=campaign();let mut r=receipt();assert!(settle(&mut c,&mut r,9).is_err());assert!(!r.settled);c.receipt_count=0;assert!(settle(&mut c,&mut r,10).is_err());assert_eq!(c.settled_count,0);}

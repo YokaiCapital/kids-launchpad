@@ -1,11 +1,12 @@
 name: KIDS reproducible program build
-# Builds the launch program's SBF on two independent runners with the pinned Anza toolchain and requires the two
+# Builds each program's SBF on two independent runners with the pinned Anza toolchain and requires the two
 # SHA-256 hashes to match. The hash is evidence for the deployed program's provenance; it does not replace a review.
 on:
   push:
     branches: [main]
     paths:
       - 'babies-launchpad/programs/atomic-launch/**'
+      - 'babies-launchpad/programs/kids-distribution/**'
       - '.github/workflows/sbf-build.yml'
   workflow_dispatch:
 permissions:
@@ -28,15 +29,21 @@ jobs:
       - name: Build
         run: |
           cargo-build-sbf --version
-          cargo-build-sbf --manifest-path babies-launchpad/programs/atomic-launch/Cargo.toml --sbf-out-dir "$RUNNER_TEMP/sbf"
-          sha256sum "$RUNNER_TEMP/sbf/kids_atomic_launch.so" | tee "$RUNNER_TEMP/sbf/kids_atomic_launch.sha256"
-          cp "$RUNNER_TEMP/sbf/kids_atomic_launch.sha256" "kids_atomic_launch-${{ matrix.runner }}.sha256"
+          for program in atomic-launch kids-distribution; do
+            cargo-build-sbf --manifest-path "babies-launchpad/programs/$program/Cargo.toml" --sbf-out-dir "$RUNNER_TEMP/sbf"
+          done
+          for so in kids_atomic_launch kids_distribution; do
+            sha256sum "$RUNNER_TEMP/sbf/$so.so" | tee "$RUNNER_TEMP/sbf/$so.sha256"
+            cp "$RUNNER_TEMP/sbf/$so.sha256" "$so-${{ matrix.runner }}.sha256"
+          done
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
           name: sbf-${{ matrix.runner }}
           path: |
             ${{ runner.temp }}/sbf/kids_atomic_launch.so
+            ${{ runner.temp }}/sbf/kids_distribution.so
             kids_atomic_launch-${{ matrix.runner }}.sha256
+            kids_distribution-${{ matrix.runner }}.sha256
           retention-days: 30
   compare:
     needs: build
@@ -46,10 +53,12 @@ jobs:
       - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093
         with:
           path: artifacts
-      - name: Both runners must produce the same binary
+      - name: Both runners must produce the same binary, per program
         run: |
           find artifacts -name '*.sha256' -exec cat {} \;
-          hashes=$(find artifacts -name '*.sha256' -exec awk '{print $1}' {} \; | sort -u)
-          echo "distinct hashes: $(echo "$hashes" | wc -l)"
-          test "$(echo "$hashes" | wc -l)" -eq 1
-          echo "reproducible SHA-256: $hashes"
+          for so in kids_atomic_launch kids_distribution; do
+            hashes=$(find artifacts -name "$so-*.sha256" -exec awk '{print $1}' {} \; | sort -u)
+            echo "$so distinct hashes: $(echo "$hashes" | wc -l)"
+            test "$(echo "$hashes" | wc -l)" -eq 1
+            echo "reproducible SHA-256 ($so): $hashes"
+          done

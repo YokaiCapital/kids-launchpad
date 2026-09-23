@@ -47,11 +47,22 @@ The launch program's accounts are read but never written: campaign (384 bytes, `
 
 ## Lifecycle
 
-`activate` (tag 0, body: four `u64` prior counters) runs once, signed by the launch program's launch authority PDA
-(a CPI at the end of the launch instruction) or by the campaign creator. It reads the launched campaign (phase 3) and
-the parents account, copies the terms, creates the four vault token accounts, burns anything a vault already held,
-moves `allocation − prior` per purpose from the signer's source token account into each vault, and requires each vault
-to hold exactly that amount afterwards. The prior counters are what the launch program already paid before this
+`activate` (tag 0, body: four `u64` prior counters; accounts: signer, payer, campaign, parents, child mint, source,
+distribution PDA, vault authorities 0..3, vaults 0..3, Token program, System program) runs once, signed by the launch
+program's launch authority PDA (the CPI inside the launch program's tag 6, after the pool and the LP lock) or by the
+campaign creator. The four vault token accounts must already exist: the launch instruction around the CPI is close
+to the runtime's nested-instruction limit, so the keeper creates them before the launch and `activate` only checks
+each one (the authority's associated token account for the child mint, initialised, owned by the authority, no
+delegate, no close authority; `VaultMissing`, error 21, when the account does not exist, `InvalidTokenAccount` for
+anything else). Every check, including that the source covers the whole amount owed, runs before the first nested
+instruction. It reads the launched campaign (phase 3, launch time set) and the parents account, copies the terms,
+creates its record (one System `create_account`; a pre-funded record PDA is topped up, allocated and assigned
+instead), burns anything a vault already held, moves `allocation − prior` per purpose from the signer's associated
+token account for the child mint (the launch custody account on the launch authority path) into each vault, and
+requires each vault to hold exactly that amount afterwards. A fresh launch runs five nested instructions here, one
+more per donated vault. A campaign that recorded a distribution program at
+creation (campaign offset 312) is only activated by that program; a campaign with none recorded may be activated by
+its creator, which is the migration path. The prior counters are what the launch program already paid before this
 activation: zero for a fresh launch; for a migrated campaign the parent and dev priors must equal the launch program's
 own counters, and the participant prior is the sum of receipts already paid.
 
@@ -83,11 +94,12 @@ cargo test
 Host tests cover the allocation table and conservation for several supplies, threshold and pro rata rounding, dev
 vesting at start, middle, end and after with month-end clamping, the parent window and burn decisions at every
 boundary second, Merkle proofs for every leaf of a small tree, the Distribution and claim receipt layouts, instruction
-parsing for every tag, and the handlers. A syscall stub serves the clock and rent and emulates Token transfers and
-burns, so `claim_dev`, `burn_expired` and `sweep_donation_to_burn` are checked end to end on the host, including the
-vault authority signer seeds. Account creation (System and Associated Token CPIs) is refused by the stub, so
-`activate`, `claim_participant` and `claim_parent` are checked up to that point; their funding and receipt paths need
-the localnet lifecycle in the design's test list, which is not part of this crate.
+parsing for every tag, and the handlers. A syscall stub serves the clock and rent, emulates Token transfers and burns
+and the System program's create, allocate, assign and transfer (checking every signer, including the vault authority
+and record PDA seeds), and logs every nested instruction, so all six handlers run end to end on the host. The
+activation tests assert the exact nested instructions: five on a fresh launch (record creation plus four transfers),
+one burn more per donated vault, a distinct refusal before any nested instruction when a vault is missing. The launch
+itself (pool, lock, the launch program's tag 6 around the activation) is covered by `localnet/verify-distribution-launch.mjs`.
 
 ## Build
 
@@ -96,5 +108,6 @@ cargo build
 cargo-build-sbf
 ```
 
-Deployment, the launch-program CPI hook, migration of an already launched coin and the upgrade-authority revocation
-follow the design document and are not done here.
+The launch program's tag 6 calls `activate` for campaigns that recorded this program (`programs/atomic-launch`,
+"Claim vaults"). Deployment, migration of an already launched coin and the upgrade-authority revocation follow the
+design document and are not done here.

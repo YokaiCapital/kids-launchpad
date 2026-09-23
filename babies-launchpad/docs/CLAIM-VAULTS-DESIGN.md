@@ -1,7 +1,9 @@
 # Claim vaults with immutable distribution rules (design, 23 September 2026)
 
-Answer to the owner-approved brief (claim vaults, 30-day parent expiry burns). Status: design only. Nothing here is
-implemented, deployed or immutable yet. Implementation follows in `programs/kids-distribution` with its own tests.
+Answer to the owner-approved brief (claim vaults, 30-day parent expiry burns). Status: implemented in
+`programs/kids-distribution` and integrated into the launch instruction (`programs/atomic-launch`), proven on the local
+ledger on 23 September 2026 (`localnet/verify-distribution-launch.mjs`). NOT deployed to mainnet, NOT reviewed, NOT
+immutable yet; the campaign layout offsets are 312 (distribution program) and 344 (activated flag).
 
 ## Summary in three lines
 
@@ -61,7 +63,7 @@ there is no instruction that writes offsets 0..279 once flag bit 0 is set.
 
 | Tag | Name | Signer | What it does |
 | --- | --- | --- | --- |
-| 0 | `activate` | launch authority PDA (CPI from the launch program) or the campaign creator, once | Reads the launched campaign (phase 3), copies terms, creates the four vaults, requires every vault to hold exactly its allocation (funded in the same transaction from the launch custody), sets the flag. Refuses if any vault is short or over-funded relative to the allocation table (donations are handled by 5). |
+| 0 | `activate` | launch authority PDA (CPI from the launch program) or the campaign creator, once | Reads the launched campaign (phase 3), copies terms, transfers allocation minus prior from the launch custody into the four vaults (the vault token accounts exist before the launch: the keeper creates them, activation creates no accounts so the launch packet stays under the nested-instruction limit), burns any pre-existing vault balance, sets the flag. 17 accounts, 5 inner instructions on a fresh launch. |
 | 1 | `claim_participant` | owner | Reads the launch program receipt (settled, accepted), pays `allocation × accepted / settled_accepted` from vault 0, writes the claim receipt. Idempotent. |
 | 2 | `claim_parent` | owner | Verifies the leaf and proof against the copied root (same leaf format as today: `kids-parent-v1`), requires `launch_time <= now < parent_expiry`, pays from vault 1 or 2, records the receipt. |
 | 3 | `claim_dev` | dev wallet | Pays `entitled(now) − dev_claimed` where entitled = 1 % + 2 % × elapsed/(end − start), capped at 3 %. |

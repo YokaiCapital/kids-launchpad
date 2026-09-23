@@ -14,17 +14,17 @@ Canonical programs, configuration, vaults, mint, ATA ownership, delegates and au
 
 | Tag | Operation |
 | --- | --- |
-| 0 | Initialize fixed campaign terms |
+| 0 | Initialize fixed campaign terms; an optional fourth account records the distribution program |
 | 1 | Commit SOL with per-wallet sequence |
 | 2 | Finalize funding / recognize launch timeout |
 | 3 | Pay receipt-bound refund, permissionless and idempotent |
 | 4 | Settle a registered receipt once |
 | 5 | Assert complete launch readiness |
-| 6 | Create pool, lock LP and revoke authorities atomically |
-| 7 | Claim participant allocation to receipt owner |
-| 8 | Claim vested dev allocation to fixed dev |
+| 6 | Create pool, lock LP and revoke authorities atomically; with a recorded distribution program, fund the four claim vaults and activate it in the same instruction |
+| 7 | Claim participant allocation to receipt owner (custody claims; error 40 once a distribution is activated) |
+| 8 | Claim vested dev allocation to fixed dev (custody claims; error 40 once a distribution is activated) |
 | 9 | Bind immutable parent snapshot roots before commitments |
-| 10 | Claim parent allocation with recipient-bound proof |
+| 10 | Claim parent allocation with recipient-bound proof (custody claims; error 40 once a distribution is activated) |
 | 20 | Initialize fee accounting |
 | 21 | Collect actual LP earnings using campaign Fee Key |
 | 22 | Convert child fees to WSOL through campaign pool |
@@ -32,6 +32,16 @@ Canonical programs, configuration, vaults, mint, ATA ownership, delegates and au
 | 24 | Buy and burn one parent's pending budget atomically |
 
 Campaign: 384 bytes, `KIDSESC3`. Receipt: 112 bytes, `KIDSREC3`. Builders and exact instruction account order: `localnet/atomic-launch.mjs`. Reproduction commands: `docs/LAUNCH-QUALIFICATION.md`.
+
+The campaign records the distribution program at offset 312 (32 bytes, all zero when none) and the activation flag at offset 344 (1 byte, written by tag 6). The full layout is listed next to `OFF_DISTRIBUTION_PROGRAM` in `src/lib.rs`.
+
+## Claim vaults
+
+A campaign created with the distribution program (`programs/kids-distribution`) as the fourth account of tag 0 pays no claims from launch custody. Tag 6 then takes 40 accounts instead of 29: the 29 pool and lock accounts, then 29 the distribution program, 30 the parents PDA, 31 the distribution PDA, 32 to 35 the four vault authorities and 36 to 39 the four vault associated token accounts. The four vault accounts must exist before the launch (the keeper creates them; `localnet/verify-distribution-launch.mjs` shows the order): the pool creation and the LP lock already use most of the runtime's nested-instruction budget, so tag 6 refuses a missing vault with error 44 instead of creating it. After the pool is created and the LP locked, tag 6 writes phase 3 and the launch time, then calls the distribution program's `activate` (tag 0, prior counters all zero, 17 accounts: outer accounts 2, 1, 0, 30, 3, 4, 31, 32 to 35, 36 to 39, 11 and 13) signed by the launch authority PDA with the keeper paying rent. `activate` creates its record, burns anything a vault already held, and moves 43.5 % / 5 % / 5 % / 3 % of the supply out of the child custody account into the vaults: five nested instructions on a fresh launch, one more per donated vault. The Associated Token program stays at outer account 12 for the pool and lock CPIs. Tag 6 then reads back that custody holds only the dust (`supply % 10000`, zero for the fixed supply), every vault holds exactly its allocation, the mint still has the original supply and no authorities, and the record names this campaign, mint and program with the activation flag set (error 42 otherwise). Only then is the activation flag written. A failing activation fails the launch, so the campaign stays in its pre-launch state and a launched pool never exists with unfunded claims.
+
+Tags 7, 8 and 10 refuse such a campaign with error 40; tag 9 is unchanged. Campaigns without a recorded program (all zero at offset 312), including the launched mainnet test coin, keep the custody claims exactly as before. The launch program signs nothing for the vaults after activation: the distribution program pays and burns only with its own vault authority PDAs, and `activate` cannot run twice because its record account already exists.
+
+Error codes added: 40 claims refused after activation, 41 the distribution program account is missing, not executable, not under the upgradeable loader or is this program, 42 the read-back after activation does not match the allocation table, 43 wrong tag 6 account count for the campaign, 44 a vault token account does not exist before the launch.
 
 ## Claims and fee custody
 

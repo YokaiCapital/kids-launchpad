@@ -1,6 +1,41 @@
-//! Atomic pool creation and permanent LP custody through canonical programs.
+//! Atomic pool creation and permanent LP custody through canonical programs. A campaign that recorded a
+//! distribution program at tag 0 also funds its four claim vaults and activates the distribution here, after the
+//! pool and the LP lock and inside the same instruction, so a launched pool never exists with unfunded claims.
 use super::*;
 use solana_program::{instruction::{AccountMeta,Instruction},pubkey};
+/// Tag 6 accounts: 0 campaign, 1 keeper (signer, pays rent), 2 launch authority PDA, 3 child mint, 4 child custody
+/// ATA, 5 WSOL custody ATA, 6 fee NFT mint (signer), 7 fee NFT ATA of the campaign, 8 locked liquidity PDA,
+/// 9 lock authority's LP ATA, 10 fee NFT metadata, 11 Token, 12 Associated Token, 13 System, 14 Rent, 15 CPMM,
+/// 16 AMM config, 17 CPMM authority, 18 pool state, 19 LP mint, 20 launch authority's LP ATA, 21 vault 0,
+/// 22 vault 1, 23 create-pool fee, 24 observation, 25 lock program, 26 lock authority, 27 Metadata, 28 WSOL mint.
+/// With a recorded distribution program: 29 distribution program, 30 parents PDA, 31 distribution PDA,
+/// 32..35 vault authorities 0..3, 36..39 vault ATAs 0..3 (created before the launch, empty).
+pub(super) const LAUNCH_ACCOUNTS:usize=29;
+pub(super) const LAUNCH_ACCOUNTS_WITH_DISTRIBUTION:usize=40;
+pub(super) const DISTRIBUTION_LEN:usize=512;
+const DISTRIBUTION_MAGIC:&[u8;8]=b"KIDSDST1";
+/// Offsets inside the distribution program's record (programs/kids-distribution/src/lib.rs) read back after activation.
+const DISTRIBUTION_OFF_CAMPAIGN:usize=8;
+const DISTRIBUTION_OFF_MINT:usize=40;
+const DISTRIBUTION_OFF_LAUNCH_PROGRAM:usize=72;
+const DISTRIBUTION_OFF_SUPPLY:usize=104;
+const DISTRIBUTION_OFF_ALLOCATION:usize=248;
+const DISTRIBUTION_OFF_FLAGS:usize=336;
+const DISTRIBUTION_FLAG_ACTIVATED:u8=1;
+const DISTRIBUTION_TAG_ACTIVATE:u8=0;
+/// Basis points of the supply per vault: participants 43.5 %, parent A 5 %, parent B 5 %, dev 3 %. With the
+/// 43.5 % liquidity share the table sums to 10,000, so custody keeps only `supply % 10000` (zero for the fixed supply).
+const VAULT_ALLOCATION_BPS:[u64;4]=[4350,500,500,300];
+pub(super) const LIQUIDITY_BPS:u64=4350;
+pub(super) fn share(supply:u64,bps:u64)->u64{supply/10000*bps}
+pub(super) fn vault_allocations(supply:u64)->[u64;4]{[share(supply,VAULT_ALLOCATION_BPS[0]),share(supply,VAULT_ALLOCATION_BPS[1]),share(supply,VAULT_ALLOCATION_BPS[2]),share(supply,VAULT_ALLOCATION_BPS[3])]}
+/// Tokens left in custody after liquidity and the four vaults: the documented dust, owed to nobody.
+pub(super) fn custody_after_activation(supply:u64)->Result<u64,ProgramError>{
+ let allocated=vault_allocations(supply).iter().try_fold(share(supply,LIQUIDITY_BPS),|acc,n|acc.checked_add(*n)).ok_or(err(10))?;
+ supply.checked_sub(allocated).ok_or(err(10))
+}
+pub(super) fn launch_account_count(c:&Campaign)->usize{if c.distribution_program==Pubkey::default(){LAUNCH_ACCOUNTS}else{LAUNCH_ACCOUNTS_WITH_DISTRIBUTION}}
+fn funded(value:bool)->ProgramResult{if value{Ok(())}else{Err(err(E_DISTRIBUTION_FUNDING_MISMATCH))}}
 const TOKEN:Pubkey=pubkey!("TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA");
 const ATA:Pubkey=pubkey!("ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL");
 const CPMM:Pubkey=pubkey!("CPMMoo8L3F4NbTegBCKVNunggL7H1ZpdTHKxQB5qKP1C");
@@ -42,8 +77,10 @@ fn cpi<'a>(a:&[AccountInfo<'a>],program:usize,spec:&[(usize,bool,bool)],data:Vec
 fn native_vault_surplus(lamports:u64,rent:u64)->u64{lamports.saturating_sub(rent)}
 fn native_sync<'a>(a:&[AccountInfo<'a>])->ProgramResult{invoke(&Instruction{program_id:TOKEN,accounts:vec![AccountMeta::new(*a[5].key,false)],data:vec![17]},&[a[5].clone(),a[11].clone()])}
 pub(super) fn execute(program:&Pubkey,a:&[AccountInfo],body:&[u8])->ProgramResult{
- check(body.is_empty()&&a.len()==29)?;
- let mut c=Campaign::read(&a[0],program)?;let now=Clock::get()?.unix_timestamp;
+ check(body.is_empty())?;
+ let mut c=Campaign::read(a.first().ok_or(ProgramError::NotEnoughAccountKeys)?,program)?;
+ if a.len()!=launch_account_count(&c){return Err(err(E_LAUNCH_ACCOUNT_COUNT))}
+ let now=Clock::get()?.unix_timestamp;
  check(ready(&c,now)&&a[0].try_borrow_data()?[98]==1&&a[1].is_signer&&a[6].is_signer)?;
  let(authority,bump)=Pubkey::find_program_address(&[b"launch_authority",a[0].key.as_ref()],program);
  key(&a[2],authority)?;check(*a[2].owner==system_program::id()&&a[2].data_is_empty())?;
@@ -116,7 +153,58 @@ pub(super) fn execute(program:&Pubkey,a:&[AccountInfo],body:&[u8])->ProgramResul
  for(at,k)in[(8,config),(40,authority),(72,*a[21].key),(104,*a[22].key),(136,*a[19].key),(168,m0),(200,m1),(232,TOKEN),(264,TOKEN),(296,*a[24].key)]{check(read_key(&d,at)?==k)?;}
  check(d[390]==0&&read64(&d,333)?==add(lp_amount,100)?)?;}
  check(a[0].lamports()>=reserve)?;
- c.phase=3;c.launch_time=now;c.pool=*a[18].key;c.fee_nft=*a[6].key;c.write(&a[0])
+ c.phase=3;c.launch_time=now;c.pool=*a[18].key;c.fee_nft=*a[6].key;c.write(&a[0])?;
+ if c.distribution_program==Pubkey::default(){return Ok(())}
+ // The distribution program reads phase 3 and the launch time from the campaign, so the launched state is
+ // persisted first. A failed activation fails the whole instruction and rolls that write back.
+ activate_distribution(program,a,&c,&authority,seeds)?;
+ c.distribution_activated=true;c.write(&a[0])
+}
+/// Activates the recorded distribution program for a campaign whose pool and lock are already in place. The four
+/// vault ATAs must exist (error 44 otherwise): the pool creation and the LP lock leave too little of the runtime's
+/// nested-instruction budget for account creation here, so the keeper creates them before the launch. The
+/// distribution program's `activate` (tag 0, prior counters all zero) creates its record (rent from the keeper),
+/// moves 43.5 % / 5 % / 5 % / 3 % of the supply from the child custody ATA into the vaults with the launch
+/// authority PDA as the transfer signer, and burns anything a vault held beforehand. Afterwards every vault, the
+/// custody, the mint and the record are read back against the allocation table.
+pub(super) fn activate_distribution<'a>(program:&Pubkey,a:&[AccountInfo<'a>],c:&Campaign,authority:&Pubkey,seeds:&[&[u8]])->ProgramResult{
+ let distribution_program=&a[29];
+ if *distribution_program.key!=c.distribution_program||!distribution_program.executable{return Err(err(E_DISTRIBUTION_PROGRAM_INVALID))}
+ pda(&a[30],&[b"parents",a[0].key.as_ref()],program)?;check(*a[30].owner==*program)?;
+ pda(&a[31],&[b"distribution",a[0].key.as_ref()],&c.distribution_program)?;
+ check(*a[31].owner==system_program::id()&&a[31].data_is_empty())?;
+ let mut authorities=[Pubkey::default();4];
+ for purpose in 0..4usize{
+  authorities[purpose]=Pubkey::find_program_address(&[b"vault",a[0].key.as_ref(),&[purpose as u8]],&c.distribution_program).0;
+  key(&a[32+purpose],authorities[purpose])?;ata(&a[36+purpose],&authorities[purpose],&c.child_mint)?;
+  check(a[36+purpose].key!=a[4].key)?;
+  if a[36+purpose].data_is_empty(){return Err(err(E_VAULT_NOT_CREATED))}
+  token(&a[36+purpose],&c.child_mint,&authorities[purpose])?;
+ }
+ let mut data=vec![DISTRIBUTION_TAG_ACTIVATE];data.extend_from_slice(&[0u8;32]);
+ // kids-distribution `activate` accounts: 0 signer (launch authority), 1 payer, 2 campaign, 3 parents, 4 child mint,
+ // 5 source token account, 6 distribution PDA, 7..10 vault authorities, 11..14 vaults, 15 Token, 16 System.
+ cpi(a,29,&[(2,true,false),(1,true,true),(0,false,false),(30,false,false),(3,false,true),(4,false,true),(31,false,true),(32,false,false),(33,false,false),(34,false,false),(35,false,false),(36,false,true),(37,false,true),(38,false,true),(39,false,true),(11,false,false),(13,false,false)],data,seeds)?;
+ verify_activation(program,a,c,authority,&authorities)
+}
+/// Read-back after the activation CPI: custody holds only the dust, every vault holds its allocation, the mint
+/// still has the original supply and no authorities, and the distribution record belongs to the recorded program.
+pub(super) fn verify_activation(program:&Pubkey,a:&[AccountInfo],c:&Campaign,authority:&Pubkey,authorities:&[Pubkey;4])->ProgramResult{
+ let allocation=vault_allocations(c.supply);
+ funded(token(&a[4],&c.child_mint,authority)?==custody_after_activation(c.supply)?)?;
+ for purpose in 0..4usize{funded(token(&a[36+purpose],&c.child_mint,&authorities[purpose])?==allocation[purpose])?;}
+ mint(&a[3],c.supply,None,6)?;{let d=a[3].try_borrow_data()?;funded(d[46..50]==[0;4])?;}
+ funded(*a[31].owner==c.distribution_program)?;
+ let record=a[31].try_borrow_data()?;distribution_record_matches(&record,a[0].key,c,program,&allocation)
+}
+/// The distribution program's record after activation must name this campaign, mint and program, carry the
+/// original supply and the allocation table, and be flagged active.
+pub(super) fn distribution_record_matches(d:&[u8],campaign:&Pubkey,c:&Campaign,program:&Pubkey,allocation:&[u64;4])->ProgramResult{
+ funded(d.len()==DISTRIBUTION_LEN&&&d[..8]==DISTRIBUTION_MAGIC)?;
+ funded(read_key(d,DISTRIBUTION_OFF_CAMPAIGN)?==*campaign&&read_key(d,DISTRIBUTION_OFF_MINT)?==c.child_mint&&read_key(d,DISTRIBUTION_OFF_LAUNCH_PROGRAM)?==*program)?;
+ funded(read64(d,DISTRIBUTION_OFF_SUPPLY)?==c.supply&&d[DISTRIBUTION_OFF_FLAGS]&DISTRIBUTION_FLAG_ACTIVATED!=0)?;
+ for purpose in 0..4{funded(read64(d,DISTRIBUTION_OFF_ALLOCATION+8*purpose)?==allocation[purpose])?;}
+ Ok(())
 }
 #[cfg(test)]mod tests{
  fn amm_config(index:u16,rate:u64,disabled:u8)->Vec<u8>{let mut d=vec![0u8;236];d[..8].copy_from_slice(&solana_program::hash::hash(b"account:AmmConfig").to_bytes()[..8]);d[9]=disabled;d[10..12].copy_from_slice(&index.to_le_bytes());d[12..20].copy_from_slice(&rate.to_le_bytes());d[20..28].copy_from_slice(&120000u64.to_le_bytes());d[28..36].copy_from_slice(&40000u64.to_le_bytes());d}

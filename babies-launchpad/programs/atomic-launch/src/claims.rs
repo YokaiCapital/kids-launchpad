@@ -1,5 +1,6 @@
-//! Fixed-recipient claims. Parent roots attest a publisher's snapshot; they do
-//! not independently prove historical ownership of a parent token.
+//! Fixed-recipient claims paid from launch custody. Parent roots attest a publisher's snapshot; they do
+//! not independently prove historical ownership of a parent token. A campaign whose distribution was
+//! activated in tag 6 refuses every claim here (error 40): its vaults and terms live in the distribution program.
 use super::*;
 use solana_program::{instruction::{AccountMeta,Instruction},pubkey,hash::hashv};
 const TOKEN:Pubkey=pubkey!("TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA");
@@ -29,14 +30,14 @@ fn transfer<'a>(program:&Pubkey,c:&Campaign,campaign:&AccountInfo<'a>,authority:
  invoke_signed(&Instruction{program_id:TOKEN,accounts:vec![AccountMeta::new(*source.key,false),AccountMeta::new(*dest.key,false),AccountMeta::new_readonly(expected,true)],data},&[source.clone(),dest.clone(),authority.clone(),token_program.clone()],&[&[b"launch_authority",campaign.key.as_ref(),&[bump]]])
 }
 pub(super) fn participant(program:&Pubkey,a:&[AccountInfo],body:&[u8])->ProgramResult{
- require(body.is_empty()&&a.len()==7)?;let c=Campaign::read(&a[0],program)?;let mut r=Receipt::read(&a[1],program,a[0].key)?;
+ require(body.is_empty()&&a.len()==7)?;let c=Campaign::read(&a[0],program)?;c.refuse_claims_after_activation()?;let mut r=Receipt::read(&a[1],program,a[0].key)?;
  require(c.phase==3&&r.settled)?;if r.claimed{return Ok(())}
  let amount=proportional(c.supply/10000*4350,r.accepted,c.settled_accepted)?;
  transfer(program,&c,&a[0],&a[2],&a[3],&a[4],&a[5],&r.owner,&a[6],amount)?;
  r.claimed=true;r.write(&a[1])
 }
 pub(super) fn dev(program:&Pubkey,a:&[AccountInfo],body:&[u8])->ProgramResult{
- require(body.is_empty()&&a.len()==6)?;let c=Campaign::read(&a[0],program)?;require(c.phase==3)?;
+ require(body.is_empty()&&a.len()==6)?;let c=Campaign::read(&a[0],program)?;c.refuse_claims_after_activation()?;require(c.phase==3)?;
  let entitled=dev_entitled(c.supply,c.launch_time,Clock::get()?.unix_timestamp)?;let prior={let d=a[0].try_borrow_data()?;read64(&d,304)?};let amount=entitled.checked_sub(prior).ok_or(err(10))?;
  transfer(program,&c,&a[0],&a[1],&a[2],&a[3],&a[4],&c.dev,&a[5],amount)?;
  put64(&mut a[0].try_borrow_mut_data()?,304,entitled);Ok(())
@@ -60,7 +61,7 @@ pub(super) fn validated_parent_mint(program:&Pubkey,config:&AccountInfo,campaign
 fn merkle(campaign:&Pubkey,index:u8,owner:&Pubkey,balance:u64,allocation:u64,proof:&[u8])->[u8;32]{let mut hash=hashv(&[b"kids-parent-v1",campaign.as_ref(),&[index],owner.as_ref(),&balance.to_le_bytes(),&allocation.to_le_bytes()]).to_bytes();for sibling in proof.chunks_exact(32){hash=if hash.as_slice()<sibling{hashv(&[&hash,sibling])}else{hashv(&[sibling,&hash])}.to_bytes()}hash}
 pub(super) fn parent(program:&Pubkey,a:&[AccountInfo],body:&[u8])->ProgramResult{
  require(a.len()==11&&body.len()>=18&&a[0].is_signer)?;let index=body[0];let balance=read64(body,1)?;let allocation=read64(body,9)?;let count=body[17] as usize;
- require(index<2&&count<=32&&body.len()==18+32*count)?;let c=Campaign::read(&a[1],program)?;require(c.phase==3)?;system(&a[10])?;
+ require(index<2&&count<=32&&body.len()==18+32*count)?;let c=Campaign::read(&a[1],program)?;c.refuse_claims_after_activation()?;require(c.phase==3)?;system(&a[10])?;
  require(*a[2].owner==*program&&*a[2].key==Pubkey::find_program_address(&[b"parents",a[1].key.as_ref()],program).0)?;
  let reserve=c.supply/10000*500;
  let claimed={let d=a[2].try_borrow_data()?;require(d.len()==PARENTS_LEN&&&d[..8]==b"KIDSPAR1"&&key(&d,8)?==*a[1].key)?;
