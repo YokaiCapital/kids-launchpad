@@ -15,6 +15,7 @@ const programLog=text=>{const m=/Program log: Error: ([^"\]]+)/.exec(text)||/Pro
 /** @returns {{title:string,detail:string,technical:string|null}} */
 export function friendlyError(raw,{payWith='SOL'}={}){
  const text=typeof raw==='string'?raw:raw?.message||String(raw||'');
+ if(raw&&typeof raw==='object'&&(raw.status===429||raw.status===503))return {title:raw.status===429?'Busy right now':'Service temporarily unavailable',detail:'Nothing was lost. Try the same action again'+(raw.retryAfter?' in '+raw.retryAfter+' seconds':' in a moment')+'; your request keeps its id, so it cannot run twice.',technical:null};
  if(!text)return {title:'Something went wrong',detail:'Try again.',technical:null};
  for(const p of PATTERNS){if(!p.test.test(text))continue;if(p.passthrough)return {title:text,detail:'',technical:null};return {title:p.title({payWith}),detail:p.detail,technical:text.length>160||/Program log|Instruction/.test(text)?text:null};}
  if(text.length<=160&&!/[{}\[\]]/.test(text))return {title:text,detail:'',technical:null};

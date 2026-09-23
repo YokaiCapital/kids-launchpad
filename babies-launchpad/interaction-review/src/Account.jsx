@@ -2,7 +2,16 @@ import {useEffect,useRef,useState} from 'react';
 import {discoverWallets,subscribeWallets,selectWallet,getSelectedWallet,forgetWallet,validateWalletChallenge} from './wallet-connection.mjs';
 import {disconnectAndSignOut} from './wallet-sign-out.mjs';
 import './wallet-connection.css';
-export async function accountApi(path,body,csrf){const response=await fetch('/api/account/'+path,{method:body?'POST':'GET',headers:body?{'Content-Type':'application/json','X-Kids-CSRF':csrf}:{},body:body?JSON.stringify(body):undefined,signal:AbortSignal.timeout(20000)});if(!response.headers.get('content-type')?.includes('application/json'))throw Error('Local account service unavailable');const result=await response.json();if(!response.ok)throw Error(result.error||'Account request failed');return result;}
+// One request, one intent: a busy answer (429/503 with Retry-After up to 5 s) is retried ONCE with the identical body,
+// so the request id and the prepared intent are preserved. Errors carry status and retryAfter for the page.
+export async function accountApi(path,body,csrf,{retries=1}={}){
+ const response=await fetch('/api/account/'+path,{method:body?'POST':'GET',headers:body?{'Content-Type':'application/json','X-Kids-CSRF':csrf}:{},body:body?JSON.stringify(body):undefined,signal:AbortSignal.timeout(20000)});
+ if(!response.headers.get('content-type')?.includes('application/json'))throw Object.assign(Error('Local account service unavailable'),{status:response.status});
+ const result=await response.json();
+ if((response.status===429||response.status===503)&&retries>0){const after=Number(response.headers.get('retry-after')||result.retryAfter||0);if(after>0&&after<=5){await new Promise(r=>setTimeout(r,after*1000));return accountApi(path,body,csrf,{retries:retries-1});}}
+ if(!response.ok)throw Object.assign(Error(result.error||'Account request failed'),{status:response.status,retryAfter:Number(response.headers.get('retry-after')||result.retryAfter||0)||null});
+ return result;
+}
 export function Account({onChange}){
  const [state,setState]=useState(null),[error,setError]=useState(''),[busy,setBusy]=useState(''),[wallets,setWallets]=useState(()=>discoverWallets());
  const running=useRef(false),mounted=useRef(true);

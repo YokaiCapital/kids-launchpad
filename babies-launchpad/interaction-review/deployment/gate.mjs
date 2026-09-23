@@ -26,6 +26,7 @@ async function proxyApi(request,env,operator){
  let upstream;try{upstream=new URL(env.KIDS_BACKEND_ORIGIN);}catch{return json(503,'Backend unavailable');}
  if(upstream.protocol!=='https:'||upstream.username||upstream.password||upstream.pathname!=='/'||upstream.search||upstream.hash||!upstream.hostname.endsWith('.up.railway.app'))return json(503,'Backend unavailable');
  const outgoing=new Headers({'authorization':'Bearer '+env.KIDS_BACKEND_TOKEN,'origin':'https://kids.fun','content-type':'application/json'});
+ const ip=(request.headers.get('x-forwarded-for')||request.headers.get('x-real-ip')||'').split(',')[0].trim();if(ip){const digest=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(ip));outgoing.set('x-kids-client',[...new Uint8Array(digest)].slice(0,12).map(b=>b.toString(16).padStart(2,'0')).join(''));}
  if(operator&&env.KIDS_OPERATOR_BACKEND_TOKEN)outgoing.set('x-kids-operator-token',env.KIDS_OPERATOR_BACKEND_TOKEN);
  const session=request.headers.get('cookie')?.split(';').map(x=>x.trim()).find(x=>/^kids_session=[a-zA-Z0-9_-]{1,256}$/.test(x));if(session)outgoing.set('cookie',session);
  const csrf=request.headers.get('x-kids-csrf');if(csrf&&/^[a-f0-9]{48}$/.test(csrf))outgoing.set('x-kids-csrf',csrf);

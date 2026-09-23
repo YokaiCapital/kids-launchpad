@@ -25,12 +25,13 @@ test('100 mixed authenticated reads queue with eight upstream requests and prese
  const server=createGateway(cfg,{requestUpstream(options,callback){const outgoing=new EventEmitter();outgoing.destroy=()=>outgoing.emit('error',Error('closed'));outgoing.end=()=>{active++;peak=Math.max(peak,active);setTimeout(()=>{const response=new PassThrough();response.headers={'content-type':'application/json'};response.statusCode=200;callback(response);active--;response.end(JSON.stringify({path:options.path,session:options.headers.cookie}));},3);};return outgoing;}});
  const paths=['/api/demo','/api/account/state','/api/account/prelaunch','/api/account/postlaunch'];
  const results=await Promise.all(Array.from({length:100},(_,i)=>new Promise(resolve=>{const request=new PassThrough();Object.assign(request,req(paths[i%paths.length],'GET',{cookie:'kids_session=user'+i}));const response=new EventEmitter();response.headersSent=false;response.writableEnded=false;response.destroyed=false;response.writeHead=(status,headers)=>{response.statusCode=status;response.headers=headers;response.headersSent=true;};response.end=body=>{response.writableEnded=true;resolve({status:response.statusCode,body:JSON.parse(body)});};server.emit('request',request,response);request.end();})));
- assert.equal(peak,8);assert.equal(results.filter(result=>result.status===200).length,100);results.forEach((result,i)=>{assert.equal(result.body.path,paths[i%paths.length]);assert.equal(result.body.session,'kids_session=user'+i);});server.close();
+ assert.equal(peak,10);assert.equal(results.filter(result=>result.status===200).length,100);results.forEach((result,i)=>{assert.equal(result.body.path,paths[i%paths.length]);assert.equal(result.body.session,'kids_session=user'+i);});server.close();
 });
 test('bounded admission limits queued reads, write bursts, disconnections and rate windows',async()=>{
- const {createAdmission}=await import('./gateway.mjs');let time=0;const admission=createAdmission({activeLimit:1,queueLimit:1,now:()=>time});const release=await admission.acquire('GET','viewer');const abort=new AbortController();const queued=admission.acquire('GET','viewer',abort.signal);await assert.rejects(admission.acquire('GET','viewer'),{status:429});await assert.rejects(admission.acquire('POST','operator'),{status:429});abort.abort();await assert.rejects(queued,{status:499});release();
- for(let i=0;i<119;i++)(await admission.acquire('POST','operator'))();await assert.rejects(admission.acquire('POST','operator'),{status:429});time=60001;(await admission.acquire('POST','operator'))();
- const reads=createAdmission();for(let i=0;i<6000;i++)(await reads.acquire('GET','viewer'))();await assert.rejects(reads.acquire('GET','viewer'),{status:429});
+ const {createAdmission}=await import('./gateway.mjs');let time=0;const admission=createAdmission({activeLimit:1,queueLimit:1,writeLimit:1,writeQueue:0,now:()=>time});const release=await admission.acquire('GET','viewer');const abort=new AbortController();const queued=admission.acquire('GET','viewer',abort.signal);await assert.rejects(admission.acquire('GET','viewer'),{status:429});abort.abort();await assert.rejects(queued,{status:499});release();
+ const w=await admission.acquire('POST','operator');await assert.rejects(admission.acquire('POST','operator'),{status:429});w();
+ for(let i=0;i<119;i++)(await admission.acquire('POST','operator'))();await assert.rejects(admission.acquire('POST','operator'),{status:429,retryAfter:60});time=60001;(await admission.acquire('POST','operator'))();
+ const reads=createAdmission();for(let i=0;i<9000;i++)(await reads.acquire('GET','viewer'))();await assert.rejects(reads.acquire('GET','viewer'),{status:429});
 });
 
 test('expired operator role cannot reuse a test wallet session for financial mutations',async()=>{
@@ -60,4 +61,20 @@ test('wallet-signed claim intent routes allow authenticated viewers without loca
 });
 test('active and explicit rehearsal read routes are separately allowlisted',()=>{
  assert.equal(authorizeGateway(req('/api/account/postlaunch'),cfg).role,'viewer');assert.equal(authorizeGateway(req('/api/account/postlaunch-preview'),cfg).role,'viewer');assert.equal(authorizeGateway(req('/api/account/postlaunch?preview=true'),cfg).status,404);
+});
+test('REGRESSION (audit item 4): slow reads never block a submission; refusals carry Retry-After and do not consume budget; identities are fair',async()=>{
+ const {createAdmission,classifyRequest,identityOf}=await import('./gateway.mjs');
+ const a=createAdmission({reads:{active:2,queue:0,waitMs:100},writes:{active:2,queue:1,waitMs:50}});
+ const r1=await a.acquire({method:'GET',path:'/api/account/prelaunch',role:'viewer'}),r2=await a.acquire({method:'GET',path:'/api/account/prelaunch',role:'viewer'});
+ await assert.rejects(a.acquire({method:'GET',path:'/api/account/state',role:'viewer'}),{status:429,retryAfter:2});
+ const submit=await a.acquire({method:'POST',path:'/api/account/prelaunch/submit',role:'viewer',identity:'s:abc'});assert.equal(typeof submit,'function','a submit is admitted while every read slot is busy');submit();r1();r2();
+ const b=createAdmission({budgets:{submit:2}});(await b.acquire({method:'POST',path:'/api/account/prelaunch/submit',role:'viewer'}))();(await b.acquire({method:'POST',path:'/api/account/prelaunch/submit',role:'viewer'}))();
+ await assert.rejects(b.acquire({method:'POST',path:'/api/account/prelaunch/submit',role:'viewer'}),{status:429});
+ assert.equal(b.stats().used.submit,2,'the refused attempt did not consume budget');
+ (await b.acquire({method:'POST',path:'/api/account/prelaunch/prepare',role:'viewer'}))();
+ const c=createAdmission({perIdentity:{'wallet-read':2}});const h={cookie:'kids_session=abc'};(await c.acquire({method:'GET',path:'/api/account/prelaunch',role:'viewer',identity:identityOf(h),headers:h}))();(await c.acquire({method:'GET',path:'/api/account/prelaunch',role:'viewer',identity:identityOf(h),headers:h}))();
+ await assert.rejects(c.acquire({method:'GET',path:'/api/account/prelaunch',role:'viewer',identity:identityOf(h),headers:h}),{status:429});
+ (await c.acquire({method:'GET',path:'/api/account/prelaunch',role:'viewer',identity:identityOf({cookie:'kids_session=other'}),headers:{cookie:'kids_session=other'}}))();
+ assert.equal(classifyRequest('GET','/api/account/prelaunch',{}),'public-read');assert.equal(classifyRequest('GET','/api/account/prelaunch',h),'wallet-read');assert.equal(classifyRequest('POST','/api/account/challenge',{}),'auth');assert.equal(classifyRequest('POST','/api/account/postlaunch/trade/quote',{}),'prepare');assert.equal(classifyRequest('POST','/api/account/postlaunch/trade/submit',{}),'submit');
+ assert.equal(identityOf({}),'anon');assert.match(identityOf({'x-kids-client':'abcdef12abcdef12'}),/^c:/);
 });

@@ -33,34 +33,64 @@ export function upstreamHeaders(req,config,role,length){
  const cookies=String(req.headers.cookie||'').split(';').map(s=>s.trim()),session=cookies.find(s=>/^kids_session=[a-zA-Z0-9_-]{1,256}$/.test(s));if(session)headers.cookie=session;
  return headers;
 }
-// Queue only authenticated reads; writes cannot accumulate behind a slow backend.
-export function createAdmission({activeLimit=8,queueLimit=128,waitMs=12000,now=Date.now}={}){
- let active=0,start=now(),reads=0;const writes={viewer:0,operator:0},queue=[];
- const release=()=>{active--;while(queue.length){const job=queue.shift();clearTimeout(job.timer);job.signal?.removeEventListener('abort',job.cancel);if(job.signal?.aborted)continue;active++;job.resolve(release);break;}};
- return {acquire(method,role,signal){
-  if(now()-start>=60000){start=now();reads=0;writes.viewer=0;writes.operator=0;}
-  if(method==='GET'?++reads>6000:++writes[role]>(role==='operator'?120:240))return Promise.reject(Object.assign(Error('Gateway request limit reached'),{status:429}));
-  if(signal?.aborted)return Promise.reject(Object.assign(Error('Request disconnected'),{status:499}));
-  if(active<activeLimit){active++;return Promise.resolve(release);}
-  if(method!=='GET'||queue.length>=queueLimit)return Promise.reject(Object.assign(Error('Gateway is busy'),{status:429}));
-  return new Promise((resolve,reject)=>{
-   const job={resolve,signal,timer:null,cancel:null};
-   const remove=(status,message)=>{const index=queue.indexOf(job);if(index<0)return;queue.splice(index,1);clearTimeout(job.timer);signal?.removeEventListener('abort',job.cancel);reject(Object.assign(Error(message),{status}));};
-   job.cancel=()=>remove(499,'Request disconnected');job.timer=setTimeout(()=>remove(503,'Gateway queue timed out'),waitMs);job.timer.unref?.();queue.push(job);signal?.addEventListener('abort',job.cancel,{once:true});
+// Admission (architecture audit item 4): reads and writes never share one pool. Public reads, wallet reads, sign-in,
+// preparation and submission each have their own budget; writes have reserved active capacity and a short queue so
+// eight slow reads cannot turn a commit into a 429; every refusal carries a Retry-After; refusals do not consume
+// budget; each identity (session, else client hash) gets a fair share so one client cannot exhaust a class.
+export function classifyRequest(method,path,headers={}){
+ const hasSession=/(?:^|;\s*)kids_session=[a-zA-Z0-9_-]{1,256}/.test(String(headers.cookie||''));
+ if(method==='GET')return hasSession?'wallet-read':'public-read';
+ if(/\/api\/account\/(challenge|verify|logout|local)$/.test(path))return 'auth';
+ if(/\/(prepare|quote)$/.test(path))return 'prepare';
+ return 'submit';
+}
+export function identityOf(headers={}){
+ const session=/(?:^|;\s*)kids_session=([a-zA-Z0-9_-]{1,256})/.exec(String(headers.cookie||''));if(session)return 's:'+createHash('sha256').update(session[1]).digest('hex').slice(0,16);
+ const client=String(headers['x-kids-client']||'');if(/^[a-f0-9]{8,64}$/.test(client))return 'c:'+client;
+ return 'anon';
+}
+export const ADMISSION_DEFAULTS={reads:{active:10,queue:128,waitMs:8000},writes:{active:6,queue:32,waitMs:3000},budgets:{'public-read':9000,'wallet-read':6000,auth:600,prepare:900,submit:900,operator:120},perIdentity:{'public-read':240,'wallet-read':240,auth:30,prepare:60,submit:60,operator:120}};
+export function createAdmission(options={}){
+ const legacy='activeLimit' in options||'queueLimit' in options;
+ const cfg={reads:{...ADMISSION_DEFAULTS.reads,...(legacy?{active:options.activeLimit??10,queue:options.queueLimit??128}:{}),...(options.reads||{})},writes:{...ADMISSION_DEFAULTS.writes,...(legacy?{active:options.writeLimit??ADMISSION_DEFAULTS.writes.active,queue:options.writeQueue??ADMISSION_DEFAULTS.writes.queue}:{}),...(options.writes||{})},budgets:{...ADMISSION_DEFAULTS.budgets,...(options.budgets||{})},perIdentity:{...ADMISSION_DEFAULTS.perIdentity,...(options.perIdentity||{})}};
+ if(options.waitMs){cfg.reads.waitMs=options.waitMs;cfg.writes.waitMs=Math.min(options.waitMs,cfg.writes.waitMs);}
+ const now=options.now||Date.now;
+ const pools={reads:{active:0,queue:[],limit:cfg.reads.active,queueLimit:cfg.reads.queue,waitMs:cfg.reads.waitMs},writes:{active:0,queue:[],limit:cfg.writes.active,queueLimit:cfg.writes.queue,waitMs:cfg.writes.waitMs}};
+ let windowStart=now();const used={},perIdentity=new Map();
+ const reject=(status,message,retryAfter)=>Promise.reject(Object.assign(Error(message),{status,retryAfter}));
+ const release=pool=>()=>{pool.active--;while(pool.queue.length){const job=pool.queue.shift();clearTimeout(job.timer);job.signal?.removeEventListener('abort',job.cancel);if(job.signal?.aborted)continue;pool.active++;job.resolve(release(pool));break;}};
+ return {acquire(a,b,c,d){
+  // legacy form acquire(method, role, signal) or acquire({method,path,role,identity,signal})
+  const req=typeof a==='string'?{method:a,role:b,signal:c,path:d||'/api/account/state',identity:'anon'}:a;
+  const {method,role='viewer',signal,path='/api/account/state',identity='anon',headers}=req;
+  const cls=role==='operator'&&method==='POST'?'operator':(req.class||classifyRequest(method,path,headers||{}));
+  const t=now();if(t-windowStart>=60000){windowStart=t;for(const k of Object.keys(used))used[k]=0;perIdentity.clear();}
+  const remaining=Math.max(1,Math.ceil((60000-(t-windowStart))/1000));
+  if((used[cls]||0)>=cfg.budgets[cls])return reject(429,'Gateway request limit reached for '+cls,remaining);
+  const idKey=identity+'|'+cls,mine=perIdentity.get(idKey)||0;if(identity!=='anon'&&mine>=cfg.perIdentity[cls])return reject(429,'Too many '+cls+' requests from this client',remaining);
+  if(signal?.aborted)return reject(499,'Request disconnected',0);
+  const pool=method==='GET'?pools.reads:pools.writes;
+  const admit=()=>{used[cls]=(used[cls]||0)+1;perIdentity.set(idKey,mine+1);};
+  if(pool.active<pool.limit){pool.active++;admit();return Promise.resolve(release(pool));}
+  if(pool.queue.length>=pool.queueLimit)return reject(429,'Gateway is busy',method==='GET'?2:3);
+  return new Promise((resolve,rej)=>{
+   const job={resolve:r=>{admit();resolve(r);},signal,timer:null,cancel:null};
+   const remove=(status,message)=>{const index=pool.queue.indexOf(job);if(index<0)return;pool.queue.splice(index,1);clearTimeout(job.timer);signal?.removeEventListener('abort',job.cancel);rej(Object.assign(Error(message),{status,retryAfter:method==='GET'?2:3}));};
+   job.cancel=()=>remove(499,'Request disconnected');job.timer=setTimeout(()=>remove(503,'Gateway queue timed out'),pool.waitMs);job.timer.unref?.();pool.queue.push(job);signal?.addEventListener('abort',job.cancel,{once:true});
   });
- }};
+ },stats(){return {reads:{active:pools.reads.active,queued:pools.reads.queue.length},writes:{active:pools.writes.active,queued:pools.writes.queue.length},used:{...used}};}};
 }
 export function createGateway(config,{requestUpstream=http.request,readiness=()=>false}={}){
  const admission=createAdmission();
  const server=http.createServer(async(req,res)=>{
-  const send=(status,error)=>{if(res.writableEnded||res.destroyed)return;if(!res.headersSent)res.writeHead(status,{'Content-Type':'application/json','Cache-Control':'no-store','X-Content-Type-Options':'nosniff'});res.end(JSON.stringify({error}));};
+  const send=(status,error,retryAfter)=>{if(res.writableEnded||res.destroyed)return;if(!res.headersSent)res.writeHead(status,{'Content-Type':'application/json','Cache-Control':'no-store','X-Content-Type-Options':'nosniff',...(retryAfter?{'Retry-After':String(retryAfter)}:{})});res.end(JSON.stringify({error,...(retryAfter?{retryAfter}:{})}));};
   // A shared liveness quota lets anonymous callers exhaust the platform probe budget.
   // Keep this constant-cost endpoint independent from authenticated API admission.
   if(req.method==='GET'&&req.url==='/healthz'){req.resume();res.writeHead(200,{'Content-Type':'application/json','Cache-Control':'no-store'});return res.end(JSON.stringify({status:'alive'}));}
   if(req.method==='GET'&&req.url==='/readyz'){req.resume();const ready=readiness();res.writeHead(ready?200:503,{'Content-Type':'application/json','Cache-Control':'no-store'});return res.end(JSON.stringify({status:ready?'ready':'unavailable'}));}
   const auth=authorizeGateway(req,config);if(auth.status){req.resume();return send(auth.status,auth.error);}
   const controller=new AbortController();const disconnected=()=>{if(!res.writableEnded)controller.abort();};res.on('close',disconnected);
-  let release;try{release=await admission.acquire(req.method,auth.role,controller.signal);}catch(error){res.off('close',disconnected);req.resume();return send(error.status||503,error.message);}
+  let release;try{release=await admission.acquire({method:req.method,path:req.url,role:auth.role,identity:identityOf(req.headers),headers:req.headers,signal:controller.signal});}catch(error){res.off('close',disconnected);req.resume();return send(error.status||503,error.message,error.retryAfter);}
   let upstream,timer;
   try{
    timer=setTimeout(()=>{upstream?.destroy();send(504,'Gateway request timed out');req.destroy();},25000);timer.unref();
@@ -75,6 +105,7 @@ export function createGateway(config,{requestUpstream=http.request,readiness=()=
      incoming.on('end',()=>{if(res.writableEnded)return resolve();if(!String(incoming.headers['content-type']).includes('application/json')){send(502,'Unexpected backend response');return resolve();}
       const headers={'Content-Type':'application/json','Cache-Control':'private, no-store','X-Content-Type-Options':'nosniff'};
       const cookies=(incoming.headers['set-cookie']||[]).filter(value=>/^kids_session=(?:[a-zA-Z0-9_-]{1,256})?;/.test(value));if(cookies.length)headers['Set-Cookie']=cookies.map(value=>/;\s*Secure(?:;|$)/i.test(value)?value:value+'; Secure');
+      if(incoming.statusCode===503){const ra=Number(incoming.headers['retry-after'])||3;send(503,'Backend busy; retry with the same request',ra);return resolve();}
       if((incoming.statusCode||500)>=500){send(502,'Backend unavailable');return resolve();}res.writeHead(incoming.statusCode||502,headers);res.end(Buffer.concat(chunks));resolve();
      });
     });
