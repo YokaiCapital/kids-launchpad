@@ -57,17 +57,20 @@
     "Cap conversion source and timing for the soft and hard caps"
   ],
   "solUsdPythFeedId": "ef0d8b6fda2ceba41da15d4095d1da392a0d2f8ed0c6c7bc0f4cfac8c280b56d",
-  "updatedAt": "2026-09-23T04:40:00Z",
+  "updatedAt": "2026-09-23T07:20:00Z",
   "program": {
     "programId": "BLiaZWNQoPm4mG4cXNm4sXifFqs1Xmxx12qD9T4Y5NeN",
-    "binarySha256": "ef584ae7555415215b8cda0597cfff8362a7ecdbb31fdc07aa747c3f63368923",
+    "binarySha256": "9721a4d8b7cdcc4aebe11ca54d968e0be73d0e2dfea261e4954eeacdc7d8ae58",
     "keyLocation": "~/.config/kids/mainnet/program-keypair.json (owner Mac, 0600)",
-    "status": "DEPLOYED on mainnet 23 September 2026 from the reproducible CI build, bytes verified; upgrade authority moved to the governance key on 23 September 2026 (owner command)",
+    "status": "UPGRADED to build 2 on 23 September 2026 (owner command, governance key): coin-side fees burned, 2 % and 2.5 % tiers, sell instruction retired; bytes verified on chain, program-data extended by 10,240 bytes",
     "deploySignature": "2Ty3yuDMkY9FDGdr6EkaVcWvCVZSZ2CHPxtVFJYHkdj8DFPeZz4QPfh5N54zdSuMN6CCJYPRiEtZSH22H81jCga2",
     "upgradeAuthority": "EPwoPzJ5wuFgvMxUs7gQyUgb48dfZh4k6TxpZsTpWf2Y",
     "explorer": "https://solscan.io/account/BLiaZWNQoPm4mG4cXNm4sXifFqs1Xmxx12qD9T4Y5NeN",
-    "binarySize": 199008,
-    "features": [],
+    "binarySize": 200784,
+    "features": [
+      "burn-child-fees",
+      "cpmm-config-allowlist"
+    ],
     "builds": [
       {
         "version": 1,
@@ -87,7 +90,9 @@
         "note": "reproducible CI build 1b1c47f (23 September 2026): coin-side fees burned (tag 26), launch accepts the 2 % and 2.5 % Raydium tiers, sell instruction (tag 22) retired; program-data account grows by 1776 bytes (extend); upgrade signed by the governance key"
       }
     ],
-    "buildsNote": "The service accepts any listed build on chain and records the live one in its program manifest; the keeper plans only what the live build supports. Move `binarySha256`/`binarySize` to version 2 once the upgrade is verified on chain."
+    "buildsNote": "The service accepts any listed build on chain and records the live one in its program manifest; the keeper plans only what the live build supports. Move `binarySha256`/`binarySize` to version 2 once the upgrade is verified on chain.",
+    "upgradeSignature": "5CBxyEGnWFUohPBL4JTD4YGNfCdJCoZMYGs7JomjuAVHnG3gG85miiHGs3e4K7iu4696ph7YPoatgt6nEYJrzYf",
+    "extensionRentFundingSignature": "3XDsec3sNgka7Fa8LrVFecHvwQY5UQQ6eiEdzjGedwEo2oxtWeV1LtvauxVUUUFbqLFhgpyJqtLBFLB3RjELNdyk"
   },
   "operatorWallet": {
     "address": "AAuwkFNvXRimHyvdQfh7Zik9baw8W2ufSbc5cyBqsdoE",

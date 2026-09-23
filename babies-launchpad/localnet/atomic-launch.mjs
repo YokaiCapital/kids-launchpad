@@ -62,7 +62,9 @@ async function qualifyAtomicContext(){
   const upgraded=PROFILE.network==='localnet'?null:matchBuild(data.data.subarray(45),acceptedBuilds(readIdentities().program));
   if(!upgraded)throw Error('Atomic launch binary differs from verified local build');
   if(upgraded.sha256!==contextStats.liveBuild)console.log(JSON.stringify({event:'program-upgraded-live',sha256:upgraded.sha256,features:upgraded.features}));contextStats.liveBuild=upgraded.sha256;
-  return {connection,programId,manifest:{...manifest,sha256:upgraded.sha256,binarySize:upgraded.binarySize,features:[...upgraded.features]}};
+  // The build this service started with stays in the lineage, so records that carry the old hash remain valid.
+  const lineage=[...(manifest.lineage||[])];if(!lineage.includes(manifest.sha256))lineage.push(manifest.sha256);
+  return {connection,programId,manifest:{...manifest,sha256:upgraded.sha256,binarySize:upgraded.binarySize,features:[...upgraded.features],lineage}};
  }
  return {connection,programId,manifest};
 }

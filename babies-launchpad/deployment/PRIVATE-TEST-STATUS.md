@@ -176,3 +176,8 @@ Owner decisions after the first mainnet launch: coin-side trading fees are burne
 - Live after the owner's upload: `/readyz` 200, `/statusz` ready, writes open, reconciliation complete (0 unresolved, 6 expired intents flagged "not proven absent"), schedule served (`next.opensAt` 2026-09-24T16:00:00Z) beside the launched test coin, post-launch data reads the live 2 % pool (tradeFeeBps 200, pool FAThun8y…).
 - Verified fix: signed-in coin page `/api/account/postlaunch` 200 with a throwaway wallet through kids.fun's gate (was 400 "Wallet missing").
 - Not yet live: signer upload (SEC-01/02 signer fixes run in the signer service), site bundle index-Cvuj5Hi1.js (card, PFPs, countdown), program build 2.
+
+## 23 September 2026, ~07:15 UTC: program build 2 live on mainnet
+
+- Upgrade signature `5CBxyEGn…zYf` (governance key); extension by 10,240 bytes paid by the governance key after a 0.0727 SOL top-up from the operator (`3XDsec3s…dyk`). Read back: program-data 209,293 bytes, first 200,784 bytes hash `9721a4d8…ae58`, tail zero, authority `EPwoPzJ5…Wf2Y` unchanged.
+- Found live: the keepers reported "Active campaign ledger or program changed" because the live-upgrade path did not carry the previous build in the lineage; fixed in the service (test added). The API must be re-uploaded (or restarted) to run the keepers again.

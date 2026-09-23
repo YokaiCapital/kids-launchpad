@@ -29,3 +29,8 @@ test('manifest features: recorded list wins, localnet defaults to the current so
  assert.deepEqual(manifestFeatures({network:'mainnet'}),[]);
  assert.deepEqual(manifestFeatures({network:'localnet'}),[...CURRENT_FEATURES]);
 });
+test('a live upgrade keeps the previous build in the lineage so campaign records stay accepted',async()=>{
+ const {acceptedProgramHash}=await import('../program-lineage.mjs');
+ const before={sha256:'v1',lineage:[]};const lineage=[...(before.lineage||[])];if(!lineage.includes(before.sha256))lineage.push(before.sha256);const after={...before,sha256:'v2',lineage};
+ assert.equal(acceptedProgramHash(after,'v1'),true);assert.equal(acceptedProgramHash(after,'v2'),true);assert.equal(acceptedProgramHash(after,'v3'),false);
+});
