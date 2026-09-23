@@ -2,7 +2,7 @@ import {netLabel,explorerTx} from './network-label.mjs';
 import {walletForOwner} from './wallet-connection.mjs';
 import {friendlyError} from './friendly-errors.mjs';
 import {useEffect,useRef,useState} from 'react';
-import {ArrowLeft,ArrowRight,ArrowsDownUp,ChartLine,CheckCircle,Copy,Globe,LockKey,Play,XLogo} from '@phosphor-icons/react';
+import {ArrowLeft,ArrowRight,ArrowsDownUp,ChartLine,CheckCircle,Copy,Fire,Globe,LockKey,Play,XLogo} from '@phosphor-icons/react';
 import {accountApi} from './Account';
 import {ParentIcon} from './Parents';
 import {CoinUpdates} from './CoinUpdates';
@@ -10,25 +10,34 @@ import {resolveShartVideo} from './coin-media';
 import {resolveCoinDescription} from './coin-display';
 import './post-launch.css';
 import {LocalTradePanel} from './LocalTradePanel';
+import {activityLabel,compactUnits,formatSolAmount,formatUnits} from './flywheel-format.mjs';
 const formatWhole=(value,decimals=6)=>value==null?'—':Math.round(Number(value)/10**decimals).toLocaleString('en-GB');
 const format=(value,decimals=6)=>value==null?'—':(Number(value)/10**decimals).toLocaleString('en-GB',{maximumFractionDigits:decimals===9?4:2});
 function moveTab(event){const tabs=[...event.currentTarget.querySelectorAll('[role="tab"]')],index=tabs.indexOf(event.target);if(index<0)return;let next;if(event.key==='ArrowRight')next=(index+1)%tabs.length;else if(event.key==='ArrowLeft')next=(index+tabs.length-1)%tabs.length;else if(event.key==='Home')next=0;else if(event.key==='End')next=tabs.length-1;else return;event.preventDefault();tabs[next].focus();tabs[next].click();}
 const short=value=>value?`${value.slice(0,5)}…${value.slice(-5)}`:'Not connected';
 const PARENT_NAMES=['Fartcoin','Buttcoin'];
 const shortSig=v=>v?v.slice(0,6)+'…'+v.slice(-6):'';
+const Burn=()=><Fire size={14} weight="fill" aria-hidden="true"/>;
+const Figure=({raw,decimals,unit})=>{const v=compactUnits(raw,decimals,unit);return <strong title={v.exact||undefined}>{v.text} <small>{unit}</small></strong>;};
+const BURN_ROWS=8;
 function Flywheel({data,verified}){
  const [copied,setCopied]=useState('');const f=verified?data.fees:null,events=(verified&&data.feeEvents)||[];
  const burns=events.filter(e=>e.kind==='buy-burn');
+ // Token counters are raw base units: the child mint's decimals from the record (6), parents at 6. SOL is lamports.
+ const childDecimals=Number.isInteger(data?.decimals)?data.decimals:6,parentDecimals=6;
  const copy=async v=>{try{await navigator.clipboard.writeText(v);setCopied(v);setTimeout(()=>setCopied(''),1500);}catch{}};
+ const childBurned=compactUnits(f?.childBurned,childDecimals,'coins');
  return <section className="post-flywheel"><div className="post-flywheel-head"><div><h2>Every trade feeds the family.</h2><p>{'The '+(data?.tradeFeeBps?(data.tradeFeeBps/100)+' %':'pool')+' fee is collected by the program. The SOL side is split: KIDS treasury, the dev, and buybacks of both parents that are burned. The coin side is burned outright, never sold.'}</p></div><span className="post-preview-badge">{f?format(f.totalSol,9)+' SOL collected':'No fees yet'}</span></div>
   <div className="post-flywheel-grid">
-   <div className="post-flywheel-tile is-burn"><span>$Shartcoin burned from fees</span><strong>{f?format(f.childBurned,0):'—'} <small>coins</small></strong><em>🔥 never sold</em></div>
-   <div className="post-flywheel-tile"><span>KIDS treasury</span><strong>{f?format(f.treasuryPaid,9):'—'} <small>SOL</small></strong></div>
-   <div className="post-flywheel-tile"><span>Dev</span><strong>{f?format(f.devPaid,9):'—'} <small>SOL</small></strong></div>
-   {PARENT_NAMES.map((name,i)=><div key={name} className="post-flywheel-tile is-burn"><span><ParentIcon name={name}/> {name} buyback</span><strong>{f?format(i?f.parentBSpent:f.parentASpent,9):'—'} <small>SOL</small></strong><em>🔥 {f?format(i?f.parentBBurned:f.parentABurned,0):'—'} burned</em>{f&&BigInt(i?f.parentBAllocated:f.parentAAllocated)>BigInt(i?f.parentBSpent:f.parentASpent)&&<small>{format(BigInt(i?f.parentBAllocated:f.parentAAllocated)-BigInt(i?f.parentBSpent:f.parentASpent),9)} SOL queued</small>}</div>)}
+   <div className="post-flywheel-tile is-burn"><span>$Shartcoin burned from fees</span><strong title={childBurned.exact||undefined}>{childBurned.text} <small>coins</small></strong><em><Burn/> never sold</em></div>
+   <div className="post-flywheel-tile"><span>KIDS treasury</span><Figure raw={f?.treasuryPaid} decimals={9} unit="SOL"/></div>
+   <div className="post-flywheel-tile"><span>Dev</span><Figure raw={f?.devPaid} decimals={9} unit="SOL"/></div>
+   {PARENT_NAMES.map((name,i)=>{const spent=f?(i?f.parentBSpent:f.parentASpent):null,burned=compactUnits(f?(i?f.parentBBurned:f.parentABurned):null,parentDecimals,name+' burned');let queued=null;try{if(f){const q=BigInt(i?f.parentBAllocated:f.parentAAllocated)-BigInt(spent);if(q>0n)queued=q;}}catch{}
+    return <div key={name} className="post-flywheel-tile is-burn"><span><ParentIcon name={name}/> {name} buyback</span><Figure raw={spent} decimals={9} unit="SOL"/><em title={burned.exact||undefined}><Burn/> {burned.text} burned</em>{queued!=null&&<small>{format(queued,9)} SOL queued</small>}</div>;})}
   </div>
-  <div className="post-burn-log"><div className="post-burn-log-head"><strong>Latest buybacks and burns</strong><span>{burns.length?burns.length+' on record':'None yet'}</span></div>
-   {burns.length===0?<p>The first buyback runs after the first fees are collected.</p>:<ul>{burns.slice(0,8).map(e=><li key={e.id}><span className="post-burn-when">{new Date(e.at*1000).toLocaleString()}</span><span className="post-burn-what"><ParentIcon name={PARENT_NAMES[e.index]||'Parent'}/> {PARENT_NAMES[e.index]||'Parent'}: {format(e.amount,9)} SOL → 🔥 {format(e.delta?.[e.index?'parentBBurned':'parentABurned'],0)} burned</span><span className="post-burn-sig">{data.explorerUrl?<a href={explorerTx(data,e.signature)} target="_blank" rel="noreferrer">{shortSig(e.signature)}</a>:<code title={e.signature}>{shortSig(e.signature)}</code>}<button type="button" onClick={()=>copy(e.signature)}>{copied===e.signature?'Copied':'Copy'}</button></span></li>)}</ul>}
+  <div className="post-burn-log"><div className="post-burn-log-head"><strong>Latest buybacks and burns</strong><span>{activityLabel(burns.length,BURN_ROWS)}</span></div>
+   {burns.length===0?<p>The first buyback runs after the first fees are collected.</p>:<ul>{burns.slice(0,BURN_ROWS).map(e=>{const sol=formatSolAmount(e.amount),delta=e.delta?.[e.index?'parentBBurned':'parentABurned'],burned=formatUnits(delta,parentDecimals),when=new Date(e.at*1000);
+    return <li key={e.id}><time className="post-burn-when" dateTime={when.toISOString()} title={when.toUTCString()}>{when.toLocaleString()}</time><span className="post-burn-what"><ParentIcon name={PARENT_NAMES[e.index]||'Parent'}/> {PARENT_NAMES[e.index]||'Parent'}: <b title={sol.exact||undefined}>{sol.text}</b> → <span className="post-burn-pair"><Burn/> <b title={delta!=null?formatUnits(delta,parentDecimals,parentDecimals)+' burned':undefined}>{burned}</b> burned</span></span><span className="post-burn-sig">{data.explorerUrl?<a href={explorerTx(data,e.signature)} target="_blank" rel="noreferrer">{shortSig(e.signature)}</a>:<code title={e.signature}>{shortSig(e.signature)}</code>}<button type="button" onClick={()=>copy(e.signature)}>{copied===e.signature?'Copied':'Copy'}</button></span></li>;})}</ul>}
    <small>{data?.explorerUrl?'Signatures open on the explorer.':'Private test ledger: signatures are real on this ledger but not on public explorers.'}</small>
   </div>
  </section>;
@@ -95,7 +104,6 @@ export function PostLaunch({identity,onSignIn,profile,posts=[],go,preview=false}
     <p className="post-description">{resolveCoinDescription(profile?.description)}</p>
     <button className="post-contract" disabled={!verified} onClick={()=>copy(data.mint,'Mint address')}><span>CA</span><code>{verified?short(data.mint):'Available after connection'}</code><Copy size={16}/></button>
     <LocalTradePanel owner={owner} campaign={data?.campaign} tradeFeeBps={data?.tradeFeeBps||null} wallet={data?.wallet||null} network={data?.network||'localnet'} enabled={verified&&!!owner} localExecution={claims?.localClaimEnabled===true} mint={data?.mint} pool={data?.pool} programId={data?.programId} genesisHash={data?.genesisHash} onSignIn={onSignIn} onTraded={()=>setRefresh(n=>n+1)}/>
-    <div className="post-life"><strong>Two parents. One kid.</strong><p>Fartcoin + Buttcoin → Shartcoin</p></div>
    </aside>
   </div>
   <span className="post-announcement" role="status" aria-live="polite">{copied||error}</span>
