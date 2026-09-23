@@ -1,7 +1,7 @@
 import {resolveCoinDescription} from './coin-display';
 import {resolveShartVideo} from './coin-media';
 import {LocalCommitPanel,usePrelaunchChain,LegacyEscrow} from './LocalPrelaunch';
-import {LaunchStatus} from './LaunchStatus';
+import {LaunchStatus,OpensIn} from './LaunchStatus';
 import {netLabel} from './network-label.mjs';
 import {chainAllocation} from './prelaunch-chain';
 import {DevVesting} from './DevVesting';
@@ -16,7 +16,7 @@ export function Prelaunch({identity,onSignIn,state=emptyPrelaunch,service,onRefr
  const [videoError,setVideoError]=useState(false);
  const featuredVideo=resolveShartVideo(profile?.video);
  const chain=usePrelaunchChain(identity?.owner||null),live=chain.data?.configured===true,preview=chain.data?.configured===false,net=netLabel(chain.data?.network);
- const policy=live?{cap:BigInt(chain.data.hardCapLamports),softCap:BigInt(chain.data.softCapLamports),poolUsd:chain.data.poolHardUsd,softPoolUsd:chain.data.poolSoftUsd}:PRELAUNCH;
+ const nextTerms=chain.data?.next?.terms,policy=live?{cap:BigInt(chain.data.hardCapLamports),softCap:BigInt(chain.data.softCapLamports),poolUsd:chain.data.poolHardUsd,softPoolUsd:chain.data.poolSoftUsd}:nextTerms?{cap:BigInt(nextTerms.hard),softCap:BigInt(nextTerms.soft),poolUsd:Number(BigInt(nextTerms.hard))/1e9*400,softPoolUsd:Number(BigInt(nextTerms.soft))/1e9*400}:PRELAUNCH;
  const committed=live?BigInt(state.committed):0n,current=live?chainAllocation(chain.data):{total:0n,retained:0n,refund:0n};
  const fundingPhase=live?chain.data.phase:state.phase;
  const funded=Number(current.total)/Number(policy.cap),softMarker=Number(policy.softCap)*100/Number(policy.cap),acceptedTotal=live&&fundingPhase==='failed'?0n:current.total>policy.cap?policy.cap:current.total,excessTotal=current.total-acceptedTotal;
@@ -45,7 +45,10 @@ export function Prelaunch({identity,onSignIn,state=emptyPrelaunch,service,onRefr
   </div><aside className="commit-panel" id="shart-commit">  <div className="coin-banner">{profile?.banner?<img src={profile.banner} alt="Shartcoin coin banner"/>:<><span>FARTCOIN × BUTTCOIN</span><strong>Oh, Shartcoin.</strong></>}<div className="coin-socials">{[{key:'xUrl',label:'Shartcoin on X',Icon:XLogo},{key:'websiteUrl',label:'Shartcoin website',Icon:Globe}].map(({key,label,Icon})=>profile?.[key]?<a key={key} href={profile[key]} target="_blank" rel="noopener noreferrer" aria-label={label} title={label}><Icon size={20}/></a>:<button key={key} disabled aria-label={`${label} — not added yet`} title={`${label} — add a URL in Dev controls`}><Icon size={20}/></button>)}</div></div>
   <div className="prelaunch-heading">{profile?.logo?<img className="coin-logo" src={profile.logo} alt="Shartcoin logo"/>:<span className="shart-mark" aria-hidden="true">S!</span>}<div><p className="eyebrow coin-parent-inline"><span className="parent-label">Parents</span><ParentIcon name="Fartcoin"/><span>Fartcoin</span><span aria-hidden="true">×</span><ParentIcon name="Buttcoin"/><span>Buttcoin</span></p><div className="coin-title-line"><h1>Shartcoin <span>$Shartcoin</span></h1></div></div><span className="prelaunch">Prelaunch</span></div>
 
-{live?<LocalCommitPanel chain={chain} identity={identity} onSignIn={onSignIn} onOpenCoin={chain.data?.phase==='launched'?()=>go('PostLaunch'):null}/>:(chain.error&&!live)?<><p className="eyebrow">STATUS</p><h2>Live status unavailable</h2><p className="small muted">The ledger did not answer. Nothing can be committed until it does.</p><button className="primary" onClick={chain.refresh}>Retry</button></>:preview?<><p className="eyebrow">STATUS</p><h2>No launch is open right now</h2><p className="small muted">When a launch opens, the commit box appears here with the live countdown.</p></>:<div className="escrow-unavailable"><h2>Prelaunch escrow</h2><p className="small muted">{chain.error||'Connecting to localnet escrow…'}</p><button className="outlined" onClick={chain.refresh}>Refresh escrow</button></div>}
+{live?<LocalCommitPanel chain={chain} identity={identity} onSignIn={onSignIn} onOpenCoin={chain.data?.phase==='launched'?()=>go('PostLaunch'):null}/>:(chain.error&&!live)?<><p className="eyebrow">STATUS</p><h2>Live status unavailable</h2><p className="small muted">The ledger did not answer. Nothing can be committed until it does.</p><button className="primary" onClick={chain.refresh}>Retry</button></>:preview?<><p className="eyebrow">COMMIT SOL</p><OpensIn data={chain.data}/><p className="small muted">{chain.data?.next?.opensAtUnix?'The commit box unlocks when the countdown reaches zero.':'The opening date will be announced here first. Nothing can be committed before then.'}</p><div className="commit-locked">
+<label>Commitment amount · SOL<input inputMode="decimal" value="" disabled aria-label="Commitment amount in SOL (opens later)" placeholder="0.00"/></label><div className="amount-presets">{['1','5','10'].map(n=><button key={n} disabled>{n} SOL</button>)}</div>
+<div className="your-split"><div><span>Estimated allocation</span><small>0 SOL committed</small></div><div className="personal-values"><span>Into pool<strong>0 SOL</strong></span><span>Excess refund<strong>0 SOL</strong></span></div><small>Final allocation at close</small></div>
+<button className="primary" disabled>{chain.data?.next?.opensAtUnix?'Opens '+new Date(chain.data.next.opensAtUnix*1000).toLocaleDateString():'Not open yet'}</button></div></>:<div className="escrow-unavailable"><h2>Prelaunch escrow</h2><p className="small muted">{chain.error||'Connecting to localnet escrow…'}</p><button className="outlined" onClick={chain.refresh}>Refresh escrow</button></div>}
   </aside></div>
  </section>;
 }

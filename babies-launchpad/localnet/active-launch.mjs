@@ -49,8 +49,13 @@ export function activeAmounts(c,r,now){
  const entitled=closed?r.committed-accepted:0n;
  return {accepted,refundable:entitled>r.refunded?entitled-r.refunded:0n,failed,phase:failed?'failed':c.phase===3?'launched':closed?'awaiting-launch':'open'};
 }
+/** Planned next launch (no campaign yet): deployment/<network>/launch-schedule.json, owner-edited, public data. */
+export function readLaunchSchedule(network=PROFILE.network){
+ const path=fileURLToPath(new URL('../deployment/'+network+'/launch-schedule.json',import.meta.url));if(!existsSync(path))return null;
+ try{const j=JSON.parse(readFileSync(path,'utf8'));const opensAt=typeof j.opensAt==='string'&&!Number.isNaN(Date.parse(j.opensAt))?j.opensAt:null;return {coin:j.coin||'Shartcoin',opensAt,opensAtUnix:opensAt?Math.floor(Date.parse(opensAt)/1000):null,terms:{soft:String(j.soft||'100000000000'),hard:String(j.hard||'500000000000'),deadlineSeconds:Number(j.deadlineSeconds||86400)},note:typeof j.note==='string'?j.note.slice(0,200):null};}catch{return null;}
+}
 export async function readActive(owner){
- if(!existsSync(manifestPath))return {configured:false};
+ if(!existsSync(manifestPath))return {configured:false,network:PROFILE.network,next:readLaunchSchedule(),chainTimeUnix:Math.floor(Date.now()/1000)};
  const ctx=await activeContext(),m=activeManifest(ctx),c=await readCampaign(ctx,m.address);validateActiveTerms(c,m);
  const info=await ctx.connection.getAccountInfo(c.address);if(info.data[98]!==1)throw Error('Parent snapshots must be configured');
  const now=await chainTime(ctx.connection),r=owner?await readActiveReceipt(ctx,c.address,owner):{committed:0n,refunded:0n,sequence:0n},a=activeAmounts(c,r,now);

@@ -9,7 +9,12 @@ export const solText=lamports=>{const n=Number(BigInt(lamports||0))/1e9;return n
 /** @param data readActive() output (or {configured:false}), @param nowUnix chain-aligned time in seconds */
 export function describeLaunch(data,nowUnix){const live=data?.network==='mainnet';
  if(!data)return {phase:'loading',tone:'muted',pill:'Connecting',headline:'Loading launch status',sub:'Reading the ledger…',countdown:null,progress:null,addresses:null};
- if(data.configured!==true)return {phase:'unscheduled',tone:'muted',pill:'Not open yet',headline:'No launch is open right now',sub:'When the next launch opens, the countdown and the commit box appear here.',countdown:null,progress:null,addresses:null};
+ if(data.configured!==true){
+  const next=data.next||null,soft=BigInt(next?.terms?.soft||'100000000000'),hard=BigInt(next?.terms?.hard||'500000000000');
+  const progress={raised:'0',soft:solText(soft),hard:solText(hard),pct:0,softPct:Math.min(100,Number(soft*10000n/hard)/100),reached:false};
+  if(next?.opensAtUnix){const opensIn=next.opensAtUnix-nowUnix;return {phase:'scheduled',tone:'pending',pill:opensIn>0?'Opens soon':'Opening',headline:(next.coin||'The next launch')+(opensIn>0?' opens '+new Date(next.opensAtUnix*1000).toLocaleString():' is opening now'),sub:'Commitments start when the clock reaches zero. Soft cap '+progress.soft+' SOL, hard cap '+progress.hard+' SOL, '+Math.round((next.terms?.deadlineSeconds||86400)/3600)+' hours to commit.',countdown:{label:'Opens in',seconds:opensIn,at:next.opensAtUnix},progress,addresses:null};}
+  return {phase:'unscheduled',tone:'muted',pill:'Not open yet',headline:next?(next.coin||'The next launch')+': opening date to be announced':'No launch is open right now',sub:next?'Planned terms: soft cap '+progress.soft+' SOL, hard cap '+progress.hard+' SOL, '+Math.round((next.terms?.deadlineSeconds||86400)/3600)+' hours to commit. The date will appear here first.':'When the next launch opens, the countdown and the commit box appear here.',countdown:null,progress:next?progress:null,addresses:null};
+ }
  const total=BigInt(data.totalLamports||0),soft=BigInt(data.softCapLamports||1),hard=BigInt(data.hardCapLamports||soft),reached=total>=soft;
  const progress={raised:solText(total),soft:solText(soft),hard:solText(hard),pct:Math.min(100,Number(total*10000n/hard)/100),softPct:Math.min(100,Number(soft*10000n/hard)/100),reached};
  const closeIn=data.deadlineUnix-nowUnix,launchWindowIn=data.launchDeadlineUnix-nowUnix;

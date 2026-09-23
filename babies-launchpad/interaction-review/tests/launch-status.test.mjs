@@ -12,3 +12,9 @@ test('closed, failed and launched states say what happened and what to do',()=>{
  const l=describeLaunch({...base,phase:'launched',pool:'P',totalLamports:'1000000000'},2000);assert.equal(l.pill,'Live');assert.deepEqual(l.addresses.map(x=>x.value),['M','P','E']);assert.equal(l.explorerUrl,null);
 });
 test('no campaign and loading states',()=>{assert.equal(describeLaunch({configured:false},0).phase,'unscheduled');assert.equal(describeLaunch(null,0).phase,'loading');assert.equal(solText('123456789012'),'123.46');});
+test('no campaign: a planned schedule shows an opening countdown and the planned terms; without a date, "to be announced"',()=>{
+ const next={coin:'Shartcoin',opensAtUnix:2000,terms:{soft:'1000000000',hard:'5000000000',deadlineSeconds:3600}};
+ const d=describeLaunch({configured:false,next},1000);assert.equal(d.phase,'scheduled');assert.equal(d.countdown.seconds,1000);assert.match(d.headline,/Shartcoin opens/);assert.match(d.sub,/Soft cap 1 SOL/);assert.equal(d.progress.hard,'5');
+ const u=describeLaunch({configured:false,next:{...next,opensAtUnix:null}},1000);assert.equal(u.phase,'unscheduled');assert.match(u.headline,/to be announced/);assert.ok(u.progress);
+ assert.equal(describeLaunch({configured:false},0).progress,null);
+});

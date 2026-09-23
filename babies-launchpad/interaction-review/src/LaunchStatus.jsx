@@ -23,3 +23,12 @@ export function LaunchStatus({data,go,onRefresh}){
   {d.phase==='launched'&&go&&<button className="primary launch-cta" onClick={()=>go('PostLaunch')}>Open the coin page: claim and trade <ArrowRight size={20}/></button>}
  </section>;
 }
+/** Ticking countdown for the disabled commit box: "Opens in 02:14:09" above the greyed controls. */
+export function OpensIn({data}){
+ const [skew,setSkew]=useState(0),[now,setNow]=useState(Date.now());
+ useEffect(()=>{if(Number.isFinite(data?.chainTimeUnix))setSkew(data.chainTimeUnix*1000-Date.now());},[data]);
+ useEffect(()=>{const id=setInterval(()=>setNow(Date.now()),1000);return()=>clearInterval(id);},[]);
+ const at=data?.next?.opensAtUnix;if(!at)return <div className="opens-in is-tba"><span>Opens</span><strong>Date to be announced</strong></div>;
+ const seconds=at-Math.floor((now+skew)/1000);
+ return <div className="opens-in"><span>{seconds>0?'Opens in':'Opening now'}</span><strong>{formatCountdown(seconds)}</strong><small>{new Date(at*1000).toLocaleString()}</small></div>;
+}
