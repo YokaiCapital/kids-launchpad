@@ -214,7 +214,7 @@ pub fn process_instruction(program:&Pubkey,accounts:&[AccountInfo],data:&[u8])->
   8=>claims::dev(program,accounts,body),
   9=>claims::configure(program,accounts,body),
   10=>claims::parent(program,accounts,body),
-  20..=25=>fees::process(program,accounts,body,tag),
+  20..=26=>fees::process(program,accounts,body,tag),
   _=>Err(ProgramError::InvalidInstructionData),
  }
 }

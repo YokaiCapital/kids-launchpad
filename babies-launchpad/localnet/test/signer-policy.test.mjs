@@ -18,7 +18,7 @@ test('REPRODUCTION: a compute-only message with a 1.4 SOL priority fee is refuse
 });
 test('user-signed tags, unknown tags and unserved campaigns are refused; keeper tags on a served campaign pass',()=>{
  for(const tag of [1,3,7,8,10,11,99])assert.equal(ev([kids(tag)]).ok,false,'tag '+tag);
- for(const tag of [2,4,5,6,20,21,22,23,24,25])assert.equal(ev([kids(tag)]).ok,true,'tag '+tag);
+ for(const tag of [2,4,5,6,20,21,22,23,24,25,26])assert.equal(ev([kids(tag)]).ok,true,'tag '+tag);
  const served=new Set([campaign.toBase58()]);assert.equal(ev([kids(21)],{campaigns:served}).ok,true);
  assert.match(ev([kids(21,[{pubkey:other.publicKey,isSigner:false,isWritable:true}])],{campaigns:served}).reason,/not served/);
  assert.match(ev([kids(0)]).reason,/not allowed/);assert.equal(ev([kids(0,[{pubkey:operator.publicKey,isSigner:true,isWritable:true},{pubkey:campaign,isSigner:false,isWritable:true}])],{provisioning:true,campaigns:served}).ok,true);

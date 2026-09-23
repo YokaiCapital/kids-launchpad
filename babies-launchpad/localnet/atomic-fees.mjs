@@ -12,6 +12,8 @@ function instructionFor(ctx,campaign,keeper,mint,tag,extra,body=Buffer.alloc(0))
  const f=feeAddresses(ctx,campaign,mint),common=[[campaign,false,false],[keeper,true,tag===20],[f.state,false,true],[f.authority,false,false]];
  return new TransactionInstruction({programId:ctx.programId,keys:[...common,...extra].map(([pubkey,isSigner,isWritable])=>({pubkey,isSigner,isWritable})),data:Buffer.concat([Buffer.from([tag]),body])});
 }
+/** Tag 26: burn `amount` of the coin-side fees held by the fee authority (owner decision, 23 September 2026). */
+export function burnChildFeesInstruction(ctx,campaign,keeper,mint,amount){const f=feeAddresses(ctx,campaign,mint);return instructionFor(ctx,campaign,keeper,mint,26,[[ata(mint,f.authority),false,true],[mint,false,true],[TOKEN_PROGRAM_ID,false,false]],u64(amount));}
 export function initFeesInstruction(ctx,campaign,keeper,mint){return instructionFor(ctx,campaign,keeper,mint,20,[[SystemProgram.programId,false,false]]);}
 export function collectFeesInstruction(ctx,campaign,keeper,mint,nft,maxLiquidity){
  const f=feeAddresses(ctx,campaign,mint),p=poolAddresses(CPMM,AMM_CONFIG,mint,NATIVE_MINT);
@@ -31,7 +33,7 @@ export function distributeFeesInstruction(ctx,campaign,keeper,mint,treasury,dev)
 export async function readFees(ctx,campaign,mint){
  const f=feeAddresses(ctx,campaign,mint),account=await ctx.connection.getAccountInfo(f.state);
  if(!account||!account.owner.equals(ctx.programId)||account.data.length!==128||account.data.subarray(0,8).toString()!=='KIDSFEE1'||!new PublicKey(account.data.subarray(8,40)).equals(campaign))throw Error('Invalid fee account');
- const names=['childPending','totalSol','treasuryPaid','devPaid','parentAAllocated','parentBAllocated','parentASpent','parentBSpent','parentABurned','parentBBurned'];return Object.fromEntries(names.map((name,i)=>[name,account.data.readBigUInt64LE(40+i*8)]));
+ const names=['childPending','totalSol','treasuryPaid','devPaid','parentAAllocated','parentBAllocated','parentASpent','parentBSpent','parentABurned','parentBBurned','childBurned'];return Object.fromEntries(names.map((name,i)=>[name,account.data.readBigUInt64LE(40+i*8)]));
 }
 export async function boundedQuote(connection,inputMint,outputMint,amount){
  const p=poolAddresses(CPMM,AMM_CONFIG,inputMint,outputMint),[pool,config,v0,v1]=await Promise.all([connection.getAccountInfo(p.pool),connection.getAccountInfo(AMM_CONFIG),connection.getAccountInfo(p.vault0),connection.getAccountInfo(p.vault1)]);

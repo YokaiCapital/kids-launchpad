@@ -9,6 +9,7 @@ import {writeDurableJson} from '../shared/durable-json.mjs';
 import {resolvePostlaunchCampaign} from './postlaunch-campaign.mjs';
 import {localKey,chainTime} from './dev-vesting.mjs';
 import {CPMM,AMM_CONFIG,LOCK,LOCK_AUTH,authorityAddress} from './atomic-launch.mjs';
+import {burnChildFeesInstruction} from './atomic-fees.mjs';
 import {parentsAddress} from './atomic-claims.mjs';
 import {poolAddresses,decodePool,decodeConfig} from './cpmm.mjs';
 import {localnetParentRoute,fetchJupiterParentRoute} from './jupiter-route.mjs';
@@ -26,7 +27,7 @@ export function feePlan(state){
  for(const name of ['childPending','totalSol','treasuryPaid','devPaid','parentAAllocated','parentBAllocated','parentASpent','parentBSpent'])raw(state[name]);
  const treasury=state.totalSol*98n/168n,dev=state.totalSol*20n/168n,parent=state.totalSol*25n/168n;
  if(state.treasuryPaid>treasury||state.devPaid>dev||state.parentAAllocated>parent||state.parentBAllocated>parent||state.parentASpent>state.parentAAllocated||state.parentBSpent>state.parentBAllocated)throw Error('Fee counter accounting mismatch');
- const plan=[];if(state.childPending>0n)plan.push({kind:'convert',amount:state.childPending.toString()});
+ const plan=[];if(state.childPending>0n)plan.push({kind:'burn',amount:state.childPending.toString()});
  if(state.treasuryPaid<treasury||state.devPaid<dev||state.parentAAllocated<parent||state.parentBAllocated<parent)plan.push({kind:'distribute'});
  for(const index of [0,1]){const budget=index?state.parentBAllocated-state.parentBSpent:state.parentAAllocated-state.parentASpent;if(budget>0n)plan.push({kind:'buy-burn',index,amount:budget.toString()});}
  return plan;
@@ -93,7 +94,7 @@ export function createActiveFeeKeeper({resolve=()=>resolvePostlaunchCampaign('ac
      }
      if(!operation){
       const plan=feePlan(await readFees(ctx,campaign,mint));
-      for(const item of plan){if(item.kind==='distribute'){operation=item;break;}try{await boundedQuote(c,item.kind==='convert'?mint:NATIVE_MINT,item.kind==='convert'?NATIVE_MINT:parents[item.index],BigInt(item.amount));operation=item;break;}catch(error){if(error.message!=='Trade too small')throw error;}}
+      for(const item of plan){if(item.kind==='distribute'||item.kind==='burn'){operation=item;break;}try{await boundedQuote(c,item.kind==='convert'?mint:NATIVE_MINT,item.kind==='convert'?NATIVE_MINT:parents[item.index],BigInt(item.amount));operation=item;break;}catch(error){if(error.message!=='Trade too small')throw error;}}
       if(!operation&&(journal.lastCollectedAt===null||now-journal.lastCollectedAt>=collectionIntervalSeconds))operation={kind:'collect'};
      }
     }
@@ -111,6 +112,7 @@ export function createActiveFeeKeeper({resolve=()=>resolvePostlaunchCampaign('ac
     const amount=lockedPositionAmount(await c.getAccountInfo(position),{pool:own.pool,nft:state.feeNft,owner:authorityAddress(ctx,campaign),lpMint:own.lpMint,vaultAmount:account.amount});
     instruction=collectFeesInstruction(ctx,campaign,admin.publicKey,mint,state.feeNft,amount);
    }else if(operation.kind==='distribute')instruction=distributeFeesInstruction(ctx,campaign,admin.publicKey,mint,state.treasury,state.dev);
+   else if(operation.kind==='burn'){instruction=burnChildFeesInstruction(ctx,campaign,admin.publicKey,mint,BigInt(operation.amount));}
    else if(operation.kind==='convert'||operation.kind==='buy-burn'){
     if(operation.kind==='buy-burn'&&![0,1].includes(operation.index))throw Error('Invalid parent index');
     const amount=raw(BigInt(operation.amount)),input=operation.kind==='convert'?mint:NATIVE_MINT,output=operation.kind==='convert'?NATIVE_MINT:parents[operation.index],expiry=await chainTime(c)+90;

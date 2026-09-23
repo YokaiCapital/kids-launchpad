@@ -78,7 +78,8 @@ async function provision(){
  }
  const info=await getMint(c,mint.publicKey),holding=await getAccount(c,child);if(info.decimals!==6||info.supply!==BigInt(m.supply)||!info.mintAuthority?.equals(authority)||!info.freezeAuthority?.equals(authority)||holding.amount!==BigInt(m.supply)||!holding.owner.equals(authority))throw Error('Mint custody or fixed supply mismatch');
  await send(new Transaction().add(createAssociatedTokenAccountIdempotentInstruction(admin.publicKey,wsol,authority,NATIVE_MINT)),[],'wsol:'+m.address);
- const balance=await c.getBalance(authority);if(balance<300000000)await send(new Transaction().add(SystemProgram.transfer({fromPubkey:admin.publicKey,toPubkey:authority,lamports:300000000-balance})),[],'topup:'+m.address);
+ // Launch authority funding: a mainnet launch used 0.18 SOL (pool creation fee, lookup table, rent); 0.22 SOL leaves a margin. Override with KIDS_LAUNCH_AUTHORITY_TOPUP_LAMPORTS.
+ const topUp=BigInt(process.env.KIDS_LAUNCH_AUTHORITY_TOPUP_LAMPORTS||'220000000');const balance=BigInt(await c.getBalance(authority));if(balance<topUp)await send(new Transaction().add(SystemProgram.transfer({fromPubkey:admin.publicKey,toPubkey:authority,lamports:topUp-balance})),[],'topup:'+m.address);
  const snapshotPath=runtime+'parent-snapshot-'+m.address+'.json';let snapshot;
  if(existsSync(snapshotPath))snapshot=read(snapshotPath);
  else if(local){snapshot=publicSnapshot(await captureLocalParentSnapshot(ctx,campaign,m.parentMints));saveActiveFile(snapshotPath,snapshot);}

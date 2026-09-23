@@ -6,8 +6,8 @@ import {Keypair} from '@solana/web3.js';
 import {createActiveFeeKeeper,lockedPositionAmount,feePlan,validateActiveFeeIdentity} from '../active-fee-keeper.mjs';
 const counters=()=>({childPending:0n,totalSol:168n,treasuryPaid:0n,devPaid:0n,parentAAllocated:0n,parentBAllocated:0n,parentASpent:0n,parentBSpent:0n});
 function selected(){const admin=Keypair.generate(),mint=Keypair.generate().publicKey,feeNft=Keypair.generate().publicKey,campaign=Keypair.generate().publicKey,programId=Keypair.generate().publicKey,dev=Keypair.generate().publicKey;const value={scope:'active-localnet',ctx:{programId,connection:{rpcEndpoint:'http://127.0.0.1:19099'},manifest:{network:'localnet',rpcUrl:'http://127.0.0.1:19099',genesisHash:'genesis',sha256:'binary'}},campaign,state:{phase:3,mint,feeNft,creator:admin.publicKey,treasury:admin.publicKey,dev}};value.record={network:'localnet',ready:true,address:campaign.toBase58(),mint:mint.toBase58(),feeNft:feeNft.toBase58(),creator:admin.publicKey.toBase58(),treasury:admin.publicKey.toBase58(),dev:dev.toBase58(),genesisHash:'genesis',programId:programId.toBase58(),programSha256:'binary',parentMints:[Keypair.generate().publicKey.toBase58(),Keypair.generate().publicKey.toBase58()]};return {value,admin};}
-test('fee plan drains child conversion before cumulative distribution and remaining parent budgets',()=>{
- assert.deepEqual(feePlan({...counters(),childPending:5n}),[{kind:'convert',amount:'5'},{kind:'distribute'}]);
+test('fee plan burns the coin-side fees before cumulative distribution and remaining parent budgets',()=>{
+ assert.deepEqual(feePlan({...counters(),childPending:5n}),[{kind:'burn',amount:'5'},{kind:'distribute'}]);
  assert.deepEqual(feePlan({...counters(),treasuryPaid:98n,devPaid:20n,parentAAllocated:25n,parentBAllocated:25n,parentASpent:5n,parentBSpent:25n}),[{kind:'buy-burn',index:0,amount:'20'}]);
 });
 test('completed budgets are never spent again and rounding dust is retained',()=>{assert.deepEqual(feePlan({...counters(),treasuryPaid:98n,devPaid:20n,parentAAllocated:25n,parentBAllocated:25n,parentASpent:25n,parentBSpent:25n}),[]);assert.deepEqual(feePlan({...counters(),totalSol:1n}),[]);});

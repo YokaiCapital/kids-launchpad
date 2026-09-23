@@ -6,7 +6,8 @@ const TOKEN:Pubkey=pubkey!("TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA");
 const TOKEN22:Pubkey=pubkey!("TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb");
 const ATA:Pubkey=pubkey!("ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL");
 const CPMM:Pubkey=pubkey!("CPMMoo8L3F4NbTegBCKVNunggL7H1ZpdTHKxQB5qKP1C");
-const CONFIG:Pubkey=pubkey!("2fGXL8uhqxJ4tpgtosHZXT4zcQap6j62z3bMDxdkMvy5");
+// Raydium CPMM fee tiers this program accepts: 2 % (index 2, the localnet clone) and 2.5 % (index 7, mainnet).
+const CONFIGS:[Pubkey;2]=[pubkey!("2fGXL8uhqxJ4tpgtosHZXT4zcQap6j62z3bMDxdkMvy5"),pubkey!("ESLj2Rzmvn3RhDo4Z18hY1wYmGyC9xM4ZtRXhvoFkDAi")];
 const LOCK:Pubkey=pubkey!("LockrWmn6K5twhz3y9w1dQERbmgSaRkfnTeTKbpofwE");
 const LOCK_AUTH:Pubkey=pubkey!("3f7GcQFG397GAaEnv51zR6tsTVihYRydnydDD1cXekxH");
 const MEMO:Pubkey=pubkey!("MemoSq4gqABAXKb96qnH8TysNcWxMyWCqXgDLGmfcHr");
@@ -33,14 +34,14 @@ fn token(a:&AccountInfo,mint:&Pubkey,owner:&Pubkey)->Result<u64,ProgramError>{
 fn mint_supply(a:&AccountInfo)->Result<u64,ProgramError>{require(*a.owner==TOKEN)?;let d=a.try_borrow_data()?;require(d.len()==82&&d[45]==1)?;read64(&d,36)}
 fn custody(a:&AccountInfo,mint:&Pubkey,owner:&Pubkey)->Result<u64,ProgramError>{ata(a,owner,mint)?;token(a,mint,owner)}
 #[derive(Default,Clone,Debug)]
-struct State{child:u64,total:u64,treasury:u64,dev:u64,parent_a:u64,parent_b:u64,spent_a:u64,spent_b:u64,burned_a:u64,burned_b:u64}
+struct State{child:u64,total:u64,treasury:u64,dev:u64,parent_a:u64,parent_b:u64,spent_a:u64,spent_b:u64,burned_a:u64,burned_b:u64,burned_child:u64}
 impl State{
  fn read(a:&AccountInfo,p:&Pubkey,campaign:&Pubkey)->Result<Self,ProgramError>{
   pda(a,&[b"fees",campaign.as_ref()],p)?;require(a.owner==p)?;let d=a.try_borrow_data()?;
   require(d.len()==LEN&&&d[..8]==MAGIC&&read_key(&d,8)?==*campaign)?;
-  Ok(Self{child:read64(&d,40)?,total:read64(&d,48)?,treasury:read64(&d,56)?,dev:read64(&d,64)?,parent_a:read64(&d,72)?,parent_b:read64(&d,80)?,spent_a:read64(&d,88)?,spent_b:read64(&d,96)?,burned_a:read64(&d,104)?,burned_b:read64(&d,112)?})
+  Ok(Self{child:read64(&d,40)?,total:read64(&d,48)?,treasury:read64(&d,56)?,dev:read64(&d,64)?,parent_a:read64(&d,72)?,parent_b:read64(&d,80)?,spent_a:read64(&d,88)?,spent_b:read64(&d,96)?,burned_a:read64(&d,104)?,burned_b:read64(&d,112)?,burned_child:read64(&d,120)?})
  }
- fn write(&self,a:&AccountInfo,campaign:&Pubkey)->ProgramResult{let mut d=a.try_borrow_mut_data()?;d[..8].copy_from_slice(MAGIC);d[8..40].copy_from_slice(campaign.as_ref());for(at,n)in[(40,self.child),(48,self.total),(56,self.treasury),(64,self.dev),(72,self.parent_a),(80,self.parent_b),(88,self.spent_a),(96,self.spent_b),(104,self.burned_a),(112,self.burned_b)]{put64(&mut d,at,n)}Ok(())}
+ fn write(&self,a:&AccountInfo,campaign:&Pubkey)->ProgramResult{let mut d=a.try_borrow_mut_data()?;d[..8].copy_from_slice(MAGIC);d[8..40].copy_from_slice(campaign.as_ref());for(at,n)in[(40,self.child),(48,self.total),(56,self.treasury),(64,self.dev),(72,self.parent_a),(80,self.parent_b),(88,self.spent_a),(96,self.spent_b),(104,self.burned_a),(112,self.burned_b),(120,self.burned_child)]{put64(&mut d,at,n)}Ok(())}
  fn liability(&self)->Result<u64,ProgramError>{self.total.checked_sub(self.treasury).and_then(|n|n.checked_sub(self.dev)).and_then(|n|n.checked_sub(self.spent_a)).and_then(|n|n.checked_sub(self.spent_b)).ok_or(err(61))}
  fn pending(&self,parent:u8)->Result<u64,ProgramError>{match parent{0=>self.parent_a.checked_sub(self.spent_a),1=>self.parent_b.checked_sub(self.spent_b),_=>None}.ok_or(err(61))}
 }
@@ -82,9 +83,9 @@ fn swap_quote(a:&[AccountInfo],input:u64,min_out:u64,expiry:i64,out_program:usiz
  executable(&a[14],&CPMM)?;executable(&a[15],&TOKEN)?;
  // The output side may be a Token-2022 parent: its program is the mint account's owner and must be the passed program.
  let (_,out_token_program)=parent_mint_supply(&a[12])?;require(*a[out_program].key==out_token_program&&a[out_program].executable)?;
- let p=pool(&a[6])?;key(&a[7],&p[0])?;key(&a[7],&CONFIG)?;require(*a[7].owner==CPMM)?;
+ let p=pool(&a[6])?;key(&a[7],&p[0])?;require(CONFIGS.contains(a[7].key)&&*a[7].owner==CPMM)?;
  let rate={let d=a[7].try_borrow_data()?;require(d.len()==236&&d[..8]==solana_program::hash::hash(b"account:AmmConfig").to_bytes()[..8])?;
- require(d[10..12]==[2,0]&&read64(&d,12)?==20000&&read64(&d,20)?==120000&&read64(&d,28)?==40000)?;20000};
+ let rate=read64(&d,12)?;require((rate==20000||rate==25000)&&read64(&d,20)?==120000&&read64(&d,28)?==40000)?;rate};
  pda(&a[8],&[b"vault_and_lp_mint_auth_seed"],&CPMM)?;key(&a[13],&p[9])?;
  let forward=*a[11].key==p[5];key(&a[11],&p[if forward{5}else{6}])?;key(&a[12],&p[if forward{6}else{5}])?;
  // The pool's recorded token programs must be exactly the owners of the mint accounts on each side.
@@ -192,6 +193,17 @@ pub(super) fn process(program:&Pubkey,a:&[AccountInfo],body:&[u8],tag:u8)->Progr
    require(parent_custody(&a[5])?==output&&parent_mint_supply(&a[7])?.0==supply.checked_sub(received).ok_or(err(61))?)?;
    if parent==0{state.spent_a=add(state.spent_a,amount)?;state.burned_a=add(state.burned_a,received)?;}else{state.spent_b=add(state.spent_b,amount)?;state.burned_b=add(state.burned_b,received)?;}
    require(custody(&a[4],&WSOL,&authority)?>=state.liability()?)?;
+  },
+  26=>{
+   // Burn the coin-side fees instead of selling them (owner decision, 23 September 2026): the fee authority burns
+   // `amount` of the child coin it holds; nothing leaves custody except into the void.
+   require(a.len()==7&&body.len()==8)?;let amount=read64(body,0)?;require(amount>0&&amount<=state.child)?;
+   key(&a[5],&c.child_mint)?;executable(&a[6],&TOKEN)?;
+   let before=custody(&a[4],&c.child_mint,&authority)?;require(before>=state.child)?;
+   let mut data=vec![8u8];data.extend_from_slice(&amount.to_le_bytes());
+   cpi(a,6,&[(4,false,true),(5,false,true),(3,true,false)],data,seeds)?;
+   require(custody(&a[4],&c.child_mint,&authority)?==before-amount)?;
+   state.child-=amount;state.burned_child=add(state.burned_child,amount)?;
   },
   _=>return Err(ProgramError::InvalidInstructionData)
  }

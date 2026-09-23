@@ -17,7 +17,7 @@ if(fresh){
  args.push('--url','https://api.mainnet-beta.solana.com');
  // Fresh genesis only: the existing hosted ledger keeps its clones. Jupiter v6 is cloned so a new environment can rehearse aggregator buybacks.
  for(const id of['CPMMoo8L3F4NbTegBCKVNunggL7H1ZpdTHKxQB5qKP1C','LockrWmn6K5twhz3y9w1dQERbmgSaRkfnTeTKbpofwE','metaqbxxUerdq28cj1RbAWkYQm3ybzjb6a8bt518x1s','JUP6LkbZbjS1jKKwapdHNy74zcZ3tLUZoi5QNyVTaV4'])args.push('--clone-upgradeable-program',id);
- for(const id of['2fGXL8uhqxJ4tpgtosHZXT4zcQap6j62z3bMDxdkMvy5','DNXgeM9EiiaAbaWvwjHj9fQQLAX5ZsfHyvmYUNRAdNC8'])args.push('--clone',id);
+ for(const id of['2fGXL8uhqxJ4tpgtosHZXT4zcQap6j62z3bMDxdkMvy5','ESLj2Rzmvn3RhDo4Z18hY1wYmGyC9xM4ZtRXhvoFkDAi','DNXgeM9EiiaAbaWvwjHj9fQQLAX5ZsfHyvmYUNRAdNC8'])args.push('--clone',id);
  args.push('--upgradeable-program',pub('atomic-launch-program-key'),'/opt/kids/kids_atomic_launch.so',pub('admin'));
 }
 const children=new Set(),validators=new Set();let stopping=false;

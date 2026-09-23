@@ -8,7 +8,7 @@ const LOCK:Pubkey=pubkey!("LockrWmn6K5twhz3y9w1dQERbmgSaRkfnTeTKbpofwE");
 const LOCK_AUTH:Pubkey=pubkey!("3f7GcQFG397GAaEnv51zR6tsTVihYRydnydDD1cXekxH");
 const METADATA:Pubkey=pubkey!("metaqbxxUerdq28cj1RbAWkYQm3ybzjb6a8bt518x1s");
 const WSOL:Pubkey=pubkey!("So11111111111111111111111111111111111111112");
-const CONFIG:Pubkey=pubkey!("2fGXL8uhqxJ4tpgtosHZXT4zcQap6j62z3bMDxdkMvy5");
+const CONFIGS:[Pubkey;2]=[pubkey!("2fGXL8uhqxJ4tpgtosHZXT4zcQap6j62z3bMDxdkMvy5"),pubkey!("ESLj2Rzmvn3RhDo4Z18hY1wYmGyC9xM4ZtRXhvoFkDAi")];
 const FEE:Pubkey=pubkey!("DNXgeM9EiiaAbaWvwjHj9fQQLAX5ZsfHyvmYUNRAdNC8");
 fn check(value:bool)->ProgramResult{if value{Ok(())}else{Err(err(21))}}
 fn key(a:&AccountInfo,k:Pubkey)->ProgramResult{check(*a.key==k)}
@@ -40,7 +40,7 @@ pub(super) fn execute(program:&Pubkey,a:&[AccountInfo],body:&[u8])->ProgramResul
  let(authority,bump)=Pubkey::find_program_address(&[b"launch_authority",a[0].key.as_ref()],program);
  key(&a[2],authority)?;check(*a[2].owner==system_program::id()&&a[2].data_is_empty())?;
  let bump_seed=[bump];let seeds:&[&[u8]]=&[b"launch_authority",a[0].key.as_ref(),&bump_seed];
- for(i,k)in[(3,c.child_mint),(11,TOKEN),(12,ATA),(13,system_program::id()),(14,solana_program::sysvar::rent::id()),(15,CPMM),(16,CONFIG),(23,FEE),(25,LOCK),(26,LOCK_AUTH),(27,METADATA),(28,WSOL)]{key(&a[i],k)?;}
+ for(i,k)in[(3,c.child_mint),(11,TOKEN),(12,ATA),(13,system_program::id()),(14,solana_program::sysvar::rent::id()),(15,CPMM),(23,FEE),(25,LOCK),(26,LOCK_AUTH),(27,METADATA),(28,WSOL)]{key(&a[i],k)?;}
  for i in [11,12,13,15,25,27]{check(a[i].executable)?;}
  check(c.child_mint!=WSOL&&*a[6].key!=c.child_mint)?;
  check(a[18].data_is_empty()&&*a[18].owner==system_program::id())?;
@@ -58,7 +58,8 @@ pub(super) fn execute(program:&Pubkey,a:&[AccountInfo],body:&[u8])->ProgramResul
  check(read64(&d,12)?==20000&&read64(&d,20)?==120000&&read64(&d,28)?==40000)?;}
  let (m0,m1)=if c.child_mint<WSOL{(c.child_mint,WSOL)}else{(WSOL,c.child_mint)};
  pda(&a[17],&[b"vault_and_lp_mint_auth_seed"],&CPMM)?;
- pda(&a[18],&[b"pool",CONFIG.as_ref(),m0.as_ref(),m1.as_ref()],&CPMM)?;
+ check(CONFIGS.contains(a[16].key)&&*a[16].owner==CPMM)?;let config=*a[16].key;
+ pda(&a[18],&[b"pool",config.as_ref(),m0.as_ref(),m1.as_ref()],&CPMM)?;
  pda(&a[19],&[b"pool_lp_mint",a[18].key.as_ref()],&CPMM)?;
  ata(&a[20],&authority,a[19].key)?;
  pda(&a[21],&[b"pool_vault",a[18].key.as_ref(),m0.as_ref()],&CPMM)?;
@@ -106,7 +107,7 @@ pub(super) fn execute(program:&Pubkey,a:&[AccountInfo],body:&[u8])->ProgramResul
  check(token(&a[21],&m0,a[17].key)?==expected0&&token(&a[22],&m1,a[17].key)?==expected1)?;
  {check(*a[18].owner==CPMM)?;let d=a[18].try_borrow_data()?;check(d.len()==637)?;
  check(d[..8]==solana_program::hash::hash(b"account:PoolState").to_bytes()[..8])?;
- for(at,k)in[(8,CONFIG),(40,authority),(72,*a[21].key),(104,*a[22].key),(136,*a[19].key),(168,m0),(200,m1),(232,TOKEN),(264,TOKEN),(296,*a[24].key)]{check(read_key(&d,at)?==k)?;}
+ for(at,k)in[(8,config),(40,authority),(72,*a[21].key),(104,*a[22].key),(136,*a[19].key),(168,m0),(200,m1),(232,TOKEN),(264,TOKEN),(296,*a[24].key)]{check(read_key(&d,at)?==k)?;}
  check(d[390]==0&&read64(&d,333)?==add(lp_amount,100)?)?;}
  check(a[0].lamports()>=reserve)?;
  c.phase=3;c.launch_time=now;c.pool=*a[18].key;c.fee_nft=*a[6].key;c.write(&a[0])

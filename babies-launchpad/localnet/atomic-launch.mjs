@@ -10,7 +10,7 @@ import {campaignAddress} from './launch-escrow.mjs';
 import {networkProfile} from './network.mjs';
 export const PROFILE=networkProfile();
 export const RPC=PROFILE.rpcUrl;
-export const CPMM=new PublicKey('CPMMoo8L3F4NbTegBCKVNunggL7H1ZpdTHKxQB5qKP1C'),LOCK=new PublicKey('LockrWmn6K5twhz3y9w1dQERbmgSaRkfnTeTKbpofwE'),LOCK_AUTH=new PublicKey('3f7GcQFG397GAaEnv51zR6tsTVihYRydnydDD1cXekxH'),METADATA=new PublicKey('metaqbxxUerdq28cj1RbAWkYQm3ybzjb6a8bt518x1s'),AMM_CONFIG=new PublicKey('2fGXL8uhqxJ4tpgtosHZXT4zcQap6j62z3bMDxdkMvy5'),POOL_FEE=new PublicKey('DNXgeM9EiiaAbaWvwjHj9fQQLAX5ZsfHyvmYUNRAdNC8');
+export const CPMM=new PublicKey('CPMMoo8L3F4NbTegBCKVNunggL7H1ZpdTHKxQB5qKP1C'),LOCK=new PublicKey('LockrWmn6K5twhz3y9w1dQERbmgSaRkfnTeTKbpofwE'),LOCK_AUTH=new PublicKey('3f7GcQFG397GAaEnv51zR6tsTVihYRydnydDD1cXekxH'),METADATA=new PublicKey('metaqbxxUerdq28cj1RbAWkYQm3ybzjb6a8bt518x1s'),AMM_CONFIG=new PublicKey(PROFILE.network==='localnet'?'2fGXL8uhqxJ4tpgtosHZXT4zcQap6j62z3bMDxdkMvy5':'ESLj2Rzmvn3RhDo4Z18hY1wYmGyC9xM4ZtRXhvoFkDAi')/* 2 % on the localnet clone, 2.5 % on real networks (owner decision 23 Sep 2026) */,POOL_FEE=new PublicKey('DNXgeM9EiiaAbaWvwjHj9fQQLAX5ZsfHyvmYUNRAdNC8');
 const LOADER='BPFLoaderUpgradeab1e11111111111111111111111';
 export const u64=n=>{const b=Buffer.alloc(8);b.writeBigUInt64LE(BigInt(n));return b;};
 // The qualified context (genesis, executable bytes, hash, upgrade authority) is expensive: one ProgramData download
