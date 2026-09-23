@@ -1,0 +1,104 @@
+/* Live market on the coin page (owner, 23 September 2026). Candles run hot and cold: buys and up-candles in the
+   brand pink, sells and down-candles in the site's ice signal blue, so the pair reads without red/green vision. */
+.post-launch{--market-up:var(--post-pink);--market-down:#8cecff;--market-live:#7ddc9a;--market-grid:rgba(255,255,255,.045)}
+
+/* Metrics: six tiles, three across, two rows; two across on phones. Row two starts with a rule. */
+.post-metrics.is-six{grid-template-columns:repeat(3,minmax(0,1fr));row-gap:0;padding:0}
+.post-metrics.is-six .post-metric{padding:16px 19px;border-left:1px solid var(--post-line);gap:4px}
+.post-metrics.is-six .post-metric:nth-child(3n+1){border-left:0}
+.post-metrics.is-six .post-metric:nth-child(n+4){border-top:1px solid var(--post-line)}
+.post-metrics.is-six .post-metric strong{font-variant-numeric:tabular-nums;font-size:21px;line-height:1.15}
+.post-metrics.is-six .post-metric strong small{font-size:12px;font-weight:400;color:var(--post-muted);margin-left:3px}
+.post-metric strong.is-up{color:var(--market-up)}.post-metric strong.is-down{color:var(--market-down)}
+.post-metric-fresh{display:inline-flex;align-items:center;gap:5px;white-space:nowrap}
+.post-metric-fresh::before{content:"";width:5px;height:5px;border-radius:50%;background:currentColor;flex-shrink:0}
+.post-metric-fresh.is-live{color:var(--market-live)}.post-metric-fresh.is-stale{color:var(--post-warn)}.post-metric-fresh.is-off{color:var(--post-error)}.post-metric-fresh.is-wait{color:var(--post-muted)}
+.post-metrics.is-six .post-metric>small{display:flex;flex-wrap:wrap;gap:2px 8px;align-items:center;margin-top:2px;line-height:1.4}
+.post-metrics.is-six .post-metric strong small{display:inline;margin:0;line-height:inherit}
+
+/* The Market tab lifts the fixed panel height: chart and transactions flow in the page, no nested scroll region. */
+.post-panel-content.is-market{height:auto;overflow:visible}
+.market-tab{display:flex;flex-direction:column;min-width:0}
+.market-toolbar{display:flex;align-items:center;flex-wrap:wrap;gap:8px 14px;padding:10px 16px;border-bottom:1px solid var(--post-line)}
+.market-pair{display:inline-flex;align-items:center;gap:8px;font-size:13px;font-weight:600;white-space:nowrap}
+.market-pair i{width:6px;height:6px;border-radius:2px;background:var(--post-pink)}
+.market-pair span{font-size:11px;font-weight:400;color:var(--post-muted)}
+.market-fresh{display:inline-flex;align-items:center;gap:6px;min-height:24px;padding:2px 9px;border:1px solid var(--post-line);border-radius:999px;font-size:11px;color:var(--post-muted);white-space:nowrap}
+.market-fresh i{width:6px;height:6px;border-radius:50%;background:currentColor;flex-shrink:0}
+.market-fresh.is-live{color:var(--market-live);border-color:rgba(125,220,154,.45)}
+.market-fresh.is-live i{animation:market-pulse 2s ease-in-out infinite}
+.market-fresh.is-stale{color:var(--post-warn);border-color:rgba(240,179,90,.5)}
+.market-fresh.is-off{color:var(--post-error);border-color:rgba(255,163,189,.45)}
+.market-fresh.is-wait{color:var(--post-muted)}
+@keyframes market-pulse{0%,100%{opacity:1}50%{opacity:.35}}
+.market-intervals{margin-left:auto;display:flex;gap:2px;padding:2px;border:1px solid var(--post-line);border-radius:8px;background:var(--post-well)}
+.post-launch .market-intervals button{min-height:32px;min-width:40px;padding:4px 8px;border:0;border-radius:6px;background:transparent;color:var(--post-muted);font-size:12px;font-weight:600;transition:color .15s,background-color .15s}
+.post-launch .market-intervals button:hover{color:var(--post-ink);background:var(--post-soft)}
+.post-launch .market-intervals button[aria-pressed=true]{color:var(--post-ink);background:var(--post-soft);box-shadow:inset 0 0 0 1px var(--post-line)}
+.market-chart{position:relative;height:clamp(240px,34vw,360px);background:var(--post-card)}
+.market-chart-canvas{position:absolute;inset:0}
+.market-chart-canvas:focus-visible{outline:2px solid var(--post-pink);outline-offset:-2px}
+.market-chart .post-chart-empty{position:absolute;inset:0}
+.market-chart .post-chart-message h2{font-size:20px}
+.market-chart .post-chart-message p{max-width:360px;margin-inline:auto}
+.market-chart .post-chart-message .outlined{margin-top:4px;min-height:36px;font-size:12px;padding:6px 14px}
+.market-banner{position:absolute;top:8px;left:8px;right:8px;z-index:2;display:flex;align-items:center;flex-wrap:wrap;gap:4px 10px;padding:6px 10px;border:1px solid rgba(255,163,189,.5);border-radius:6px;background:rgba(27,19,40,.94);font-size:11px;color:var(--post-ink)}
+.market-banner.is-stale{border-color:rgba(240,179,90,.5)}
+.market-banner .text-button{min-height:24px;padding:0 4px;font-size:11px;margin-left:auto}
+.market-foot{display:flex;align-items:center;flex-wrap:wrap;gap:4px 14px;padding:7px 16px;border-top:1px solid var(--post-line);font-size:11px;color:var(--post-muted)}
+.market-foot .market-credit{margin-left:auto;display:inline-flex;align-items:center;min-height:24px;color:var(--post-muted);text-decoration:underline;text-underline-offset:2px}
+.market-foot .market-credit:hover{color:var(--post-ink)}
+.market-gaps{color:var(--post-warn)}
+
+/* Transactions */
+.market-trades{padding:12px 16px 16px;border-top:1px solid var(--post-line)}
+.market-trades-head{display:flex;align-items:baseline;justify-content:space-between;flex-wrap:wrap;gap:2px 12px;margin-bottom:8px}
+.market-trades-head h2{font-size:15px;letter-spacing:-.2px;margin:0}
+.market-trades-head span{font-size:12px;color:var(--post-muted)}
+.market-trades ul{list-style:none;margin:0;padding:0;display:grid;gap:4px}
+.market-trade small{display:inline;margin:0;line-height:inherit}
+.market-trade{display:grid;grid-template-columns:80px 52px minmax(0,.9fr) minmax(0,1.3fr) minmax(0,1.7fr) 128px 104px;align-items:center;gap:10px;min-height:38px;padding:6px 10px;border:1px solid var(--post-line);border-radius:8px;font-size:12px;font-variant-numeric:tabular-nums;min-width:0}
+.market-trade.is-provisional{border-style:dashed}
+.market-trade-main,.market-trade-sub{display:contents}
+.market-trade time{color:var(--post-muted);white-space:nowrap}
+.market-side{display:inline-flex;justify-content:center;align-items:center;min-width:44px;min-height:22px;padding:1px 7px;border:1px solid;border-radius:999px;font-size:11px;font-weight:700;letter-spacing:.02em}
+.is-buy .market-side{color:var(--market-up);border-color:rgba(248,107,207,.55);background:rgba(248,107,207,.09)}
+.is-sell .market-side{color:var(--market-down);border-color:rgba(140,236,255,.5);background:rgba(140,236,255,.08)}
+.market-sol{font-weight:700;color:var(--post-ink);white-space:nowrap}
+.market-coin,.market-price{color:var(--post-ink);min-width:0;overflow-wrap:anywhere}
+.market-coin small,.market-price small,.market-sol small{font-size:11px;font-weight:400;color:var(--post-muted);white-space:nowrap}
+.market-tags{display:flex;gap:4px;flex-wrap:wrap}
+.market-tags em{font-style:normal;font-size:10px;padding:1px 6px;border:1px solid var(--post-line);border-radius:999px;color:var(--post-muted);white-space:nowrap}
+.market-tags em.is-confirming{color:var(--post-warn);border-color:rgba(240,179,90,.5)}
+.market-sig{justify-self:end;font-family:monospace;font-size:11px;white-space:nowrap}
+.market-sig a{color:#80e6e9}.market-sig a:hover{color:var(--post-ink)}.market-sig code{color:var(--post-muted)}
+.market-trades-foot{display:flex;align-items:center;flex-wrap:wrap;gap:8px 14px;margin-top:10px;font-size:12px;color:var(--post-muted)}
+.post-launch .market-more{min-height:36px;font-size:12px;padding:6px 14px}
+.market-trades-empty{margin:0;padding:14px 4px 4px;font-size:13px;line-height:1.5;color:var(--post-muted)}
+.market-trades-empty .text-button{display:inline-flex;min-height:28px;padding:0 4px;font-size:13px;margin-left:6px}
+
+@media(max-width:1200px){.market-trade{grid-template-columns:72px 50px minmax(0,.9fr) minmax(0,1.2fr) minmax(0,1.7fr) 110px 100px;gap:8px}}
+@media(max-width:1050px){.post-metrics.is-six .post-metric{padding:14px 15px}}
+@media(max-width:900px){
+ .market-trade{display:flex;flex-wrap:wrap;gap:4px 8px;padding:8px 10px}
+ .market-trade-main,.market-trade-sub{display:flex;flex-wrap:wrap;align-items:center;gap:4px 8px;width:100%;min-width:0}
+ .market-trade-main time{margin-left:auto;order:3}
+ .market-sig{justify-self:auto;margin-left:auto}
+}
+@media(max-width:760px){
+ .post-metrics.is-six{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .post-metrics.is-six .post-metric{padding:13px 13px}
+ .post-metrics.is-six .post-metric:nth-child(3n+1){border-left:1px solid var(--post-line)}
+ .post-metrics.is-six .post-metric:nth-child(odd){border-left:0}
+ .post-metrics.is-six .post-metric:nth-child(n+3){border-top:1px solid var(--post-line)}
+ .post-metrics.is-six .post-metric strong{font-size:19px}
+ .market-toolbar{padding:10px 12px}
+ .market-intervals{margin-left:0;width:100%}
+ .post-launch .market-intervals button{flex:1;min-height:44px;min-width:44px}
+ .market-chart{height:240px}
+ .market-foot{padding:7px 12px}
+ .market-trades{padding:10px 12px 14px}
+ .post-launch .market-more{min-height:44px}
+ .post-launch .market-banner .text-button{min-height:36px}
+}
+@media(prefers-reduced-motion:reduce){.market-fresh.is-live i{animation:none}.post-launch .market-intervals button{transition:none}}

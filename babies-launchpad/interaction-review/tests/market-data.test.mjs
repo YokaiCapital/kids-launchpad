@@ -1,0 +1,108 @@
+import test from 'node:test';import assert from 'node:assert/strict';
+import {adaptiveDecimals,formatPrice,formatSolVolume,formatChange,relativeTime,utcStamp,normaliseCandle,mergeCandles,mergeGaps,seriesData,diffForUpdate,pricePrecision,candleRange,normaliseTrade,mergeTrades,deriveMarketState,freshnessHint,poolLiquidity,formatSol,fetchMarket,startPolling,STALE_AFTER_SECONDS} from '../src/market-data.mjs';
+
+test('price keeps four significant digits however small, and never invents one',()=>{
+ assert.equal(adaptiveDecimals(0.000012345),8);assert.equal(adaptiveDecimals(2.5),4);assert.equal(adaptiveDecimals(1234.5),2);assert.equal(adaptiveDecimals(0),0);
+ assert.deepEqual(formatPrice('0.000012345'),{text:'0.00001235',exact:'0.000012345'});
+ assert.deepEqual(formatPrice('0.5'),{text:'0.5',exact:'0.5'});
+ assert.deepEqual(formatPrice('1234.56789'),{text:'1,234.57',exact:'1234.56789'});
+ assert.deepEqual(formatPrice('0'),{text:'0',exact:'0'});
+ assert.deepEqual(formatPrice(null),{text:'—',exact:null});assert.deepEqual(formatPrice('abc'),{text:'—',exact:null});assert.deepEqual(formatPrice('-1'),{text:'—',exact:null});
+});
+test('volume is compact above a thousand SOL and a dash when unknown',()=>{
+ assert.deepEqual(formatSolVolume('12345.6'),{text:'12.35K',exact:'12345.6'});
+ assert.deepEqual(formatSolVolume('12.3456'),{text:'12.35',exact:'12.3456'});
+ assert.deepEqual(formatSolVolume('0.12345'),{text:'0.1235',exact:'0.12345'});
+ assert.deepEqual(formatSolVolume(undefined),{text:'—',exact:null});
+});
+test('24h change is signed with a tone, unknown is a dash not zero',()=>{
+ assert.deepEqual(formatChange(4.2),{text:'+4.20%',tone:'up'});
+ assert.deepEqual(formatChange(-1.339),{text:'−1.34%',tone:'down'});
+ assert.deepEqual(formatChange(0),{text:'0.00%',tone:'flat'});
+ assert.deepEqual(formatChange(null),{text:'—',tone:'none'});
+});
+test('relative and exact UTC time',()=>{
+ assert.equal(relativeTime(1000,1003),'just now');assert.equal(relativeTime(1000,1042),'42 s ago');assert.equal(relativeTime(1000,1000+7*60),'7 min ago');
+ assert.equal(relativeTime(1000,1000+5*3600),'5 h ago');assert.equal(relativeTime(1000,1000+3*86400),'3 d ago');assert.equal(relativeTime(null,5),'');
+ assert.equal(utcStamp(1790172202),'23 Sep 2026, 14:03:22 UTC');assert.equal(utcStamp('x'),'');
+});
+test('candles are validated, merged in time order and a provisional bar is replaced',()=>{
+ assert.equal(normaliseCandle({t:60,o:'1',h:'0.5',l:'0.4',c:'0.45'}),null);// high below open
+ assert.equal(normaliseCandle({t:60,o:'x',h:'1',l:'1',c:'1'}),null);
+ const first=mergeCandles([],[{t:120,o:'1',h:'2',l:'1',c:'2',v:'5',n:2},{t:60,o:'1',h:'1',l:'1',c:'1',v:'1',n:1,provisional:true}]);
+ assert.deepEqual(first.map(b=>b.time),[60,120]);assert.equal(first[0].provisional,true);
+ const merged=mergeCandles(first,[{t:60,o:'1',h:'1.5',l:'0.9',c:'1.2',v:'3',n:4},{t:180,o:'2',h:'2',l:'2',c:'2',v:'0',n:1}]);
+ assert.deepEqual(merged.map(b=>[b.time,b.close,b.provisional]),[[60,1.2,false],[120,2,false],[180,2,false]]);
+ assert.deepEqual(mergeGaps([{fromUnix:10,toUnix:20}],[{fromUnix:10,toUnix:20},{fromUnix:5,toUnix:2},{fromUnix:30,toUnix:40}]),[{fromUnix:10,toUnix:20},{fromUnix:30,toUnix:40}]);
+});
+test('series data draws whitespace for missing buckets and gaps instead of fake bars',()=>{
+ const candles=mergeCandles([],[{t:60,o:'1',h:'1',l:'1',c:'1'},{t:300,o:'1',h:'1',l:'1',c:'1'}]);
+ const {points,filled}=seriesData(candles,{intervalSeconds:60,fromUnix:60,toUnix:420});
+ assert.equal(filled,true);assert.deepEqual(points.map(p=>p.time),[60,120,180,240,300,360,420]);
+ assert.deepEqual(points[1],{time:120});assert.equal(points[4].close,1);assert.equal('open' in points[6],false);
+ assert.deepEqual(seriesData([],{intervalSeconds:60}),{points:[],filled:true});
+ const wide=seriesData(candles,{intervalSeconds:1,fromUnix:0,toUnix:10**6});assert.equal(wide.filled,false);assert.equal(wide.points.length,2);
+});
+test('chart updates append or replace in place and only reset when the series start moved',()=>{
+ const a=[{time:60,open:1,high:1,low:1,close:1},{time:120}];
+ const same={reset:false,updates:[]};assert.deepEqual(diffForUpdate(a,a.map(p=>({...p}))),same);
+ const next=[{time:60,open:1,high:1,low:1,close:1},{time:120,open:1,high:2,low:1,close:2},{time:180}];
+ assert.deepEqual(diffForUpdate(a,next),{reset:false,updates:[{point:next[1],historical:false},{point:next[2],historical:false}]});
+ const hist=[{time:60,open:1,high:3,low:1,close:3},{time:120}];
+ assert.deepEqual(diffForUpdate(a,hist),{reset:false,updates:[{point:hist[0],historical:true}]});
+ assert.equal(diffForUpdate(a,[{time:120}]).reset,true);assert.equal(diffForUpdate([],a).reset,true);assert.equal(diffForUpdate(a,[a[0]]).reset,true);
+ assert.equal(pricePrecision([{close:0.00042},{close:0.0005}]),7);assert.equal(pricePrecision([]),4);
+ assert.deepEqual(candleRange('1m',[],1000000),{from:1000000-6*3600,to:1000000});
+ assert.deepEqual(candleRange('1m',[{time:999900}],1000000),{from:999840,to:1000000});
+});
+test('trades are newest first, one per signature, confirming rows replaced by confirmed ones',()=>{
+ assert.equal(normaliseTrade({signature:'a',side:'hold'}),null);assert.equal(normaliseTrade({side:'buy'}),null);
+ const rows=mergeTrades([],[{signature:'a',slot:10,blockTimeUnix:100,side:'buy',solRaw:'1',coinRaw:'2',priceSol:'0.5',nested:false,provisional:true,wallet:null},{signature:'b',slot:12,blockTimeUnix:105,side:'sell',solRaw:'1',coinRaw:'2',priceSol:'0.5',nested:true,provisional:false,wallet:'W'}]);
+ assert.deepEqual(rows.map(r=>r.signature),['b','a']);assert.equal(rows[1].provisional,true);
+ const again=mergeTrades(rows,[{signature:'a',slot:10,blockTimeUnix:100,side:'buy',solRaw:'1',coinRaw:'2',priceSol:'0.5',nested:false,provisional:false},{signature:'c',slot:9,blockTimeUnix:100,side:'buy',solRaw:'1',coinRaw:'1',priceSol:'1'}]);
+ assert.deepEqual(again.map(r=>[r.signature,r.provisional]),[['b',false],['a',false],['c',false]]);
+});
+test('market state comes from the summary and the last read, never from guesses',()=>{
+ const now=2000;
+ assert.equal(deriveMarketState({summary:null,result:null,nowUnix:now}),'loading');
+ assert.equal(deriveMarketState({summary:null,result:{ok:false,reason:'off'},nowUnix:now}),'off');
+ assert.equal(deriveMarketState({summary:{freshness:'live'},result:{ok:false,reason:'unavailable',status:503},nowUnix:now}),'unavailable');
+ const live={configured:true,priceSol:'0.1',trades24h:4,lastTradeUnix:1990,lagSeconds:3,freshness:'live'};
+ assert.equal(deriveMarketState({summary:live,result:{ok:true,data:live},nowUnix:now}),'live');
+ assert.equal(deriveMarketState({summary:{...live,lagSeconds:STALE_AFTER_SECONDS+1},result:{ok:true,data:live},nowUnix:now}),'stale');
+ assert.equal(deriveMarketState({summary:{...live,freshness:'stale'},result:{ok:true,data:live},nowUnix:now}),'stale');
+ assert.equal(deriveMarketState({summary:{...live,freshness:'backfilling'},result:{ok:true,data:live},nowUnix:now}),'backfilling');
+ assert.equal(deriveMarketState({summary:{configured:true,priceSol:null,trades24h:0,lastTradeUnix:null,lagSeconds:null,freshness:'live'},result:{ok:true,data:{}},nowUnix:now}),'no-trades');
+ assert.equal(deriveMarketState({summary:{configured:false},result:{ok:true,data:{}},nowUnix:now}),'off');
+ assert.deepEqual(freshnessHint({state:'live',summary:live,lastReadUnix:1990,nowUnix:now}),{text:'Updated 10 s ago',tone:'live'});
+ assert.deepEqual(freshnessHint({state:'stale',summary:{...live,lagSeconds:300},lastReadUnix:1990,nowUnix:now}),{text:'Stale · feed 5 min behind',tone:'stale'});
+ assert.deepEqual(freshnessHint({state:'unavailable',summary:live,lastReadUnix:1700,nowUnix:now}),{text:'Feed unavailable · last read 5 min ago',tone:'off'});
+ assert.deepEqual(freshnessHint({state:'off',summary:null,lastReadUnix:null,nowUnix:now}),{text:'Market feed not connected',tone:'off'});
+});
+test('two-sided liquidity values the coin side at the last price and stays honest without one',()=>{
+ const full=poolLiquidity({quoteReserveLamports:'612345678901',baseReserveRaw:'434999123456789',decimals:6,priceSol:'0.0000014'});
+ assert.equal(full.solSide,612.345678901);assert.ok(Math.abs(full.coinSideSol-608.99877)<0.001);assert.ok(Math.abs(full.total-1221.3445)<0.001);
+ const none=poolLiquidity({quoteReserveLamports:'612345678901',baseReserveRaw:'434999123456789',decimals:6,priceSol:null});
+ assert.equal(none.total,null);assert.equal(none.coinSideSol,null);assert.equal(none.solSide,612.345678901);
+ assert.equal(formatSol(1221.34456),'1,221.34');assert.equal(formatSol(0.5),'0.5');assert.equal(formatSol(null),'—');
+});
+test('fetchMarket classifies 503, HTML fallbacks, configured:false, bad JSON and network errors without throwing',async()=>{
+ const json=(status,body,type='application/json')=>async()=>({ok:status<400,status,headers:{get:h=>h==='content-type'?type:null},json:async()=>{if(typeof body==='string')throw Error('bad');return body;}});
+ assert.deepEqual(await fetchMarket('summary',{campaign:'c'},{fetchImpl:json(503,{error:'down'})}),{ok:false,reason:'unavailable',status:503});
+ assert.deepEqual(await fetchMarket('summary',{campaign:'c'},{fetchImpl:json(200,{},'text/html')}),{ok:false,reason:'unavailable',status:200});
+ assert.deepEqual(await fetchMarket('summary',{campaign:'c'},{fetchImpl:json(200,{configured:false})}),{ok:false,reason:'off',status:200});
+ assert.deepEqual(await fetchMarket('candles',{campaign:'c'},{fetchImpl:json(200,'nope')}),{ok:false,reason:'malformed',status:200});
+ assert.deepEqual(await fetchMarket('candles',{campaign:'c'},{fetchImpl:json(200,{interval:'1m'})}),{ok:false,reason:'malformed',status:200});
+ assert.deepEqual(await fetchMarket('trades',{campaign:'c'},{fetchImpl:async()=>{throw Error('offline');}}),{ok:false,reason:'network',status:null});
+ let seen='';const ok=await fetchMarket('candles',{campaign:'c',interval:'5m',from:1,to:2},{fetchImpl:async url=>{seen=url;return json(200,{interval:'5m',candles:[],gaps:[]})();}});
+ assert.equal(seen,'/api/market/candles?campaign=c&interval=5m&from=1&to=2');assert.equal(ok.ok,true);
+});
+test('polling runs now, every tick while visible, pauses when hidden and resumes on return',()=>{
+ const listeners={};const doc={visibilityState:'visible',addEventListener:(n,f)=>{listeners[n]=f;},removeEventListener:n=>{delete listeners[n];}};
+ let runs=0,timers=[],cleared=0;const si=(fn,ms)=>{timers.push(fn);return timers.length;},ci=()=>{cleared++;};
+ const stop=startPolling(()=>runs++,10,{doc,setInterval:si,clearInterval:ci});
+ assert.equal(runs,1);assert.equal(timers.length,1);timers[0]();assert.equal(runs,2);
+ doc.visibilityState='hidden';listeners.visibilitychange();assert.equal(cleared,1);timers[0]();assert.equal(runs,2);
+ doc.visibilityState='visible';listeners.visibilitychange();assert.equal(runs,3);assert.equal(timers.length,2);
+ stop();assert.equal(cleared,2);assert.equal(listeners.visibilitychange,undefined);timers[1]();assert.equal(runs,3);
+});

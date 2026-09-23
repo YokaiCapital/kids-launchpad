@@ -1,8 +1,12 @@
 import {netLabel,explorerTx,explorerAccount} from './network-label.mjs';
 import {walletForOwner} from './wallet-connection.mjs';
 import {friendlyError} from './friendly-errors.mjs';
-import {useEffect,useRef,useState} from 'react';
+import {Suspense,lazy,useEffect,useRef,useState} from 'react';
 import {ArrowLeft,ArrowRight,ChartLine,CheckCircle,Copy,Fire,Globe,LockKey,Play,XLogo} from '@phosphor-icons/react';
+import {POLL_MS,deriveMarketState,fetchMarket,formatChange,formatPrice,formatSol,formatSolVolume,freshnessHint,poolLiquidity,relativeTime,startPolling} from './market-data.mjs';
+import './market.css';
+// The chart library loads only with the Market tab; the tab is unmounted (and the chart removed) when another tab opens.
+const MarketTab=lazy(()=>import('./MarketChart').then(m=>({default:m.MarketTab})));
 import {accountApi} from './Account';
 import {ParentIcon} from './Parents';
 import {CoinUpdates} from './CoinUpdates';
@@ -46,7 +50,24 @@ function Flywheel({data,verified}){
   </div>
  </section>;
 }
-function Metric({label,value,note}){return <div className="post-metric"><span>{label}</span><strong>{value}</strong>{note&&<small>{note}</small>}</div>;}
+function Metric({label,value,unit,note,tone,fresh,title}){return <div className="post-metric"><span>{label}</span><strong className={tone?'is-'+tone:undefined} title={title||undefined}>{value}{unit&&<small>{unit}</small>}</strong>{(note||fresh)&&<small>{note&&<span>{note}</span>}{fresh&&<em className={`post-metric-fresh is-${fresh.tone}`}>{fresh.text}</em>}</small>}</div>;}
+/** Market summary for the metrics row: read every 10 s while the page is visible, last valid answer kept through failures. */
+function useMarketSummary(campaign,enabled){
+ const [state,setState]=useState({summary:null,result:null,readAt:null,now:Math.floor(Date.now()/1000)});
+ useEffect(()=>{
+  if(!campaign||!enabled){setState({summary:null,result:null,readAt:null,now:Math.floor(Date.now()/1000)});return;}
+  let controller=null,alive=true;
+  const stop=startPolling(async()=>{
+   controller?.abort();controller=new AbortController();const signal=controller.signal;
+   const result=await fetchMarket('summary',{campaign},{signal});if(!alive||signal.aborted)return;
+   const now=Math.floor(Date.now()/1000);
+   setState(s=>result.ok?{summary:result.data,result,readAt:now,now}:{...s,result,now});
+  },POLL_MS);
+  return()=>{alive=false;stop();controller?.abort();};
+ },[campaign,enabled]);
+ const marketState=enabled?deriveMarketState({summary:state.summary,result:state.result,nowUnix:state.now}):'off';
+ return {...state,state:marketState,hint:freshnessHint({state:marketState,summary:state.summary,lastReadUnix:state.readAt,nowUnix:state.now})};
+}
 /** One line under the heading: what this wallet can claim right now, or why that is unknown. Selecting Claims is the reader's click, never automatic. */
 function ClaimStrip({owner,claims,verified,loading,error,onSignIn,onOpen,decimals}){
  if(!owner)return <div className="post-claim-strip is-quiet"><span>Sign in to see what you can claim.</span><button className="text-button" onClick={onSignIn}>Sign in <ArrowRight size={15}/></button></div>;
@@ -89,6 +110,13 @@ export function PostLaunch({identity,onSignIn,profile,posts=[],go,preview=false}
  function openClaims(){setRailTab('Claims');requestAnimationFrame(()=>{const rail=railRef.current;if(!rail)return;rail.scrollIntoView({behavior:'smooth',block:'start'});rail.querySelector('#post-rail-tab-Claims')?.focus({preventScroll:true});});}
  const socials=[{key:'xUrl',label:'Shartcoin on X',Icon:XLogo},{key:'websiteUrl',label:'Shartcoin website',Icon:Globe}].filter(({key})=>typeof profile?.[key]==='string'&&/^https:\/\//.test(profile[key]));
  const facts=custodyFacts(verified?data:null);
+ const market=useMarketSummary(verified?data.campaign:null,verified);
+ const summary=market.summary,marketOk=market.state!=='off'&&market.state!=='loading';
+ const price=formatPrice(marketOk?summary?.priceSol:null),change=formatChange(marketOk?summary?.priceChange24hPct:null),volume=formatSolVolume(marketOk?summary?.volume24hSol:null);
+ const liquidity=verified?poolLiquidity({quoteReserveLamports:data.quoteReserveLamports,baseReserveRaw:data.baseReserveRaw,decimals,priceSol:marketOk?summary?.priceSol:null}):null;
+ const poolReadUnix=verified&&data.observedAt?Math.floor(Date.parse(data.observedAt)/1000):null;
+ const poolFresh=verified?{text:poolReadUnix?'Pool read '+relativeTime(poolReadUnix,market.now):'Pool read at slot '+Number(data.observedSlot||0).toLocaleString('en-GB'),tone:'live'}:null;
+ const feedFresh=verified?market.hint:null;
  const statusText=verified?(preview?net.name+' test pool · Separate from Shartcoin':'Active Shartcoin · '+net.name):loading?'Loading launch data…':error?'Launch data unavailable':preview?'Trading and claims are not connected':'No launched campaign is connected';
  return <section className="post-launch">
   <div className="post-page-bar"><button className="text-button" onClick={()=>go('Shart')}><ArrowLeft size={17}/> Funding history</button><div><span className="post-preview-badge">{preview?'Post-launch preview':'Shartcoin launch'}</span><span>{statusText}</span>{!preview&&!verified&&!loading&&<button className="text-button" onClick={()=>go('PostLaunchPreview')}>View post-launch preview</button>}</div><button className="text-button" onClick={()=>setRefresh(n=>n+1)}>Refresh</button></div>
@@ -96,10 +124,18 @@ export function PostLaunch({identity,onSignIn,profile,posts=[],go,preview=false}
    <div className="post-main">
     <div className="post-market-heading"><div><span className="post-kicker">The next chapter</span><h1>Shartcoin <span>$Shartcoin</span></h1></div><span className={`post-status ${verified?'is-verified':''}`}><span/>{verified?'Pool found '+net.on:loading?'Reading the pool…':'Pool not connected'}</span></div>
     {!preview&&<ClaimStrip owner={owner} claims={claims} verified={verified} loading={loading} error={error} onSignIn={onSignIn} onOpen={openClaims} decimals={decimals}/>}
-    <div className="post-metrics"><Metric label="Pool liquidity" value={verified?`${format(data.quoteReserveLamports,9)} SOL`:'—'} note="SOL side of the pool only"/><Metric label="Token reserve" value={verified?formatWhole(data.baseReserveRaw,decimals):'—'} note="$Shartcoin in the pool"/><Metric label="24h volume" value="—" note="Market feed not connected"/><Metric label="Pool fee" value={verified&&data.tradeFeeBps?(data.tradeFeeBps/100).toLocaleString('en-GB')+'%':'—'} note={verified&&data.tradeFeeBps?'Read from the pool':'Not served'}/></div>
+    <div className="post-metrics is-six">
+     <Metric label="Price" value={price.text} unit={price.exact?' SOL':null} title={price.exact?price.exact+' SOL per $Shartcoin':undefined} note="SOL per $Shartcoin" fresh={feedFresh}/>
+     <Metric label="24h change" value={change.text} tone={change.tone==='up'||change.tone==='down'?change.tone:null} note="Against the price 24 hours ago" fresh={feedFresh}/>
+     <Metric label="24h volume" value={volume.text} unit={volume.exact?' SOL':null} title={volume.exact?volume.exact+' SOL traded in 24 hours':undefined} note={marketOk&&summary?.trades24h!=null?Number(summary.trades24h).toLocaleString('en-GB')+' trades':'Traded in the last 24 hours'} fresh={feedFresh}/>
+     <Metric label="Pool liquidity" value={liquidity?formatSol(liquidity.total??liquidity.solSide):'—'} unit={liquidity&&(liquidity.total??liquidity.solSide)!=null?' SOL':null} title={liquidity?.total!=null?formatSol(liquidity.solSide)+' SOL + '+formatSol(liquidity.coinSideSol)+' SOL in $Shartcoin at the last price':undefined} note={liquidity?.total!=null?`${formatSol(liquidity.solSide,2)} SOL + $Shartcoin worth ${formatSol(liquidity.coinSideSol,2)} SOL at the last price`:liquidity?.solSide!=null?'SOL side only; the coin side needs a price from the feed':'Both sides of the pool'} fresh={poolFresh}/>
+     <Metric label="Token reserve" value={verified?formatWhole(data.baseReserveRaw,decimals):'—'} note="$Shartcoin in the pool" fresh={poolFresh}/>
+     <Metric label="Pool fee" value={verified&&data.tradeFeeBps?(data.tradeFeeBps/100).toLocaleString('en-GB')+'%':'—'} note={verified&&data.tradeFeeBps?'Read from the pool':'Not served'} fresh={verified&&data.tradeFeeBps?poolFresh:null}/>
+    </div>
     <section className="post-market-panel" aria-label="Coin market and media"><div className="post-panel-tabs" role="tablist" onKeyDown={moveTab} aria-label="Coin content">{['Market','Dev updates',...(video?['Video']:[])].map(name=><button id={`post-tab-${name.replaceAll(' ','-')}`} key={name} role="tab" tabIndex={tab===name?0:-1} aria-selected={tab===name} aria-controls="post-content-panel" onClick={()=>setTab(name)}>{name==='Market'?<ChartLine size={17}/>:name==='Video'?<Play size={17}/>:null}{name}</button>)}</div>
-     <div id="post-content-panel" role="tabpanel" aria-labelledby={`post-tab-${tab.replaceAll(' ','-')}`} className={`post-panel-content ${tab==='Video'?'is-video':''}`}>
-      {tab==='Market'&&<div className="post-chart-empty"><div className="post-chart-grid" aria-hidden="true"/><div className="post-chart-message"><ChartLine size={35} weight="light"/><h2>A home for every move.</h2><p>The price chart appears here when the market feed is connected.</p><span>{verified?'Pool confirmed. Price history is not available yet.':'Connect a market feed to see trading activity.'}</span></div><div className="post-market-legend"><span><i/> $Shartcoin / SOL</span><span>Raydium CPMM</span></div></div>}
+     <div id="post-content-panel" role="tabpanel" aria-labelledby={`post-tab-${tab.replaceAll(' ','-')}`} className={`post-panel-content ${tab==='Video'?'is-video':''}${tab==='Market'&&verified?' is-market':''}`}>
+      {tab==='Market'&&!verified&&<div className="post-chart-empty"><div className="post-chart-grid" aria-hidden="true"/><div className="post-chart-message"><ChartLine size={35} weight="light"/><h2>A home for every move.</h2><p>The price chart appears here when the pool is connected.</p><span>{loading?'Reading the pool…':'Connect a launched pool to see trading activity.'}</span></div><div className="post-market-legend"><span><i/> $Shartcoin / SOL</span><span>Raydium CPMM</span></div></div>}
+      {tab==='Market'&&verified&&<Suspense fallback={<div className="post-chart-empty" aria-busy="true"><div className="post-chart-grid" aria-hidden="true"/><div className="post-chart-message"><ChartLine size={30} weight="light" aria-hidden="true"/><h2>Loading the chart…</h2><p>Fetching the chart library.</p></div></div>}><MarketTab campaign={data.campaign} decimals={decimals} data={data} market={market} enabled={verified}/></Suspense>}
       {tab==='Dev updates'&&<CoinUpdates profile={profile} posts={posts} ready={false} admin={false}/>}
       {tab==='Video'&&(videoError?<div className="post-media-error"><p>Video unavailable.</p><button className="outlined" onClick={()=>setVideoError(false)}>Retry video</button></div>:<video key={video} controls playsInline preload="metadata" src={video} aria-label="Shartcoin introduction" onError={()=>setVideoError(true)}/>)}
      </div>
