@@ -24,7 +24,7 @@ every release; the coin page links to it.
 | From build 3 | both authorities are revoked at creation, before the campaign opens, so no scanner ever sees the coin as mintable |
 | Metadata | **none** on this coin (created before metadata-at-creation existed). New coins get an immutable Metaplex metadata account in the mint transaction. |
 | Supply in program custody | 56.5 % of the original supply at launch (43.5 % participants + 5 % + 5 % parents + 3 % dev), decreasing as claims are paid. It is program-controlled, not a wallet, but see "upgradeable" above. |
-| Liquidity | Raydium CPMM pool `FAThun8y…`, 2 % fee tier, LP permanently locked (Raydium lock, fee key held by the campaign). |
+| Liquidity | Raydium CPMM pool `FAThun8y…`, 2 % fee tier, LP permanently locked (Raydium lock, fee key held by the campaign). Fee harvesting redeems the accrued fee share of the locked position (CollectCpFees, then Withdraw), so the locked LP unit count decreases by exactly the harvested fee share while the principal stays locked. Scanners label these harvests as "remove liquidity"; the keeper skips harvests below 0.0005 SOL. |
 | Trading fee | 2 % on this pool. New pools open on the 2.5 % tier once build 2 is live. LP earnings are split 98:20:25:25 (treasury, dev, parent A buyback, parent B buyback) of the SOL side; the coin side is burned under build 2 (converted to SOL under build 1). |
 
 ## Claims and proofs
