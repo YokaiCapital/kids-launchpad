@@ -44,6 +44,10 @@ console.log(JSON.stringify({event:'program-verified',network:profile.network,pro
 if(profile.network==='mainnet'&&authority===operator.publicKey.toBase58())console.log(JSON.stringify({event:'governance-warning',message:'the keeper key still holds the program upgrade authority; move it to the governance key'}));
 // Campaign: provision only when a plan and its snapshot evidence exist; otherwise the API answers "not configured".
 if(existsSync(new URL('./campaign-plan.json',import.meta.url))){
+ // A finished test campaign (failed, every commitment refunded) is archived first when KIDS_ACTIVE_CAMPAIGN_RENEW is set;
+ // a launched campaign is never replaced here. The new campaign then comes from the (new) plan.
+ const renewSetting=process.env.KIDS_ACTIVE_CAMPAIGN_RENEW;
+ if(renewSetting){const renew=await import('../../localnet/renew-active-launch.mjs');const setting=renew.parseRenewSetting(renewSetting);if(setting?.refused)console.log(JSON.stringify({event:'active-campaign-renew-refused',reason:setting.refused}));else if(setting){try{const r=await renew.renewFinishedActiveLaunch({mode:setting.mode,token:setting.token,log:line=>console.log(JSON.stringify(line))});console.log(JSON.stringify({event:'active-campaign-renew',...r}));}catch(error){console.log(JSON.stringify({event:'active-campaign-renew-failed',reason:String(error.message).slice(0,200)}));}}}
  try{const {provisionActiveLaunch}=await import('../../localnet/provision-active-launch.mjs');const state=await provisionActiveLaunch();console.log(JSON.stringify({event:'campaign-ready',campaign:state.escrowAddress,phase:state.phase,deadlineUnix:state.deadlineUnix}));}
  catch(error){console.log(JSON.stringify({event:'campaign-not-provisioned',reason:String(error.message).slice(0,300)}));if(process.env.KIDS_REQUIRE_CAMPAIGN==='1')throw error;}
 }else console.log(JSON.stringify({event:'no-campaign-plan'}));
