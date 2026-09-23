@@ -181,3 +181,9 @@ Owner decisions after the first mainnet launch: coin-side trading fees are burne
 
 - Upgrade signature `5CBxyEGn…zYf` (governance key); extension by 10,240 bytes paid by the governance key after a 0.0727 SOL top-up from the operator (`3XDsec3s…dyk`). Read back: program-data 209,293 bytes, first 200,784 bytes hash `9721a4d8…ae58`, tail zero, authority `EPwoPzJ5…Wf2Y` unchanged.
 - Found live: the keepers reported "Active campaign ledger or program changed" because the live-upgrade path did not carry the previous build in the lineage; fixed in the service (test added). The API must be re-uploaded (or restarted) to run the keepers again.
+
+## 23 September 2026, ~04:20 UTC: deploys now come from GitHub (release branch)
+
+- kids-api deployment a18729fd and kids-signer 38945427 both built from YokaiCapital/kids-launchpad, branch release, commit 1f37128 (owner connected both services; the CLI upload is retired).
+- Live after the deploy: ready, writes open, signer reachable, keepers running (active: launched, fees: completed), reconciliation complete.
+- FIRST COIN-SIDE BURN on mainnet (build 2): 670,345.318218 coins burned at 04:17:57 UTC, signature `3iFTQBFjvkxGGFq397HG4NkbSGo1eRMGKkzccvSQwgsiypFyXJXHwJga3r6XL3vVimLz3D7wvrzAuzD3w4mA1YNQ`; childPending 0, childBurned 670345318218 raw.
