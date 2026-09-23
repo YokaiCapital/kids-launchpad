@@ -13,7 +13,7 @@ import {Keypair,PublicKey,Transaction,VersionedTransaction,SystemProgram,Compute
 import {TOKEN_PROGRAM_ID,NATIVE_MINT,ACCOUNT_SIZE,getAssociatedTokenAddressSync,createAssociatedTokenAccountIdempotentInstruction,createInitializeAccount3Instruction,createCloseAccountInstruction,unpackAccount} from '@solana/spl-token';
 import {qualifiedCampaign} from './postlaunch-claims.mjs';
 import {localKey} from './dev-vesting.mjs';
-import {CPMM,campaignPoolAddresses,checkPoolPolicy} from './atomic-launch.mjs';
+import {CPMM,campaignPoolAddresses,checkPoolPolicy,PROFILE} from './atomic-launch.mjs';
 import {poolAddresses,decodePool,decodeConfig,swapInstruction} from './cpmm.mjs';
 import {encodeBase58} from '../shared/solana.mjs';
 const file=new URL('./.runtime/postlaunch-trade-intents.json',import.meta.url);
@@ -60,7 +60,7 @@ const fmt=(raw,decimals)=>{const s=raw.toString().padStart(decimals+1,'0');const
 /** Refuse a quote the wallet cannot pay for, in plain words, before anything is signed. Buys keep 0.01 SOL for fees and the temporary wrapped-SOL account. */
 export async function assertTradeBalance(connection,owner,side,amountRaw,mint){
  const wallet=new PublicKey(owner);
- if(side==='buy'){const balance=BigInt(await connection.getBalance(wallet,'confirmed')),reserve=10000000n;if(amountRaw+reserve>balance){const max=balance>reserve?balance-reserve:0n;throw Error('You have '+fmt(balance,9)+' SOL on the test ledger. Enter at most '+fmt(max,9)+' SOL to leave room for network fees.');}return;}
+ if(side==='buy'){const balance=BigInt(await connection.getBalance(wallet,'confirmed')),reserve=10000000n;if(amountRaw+reserve>balance){const max=balance>reserve?balance-reserve:0n;throw Error('You have '+fmt(balance,9)+' SOL in this wallet'+(PROFILE.network==='localnet'?' on the test ledger':'')+'. Enter at most '+fmt(max,9)+' SOL to leave room for network fees.');}return;}
  const ata=getAssociatedTokenAddressSync(new PublicKey(mint),wallet,false,TOKEN_PROGRAM_ID);const info=await connection.getTokenAccountBalance(ata,'confirmed').catch(()=>null);const held=BigInt(info?.value?.amount||'0');
  if(amountRaw>held)throw Error(held===0n?'You hold no $Shartcoin in this wallet yet. Claim first, or buy some.':'You hold '+fmt(held,6)+' $Shartcoin. Enter at most that amount.');
 }

@@ -7,6 +7,6 @@ test('a sell above the wallet holding is refused in plain words before any signi
  await assert.equal(await assertTradeBalance(conn(0,12500000),owner,'sell',12500000n,mint),undefined);
 });
 test('a buy keeps 0.01 SOL for fees and says the maximum',async()=>{
- await assert.rejects(assertTradeBalance(conn(500000000,0),owner,'buy',495000000n,mint),/You have 0\.5 SOL on the test ledger\. Enter at most 0\.49 SOL/);
+ await assert.rejects(assertTradeBalance(conn(500000000,0),owner,'buy',495000000n,mint),/You have 0\.5 SOL in this wallet on the test ledger\. Enter at most 0\.49 SOL/);
  await assert.equal(await assertTradeBalance(conn(500000000,0),owner,'buy',490000000n,mint),undefined);
 });

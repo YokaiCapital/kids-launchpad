@@ -199,3 +199,9 @@ Owner decisions after the first mainnet launch: coin-side trading fees are burne
 
 - Owner saw the test coin as "mintable" on a scanner: stale snapshot from the funding window (the chain shows both authorities gone). Fix: the freeze authority is revoked at creation from the next release; the mint authority too once build 3 is live (the launch accepts an already-revoked mint).
 - Localnet, launch program build `3e6bf499…9067` (local): vault lifecycle with both authorities revoked before the campaign opened (launch 56zWViH2…, all claims paid), classic lifecycle unchanged. Build 3's CI hash changes with this source change; the identities record is updated after the next reproducible build.
+
+## 23 September 2026, ~05:25 UTC: release 1eb7bc5 live (GitHub release branch) + site bundle index-oBi8LAVw.js
+
+- API and signer both SUCCESS from release 1eb7bc5; ready, writes open, signer reachable, keepers running, reconciliation complete.
+- Live checks: launched coin page swap panel 383 CSS px at 1280 and 375 (was 529/513), "Pool fee 2 % · Slippage 10 %", new picture at 512 px, no horizontal overflow. Live quote probe with a throwaway wallet: slippage 0 and 6000 bps refused ("between 0.01 % and 50 %"), 1000 and 250 bps accepted through to the balance check.
+- Found live: the balance message said "on the test ledger" on mainnet; fixed in the clone (network-aware wording).
