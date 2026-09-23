@@ -14,9 +14,9 @@ export function createLocalSigner(keypair){
 export function createRemoteSigner({url,token,publicKey,fetchImpl=globalThis.fetch,timeoutMs=10000}){
  if(typeof url!=='string'||!/^https?:\/\//.test(url))throw Error('Signer URL required');if(typeof token!=='string'||token.length<32)throw Error('Signer token must be at least 32 characters');
  const pk=new PublicKey(publicKey),endpoint=url.replace(/\/$/,'')+'/sign';
- return {kind:'remote',publicKey:pk,async sign(tx){
+ return {kind:'remote',publicKey:pk,async sign(tx,{operationId=null}={}){
   const message=messageBytes(tx);
-  const r=await fetchImpl(endpoint,{method:'POST',headers:{'content-type':'application/json',authorization:'Bearer '+token},body:JSON.stringify({message:message.toString('base64')}),signal:AbortSignal.timeout(timeoutMs)});
+  const r=await fetchImpl(endpoint,{method:'POST',headers:{'content-type':'application/json',authorization:'Bearer '+token},body:JSON.stringify({message:message.toString('base64'),...(operationId?{operationId}:{})}),signal:AbortSignal.timeout(timeoutMs)});
   if(!r.ok)throw Error('Signer refused the request ('+r.status+')');
   const body=await r.json().catch(()=>null);const signature=Buffer.from(String(body?.signature??''),'base64');
   if(signature.length!==64||!verify(null,message,spki(pk),signature))throw Error('Signer returned an invalid signature');

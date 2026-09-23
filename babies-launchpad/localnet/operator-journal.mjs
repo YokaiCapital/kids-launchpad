@@ -15,7 +15,7 @@ export function createOperatorSender({connection:c,journal,persist,now=Date.now,
     if(failed||expired){journal.attempts[id+':'+old.createdAt]={...old,closedReason:failed?'failed':'expired'};delete journal.attempts[id];old=null;persist();}
    }
    if(!old){
-    const block=await c.getLatestBlockhash('confirmed'),tx=await build(block);
+    const block=await c.getLatestBlockhash('confirmed'),tx=await build(block,id);
     const signature=encodeBase58(tx instanceof VersionedTransaction?tx.signatures[0]:tx.signature);
     old={block,signature,wire:Buffer.from(tx.serialize()).toString('base64'),createdAt:now()};journal.attempts[id]=old;
    }

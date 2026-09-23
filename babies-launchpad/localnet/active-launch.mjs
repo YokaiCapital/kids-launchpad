@@ -1,6 +1,7 @@
 import {escrowIntentRetry} from './escrow-intent-retry.mjs';
 import {acceptedProgramHash} from './program-lineage.mjs';
 import {createIntentRetention,intentHistorySize,summarizeIntents} from '../shared/intent-retention.mjs';
+import {reconcileSignedIntents} from './chain-reconcile.mjs';
 import {createOperatorSender} from './operator-journal.mjs';
 import {operatorSigner} from './operator-signer.mjs';
 import {writeDurableJson} from '../shared/durable-json.mjs';
@@ -164,11 +165,14 @@ async function settleActiveInternal(){
  const journal=existsSync(path)?read(path):{campaign:m.address,genesisHash:m.genesisHash,programSha256:m.programSha256,attempts:{}};
  if(journal.campaign!==m.address||journal.genesisHash!==m.genesisHash||!acceptedProgramHash(ctx.manifest,journal.programSha256))throw Error('Settlement journal identity mismatch');
  const sender=createOperatorSender({connection:ctx.connection,journal,persist:()=>save(path,journal)});
- const send=(ix,stage='')=>sender(createHash('sha256').update(Buffer.concat([ix.data,...ix.keys.map(k=>k.pubkey.toBuffer())])).update(':phase:'+c.phase+':'+stage).digest('hex'),async block=>{const tx=new Transaction({feePayer:admin.publicKey,...block}).add(ix);await admin.sign(tx);return tx;});
+ const send=(ix,stage='')=>sender(createHash('sha256').update(Buffer.concat([ix.data,...ix.keys.map(k=>k.pubkey.toBuffer())])).update(':phase:'+c.phase+':'+stage).digest('hex'),async(block,operationId)=>{const tx=new Transaction({feePayer:admin.publicKey,...block}).add(ix);await admin.sign(tx,{operationId});return tx;});
  if(c.phase===0||now>=c.launchDeadline&&c.phase===1)await send(finalizeInstruction(ctx,m.address));
  const rows=await ctx.connection.getProgramAccounts(ctx.programId,{filters:[{dataSize:112},{memcmp:{offset:8,bytes:m.address}}]});let settled=0,refunded=0;
  for(const row of rows){if(row.account.data.subarray(0,8).toString()!=='KIDSREC3')throw Error('Unexpected registered receipt');const owner=new PublicKey(row.account.data.subarray(40,72));let r=await readActiveReceipt(ctx,m.address,owner);if(!r.settled){await send(settleInstruction(ctx,m.address,owner));settled++;}r=await readActiveReceipt(ctx,m.address,owner);if(activeAmounts(c,r,await chainTime(ctx.connection)).refundable>0n){await send(refundInstruction(ctx,m.address,owner),'refunded:'+r.refunded);refunded++;}}
  return {settled,refunded,state:await readActive()};
 }
 /** Startup reconciliation (docs/ENGINEERING-RULES.md): classify every finalized outcome against the chain before writes reopen. */
-export async function reconcile(){await history.compact();return summarizeIntents('active-launch',intents,'confirmedSignature');}
+export async function reconcile(){
+ if(!existsSync(manifestPath))return {service:'active-launch',hot:intentHistorySize(intents),signed:0,checked:0,unresolvedSigned:0,complete:true};
+ const ctx=await activeContext();const summary=await reconcileSignedIntents({service:'active-launch',intents,connection:ctx.connection,successField:'confirmedSignature',persist:()=>save(intentPath,intents)});await history.compact();return summary;
+}

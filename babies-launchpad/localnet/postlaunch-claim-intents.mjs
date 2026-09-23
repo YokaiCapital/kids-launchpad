@@ -1,3 +1,4 @@
+import {reconcileSignedIntents} from './chain-reconcile.mjs';
 import {createIntentRetention,intentHistorySize,summarizeIntents} from '../shared/intent-retention.mjs';
 import {acceptedProgramHash} from './program-lineage.mjs';
 import {fileURLToPath} from 'node:url';
@@ -33,7 +34,7 @@ export function createClaimIntentService({file,build=buildPostlaunchClaim,qualif
  }});
  let preparationQueue=Promise.resolve();
  const enqueue=work=>{const p=preparationQueue.then(work);preparationQueue=p.catch(()=>{});return p;};
- return {async reconcile(){await history.compact();return summarizeIntents('postlaunch-claims',intents);},
+ return {async reconcile(){const first=Object.values(intents).find(i=>i&&typeof i==='object'&&i.campaign);if(!first)return {service:'postlaunch-claims',hot:intentHistorySize(intents),signed:0,checked:0,unresolvedSigned:0,complete:true};const {ctx}=await qualified(first.campaign);const summary=await reconcileSignedIntents({service:'postlaunch-claims',intents,connection:ctx.connection,successField:'confirmedSignature',persist:save});await history.compact();return summary;},
   async prepare(owner,input){
    const {id,descriptor}=claimRequest(owner,input);
    const result=await enqueue(()=>locked('prepare:'+id,async()=>{

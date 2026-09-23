@@ -24,7 +24,7 @@ async function run(){
  if(journal.campaign!==m.address||journal.genesisHash!==m.genesisHash||!acceptedProgramHash(ctx.manifest,journal.programSha256))throw Error('Operator journal identity mismatch');
  const persist=()=>saveActiveFile(journalPath,journal);
  const send=createOperatorSender({connection:c,journal,persist});
- const legacy=instruction=>async block=>{const tx=new Transaction({feePayer:admin.publicKey,...block}).add(instruction);await admin.sign(tx);return tx;};
+ const legacy=instruction=>async(block,operationId)=>{const tx=new Transaction({feePayer:admin.publicKey,...block}).add(instruction);await admin.sign(tx,{operationId});return tx;};
  if(!journal.table){const recentSlot=await c.getSlot('finalized'),[,address]=AddressLookupTableProgram.createLookupTable({authority:admin.publicKey,payer:admin.publicKey,recentSlot});journal.table={address:address.toBase58(),recentSlot};persist();}
  let tableAddress=new PublicKey(journal.table.address),table=(await c.getAddressLookupTable(tableAddress)).value;
  if(!table){
@@ -42,7 +42,7 @@ async function run(){
  const missing=addresses.filter(a=>!table.state.addresses.some(b=>a.equals(b)));
  for(let i=0;i<missing.length;i+=20){const chunk=missing.slice(i,i+20);await send('extend:'+tableAddress+':'+chunk.map(x=>x.toBase58()).join(','),legacy(AddressLookupTableProgram.extendLookupTable({lookupTable:tableAddress,authority:admin.publicKey,payer:admin.publicKey,addresses:chunk})));}
  table=(await c.getAddressLookupTable(tableAddress)).value;const start=Date.now();while(await c.getSlot('confirmed')<=table.state.lastExtendedSlot){if(Date.now()-start>30000)throw Error('Lookup table activation stalled');await new Promise(resolve=>setTimeout(resolve,200));}
- const signature=await send('launch',async block=>{const message=new TransactionMessage({payerKey:admin.publicKey,recentBlockhash:block.blockhash,instructions:[ComputeBudgetProgram.setComputeUnitLimit({units:1200000}),good.instruction]}).compileToV0Message([table]),tx=new VersionedTransaction(message);tx.sign([nft]);await admin.sign(tx);return tx;});
+ const signature=await send('launch',async(block,operationId)=>{const message=new TransactionMessage({payerKey:admin.publicKey,recentBlockhash:block.blockhash,instructions:[ComputeBudgetProgram.setComputeUnitLimit({units:1200000}),good.instruction]}).compileToV0Message([table]),tx=new VersionedTransaction(message);tx.sign([nft]);await admin.sign(tx,{operationId});return tx;});
  state=await readCampaign(ctx,m.address);if(state.phase!==3||!state.pool.equals(good.addresses.pool)||!state.feeNft.equals(nft.publicKey))throw Error('Launch postconditions failed');
  m.launchSignature=signature;m.pool=state.pool.toBase58();saveActiveFile(activeManifestPath,m);return {signature,state:await readActive()};
 }

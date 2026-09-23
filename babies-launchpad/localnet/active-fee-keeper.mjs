@@ -140,9 +140,9 @@ export function createActiveFeeKeeper({resolve=()=>resolvePostlaunchCampaign('ac
    const tables=lookupTables.length?await Promise.all(lookupTables.map(async address=>{const t=(await c.getAddressLookupTable(address)).value;if(!t)throw Error('Route lookup table missing');return t;})):[];
    const before=await readFees(ctx,campaign,mint).catch(()=>null);
    let signature;
-   try{signature=await send(operation.id,async block=>{
-    if(!tables.length){const tx=new Transaction({feePayer:admin.publicKey,...block}).add(ComputeBudgetProgram.setComputeUnitLimit({units:1200000}),instruction);await admin.sign(tx);return tx;}
-    const message=new TransactionMessage({payerKey:admin.publicKey,recentBlockhash:block.blockhash,instructions:[ComputeBudgetProgram.setComputeUnitLimit({units:1200000}),instruction]}).compileToV0Message(tables);const tx=new VersionedTransaction(message);await admin.sign(tx);return tx;});
+   try{signature=await send(operation.id,async(block,operationId)=>{
+    if(!tables.length){const tx=new Transaction({feePayer:admin.publicKey,...block}).add(ComputeBudgetProgram.setComputeUnitLimit({units:1200000}),instruction);await admin.sign(tx,{operationId});return tx;}
+    const message=new TransactionMessage({payerKey:admin.publicKey,recentBlockhash:block.blockhash,instructions:[ComputeBudgetProgram.setComputeUnitLimit({units:1200000}),instruction]}).compileToV0Message(tables);const tx=new VersionedTransaction(message);await admin.sign(tx,{operationId});return tx;});
    }catch(error){
     // Accrued pool fees too small to withdraw (CPMM ZeroTradingTokens): nothing to collect yet. Release the operation and
     // wait a full interval instead of retrying the same transaction every tick.

@@ -1,4 +1,5 @@
 import {createIntentRetention,summarizeIntents} from '../shared/intent-retention.mjs';
+import {reconcileSignedIntents} from './chain-reconcile.mjs';
 import {acceptedProgramHash} from './program-lineage.mjs';
 import {pruneUnissuedTradeQuotes,reserveTradeIntentSlot} from './trade-intent-retention.mjs';
 import {writeDurableJson} from '../shared/durable-json.mjs';
@@ -163,4 +164,4 @@ export async function submitPostlaunchTrade(owner,input){
  });
 }
 /** Startup reconciliation (docs/ENGINEERING-RULES.md): classify every finalized outcome against the chain before writes reopen. */
-export async function reconcile(){await history.compact();return summarizeIntents('postlaunch-trades',intents,'confirmed');}
+export async function reconcile(){const first=Object.values(intents).find(i=>i&&typeof i==='object'&&i.campaign);if(!first)return {service:'postlaunch-trades',hot:Object.keys(intents).length,signed:0,checked:0,unresolvedSigned:0,complete:true};const current=await qualifiedCampaign(first.campaign);const summary=await reconcileSignedIntents({service:'postlaunch-trades',intents,connection:current.ctx.connection,successField:'confirmed',persist:save});await history.compact();return summary;}
