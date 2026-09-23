@@ -27,3 +27,13 @@ test('restore drill: mainnet boots without a signer, refuses keys, and every sig
  assert.equal(resolveOperatorMode({KIDS_NETWORK:'mainnet',KIDS_DRILL:'1',KIDS_SIGNER_PUBKEY:pk,KIDS_OPERATOR_KEY_JSON:'[1]'}).mode,'invalid');
  const signer=await operatorSigner({KIDS_DRILL:'1',KIDS_SIGNER_PUBKEY:pk});assert.equal(signer.publicKey.toBase58(),pk);await assert.rejects(signer.sign({}),/drill/);
 });
+test('a plan that pins the coin address needs exactly that key; without a pin the key is generated',async()=>{
+ const {plannedMintKeypair}=await import('../provision-active-launch.mjs');const {Keypair}=await import('@solana/web3.js');
+ const kp=Keypair.generate(),secret=JSON.stringify(Array.from(kp.secretKey)),plan={mint:kp.publicKey.toBase58()};
+ assert.equal(plannedMintKeypair(plan,{KIDS_ACTIVE_MINT_SECRET:secret}).publicKey.toBase58(),plan.mint);
+ assert.throws(()=>plannedMintKeypair(plan,{}),/not set/);
+ assert.throws(()=>plannedMintKeypair(plan,{KIDS_ACTIVE_MINT_SECRET:JSON.stringify(Array.from(Keypair.generate().secretKey))}),/does not belong/);
+ assert.throws(()=>plannedMintKeypair(plan,{KIDS_ACTIVE_MINT_SECRET:'not json'}),/JSON array/);
+ assert.throws(()=>plannedMintKeypair({},{KIDS_ACTIVE_MINT_SECRET:secret}),/pins no mint/);
+ assert.notEqual(plannedMintKeypair({},{}).publicKey.toBase58(),plannedMintKeypair(null,{}).publicKey.toBase58());
+});

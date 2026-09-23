@@ -1,6 +1,8 @@
 // Operator tool: fix the next campaign's identity BEFORE the snapshot and before any transaction.
 //   KIDS_NETWORK=mainnet KIDS_HELIUS_RPC_URL=… node localnet/plan-network-campaign.mjs [--soft-sol 1] [--hard-sol 5] [--hours 24]
 //     [--name 'Shartcoin' --symbol SHART --description '…' --image interaction-review/public/assets/shart-pfp.png]
+//     [--mint <address>]  pins the coin address (a vanity key ground offline); the API must then hold its secret in
+//                        KIDS_ACTIVE_MINT_SECRET (solana-keygen JSON array) and refuses any other key.
 // Without branding flags the plan carries the TEST coin name and image (a test launch never shows the real artwork).
 // Writes deployment/<network>/campaign-plan.json: nonce, creator (operator), program id, campaign address and terms.
 // Refuses to overwrite a plan that already has snapshot evidence. Nothing is sent to the chain.
@@ -17,6 +19,7 @@ const programId=process.env.KIDS_PROGRAM_ID||identities.program?.programId;if(!p
 const operator=await operatorKeypair();const path=campaignPlanPath(profile.network);
 if(existsSync(path)){const old=JSON.parse(readFileSync(path,'utf8'));const dir=snapshotDirectory(profile.network)+'/'+old.campaign;if(existsSync(dir))throw Error('A plan with snapshot evidence exists ('+old.campaign+'); remove it deliberately before planning another campaign');}
 const nonce=randomBytes(8).readBigUInt64LE(),campaign=campaignAddress(new PublicKey(programId),operator.publicKey,nonce).toBase58();
-const plan={network:profile.network,programId,creator:operator.publicKey.toBase58(),nonce:nonce.toString(),campaign,terms:{soft:terms.soft,hard:terms.hard,deadlineSeconds:terms.deadlineSeconds},token,parents:identities.parents.map(p=>({role:p.role,mint:p.mint})),dev:identities.devWallet.address,treasury:identities.treasuryWallet.address,plannedAt:new Date().toISOString(),snapshotDirectory:'deployment/'+profile.network+'/snapshots/'+campaign};
+const mint=opt('--mint')?new PublicKey(opt('--mint')).toBase58():null;
+const plan={network:profile.network,programId,creator:operator.publicKey.toBase58(),nonce:nonce.toString(),campaign,...(mint?{mint}:{}),terms:{soft:terms.soft,hard:terms.hard,deadlineSeconds:terms.deadlineSeconds},token,parents:identities.parents.map(p=>({role:p.role,mint:p.mint})),dev:identities.devWallet.address,treasury:identities.treasuryWallet.address,plannedAt:new Date().toISOString(),snapshotDirectory:'deployment/'+profile.network+'/snapshots/'+campaign};
 mkdirSync(fileURLToPath(new URL('../deployment/'+profile.network+'/',import.meta.url)),{recursive:true});writeFileSync(path,JSON.stringify(plan,null,2)+'\n');
 console.log(JSON.stringify(plan,null,2));console.log('Next: KIDS_HELIUS_RPC_URL=… node localnet/snapshot-parents-mainnet.mjs '+campaign+' '+plan.snapshotDirectory.replace('/'+campaign,''));

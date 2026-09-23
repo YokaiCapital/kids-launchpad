@@ -47,6 +47,19 @@ export function activeCampaignTerms(env=process.env){
  return terms;
 }
 const runtime=fileURLToPath(new URL('./.runtime/',import.meta.url)),keysPath=runtime+'active-launch-setup-keys.json';
+/** The coin keypair for a NEW campaign. A plan that pins `mint` (a vanity address ground offline) needs its secret in
+ * KIDS_ACTIVE_MINT_SECRET (the solana-keygen JSON array, 64 numbers); any other key, or none, refuses provisioning so a
+ * pinned address is never replaced by a random one. Without a pinned mint the key is generated here. The secret only
+ * matters until the mint account exists: afterwards both authorities are revoked and the variable can be deleted. */
+export function plannedMintKeypair(plan,env=process.env){
+ const pinned=plan?.mint||null,raw=env.KIDS_ACTIVE_MINT_SECRET;
+ if(!pinned){if(raw)throw Error('KIDS_ACTIVE_MINT_SECRET is set but the campaign plan pins no mint address');return Keypair.generate();}
+ if(!raw)throw Error('The campaign plan pins mint '+pinned+' but KIDS_ACTIVE_MINT_SECRET is not set on the API');
+ let bytes;try{bytes=Uint8Array.from(JSON.parse(raw));}catch{throw Error('KIDS_ACTIVE_MINT_SECRET must be the solana-keygen JSON array');}
+ if(bytes.length!==64)throw Error('KIDS_ACTIVE_MINT_SECRET must be the solana-keygen JSON array');
+ const kp=Keypair.fromSecretKey(bytes);if(kp.publicKey.toBase58()!==pinned)throw Error('KIDS_ACTIVE_MINT_SECRET does not belong to the pinned mint '+pinned);
+ return kp;
+}
 const read=p=>JSON.parse(readFileSync(p,'utf8'));
 let provisioning;
 export function provisionActiveLaunch(){if(provisioning)return provisioning;provisioning=provision().finally(()=>{provisioning=null;});return provisioning;}
@@ -72,7 +85,7 @@ async function provision(){
    var token=tokenBranding(plan.token||TEST_TOKEN);
   }
   // Persist identities before any transaction; retries cannot create another coin.
-  const mint=Keypair.generate(),nft=Keypair.generate();
+  const mint=plannedMintKeypair(local?null:read(campaignPlanPath(PROFILE.network)),process.env),nft=Keypair.generate();
   saveActiveFile(keysPath,{mint:Array.from(mint.secretKey),nft:Array.from(nft.secretKey)});
   m={version:3,network:PROFILE.network,rpcUrl:PROFILE.rpcLabel,programId:ctx.programId.toBase58(),programSha256:ctx.manifest.sha256,genesisHash:ctx.manifest.genesisHash,creator:admin.publicKey.toBase58(),nonce:nonce.toString(),address:campaignAddress(ctx.programId,admin.publicKey,nonce).toBase58(),mint:mint.publicKey.toBase58(),feeNft:nft.publicKey.toBase58(),supply:'1000000000000000',soft:terms.soft,hard:terms.hard,deadlineSeconds:terms.deadlineSeconds,...campaignWindow(terms.deadlineSeconds,now),dev,treasury,parentMints,token,metadataUri:null,distributionProgram:distributionProgramFor(PROFILE.network)?.toBase58()||null,ready:false};
   saveActiveFile(activeManifestPath,m);
