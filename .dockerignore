@@ -1,0 +1,15 @@
+**
+!babies-launchpad/
+!babies-launchpad/**
+**/.runtime/**
+**/node_modules/**
+**/target/**
+**/dist/**
+**/.git/**
+**/.env*
+**/*-keypair.json
+**/*-secret.json
+**/*.sqlite*
+**/*.db
+**/*.log
+**/.runtime*/**
