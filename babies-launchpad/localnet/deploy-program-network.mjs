@@ -29,10 +29,18 @@ if(checkOnly){console.log(JSON.stringify({deployed:!!programInfo?.executable,che
 if(balance<needed)throw Error('Operator wallet needs about '+(needed/1e9).toFixed(2)+' SOL (has '+(balance/1e9).toFixed(3)+'); fund '+operator.keypair.publicKey.toBase58());
 const tmp=mkdtempSync(join(tmpdir(),'kids-cli-'));const config=join(tmp,'cli.yml');writeFileSync(config,'json_rpc_url: "'+profile.rpcUrl+'"\nwebsocket_url: ""\nkeypair_path: '+operator.path+'\ncommitment: confirmed\n',{mode:0o600});
 try{
- // Extension: `solana program deploy` extends the program-data account itself when the binary grew (CLI 2.x+), signed by
- // the upgrade authority and paid by the fee payer. The explicit extend is attempted first and is not fatal: the CLI's
- // signer resolution for extend with a separate authority has refused both operator-as-authority and payer+authority.
- if(extendBy){console.log('solana program extend (best effort)');try{execFileSync(join(bin,'solana'),['program','extend',program.keypair.publicKey.toBase58(),String(extendBy),'--authority',authorityPath,'--keypair',operator.path,'--config',config],{stdio:'inherit'});}catch{console.log(JSON.stringify({event:'extend-deferred-to-deploy',bytes:extendBy}));}}
+ // Extension (verified on a local ledger, 23 September 2026): the loader extends by at least 10,240 bytes, and the CLI
+ // accepts the extension only when the upgrade authority is the default signer and the payer. The governance key is
+ // therefore topped up from the operator with just enough for the rent, and signs the extension itself.
+ if(extendBy){
+  extendBy=Math.max(extendBy,10240);const {SystemProgram,Transaction,sendAndConfirmTransaction}=await import('@solana/web3.js');
+  const authorityKeypair=Keypair.fromSecretKey(Uint8Array.from(JSON.parse(readFileSync(authorityPath,'utf8'))));
+  const need=await connection.getMinimumBalanceForRentExemption(extendBy)+20_000_000,have=await connection.getBalance(authorityKeypair.publicKey);
+  if(have<need){const lamports=need-have;console.log(JSON.stringify({event:'fund-upgrade-authority-for-extension',from:operator.keypair.publicKey.toBase58(),to:authorityKeypair.publicKey.toBase58(),sol:lamports/1e9}));
+   const sig=await sendAndConfirmTransaction(connection,new Transaction().add(SystemProgram.transfer({fromPubkey:operator.keypair.publicKey,toPubkey:authorityKeypair.publicKey,lamports})),[operator.keypair],{commitment:'confirmed'});console.log(JSON.stringify({funded:true,signature:sig}));}
+  const configAuthority=join(tmp,'cli-authority.yml');writeFileSync(configAuthority,'json_rpc_url: "'+profile.rpcUrl+'"\nwebsocket_url: ""\nkeypair_path: '+authorityPath+'\ncommitment: confirmed\n',{mode:0o600});
+  console.log('solana program extend by '+extendBy+' bytes (authority signs and pays)');execFileSync(join(bin,'solana'),['program','extend',program.keypair.publicKey.toBase58(),String(extendBy),'--keypair',authorityPath,'--config',configAuthority],{stdio:'inherit'});
+ }
  const upgrade=!!programInfo?.executable;
  const args=upgrade?['program','deploy',binaryPath,'--program-id',program.keypair.publicKey.toBase58(),'--upgrade-authority',authorityPath,'--keypair',operator.path,'--config',config,'--commitment','confirmed','--use-rpc']:['program','deploy',binaryPath,'--program-id',program.path,'--upgrade-authority',authorityPath,'--keypair',operator.path,'--config',config,'--commitment','confirmed','--use-rpc','--max-len',String(bytes.length)];
  console.log(JSON.stringify({mode:upgrade?'upgrade':'first-deploy',upgradeAuthorityKey:authorityPath===governancePath?'governance':'operator'}));
