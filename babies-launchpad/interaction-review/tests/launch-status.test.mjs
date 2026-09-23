@@ -6,7 +6,7 @@ test('open: countdown to close and progress against soft and hard cap',()=>{
  const r=describeLaunch({...base,totalLamports:'1500000000'},1000);assert.match(r.headline,/Soft cap reached/);assert.equal(r.progress.reached,true);
 });
 test('closed, failed and launched states say what happened and what to do',()=>{
- const a=describeLaunch({...base,phase:'awaiting-launch'},1400);assert.equal(a.pill,'Launching');assert.equal(a.countdown.seconds,1300+86400-1400);
+ const a=describeLaunch({...base,phase:'awaiting-launch'},1400);assert.equal(a.pill,'Launching');assert.equal(a.countdown,null);assert.match(a.sub,/refunded/);
  const f=describeLaunch({...base,phase:'failed'},2000);assert.equal(f.pill,'Not launched');assert.match(f.sub,/Only 0\.4 of the 1 SOL soft cap/);assert.match(f.sub,/refund/);assert.equal(f.countdown,null);
  const f2=describeLaunch({...base,phase:'failed',totalLamports:'2000000000'},2000);assert.match(f2.sub,/launch window closed/);
  const l=describeLaunch({...base,phase:'launched',pool:'P',totalLamports:'1000000000'},2000);assert.equal(l.pill,'Live');assert.deepEqual(l.addresses.map(x=>x.value),['M','P','E']);assert.equal(l.explorerUrl,null);
