@@ -1,6 +1,11 @@
+import {createHash} from 'node:crypto';
 // One writer per runtime. All retries durably retain exactly the signed bytes.
 import {VersionedTransaction} from '@solana/web3.js';
 import {encodeBase58} from '../shared/solana.mjs';
+/** The signer accepts operation ids of at most 120 characters. Journal ids stay descriptive (an extend step lists its
+ * addresses); the id sent to the signer is the same string when it fits and its hash otherwise, so every journal id
+ * still maps to exactly one signer operation. */
+export function signerOperationId(id){return id.length<=120?id:'sha256:'+createHash('sha256').update(id).digest('hex');}
 export function createOperatorSender({connection:c,journal,persist,now=Date.now,resendIntervalMs=2000,confirmationTimeoutMs=120000}) {
  const pending=new Map();
  return function send(id,build) {
@@ -15,7 +20,7 @@ export function createOperatorSender({connection:c,journal,persist,now=Date.now,
     if(failed||expired){journal.attempts[id+':'+old.createdAt]={...old,closedReason:failed?'failed':'expired'};delete journal.attempts[id];old=null;persist();}
    }
    if(!old){
-    const block=await c.getLatestBlockhash('confirmed'),tx=await build(block,id);
+    const block=await c.getLatestBlockhash('confirmed'),tx=await build(block,signerOperationId(id));
     const signature=encodeBase58(tx instanceof VersionedTransaction?tx.signatures[0]:tx.signature);
     old={block,signature,wire:Buffer.from(tx.serialize()).toString('base64'),createdAt:now()};journal.attempts[id]=old;
    }
