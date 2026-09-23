@@ -20,7 +20,9 @@ async function proxyApi(request,env,operator){
  const json=(status,error)=>Response.json({error},{status,headers});
  if(!env.KIDS_BACKEND_ORIGIN||!env.KIDS_BACKEND_TOKEN)return json(503,'Online transactions are not enabled. This service is restricted to the local test environment.');
  const url=new URL(request.url);
- if(url.search||!routes.has(request.method+' '+url.pathname))return json(404,'Route unavailable');
+ // Market and activity reads carry a bounded query (campaign, interval, cursor, kinds); every other route takes none.
+ const marketRead=request.method==='GET'&&/^\/api\/market\/(summary|candles|trades|activity)$/.test(url.pathname)&&/^\?[A-Za-z0-9=&_.%,-]{1,600}$/.test(url.search);
+ if(!marketRead&&(url.search||!routes.has(request.method+' '+url.pathname)))return json(404,'Route unavailable');
  if((['/api/account/local','/api/account/postlaunch/claim','/api/account/postlaunch/trade/execute','/api/account/dev-vesting/claim'].includes(url.pathname))&&!operator)return json(401,'Operator access required. Open /__operator to sign in.');
  if(request.method==='POST'&&request.headers.get('origin')!==url.origin)return json(403,'Forbidden');
  let upstream;try{upstream=new URL(env.KIDS_BACKEND_ORIGIN);}catch{return json(503,'Backend unavailable');}
@@ -38,7 +40,7 @@ async function proxyApi(request,env,operator){
   body=new Uint8Array(size);let offset=0;for(const chunk of chunks){body.set(chunk,offset);offset+=chunk.length;}
  }
  try{
-  const response=await fetch(new URL(url.pathname,upstream),{method:request.method,headers:outgoing,body,redirect:'error',signal:AbortSignal.timeout(40000)});
+  const response=await fetch(new URL(url.pathname+(marketRead?url.search:''),upstream),{method:request.method,headers:outgoing,body,redirect:'error',signal:AbortSignal.timeout(40000)});
   if(!response.headers.get('content-type')?.includes('application/json'))return json(502,'Backend unavailable');
   const resultHeaders=new Headers({...headers,'content-type':'application/json'});
   const cookie=response.headers.get('set-cookie');if(cookie&&/^kids_session=(?:[a-zA-Z0-9_-]{1,256})?;/.test(cookie)&&!cookie.includes(','))resultHeaders.set('set-cookie',/;\s*Secure(?:;|$)/i.test(cookie)?cookie:cookie+'; Secure');
