@@ -20,3 +20,9 @@ test('no campaign: a planned schedule shows an opening countdown and the planned
 });
 
 test('one canonical UTC label for the announced opening; never the viewer\'s zone',()=>{assert.equal(formatUtc(Date.UTC(2026,8,24,16,0,0)/1000),'24 Sep 2026, 16:00 UTC');assert.equal(formatUtc(NaN),'');});
+test('coin links: the profile link wins, otherwise the Shartcoin X account; never a non-https value',async()=>{
+ const {coinLink,COIN_LINKS}=await import('../src/coin-links.mjs');
+ assert.equal(COIN_LINKS.xUrl,'https://x.com/shartcoinkids');
+ assert.equal(coinLink(null,'xUrl'),'https://x.com/shartcoinkids');assert.equal(coinLink({xUrl:'https://x.com/other'},'xUrl'),'https://x.com/other');
+ assert.equal(coinLink({xUrl:'javascript:alert(1)'},'xUrl'),'https://x.com/shartcoinkids');assert.equal(coinLink({},'websiteUrl'),null);
+});

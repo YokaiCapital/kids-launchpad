@@ -1,3 +1,4 @@
+import {coinLink} from './coin-links.mjs';
 import {netLabel,explorerAccount} from './network-label.mjs';
 import {walletForOwner} from './wallet-connection.mjs';
 import {friendlyError} from './friendly-errors.mjs';
@@ -109,7 +110,7 @@ export function PostLaunch({identity,onSignIn,profile,posts=[],go,preview=false}
  const video=resolveShartVideo(profile?.video);
  async function copy(value,label){try{await navigator.clipboard.writeText(value);setCopied(`${label} copied`);}catch{setCopied('Copy unavailable. Select the address in Token details.');}}
  function openClaims(){setRailTab('Claims');requestAnimationFrame(()=>{const rail=railRef.current;if(!rail)return;rail.scrollIntoView({behavior:'smooth',block:'start'});rail.querySelector('#post-rail-tab-Claims')?.focus({preventScroll:true});});}
- const socials=[{key:'xUrl',label:'Shartcoin on X',Icon:XLogo},{key:'websiteUrl',label:'Shartcoin website',Icon:Globe}].filter(({key})=>typeof profile?.[key]==='string'&&/^https:\/\//.test(profile[key]));
+ const socials=[{key:'xUrl',label:'Shartcoin on X',Icon:XLogo},{key:'websiteUrl',label:'Shartcoin website',Icon:Globe}].map(s=>({...s,href:coinLink(profile,s.key)})).filter(s=>s.href);
  const facts=custodyFacts(verified?data:null);
  const market=useMarketSummary(verified?data.campaign:null,verified);
  const summary=market.summary,marketOk=market.state!=='off'&&market.state!=='loading';
@@ -156,7 +157,7 @@ export function PostLaunch({identity,onSignIn,profile,posts=[],go,preview=false}
     </dl></details></div>
    </div>
    <aside className="post-rail" ref={railRef}>
-    <div className="post-banner"><img src={profile?.banner||"/assets/shart-cover.jpg"} alt="Shartcoin banner"/>{socials.length>0&&<div className="post-socials">{socials.map(({key,label,Icon})=><a key={key} href={profile[key]} target="_blank" rel="noopener noreferrer" aria-label={label} title={label}><Icon size={20} aria-hidden="true"/></a>)}</div>}</div>
+    <div className="post-banner"><img src={profile?.banner||"/assets/shart-cover.jpg"} alt="Shartcoin banner"/>{socials.length>0&&<div className="post-socials">{socials.map(({key,label,Icon,href})=><a key={key} href={href} target="_blank" rel="noopener noreferrer" aria-label={label} title={label}><Icon size={20} aria-hidden="true"/></a>)}</div>}</div>
     <div className="post-identity"><CoinPfp src={profile?.logo||SHART_PFP} alt="Shartcoin logo" size={72} preview/><div><div className="post-inline-parents"><ParentIcon name="Fartcoin"/><span>Fartcoin</span><b>×</b><ParentIcon name="Buttcoin"/><span>Buttcoin</span></div><strong>Shartcoin</strong><small>$Shartcoin</small></div></div>
     <p className="post-description">{resolveCoinDescription(profile?.description)}</p>
     <button className="post-contract" disabled={!verified} onClick={()=>copy(data.mint,'Mint address')}><span>CA</span><code>{verified?short(data.mint):'Available after connection'}</code><Copy size={16}/></button>
