@@ -114,3 +114,9 @@ test('the served shapes (long names, nested feed and coverage, exact amounts) ad
  const t=normaliseTrade({signature:'4ePp',path:'5.0',slot:449622084,time:1790144972,side:'buy',trader:'xEMq',sol:0.005620729,coin:4430574.786107,priceSol:1.268622982e-9,exact:{solLamports:'5620729',coinRaw:'4430574786107',priceSol:'0.000000001268622982'},nested:true,commitment:'finalized'});
  assert.equal(t.blockTimeUnix,1790144972);assert.equal(t.solRaw,'5620729');assert.equal(t.coinRaw,'4430574786107');assert.equal(t.priceSol,'0.000000001268622982');assert.equal(t.wallet,'xEMq');assert.equal(t.provisional,false);assert.equal(normaliseTrade({signature:'x',side:'sell',time:1,commitment:'confirmed'}).provisional,true);
 });
+test('served trade and candle rows are always normalised when merged (the live list showed Pending and dashes)',async()=>{
+ const {mergeTrades,mergeCandles}=await import('../src/market-data.mjs');
+ const [t]=mergeTrades([],[{signature:'4ePp',slot:449622084,time:1790144972,side:'buy',trader:'xEMq',priceSol:1.268622982e-9,exact:{solLamports:'5620729',coinRaw:'4430574786107',priceSol:'0.000000001268622982'},nested:true,commitment:'finalized'}]);
+ assert.equal(t.blockTimeUnix,1790144972);assert.equal(t.solRaw,'5620729');assert.equal(t.provisional,false);
+ const [c]=mergeCandles([],[{time:1790129100,open:1,high:2,low:0.5,close:1.5,volumeSol:0.4,trades:3}]);assert.equal(c.volume,0.4);assert.equal(c.trades,3);
+});

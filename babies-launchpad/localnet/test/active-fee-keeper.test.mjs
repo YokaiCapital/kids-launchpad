@@ -47,3 +47,9 @@ test('cost basis: the minimum buyback budget covers the bounded operation cost f
  assert.equal(worthwhileBudget(5_000_000n),true);assert.equal(worthwhileBudget(400_000n),false,'2 % of the budget must cover the fixed costs');
  assert.equal(BURN_MIN_VALUE_LAMPORTS,COLLECT_THRESHOLDS.lamports);
 });
+test('runtime floor: the configured buyback minimum can only raise the floor; the burn gate compares the quoted value',async()=>{
+ const {effectiveBuybackMinimum,BUYBACK_FLOOR_LAMPORTS,burnWorthwhile}=await import('../active-fee-keeper.mjs');
+ assert.equal(BUYBACK_FLOOR_LAMPORTS,500_000n);assert.equal(effectiveBuybackMinimum({KIDS_BUYBACK_MIN_LAMPORTS:'1'}),500_000n);assert.equal(effectiveBuybackMinimum({KIDS_BUYBACK_MIN_LAMPORTS:'nonsense'}),500_000n);
+ assert.equal(effectiveBuybackMinimum({}),5_000_000n);assert.equal(effectiveBuybackMinimum({KIDS_BUYBACK_MIN_LAMPORTS:'20000000'}),20_000_000n);
+ assert.equal(burnWorthwhile(499_999n),false);assert.equal(burnWorthwhile(500_000n),true);
+});

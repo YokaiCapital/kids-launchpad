@@ -125,7 +125,7 @@ export function normaliseCandle(c){
 /** Ascending by time, one bar per bucket; an incoming bar replaces the bar it shares a bucket with (this is how a provisional bar is replaced). */
 export function mergeCandles(existing,incoming){
  const map=new Map();for(const bar of existing||[])if(bar)map.set(bar.time,bar);
- for(const raw of incoming||[]){const bar=raw&&'open' in raw&&'time' in raw?raw:normaliseCandle(raw);if(bar)map.set(bar.time,bar);}
+ for(const raw of incoming||[]){const bar=normaliseCandle(raw);if(bar)map.set(bar.time,bar);}// always normalised (served bars use volumeSol/trades)
  return [...map.values()].sort((a,b)=>a.time-b.time);
 }
 /** Union of coverage gaps, deduplicated and sorted; invalid entries dropped. */
@@ -186,7 +186,7 @@ export function normaliseTrade(t){
 /** Newest first, one row per signature; an incoming row replaces the row it shares a signature with (confirming → confirmed). */
 export function mergeTrades(existing,incoming){
  const map=new Map();for(const t of existing||[])if(t)map.set(t.signature,t);
- for(const raw of incoming||[]){const t=raw&&raw.side&&typeof raw.nested==='boolean'?raw:normaliseTrade(raw);if(t)map.set(t.signature,t);}
+ for(const raw of incoming||[]){const t=normaliseTrade(raw);if(t)map.set(t.signature,t);}// always normalised: served rows carry `time` and `exact` amounts, not the page's field names
  return [...map.values()].sort((a,b)=>(b.blockTimeUnix??0)-(a.blockTimeUnix??0)||(b.slot??0)-(a.slot??0)||(a.signature<b.signature?-1:1));
 }
 
