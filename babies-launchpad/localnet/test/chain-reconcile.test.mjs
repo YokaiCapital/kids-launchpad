@@ -33,3 +33,8 @@ test('startup gate: complete only when every pass ran and no signed row is unres
  const r3=await reconcileJournals({passes:[['c',async()=>({service:'c',hot:0,signed:0,unresolvedSigned:0,checked:0,complete:false})]]});assert.equal(r3.complete,false);
  const r4=await reconcileJournals({passes:[['d',async()=>{throw Error('boom');}]]});assert.equal(r4.complete,false);assert.equal(r4.services[0].status,'failed');
 });
+test('hasPendingSigned: a journal with only resolved or unsigned rows needs no chain access; one pending signed row does',async()=>{
+ const {hasPendingSigned}=await import('../chain-reconcile.mjs');
+ assert.equal(hasPendingSigned({a:{submittedSignature:'s',confirmedSignature:'s'},b:{unsignedTransactionBase64:'u'},c:{signature:'x',closedReason:'failed'}}),false);
+ assert.equal(hasPendingSigned({a:{submittedSignature:'s'}}),true);assert.equal(hasPendingSigned({t:{signature:'q',signed:'bytes'}},'confirmed'),true);assert.equal(hasPendingSigned({t:{signature:'q',signed:'bytes',confirmed:true}},'confirmed'),false);
+});

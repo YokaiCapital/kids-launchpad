@@ -14,6 +14,11 @@ export function signatureOf(row){
  return null;
 }
 const isResolved=(row,successField)=>!!(row[successField]||row.archivedProof||row.closedReason);
+/** True when a journal has no signed row without an outcome: nothing to ask the chain about. */
+export function hasPendingSigned(intents,successField='confirmedSignature'){
+ for(const [key,row] of Object.entries(intents)){if(key===ARCHIVE_MARKER||!row||typeof row!=='object')continue;const wasSigned=!!(row.submittedSignature||row.signedTransactionBase64||row.signature||row.signed===true||row.signed);if(wasSigned&&!isResolved(row,successField))return true;}
+ return false;
+}
 export async function reconcileSignedIntents({service,intents,connection,successField='confirmedSignature',persist=()=>{},batchSize=100,deadlineMs=120000,now=Date.now,log=()=>{}}){
  const started=now();let hot=0,signed=0,checked=0,resolvedSuccess=0,resolvedFailed=0,expired=0,unresolvedSigned=0,unchecked=0;
  const pending=[];

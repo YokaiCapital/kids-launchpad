@@ -1,5 +1,5 @@
 import {escrowIntentRetry} from './escrow-intent-retry.mjs';
-import {reconcileSignedIntents} from './chain-reconcile.mjs';
+import {reconcileSignedIntents,hasPendingSigned} from './chain-reconcile.mjs';
 import {createIntentRetention,intentHistorySize,summarizeIntents} from '../shared/intent-retention.mjs';
 import {writeDurableJson} from '../shared/durable-json.mjs';
 import {existsSync,readFileSync} from 'node:fs';
@@ -162,4 +162,10 @@ export async function runRefundKeeper(){
 }
 if(process.argv[1]===fileURLToPath(import.meta.url))console.log(JSON.stringify(await provisionEscrow(),null,2));
 /** Startup reconciliation (docs/ENGINEERING-RULES.md): classify every finalized outcome against the chain before writes reopen. */
-export async function reconcile(){if(LEGACY_OFF)return {service:'escrow',hot:0,signed:0,checked:0,unresolvedSigned:0,complete:true,off:true};const ctx=await escrowContext();const summary=await reconcileSignedIntents({service:'escrow',intents,connection:ctx.connection,successField:'confirmedSignature',persist:()=>save(intentPath,intents)});await history.compact();return summary;}
+export async function reconcile(){
+ if(LEGACY_OFF)return {service:'escrow',hot:0,signed:0,checked:0,unresolvedSigned:0,complete:true,off:true};
+ // The legacy escrow lives on the second local validator. With no signed row awaiting an outcome there is nothing to
+ // ask that ledger; with pending rows its context must answer, or this pass fails closed.
+ if(!hasPendingSigned(intents,'confirmedSignature'))return {service:'escrow',hot:intentHistorySize(intents),signed:0,checked:0,unresolvedSigned:0,complete:true};
+ const ctx=await escrowContext();const summary=await reconcileSignedIntents({service:'escrow',intents,connection:ctx.connection,successField:'confirmedSignature',persist:()=>save(intentPath,intents)});await history.compact();return summary;
+}
