@@ -205,3 +205,9 @@ Owner decisions after the first mainnet launch: coin-side trading fees are burne
 - API and signer both SUCCESS from release 1eb7bc5; ready, writes open, signer reachable, keepers running, reconciliation complete.
 - Live checks: launched coin page swap panel 383 CSS px at 1280 and 375 (was 529/513), "Pool fee 2 % · Slippage 10 %", new picture at 512 px, no horizontal overflow. Live quote probe with a throwaway wallet: slippage 0 and 6000 bps refused ("between 0.01 % and 50 %"), 1000 and 250 bps accepted through to the balance check.
 - Found live: the balance message said "on the test ledger" on mainnet; fixed in the clone (network-aware wording).
+
+## 23 September 2026, ~06:05 UTC: release aae5b35 live (both services) + site bundle index-BNwHgEo4.js
+
+- API and signer SUCCESS from release aae5b35 (keeper dust-harvest backoff, balance copy fix); ready, writes open, signer reachable, keepers running, reconciliation complete.
+- Site live checks: Docs at #docs/start (10 topics, search), header shows Docs, launched coin page shows the claim strip ("Sign in to see what you can claim"), Trade/Claims rail, no horizontal overflow at 375. Banner icons render only with a destination (none configured on the test coin, so none shown).
+- README with full transparency is on GitHub main/release (repository stays private, owner decision 23 September 2026).
