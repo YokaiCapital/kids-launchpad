@@ -23,7 +23,7 @@ function injectedProvider(raw){
 }
 // Phantom shows a malicious-site warning for domains it has not whitelisted yet. Until kids.fun is
 // whitelisted, Phantom stays visible but cannot be selected, so nobody meets that warning here.
-export const PAUSED_WALLETS={phantom:'Waiting for Phantom whitelisting'};
+export const PAUSED_WALLETS={phantom:'Phantom is still reviewing kids.fun; use Backpack, Jupiter or Solflare for now'};
 const pausedReason=name=>PAUSED_WALLETS[name.toLowerCase()]||null;
 /** Always listed, in this order, whether or not the browser has them (owner, 23 Sep 2026: most people have Phantom and
  * might not notice the other options). A missing one is an install link, never a dead button. */
