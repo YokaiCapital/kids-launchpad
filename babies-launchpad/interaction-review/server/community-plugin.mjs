@@ -3,7 +3,7 @@
 // envelope, keeps the last versions for audit and serves the current one. The blocklist is NOT here: it is a repository
 // file carried by releases, because it drives enforcement.
 import {existsSync,readFileSync,writeFileSync,mkdirSync,renameSync,readdirSync,unlinkSync} from 'node:fs';import {fileURLToPath} from 'node:url';
-import {trustedGatewayContext} from '../../shared/trusted-gateway.mjs';
+import {trustedGatewayContext} from '../../shared/trusted-gateway.mjs';import {readDenylist} from '../../shared/denylist.mjs';
 const runtime=fileURLToPath(new URL('../../localnet/.runtime/community/',import.meta.url));
 export const COMMUNITY_FILES=Object.freeze({'supporters':{max:2_000_000,entry:e=>typeof e?.xId==='string'&&/^\d{1,25}$/.test(e.xId)&&typeof e.username==='string'&&e.username.length<=32&&(e.name==null||typeof e.name==='string')&&(e.followers==null||Number.isInteger(e.followers))&&Array.isArray(e.how)&&e.how.every(h=>typeof h==='string'&&h.length<=40)&&typeof e.since==='string'&&!Number.isNaN(Date.parse(e.since))},
  'supporter-wallets':{max:2_000_000,entry:e=>typeof e?.xId==='string'&&/^\d{1,25}$/.test(e.xId)&&typeof e.wallet==='string'&&/^[1-9A-HJ-NP-Za-km-z]{32,44}$/.test(e.wallet)&&typeof e.provedAt==='string'&&!Number.isNaN(Date.parse(e.provedAt))&&typeof e.tweetUrl==='string'&&/^https:\/\/(x|twitter)\.com\//.test(e.tweetUrl)}});
@@ -28,7 +28,9 @@ export function communityPlugin({dir=runtime}={}){
  const cache=new Map();
  const install=server=>{
   server.middlewares.use(async(req,res,next)=>{
-   const m=/^\/api\/community\/(supporters|supporter-wallets)$/.exec((req.url||'').split('?')[0]);if(!m)return next();const name=m[1];
+   const path=(req.url||'').split('?')[0];
+   if(path==='/api/community/denylist'){if(req.method!=='GET'){res.statusCode=405;return res.end();}const d=readDenylist();res.statusCode=200;res.setHeader('content-type','application/json');res.setHeader('cache-control','no-store');return res.end(JSON.stringify({wallets:d.wallets,counts:d.counts,enforcement:d.enforcement,updatedAt:new Date().toISOString()}));}
+   const m=/^\/api\/community\/(supporters|supporter-wallets)$/.exec(path);if(!m)return next();const name=m[1];
    const send=(status,body)=>{res.statusCode=status;res.setHeader('content-type','application/json');res.setHeader('cache-control','no-store');res.end(JSON.stringify(body));};
    if(req.method==='GET'){const hit=cache.get(name);const now=Date.now();if(hit&&now-hit.at<60000)return send(hit.status,hit.body);
     const body=readCommunityFile(name,dir);const out=body?{status:200,body:{name,generatedAt:body.generatedAt,count:body.entries.length,entries:body.entries,refreshEveryMinutes:30}}:{status:404,body:{error:'not published yet',name}};cache.set(name,{...out,at:now});return send(out.status,out.body);}

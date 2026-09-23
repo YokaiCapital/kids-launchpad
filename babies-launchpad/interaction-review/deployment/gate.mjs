@@ -51,7 +51,7 @@ async function validCookie(request,name,secret,now){
 const accountGets=['state','prelaunch','prelaunch-legacy','postlaunch','postlaunch-preview','dev-vesting','rounds'];
 const accountPosts=['challenge','verify','logout','local','prelaunch/prepare','prelaunch/submit','prelaunch-legacy/prepare','prelaunch-legacy/submit','postlaunch/claim','postlaunch/claim/prepare','postlaunch/claim/submit','postlaunch/trade/quote','postlaunch/trade/prepare','postlaunch/trade/submit','postlaunch/trade/execute','dev-vesting/claim'];
 // Admin routes are never bridged (owner rule, 22 September 2026): admin functions exist only on the local machine.
-const routes=new Set(['GET /api/demo','GET /api/community/supporters','GET /api/community/supporter-wallets',...accountGets.map(p=>'GET /api/account/'+p),...accountPosts.map(p=>'POST /api/account/'+p)]);
+const routes=new Set(['GET /api/demo','GET /api/community/supporters','GET /api/community/supporter-wallets','GET /api/community/denylist',...accountGets.map(p=>'GET /api/account/'+p),...accountPosts.map(p=>'POST /api/account/'+p)]);
 async function proxyApi(request,env,operator){
  const json=(status,error)=>Response.json({error},{status,headers});
  if(!env.KIDS_BACKEND_ORIGIN||!env.KIDS_BACKEND_TOKEN)return json(503,'Online transactions are not enabled. This service is restricted to the local test environment.');

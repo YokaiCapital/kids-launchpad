@@ -1,0 +1,6 @@
+{
+  "version": 1,
+  "note": "Append-only journal of wallets refused by kids.fun (launch creation, commitments, trades through the site). Program-level enforcement follows in a later build; the page says which is live. Rows are never edited: a later row with status 'removed' or 'appealed' supersedes an earlier 'active' row for the same wallet.",
+  "reasons": ["bundler", "fake-leaderboard", "drained-funds", "vamp", "other"],
+  "entries": []
+}

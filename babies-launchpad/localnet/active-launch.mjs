@@ -1,4 +1,5 @@
 import {escrowIntentRetry} from './escrow-intent-retry.mjs';
+import {walletDenied,DENIED_MESSAGE} from '../shared/denylist.mjs';
 import {acceptedProgramHash} from './program-lineage.mjs';
 import {createIntentRetention,intentHistorySize,summarizeIntents} from '../shared/intent-retention.mjs';
 import {reconcileSignedIntents} from './chain-reconcile.mjs';
@@ -83,6 +84,8 @@ let preparationQueue=Promise.resolve();
 export function prepareActive(owner,input){const action=preparationQueue.then(()=>prepareActiveInternal(owner,input));preparationQueue=action.catch(()=>{});return action;}
 async function prepareActiveInternal(owner,input){
  if(!['commit','refund'].includes(input.action)||!/^[-a-zA-Z0-9]{16,80}$/.test(input.requestId||''))throw Error('Valid action and request ID required');
+ // Listed wallets cannot commit through kids.fun; refunds are never blocked (a listing never touches an existing receipt).
+ if(input.action==='commit'&&walletDenied(owner))throw Error(DENIED_MESSAGE);
  const key=createHash('sha256').update(owner+':'+input.requestId).digest('hex');
  const descriptor=JSON.stringify({owner,action:input.action,amount:input.amountLamports||null});
  const prior=history.lookup(key);

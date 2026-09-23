@@ -1,4 +1,5 @@
 import {createIntentRetention,summarizeIntents} from '../shared/intent-retention.mjs';
+import {walletDenied,DENIED_MESSAGE} from '../shared/denylist.mjs';
 import {reconcileSignedIntents} from './chain-reconcile.mjs';
 import {acceptedProgramHash} from './program-lineage.mjs';
 import {pruneUnissuedTradeQuotes,reserveTradeIntentSlot} from './trade-intent-retention.mjs';
@@ -66,6 +67,7 @@ export async function assertTradeBalance(connection,owner,side,amountRaw,mint){
 }
 export async function quotePostlaunchTrade(owner,input){
  validateTradeInput(input);if(new PublicKey(owner).toBase58()!==owner)throw Error('Invalid wallet');
+ if(walletDenied(owner))throw Error(DENIED_MESSAGE);
  const descriptor=JSON.stringify([owner,input.campaign,input.side,input.amountRaw,input.slippageBps]);
  const id=createHash('sha256').update(owner+':'+input.requestId).digest('hex');
  const result=await enqueueQuote(()=>locked('quote:'+id,async()=>{
