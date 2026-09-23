@@ -1,7 +1,13 @@
 // Pure helpers for the launch status card: what to say in each phase and how to count down.
+/** One canonical UTC rendering of a Unix time: '24 Sep 2026, 16:00 UTC'. Never the viewer's local zone. */
+export function formatUtc(unix){
+ const d=new Date(unix*1000);if(Number.isNaN(d.getTime()))return '';const months=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+ return d.getUTCDate()+' '+months[d.getUTCMonth()]+' '+d.getUTCFullYear()+', '+String(d.getUTCHours()).padStart(2,'0')+':'+String(d.getUTCMinutes()).padStart(2,'0')+' UTC';
+}
+/** Remaining time as days, hours, minutes and seconds; never negative (0 or below renders as 00:00). */
 export function formatCountdown(seconds){
  const s=Math.max(0,Math.floor(seconds));const d=Math.floor(s/86400),h=Math.floor(s%86400/3600),m=Math.floor(s%3600/60),sec=s%60,two=n=>String(n).padStart(2,'0');
- if(d>0)return d+'d '+two(h)+'h '+two(m)+'m';
+ if(d>0)return d+'d '+two(h)+'h '+two(m)+'m '+two(sec)+'s';
  if(h>0)return two(h)+':'+two(m)+':'+two(sec);
  return two(m)+':'+two(sec);
 }
@@ -21,6 +27,11 @@ export function describeLaunch(data,nowUnix){const live=data?.network==='mainnet
  if(data.phase==='open')return {phase:'open',tone:'live',pill:'Open',headline:reached?'Soft cap reached. Still open.':'Open for commitments',sub:reached?'Every SOL committed now joins the pool at launch, up to the hard cap of '+progress.hard+' SOL.':'Reach '+progress.soft+' SOL before the clock runs out and the coin launches by itself.',countdown:{label:'Closes in',seconds:closeIn,at:data.deadlineUnix},progress,addresses:null};
  if(data.phase==='awaiting-launch')return {phase:'awaiting-launch',tone:'pending',pill:'Launching',headline:'Funding closed. Launching now.',sub:'Every commitment is being settled, then the pool is created and locked. This usually takes under a minute. If the launch could not happen within 24 hours, every commitment would be refunded in full.',countdown:null,progress,addresses:null};
  if(data.phase==='failed')return {phase:'failed',tone:'problem',pill:'Not launched',headline:'This launch did not happen',sub:(reached?'The launch window closed before the pool was created.':'Only '+progress.raised+' of the '+progress.soft+' SOL soft cap was committed.')+' Every commitment is refunded in full. If you took part, claim your refund below.',countdown:null,progress,addresses:null};
- if(data.phase==='launched')return {phase:'launched',tone:'ok',pill:'Live',headline:'Shartcoin is live',sub:'The pool is created and the liquidity is locked. Claim your coins and trade on the coin page.',countdown:null,progress,addresses:[{label:'Coin address',value:data.mint},{label:'Pool',value:data.pool},{label:'Escrow',value:data.escrowAddress}].filter(a=>a.value),explorerUrl:data.explorerUrl||null};
+ if(data.phase==='launched'){
+  // Completed-launch stats: only what the API served. Pool liquidity, lock state and the launch signature are not served, so they are not shown.
+  const count=v=>/^\d+$/.test(String(v??''))?String(v):null,receipts=count(data.receiptCount),settled=count(data.settledReceiptCount);
+  const stats=[{label:'Raised',value:progress.raised,unit:'SOL'},receipts&&{label:'Commitments',value:Number(receipts).toLocaleString('en-GB')},receipts&&settled&&{label:'Settled',value:Number(settled).toLocaleString('en-GB'),unit:'of '+Number(receipts).toLocaleString('en-GB')}].filter(Boolean);
+  return {phase:'launched',tone:'ok',pill:'Live',headline:'Shartcoin is live',sub:'The pool is created. Claims and trading are on the coin page.',countdown:null,progress,stats,addresses:[{label:'Coin address',value:data.mint},{label:'Pool',value:data.pool},{label:'Escrow',value:data.escrowAddress}].filter(a=>a.value),explorerUrl:data.explorerUrl||null};
+ }
  return {phase:data.phase,tone:'muted',pill:data.phase,headline:'Launch status: '+data.phase,sub:'',countdown:null,progress,addresses:null};
 }

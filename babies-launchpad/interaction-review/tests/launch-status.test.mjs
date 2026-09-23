@@ -1,6 +1,6 @@
-import test from 'node:test';import assert from 'node:assert/strict';import {describeLaunch,formatCountdown,solText} from '../src/launch-status.mjs';
+import test from 'node:test';import assert from 'node:assert/strict';import {describeLaunch,formatCountdown,formatUtc,solText} from '../src/launch-status.mjs';
 const base={configured:true,phase:'open',chainTimeUnix:1000,deadlineUnix:1300,launchDeadlineUnix:1300+86400,totalLamports:'400000000',softCapLamports:'1000000000',hardCapLamports:'5000000000',mint:'M',pool:null,escrowAddress:'E',explorerUrl:null};
-test('countdown formats minutes, hours and days',()=>{assert.equal(formatCountdown(299),'04:59');assert.equal(formatCountdown(3661),'01:01:01');assert.equal(formatCountdown(90061),'1d 01h 01m');assert.equal(formatCountdown(-5),'00:00');});
+test('countdown formats minutes, hours and days',()=>{assert.equal(formatCountdown(299),'04:59');assert.equal(formatCountdown(3661),'01:01:01');assert.equal(formatCountdown(90061),'1d 01h 01m 01s');assert.equal(formatCountdown(-5),'00:00');});
 test('open: countdown to close and progress against soft and hard cap',()=>{
  const d=describeLaunch(base,1000);assert.equal(d.phase,'open');assert.equal(d.countdown.seconds,300);assert.equal(d.countdown.label,'Closes in');assert.equal(d.progress.raised,'0.4');assert.equal(d.progress.pct,8);assert.equal(d.progress.softPct,20);assert.equal(d.progress.reached,false);
  const r=describeLaunch({...base,totalLamports:'1500000000'},1000);assert.match(r.headline,/Soft cap reached/);assert.equal(r.progress.reached,true);
@@ -18,3 +18,5 @@ test('no campaign: a planned schedule shows an opening countdown and the planned
  const u=describeLaunch({configured:false,next:{...next,opensAtUnix:null}},1000);assert.equal(u.phase,'unscheduled');assert.match(u.headline,/to be announced/);assert.ok(u.progress);
  assert.equal(describeLaunch({configured:false},0).progress,null);
 });
+
+test('one canonical UTC label for the announced opening; never the viewer\'s zone',()=>{assert.equal(formatUtc(Date.UTC(2026,8,24,16,0,0)/1000),'24 Sep 2026, 16:00 UTC');assert.equal(formatUtc(NaN),'');});

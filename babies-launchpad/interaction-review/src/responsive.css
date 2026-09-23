@@ -118,6 +118,43 @@
 .launch-addresses small{color:var(--muted);font-size:12px}.launch-cta{width:100%;margin-top:16px;gap:12px;font-size:18px}
 @media(max-width:640px){.launch-status{padding:16px}.launch-status h2{font-size:24px}.launch-countdown strong{font-size:40px}.launch-address{grid-template-columns:1fr;gap:4px}.launch-address span{min-width:0}}
 
+/* Shartcoin profile picture (home hero, family diagram, live card); the S! mark is the load-failure fallback */
+.coin-pfp{display:block;flex-shrink:0;width:68px;height:68px;border-radius:16px;object-fit:cover;background:#1d1228;border:1px solid #57366c}
+.family-child .coin-pfp,.family-child .coin-pfp-fallback{margin:8px 0 12px}.family-child>.coin-pfp{width:100px;height:100px;border-radius:22px}
+@media(max-width:760px){.hero-child .coin-pfp,.hero-child .coin-pfp-fallback{width:60px;height:60px}}
+
+/* Launched coin card: compact identity row, result tiles, coin address, contract details folded away */
+.launch-status.is-launched{padding:16px 18px;border:1px solid var(--line);background:#1c1227}
+.launch-live-head{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:6px 14px;align-items:center}
+.launch-live-pfp{width:44px;height:44px;border-radius:12px}
+.launch-live-title{min-width:0}.launch-live-title>div{display:flex;flex-wrap:wrap;align-items:center;gap:6px 10px}
+.launch-status.is-launched h2{margin:0;font-size:22px;line-height:1.1;letter-spacing:-.5px}
+.launch-live-sub{margin:3px 0 0;font-size:13px;line-height:1.4;color:var(--muted)}
+.live-badge{display:inline-flex;align-items:center;gap:6px;padding:3px 9px 3px 8px;border-radius:999px;font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#7ddc9a;background:rgba(125,220,154,.12)}
+.live-badge i{width:7px;height:7px;border-radius:50%;background:currentColor;animation:live-ping 2.4s ease-out infinite}
+@keyframes live-ping{0%{box-shadow:0 0 0 0 rgba(125,220,154,.5)}60%,100%{box-shadow:0 0 0 6px rgba(125,220,154,0)}}
+@media(prefers-reduced-motion:reduce){.live-badge i{animation:none}}
+.launch-view{display:inline-flex;align-items:center;gap:8px;width:auto;margin:0;min-height:44px;padding:0 16px;font-size:15px;white-space:nowrap}
+.launch-stats{display:flex;flex-wrap:wrap;gap:8px;margin:14px 0 0;padding:0;list-style:none}
+.launch-stats li{flex:1 1 110px;min-width:0;padding:8px 12px;border:1px solid var(--line);border-radius:10px;background:rgba(255,255,255,.03)}
+.launch-stats span{display:block;font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.launch-stats strong{display:block;margin-top:2px;font-size:18px;line-height:1.2;font-variant-numeric:tabular-nums;letter-spacing:-.3px;overflow-wrap:anywhere}
+.launch-stats strong small{display:inline;margin:0 0 0 4px;font-size:12px;font-weight:500;color:var(--muted)}
+.launch-address-row{display:flex;flex-wrap:wrap;align-items:center;gap:8px 10px;margin-top:14px;font-size:13px}
+.launch-address-row>span{color:var(--muted)}.launch-address-row code{font-size:13px;color:var(--fg)}
+.launch-copy{display:inline-flex;align-items:center;gap:5px;min-height:36px;padding:0 10px;font-size:12px;border:1px solid var(--line);border-radius:8px;background:transparent}
+.launch-copy.is-copied{color:#7ddc9a;border-color:rgba(125,220,154,.5)}
+.launch-contract{margin-top:12px;padding-top:6px;border-top:1px solid var(--line)}
+.launch-contract summary{gap:6px;min-height:36px;font-size:13px;color:var(--muted);list-style:none}
+.launch-contract summary::-webkit-details-marker{display:none}.launch-contract summary:hover{color:var(--fg)}
+.launch-contract summary svg{transition:transform .2s}.launch-contract[open] summary svg{transform:rotate(90deg)}
+@media(prefers-reduced-motion:reduce){.launch-contract summary svg{transition:none}}
+.launch-contract .launch-addresses{margin:2px 0 4px;gap:10px}
+.launch-contract .launch-address{grid-template-columns:auto minmax(0,1fr) auto;padding:0}
+.launch-address-actions{display:flex;align-items:center;gap:6px}
+.launch-explorer{display:inline-flex;align-items:center;gap:4px;min-height:36px;padding:0 8px;font-size:12px;color:var(--ice);border-radius:8px}
+@media(max-width:640px){.launch-status.is-launched{padding:14px}.launch-live-head{grid-template-columns:auto minmax(0,1fr)}.launch-view{grid-column:1/-1;justify-content:center;width:100%;margin-top:6px}.launch-stats{gap:6px}.launch-stats li{flex-basis:80px;padding:8px 10px}.launch-stats span{font-size:10px}.launch-stats strong{font-size:16px}.launch-contract .launch-address{grid-template-columns:1fr;gap:4px}}
+
 .post-claim-card.is-claimed button{border-color:#7ddc9a;color:#7ddc9a;opacity:1}
 
 /* Coin page: balances and percent presets, flywheel section, metric numbers never wrap */

@@ -1,7 +1,7 @@
 import {resolveCoinDescription} from './coin-display';
 import {resolveShartVideo} from './coin-media';
 import {LocalCommitPanel,usePrelaunchChain,LegacyEscrow} from './LocalPrelaunch';
-import {LaunchStatus,OpensIn} from './LaunchStatus';
+import {LaunchStatus,OpensIn} from './LaunchStatus';import {formatUtc} from './launch-status';
 import {CoinSkeleton} from './CoinSkeleton';
 import {netLabel} from './network-label.mjs';
 import {chainAllocation} from './prelaunch-chain';
@@ -52,7 +52,7 @@ export function Prelaunch({identity,onSignIn,state=emptyPrelaunch,service,onRefr
 {live?<LocalCommitPanel chain={chain} identity={identity} onSignIn={onSignIn} onOpenCoin={chain.data?.phase==='launched'?()=>go('PostLaunch'):null}/>:(chain.error&&!live)?<><p className="eyebrow">STATUS</p><h2>Live status unavailable</h2><p className="small muted">The ledger did not answer. Nothing can be committed until it does.</p><button className="primary" onClick={chain.refresh}>Retry</button></>:preview?<><p className="eyebrow">COMMIT SOL</p><OpensIn data={chain.data}/><p className="small muted">{chain.data?.next?.opensAtUnix?'The commit box unlocks when the countdown reaches zero.':'The opening date will be announced here first. Nothing can be committed before then.'}</p><div className="commit-locked">
 <label>Commitment amount · SOL<input inputMode="decimal" value="" disabled aria-label="Commitment amount in SOL (opens later)" placeholder="0.00"/></label><div className="amount-presets">{['1','5','10'].map(n=><button key={n} disabled>{n} SOL</button>)}</div>
 <div className="your-split"><div><span>Estimated allocation</span><small>0 SOL committed</small></div><div className="personal-values"><span>Into pool<strong>0 SOL</strong></span><span>Excess refund<strong>0 SOL</strong></span></div><small>Final allocation at close</small></div>
-<button className="primary" disabled>{chain.data?.next?.opensAtUnix?'Opens '+new Date(chain.data.next.opensAtUnix*1000).toLocaleDateString():'Not open yet'}</button></div></>:<CoinSkeleton variant="commit"/>}
+<button className="primary" disabled>{chain.data?.next?.opensAtUnix?'Opens '+formatUtc(chain.data.next.opensAtUnix):'Not open yet'}</button></div></>:<CoinSkeleton variant="commit"/>}
   </aside></div>
  </section>;
 }
