@@ -1,6 +1,6 @@
 {
-  "schemaVersion": 1,
-  "network": "localnet",
+  "schemaVersion": 2,
+  "network": "mainnet (kids.fun) and private test ledger",
   "publicAccess": "password-gated",
   "realDepositsEnabled": false,
   "mainnetReady": false,
@@ -8,33 +8,39 @@
     {
       "id": "identities",
       "status": "partial",
-      "requirement": "Treasury recipient, dev-wallet ownership proof, cap conversion source and immutable published launch terms (parent mints verified on chain 20 September 2026; dev wallet recorded as owner-supplied)"
+      "requirement": "Parents verified on chain (20 Sep); treasury, dev and operator wallets created 22 Sep (keys on the owner's Mac, hardware custody pending); dev-wallet ownership by key creation; published launch terms pending the owner's date"
     },
     {
       "id": "deployment",
-      "status": "missing",
-      "requirement": "Mainnet program deployment and upgrade-authority governance (reproducible two-runner build with equal hashes in CI since 20 September 2026)"
+      "status": "done-governance-pending",
+      "requirement": "Program BLiaZWNQoPm4mG4cXNm4sXifFqs1Xmxx12qD9T4Y5NeN deployed on mainnet 23 Sep 2026 from the reproducible build ef584ae7\u20268923, bytes verified; upgrade authority still the operator key until /tmp/kids-mainnet-governance.sh moves it to the governance key"
     },
     {
       "id": "review",
       "status": "missing",
-      "requirement": "Independent contract and economic-security review, including snapshot publisher and upstream custody dependencies"
+      "requirement": "Independent contract and economic-security review (owner's track). Internal architecture audit of 23 Sep 2026: items 1-5 fixed with regression tests, item 6 in progress"
     },
     {
       "id": "keeper",
       "status": "partial",
-      "requirement": "Production RPC, a deployed keeper signing service (built and rehearsed on localnet 20 September 2026, not deployed), and a live-quote run of the Pyth reference-price guard (the Jupiter buyback route is rehearsed on the hosted kids-jupiter-localnet environment)"
+      "requirement": "Signer service with operation-level policy built and tested (23 Sep); separate kids-signer Railway service created; the switch of the mainnet API to signer mode and the signer upload are owner commands; Pyth guard still fixture-only"
     },
     {
       "id": "recovery",
       "status": "partial",
-      "requirement": "Sustained mixed read/write capacity and alert delivery confirmed by the owner (isolated provider restore drill passed and startup chain reconciliation gate in place, 20 September 2026)"
+      "requirement": "Chain-backed startup reconciliation (23 Sep); mainnet volume backups and a timed restore drill not yet set up (owner: Railway dashboard); alert delivery to be confirmed by the owner after the simulated failure run"
     },
     {
       "id": "lifecycle",
+      "status": "verified-on-test-ledger",
+      "requirement": "Commit, automatic launch, claim, trade, fee split, buybacks and burns with the owner's real wallet on the private test ledger (22 Sep 2026); mainnet campaign not created yet"
+    },
+    {
+      "id": "capacity",
       "status": "partial",
-      "requirement": "End-to-end long-lived active campaign close, launch, claims and fee settlement through the public wallet application with real browser wallets"
+      "requirement": "Built for 1,000 active users (owner decision 23 Sep): admission split, reserved write capacity, shared reads; representative mixed-load and restart tests pending on the new gateway; 10k work afterwards"
     }
   ],
-  "checklist": "deployment/RELEASE-CHECKLIST.md"
+  "checklist": "deployment/RELEASE-CHECKLIST.md",
+  "updatedAt": "2026-09-23T03:30:00Z"
 }

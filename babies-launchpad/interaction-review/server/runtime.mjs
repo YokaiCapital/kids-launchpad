@@ -1,5 +1,7 @@
 // Standalone API runtime: no development server, asset serving, or arbitrary proxy.
 import http from 'node:http';
+import {statusSnapshot,setSignerStatus,setReconciliation} from '../../shared/service-status.mjs';
+const runtimeDir=new URL('../../localnet/.runtime/',import.meta.url).pathname;
 import {fileURLToPath} from 'node:url';
 import {readFile} from 'node:fs/promises';
 const json=(res,status,body)=>{if(res.writableEnded)return;res.writeHead(status,{'Content-Type':'application/json','Cache-Control':'no-store','X-Content-Type-Options':'nosniff'});res.end(JSON.stringify(body));};
@@ -9,6 +11,7 @@ export function createApiServer({plugins=[],probe=async()=>true,probeInterval=10
  const middleware=[];let healthy=false,checkedAt=0,probing=false,draining=false;
  const gate=writesGate||{open:true,report:null};
  const server=http.createServer((req,res)=>{
+  if(req.url==='/_health/status'&&req.method==='GET'){const ready=!draining&&healthy&&Date.now()-checkedAt<30000&&gate.open===true;return json(res,200,statusSnapshot({ready,runtimePath:runtimeDir}));}
   if(req.url==='/_health/ready'&&req.method==='GET'){const ready=!draining&&healthy&&Date.now()-checkedAt<30000&&gate.open===true;return json(res,ready?200:503,{status:ready?'ready':'unavailable',reconciliation:gate.report?{complete:!!gate.report.complete,unresolvedSigned:gate.report.unresolvedSigned??null,at:gate.report.at??null}:null});}
   if(draining)return json(res,503,{error:'Service restarting; retry with the same request ID.'});
   if(!req.url?.startsWith('/api/'))return json(res,404,{error:'Not found'});
@@ -23,8 +26,8 @@ export function createApiServer({plugins=[],probe=async()=>true,probeInterval=10
  // money operations that would then fail downstream or need reconciliation); they reopen after two healthy probes.
  let failedProbes=0,healthyProbes=0;
  const check=async()=>{if(probing||draining)return;probing=true;try{healthy=(await probe())===true;}catch{healthy=false;}finally{checkedAt=Date.now();probing=false;
-  if(healthy){healthyProbes+=1;failedProbes=0;if(gate.degraded&&healthyProbes>=2){gate.open=gate.reconciled===true;gate.degraded=false;console.log(JSON.stringify({event:'writes-reopened',reason:'ledger probe healthy'}));}}
-  else{failedProbes+=1;healthyProbes=0;if(failedProbes>=3&&gate.open){gate.open=false;gate.degraded=true;console.log(JSON.stringify({event:'writes-closed',reason:'ledger probe failed '+failedProbes+' times'}));}}}};
+  if(healthy){healthyProbes+=1;failedProbes=0;if(gate.degraded&&healthyProbes>=2){gate.open=gate.reconciled===true;gate.degraded=false;setReconciliation(gate.report,gate.open);console.log(JSON.stringify({event:'writes-reopened',reason:'ledger probe healthy'}));}}
+  else{failedProbes+=1;healthyProbes=0;if(failedProbes>=3&&gate.open){gate.open=false;gate.degraded=true;setReconciliation(gate.report,false);console.log(JSON.stringify({event:'writes-closed',reason:'ledger probe failed '+failedProbes+' times'}));}}}};
  const timer=setInterval(check,probeInterval);timer.unref();server.once('listening',check);server.once('close',()=>clearInterval(timer));
  server.headersTimeout=10000;server.requestTimeout=30000;server.keepAliveTimeout=5000;server.maxHeadersCount=40;
  return {server,check,async shutdown(){draining=true;clearInterval(timer);await new Promise(resolve=>{server.close(resolve);server.closeIdleConnections();const timeout=setTimeout(()=>server.closeAllConnections(),25000);timeout.unref();server.once('close',()=>clearTimeout(timeout));});}};
@@ -52,7 +55,9 @@ if(process.argv[1]===fileURLToPath(import.meta.url)){
  const runtime=createApiServer({plugins:[adminPlugin(),accountPlugin(),parentLookupPlugin(),demoPersistencePlugin()],probe:ledgerProbe,writesGate});
  for(const signal of ['SIGTERM','SIGINT'])process.once(signal,()=>runtime.shutdown().then(()=>process.exit(0)));
  runtime.server.listen(4175,'127.0.0.1',()=>console.log('KIDS API listening on loopback:4175 (financial writes closed until journals reconcile with the chain)'));
+ // Signer reachability for the status page (every 60 s) when a remote signer is configured.
+ if(process.env.KIDS_SIGNER_URL){setSignerStatus({configured:true,publicKey:process.env.KIDS_SIGNER_PUBKEY||null});const probeSigner=async()=>{try{const r=await fetch(process.env.KIDS_SIGNER_URL.replace(/\/$/,'')+'/healthz',{signal:AbortSignal.timeout(4000)});const body=r.ok?await r.json():null;setSignerStatus({ok:r.ok&&body?.publicKey===process.env.KIDS_SIGNER_PUBKEY,checkedAt:Date.now()});}catch{setSignerStatus({ok:false,checkedAt:Date.now()});}};probeSigner();const signerTimer=setInterval(probeSigner,60000);signerTimer.unref();}
  // Reconcile every intent journal with the chain before financial writes reopen; retry until the ledger answers.
  const {reconcileJournals}=await import('../../localnet/startup-reconcile.mjs');
- (async()=>{for(let attempt=1;;attempt+=1){const report=await reconcileJournals({log:line=>console.log(JSON.stringify(line))});writesGate.report=report;if(report.complete){writesGate.reconciled=true;writesGate.open=true;console.log(JSON.stringify({event:'startup-reconcile-complete',unresolvedSigned:report.unresolvedSigned,ms:report.ms}));return;}console.error(JSON.stringify({event:'startup-reconcile-retry',attempt,failed:report.services.filter(s=>s.status!=='reconciled').map(s=>s.service)}));await new Promise(r=>setTimeout(r,Math.min(60000,15000*attempt)));}})();
+ (async()=>{for(let attempt=1;;attempt+=1){const report=await reconcileJournals({log:line=>console.log(JSON.stringify(line))});writesGate.report=report;setReconciliation(report,report.complete);if(report.complete){writesGate.reconciled=true;writesGate.open=true;console.log(JSON.stringify({event:'startup-reconcile-complete',unresolvedSigned:report.unresolvedSigned,ms:report.ms}));return;}console.error(JSON.stringify({event:'startup-reconcile-retry',attempt,failed:report.services.filter(s=>s.status!=='reconciled').map(s=>s.service)}));await new Promise(r=>setTimeout(r,Math.min(60000,15000*attempt)));}})();
 }

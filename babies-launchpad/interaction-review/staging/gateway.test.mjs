@@ -78,3 +78,9 @@ test('REGRESSION (audit item 4): slow reads never block a submission; refusals c
  assert.equal(classifyRequest('GET','/api/account/prelaunch',{}),'public-read');assert.equal(classifyRequest('GET','/api/account/prelaunch',h),'wallet-read');assert.equal(classifyRequest('POST','/api/account/challenge',{}),'auth');assert.equal(classifyRequest('POST','/api/account/postlaunch/trade/quote',{}),'prepare');assert.equal(classifyRequest('POST','/api/account/postlaunch/trade/submit',{}),'submit');
  assert.equal(identityOf({}),'anon');assert.match(identityOf({'x-kids-client':'abcdef12abcdef12'}),/^c:/);
 });
+test('/statusz is public, cached and carries the status page without authentication',async()=>{
+ const {createGateway}=await import('./gateway.mjs');const {EventEmitter}=await import('node:events');let fetched=0;
+ const server=createGateway(cfg,{statusFetch:async()=>{fetched++;return JSON.stringify({status:'ready',keepers:{}});}});
+ const call=()=>new Promise(resolve=>{const request=new EventEmitter();Object.assign(request,{method:'GET',url:'/statusz',headers:{},resume(){}});const response=new EventEmitter();response.headersSent=false;response.writableEnded=false;response.destroyed=false;response.writeHead=(status,headers)=>{response.statusCode=status;response.headersSent=true;};response.end=body=>{response.writableEnded=true;resolve({status:response.statusCode,body:JSON.parse(body)});};server.emit('request',request,response);});
+ const a=await call(),b=await call();assert.equal(a.status,200);assert.equal(a.body.status,'ready');assert.equal(b.status,200);assert.equal(fetched,1,'second call within 5 s served from cache');server.close();
+});

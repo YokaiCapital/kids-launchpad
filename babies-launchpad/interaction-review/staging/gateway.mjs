@@ -80,13 +80,15 @@ export function createAdmission(options={}){
   });
  },stats(){return {reads:{active:pools.reads.active,queued:pools.reads.queue.length},writes:{active:pools.writes.active,queued:pools.writes.queue.length},used:{...used}};}};
 }
-export function createGateway(config,{requestUpstream=http.request,readiness=()=>false}={}){
- const admission=createAdmission();
+export function createGateway(config,{requestUpstream=http.request,readiness=()=>false,statusFetch=null}={}){
+ const admission=createAdmission();let statusCache={at:0,body:null};
+ const fetchStatus=statusFetch||(async()=>{const r=await fetch('http://127.0.0.1:4175/_health/status',{signal:AbortSignal.timeout(3000)});return r.ok?await r.text():null;});
  const server=http.createServer(async(req,res)=>{
   const send=(status,error,retryAfter)=>{if(res.writableEnded||res.destroyed)return;if(!res.headersSent)res.writeHead(status,{'Content-Type':'application/json','Cache-Control':'no-store','X-Content-Type-Options':'nosniff',...(retryAfter?{'Retry-After':String(retryAfter)}:{})});res.end(JSON.stringify({error,...(retryAfter?{retryAfter}:{})}));};
   // A shared liveness quota lets anonymous callers exhaust the platform probe budget.
   // Keep this constant-cost endpoint independent from authenticated API admission.
   if(req.method==='GET'&&req.url==='/healthz'){req.resume();res.writeHead(200,{'Content-Type':'application/json','Cache-Control':'no-store'});return res.end(JSON.stringify({status:'alive'}));}
+  if(req.method==='GET'&&req.url==='/statusz'){req.resume();if(Date.now()-statusCache.at>5000){try{statusCache={at:Date.now(),body:await fetchStatus()};}catch{statusCache={at:Date.now(),body:null};}}res.writeHead(statusCache.body?200:503,{'Content-Type':'application/json','Cache-Control':'no-store'});return res.end(statusCache.body||JSON.stringify({status:'unavailable'}));}
   if(req.method==='GET'&&req.url==='/readyz'){req.resume();const ready=readiness();res.writeHead(ready?200:503,{'Content-Type':'application/json','Cache-Control':'no-store'});return res.end(JSON.stringify({status:ready?'ready':'unavailable'}));}
   const auth=authorizeGateway(req,config);if(auth.status){req.resume();return send(auth.status,auth.error);}
   const controller=new AbortController();const disconnected=()=>{if(!res.writableEnded)controller.abort();};res.on('close',disconnected);

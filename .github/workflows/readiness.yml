@@ -1,10 +1,11 @@
-name: Private KIDS readiness
+name: KIDS readiness (mainnet, test ledger, kids.fun)
 on:
   push:
     branches: [main]
     paths:
       - '.github/workflows/readiness.yml'
       - 'babies-launchpad/deployment/health-check.mjs'
+      - 'babies-launchpad/shared/service-status.mjs'
   workflow_dispatch:
     inputs:
       simulate_failure:

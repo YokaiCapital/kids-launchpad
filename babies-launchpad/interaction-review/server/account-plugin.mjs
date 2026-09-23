@@ -3,6 +3,7 @@ import {createActiveLifecycleKeeper} from '../../localnet/active-keeper.mjs';
 const activeFeeURL=new URL('../../localnet/active-fee-keeper.mjs',import.meta.url).href;
 const launchOperatorURL=new URL('../../localnet/launch-active.mjs',import.meta.url).href;
 import {createEscrowKeepers} from './escrow-keepers.mjs';
+import {runKeeper} from '../../shared/service-status.mjs';
 import {trustedGatewayContext,gatewayFinancialDenied} from '../../shared/trusted-gateway.mjs';
 const activeLaunchURL=new URL('../../localnet/active-launch.mjs',import.meta.url).href;
 const activeLaunch=()=>import(/* @vite-ignore */ activeLaunchURL);
@@ -28,7 +29,7 @@ export function accountPlugin(){
   mkdirSync(runtime,{recursive:true,mode:0o700});const stores=new Map(),csrf=newCsrfToken();
   const activeTick=createActiveLifecycleKeeper({read:async()=>(await activeLaunch()).readActive(),settle:async()=>(await activeLaunch()).settleActive(),launch:async()=>(await import(/* @vite-ignore */ launchOperatorURL)).launchActive()});
   let feeTick;
-  const tickKeepers=createEscrowKeepers({legacy:async()=>{await (await escrow()).runRefundKeeper();},active:activeTick,fees:async()=>{feeTick??=(await import(/* @vite-ignore */ activeFeeURL)).createActiveFeeKeeper();return feeTick();}},(name,error)=>console.error('Local '+name+' escrow keeper:',error.message));
+  const tickKeepers=createEscrowKeepers({legacy:()=>runKeeper('legacy',async()=>{await (await escrow()).runRefundKeeper();}),active:()=>runKeeper('active',activeTick),fees:()=>runKeeper('fees',async()=>{feeTick??=(await import(/* @vite-ignore */ activeFeeURL)).createActiveFeeKeeper();return feeTick();})},(name,error)=>console.error('Local '+name+' escrow keeper:',error.message));
   const keeper=setInterval(tickKeepers,15000);keeper.unref();
   server.httpServer?.once('close',()=>{clearInterval(keeper);for(const store of stores.values())store.close();});
   server.middlewares.use(async(req,res,next)=>{
