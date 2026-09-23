@@ -60,11 +60,11 @@ export async function ledgerProbe(){
  return true;
 }
 if(process.argv[1]===fileURLToPath(import.meta.url)){
- const [{accountPlugin},{demoPersistencePlugin},{parentLookupPlugin}]=await Promise.all([import('./account-plugin.mjs'),import('./demo-plugin.mjs'),import('./parent-lookup.mjs')]);
+ const [{accountPlugin},{demoPersistencePlugin},{parentLookupPlugin},{communityPlugin}]=await Promise.all([import('./account-plugin.mjs'),import('./demo-plugin.mjs'),import('./parent-lookup.mjs'),import('./community-plugin.mjs')]);
  const writesGate={open:false,report:null};
  // Admin routes (launch control, rehearsals, settings) exist only on the owner's own machine: a cloud runtime never
  // installs the plugin, whatever the network (security audit, 23 September 2026: "cloud runtime still installs adminPlugin").
- const plugins=[accountPlugin(),parentLookupPlugin(),demoPersistencePlugin()];
+ const plugins=[accountPlugin(),parentLookupPlugin(),demoPersistencePlugin(),communityPlugin()];
  if(adminPluginAllowed(process.env)){const {adminPlugin}=await import('./admin-plugin.mjs');plugins.unshift(adminPlugin());}
  else console.log(JSON.stringify({event:'admin-plugin-omitted',reason:'cloud runtime or KIDS_ADMIN_PLUGIN=0'}));
  const runtime=createApiServer({plugins,probe:ledgerProbe,writesGate});

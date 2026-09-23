@@ -7,16 +7,28 @@ const origin='https://kids.fun';
 const accountGets=['state','prelaunch','prelaunch-legacy','postlaunch','postlaunch-preview','dev-vesting','rounds'];
 const accountPosts=['challenge','verify','logout','local','prelaunch/prepare','prelaunch/submit','prelaunch-legacy/prepare','prelaunch-legacy/submit','postlaunch/claim','postlaunch/claim/prepare','postlaunch/claim/submit','postlaunch/trade/quote','postlaunch/trade/prepare','postlaunch/trade/submit','postlaunch/trade/execute','dev-vesting/claim'];
 // Admin routes are never served by the gateway (owner rule, 22 September 2026): the admin plugin stays loopback-only inside the container.
-const routes=new Set(['GET /api/demo',...accountGets.map(p=>'GET /api/account/'+p),...accountPosts.map(p=>'POST /api/account/'+p)]);
+const routes=new Set(['GET /api/demo','GET /api/community/supporters','GET /api/community/supporter-wallets',...accountGets.map(p=>'GET /api/account/'+p),...accountPosts.map(p=>'POST /api/account/'+p)]);
 export const requiresOperator=path=>['/api/account/local','/api/account/postlaunch/claim','/api/account/postlaunch/trade/execute','/api/account/dev-vesting/claim'].includes(path);
 const equal=(a,b)=>timingSafeEqual(createHash('sha256').update(a).digest(),createHash('sha256').update(b).digest());
 export function gatewayConfig(env=process.env){
  const service=env.KIDS_BACKEND_TOKEN,operator=env.KIDS_OPERATOR_BACKEND_TOKEN,internal=env.KIDS_GATEWAY_INTERNAL_TOKEN,host=env.KIDS_GATEWAY_HOST;
  if([service,operator,internal].some(s=>typeof s!=='string'||s.length<32)||new Set([service,operator,internal]).size!==3||typeof host!=='string'||!/^[a-z0-9.-]+(?::\d{1,5})?$/.test(host))throw Error('Private gateway credentials and exact host must be configured');
- return {service,operator,internal,host};
+ const community=typeof env.KIDS_COMMUNITY_TOKEN==='string'&&env.KIDS_COMMUNITY_TOKEN.length>=32?env.KIDS_COMMUNITY_TOKEN:null;
+ return {service,operator,internal,host,community};
 }
+export const COMMUNITY_FILES=['supporters','supporter-wallets'];
+const communityPost=path=>{const m=/^\/api\/community\/(supporters|supporter-wallets)$/.exec(path||'');return m?m[1]:null;};
 export function authorizeGateway(req,config){
  const h=req.headers||{},path=req.url;
+ // Community uploads (the believers worker): their own token, no site origin, JSON up to 2 MB, role 'community'.
+ if(req.method==='POST'&&communityPost(path)){
+  if(!config.community)return {status:404,error:'Route unavailable'};
+  const t=h['x-kids-community-token'];if(typeof t!=='string'||t.length>600||!equal(t,config.community))return {status:401,error:'Community authentication required'};
+  if(!/^application\/json(?:\s*;.*)?$/i.test(h['content-type']||''))return {status:415,error:'JSON required'};
+  if(h['content-encoding']||h['transfer-encoding']&&h['content-length'])return {status:400,error:'Unsupported request framing'};
+  const size=h['content-length'];if(size===undefined||!/^\d+$/.test(size)||Number(size)>2000000)return {status:413,error:'Request too large (2 MB) or length missing'};
+  return {role:'community'};
+ }
  if(h.host!==config.host||h.origin!==origin)return {status:403,error:'Gateway origin or host rejected'};
  if(typeof path!=='string'||!(routes.has(req.method+' '+path)||(req.method==='GET'&&/^\/api\/market\/(summary|candles|trades|activity)\?[A-Za-z0-9=&_.%,-]{1,600}$/.test(path))))return {status:404,error:'Route unavailable'};// market reads (public, cached upstream) carry a query string
  if(typeof h.authorization!=='string'||h.authorization.length>600||!h.authorization.startsWith('Bearer ')||!equal(h.authorization.slice(7),config.service))return {status:401,error:'Service authentication required'};

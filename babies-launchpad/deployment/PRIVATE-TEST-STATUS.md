@@ -211,3 +211,8 @@ Owner decisions after the first mainnet launch: coin-side trading fees are burne
 - API and signer SUCCESS from release aae5b35 (keeper dust-harvest backoff, balance copy fix); ready, writes open, signer reachable, keepers running, reconciliation complete.
 - Site live checks: Docs at #docs/start (10 topics, search), header shows Docs, launched coin page shows the claim strip ("Sign in to see what you can claim"), Trade/Claims rail, no horizontal overflow at 375. Banner icons render only with a destination (none configured on the test coin, so none shown).
 - README with full transparency is on GitHub main/release (repository stays private, owner decision 23 September 2026).
+
+## 23 September 2026, ~07:55 UTC: market data, activity feed and parent statistics live
+
+- Release d83af66 (API 46b5ab2f, signer 62f3698e) + site bundle index-B5f8YgrN.js. Two site fixes were needed after the first deploy: the edge gate refused any query string (eb2588a) and the page read a different shape than the API served (7bc5d27).
+- Live checks in a browser: price 0.000000001269 SOL, 24h change −75.02 %, volume 1.87 SOL / 47 trades (equal to the read-only chain run), candlestick chart rendered (7 canvases), 30 transactions listed, activity feed 118 events with real signatures (fee harvests, coin-side burns, distributions, buybacks). Status page: market and activity workers connected, lag 5 to 8 s, backfill complete to launch, 0 gaps, 0 decode failures.
