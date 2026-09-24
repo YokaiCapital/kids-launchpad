@@ -79,7 +79,9 @@ pub(super) fn parent(program:&Pubkey,a:&[AccountInfo],body:&[u8])->ProgramResult
  let(expected,bump)=Pubkey::find_program_address(&[b"parent_claim",a[1].key.as_ref(),&[index],a[4].key.as_ref()],program);require(*a[3].key==expected)?;
  // A valid replay is harmless, but unrelated existing accounts are rejected.
  if *a[3].owner==*program{let d=a[3].try_borrow_data()?;require(d.len()==CLAIM_LEN&&&d[..8]==b"KIDSPCL1"&&key(&d,8)?==*a[1].key&&key(&d,40)?==*a[4].key&&d[72]==index&&d[73]==bump)?;return Ok(())}
- let claimed=add(claimed,allocation)?;require(claimed<=reserve)?;
+ // Defence in depth: paid plus burned plus this claim can never exceed the reserve (tag 11 only runs after the window).
+ let burned=read64(&a[2].try_borrow_data()?,OFF_BURNED+8*index as usize)?;
+ let claimed=add(claimed,allocation)?;require(add(claimed,burned)?<=reserve)?;
  create_pda(&a[0],&a[3],&a[10],program,CLAIM_LEN,&[b"parent_claim",a[1].key.as_ref(),&[index],a[4].key.as_ref(),&[bump]])?;
  transfer(program,&c,&a[1],&a[5],&a[6],&a[7],&a[8],a[4].key,&a[9],allocation)?;
  {let mut d=a[3].try_borrow_mut_data()?;d.fill(0);d[..8].copy_from_slice(b"KIDSPCL1");d[8..40].copy_from_slice(a[1].key.as_ref());d[40..72].copy_from_slice(a[4].key.as_ref());d[72]=index;d[73]=bump;}
