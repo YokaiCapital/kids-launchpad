@@ -1,0 +1,299 @@
+{
+  "generatedAt": "2026-09-24T11:36:13.486Z",
+  "network": "mainnet",
+  "genesisHash": "5eykt4UsFv8P8NJdTREpY1vzqKqZKvdpKuc147dw2N9d",
+  "rpcLabel": "https://api.mainnet-beta.solana.com",
+  "program": {
+    "programId": "BLiaZWNQoPm4mG4cXNm4sXifFqs1Xmxx12qD9T4Y5NeN",
+    "programData": "G3suWTB76JaM13CHPwpPdGiKp7XV1RiBknSKggEexBqP",
+    "upgradeAuthority": "EPwoPzJ5wuFgvMxUs7gQyUgb48dfZh4k6TxpZsTpWf2Y",
+    "lastDeploySlot": 450001406,
+    "programDataBytes": 219533,
+    "liveBuild": {
+      "version": 5,
+      "sha256": "245b4f4878f767c7181349306e56a266157095f0db6e74ba67b4ddbdee7fbf1b",
+      "binarySize": 210560,
+      "features": [
+        "burn-child-fees",
+        "cpmm-config-allowlist",
+        "claim-vaults",
+        "revoke-at-creation",
+        "jupiter-route"
+      ],
+      "note": "reproducible CI build 9aa084e (24 September 2026, runners identical): build 4 minus the over-strict custody guard that refused every live Jupiter route (the wSOL custody is repeated by Jupiter among the route's working accounts); coin custody and the other parent's custody stay refused"
+    },
+    "recordedBuilds": [
+      {
+        "version": "primary",
+        "sha256": "9721a4d8b7cdcc4aebe11ca54d968e0be73d0e2dfea261e4954eeacdc7d8ae58",
+        "binarySize": 200784,
+        "features": []
+      },
+      {
+        "version": 1,
+        "sha256": "ef584ae7555415215b8cda0597cfff8362a7ecdbb31fdc07aa747c3f63368923",
+        "binarySize": 199008,
+        "features": []
+      },
+      {
+        "version": 2,
+        "sha256": "9721a4d8b7cdcc4aebe11ca54d968e0be73d0e2dfea261e4954eeacdc7d8ae58",
+        "binarySize": 200784,
+        "features": [
+          "burn-child-fees",
+          "cpmm-config-allowlist"
+        ]
+      },
+      {
+        "version": 3,
+        "sha256": "05b5a03bbd7e5043d7aa177fcf9feea782c56927f491c26729bff40468c599a7",
+        "binarySize": 210432,
+        "features": [
+          "burn-child-fees",
+          "cpmm-config-allowlist",
+          "claim-vaults"
+        ]
+      },
+      {
+        "version": 4,
+        "sha256": "21a911e04e36e995b1df921c007fe582d34e6663c3cc284a7a249400bcb51e1e",
+        "binarySize": 210664,
+        "features": [
+          "burn-child-fees",
+          "cpmm-config-allowlist",
+          "claim-vaults",
+          "revoke-at-creation",
+          "jupiter-route"
+        ]
+      },
+      {
+        "version": 5,
+        "sha256": "245b4f4878f767c7181349306e56a266157095f0db6e74ba67b4ddbdee7fbf1b",
+        "binarySize": 210560,
+        "features": [
+          "burn-child-fees",
+          "cpmm-config-allowlist",
+          "claim-vaults",
+          "revoke-at-creation",
+          "jupiter-route"
+        ]
+      }
+    ],
+    "distributionProgram": null,
+    "distributionBuildSha256": "2523827fc49cf439a03323c7411a9ecb7d04daa6bdfff266112fadba26e490b0"
+  },
+  "services": {
+    "api": {
+      "deploymentId": "ead1745c-eed2-4bc0-90bf-3837eb1642a1",
+      "status": "SUCCESS",
+      "createdAt": "2026-09-24T11:19:06.735Z",
+      "commit": "e24c5eb773332ac0c64f1a4485190e3b0e33f08f",
+      "branch": "release"
+    },
+    "signer": {
+      "deploymentId": "e1baa7e9-22c8-4d20-b8c1-d1c64ed928c5",
+      "status": "SUCCESS",
+      "createdAt": "2026-09-24T11:19:06.735Z",
+      "commit": "e24c5eb773332ac0c64f1a4485190e3b0e33f08f",
+      "branch": "release"
+    },
+    "believersWorker": {
+      "serviceId": "3e51321e-aba2-43f4-85c4-6bbf8a55bf25",
+      "note": "cron */30, publishes supporters; holds no KIDS keys"
+    }
+  },
+  "site": {
+    "vercelProject": "kids-fun",
+    "domain": "https://kids.fun",
+    "gate": "password until the owner sets KIDS_ACCESS_OPENS_AT (set 23 Sep 2026 ~23:20 UTC)"
+  },
+  "campaigns": [
+    {
+      "role": "active",
+      "identity": {
+        "genesisHash": "5eykt4UsFv8P8NJdTREpY1vzqKqZKvdpKuc147dw2N9d",
+        "programId": "BLiaZWNQoPm4mG4cXNm4sXifFqs1Xmxx12qD9T4Y5NeN",
+        "campaign": "9FjwHicbkzP17NEW94UasBa3LfWtqmsmddzstq8UqKxP"
+      },
+      "mode": "family",
+      "mint": "UpBBfyC75u3kxDGWmmmW2yauk9YY3CqZhdt1KUDkids",
+      "pool": "82BHvVSeHgcGNtiH8fGTaYRsKbbjF53beAZp8LCATXsc",
+      "phase": "launched",
+      "launchSignature": "2aGS9r8x5J4LNUcFwSXC7RfR5Km3LLjEV1GNk6pJUFe5zY6sDmD12GfiwiAf6GSoBXfjMCSHXnQSoseBJDE6NCUY",
+      "launchedAt": 1790213669,
+      "terms": {
+        "soft": "200000000000",
+        "hard": "1000000000000",
+        "deadlineUnix": 1790213402,
+        "launchDeadlineUnix": 1790299802
+      },
+      "chain": {
+        "campaignLamports": "2601100",
+        "phaseByte": 3,
+        "receiptAccounts": 196
+      },
+      "totals": {
+        "committed": "2500244470000",
+        "accepted": "999999999902",
+        "refunded": "1500244470098",
+        "receipts": "196",
+        "settled": "196"
+      },
+      "parents": [
+        {
+          "mint": "9BB6NFEcjBCtnNLFko2FqVQBq8HHM13kCyYcdQbgpump",
+          "eligible": 138,
+          "allocationRaw": "50000000000000",
+          "claimedRaw": "0",
+          "claimedCount": 0,
+          "rootVerified": true
+        },
+        {
+          "mint": "Cm6fNnMk7NfzStP9CZpsQA2v3jjzbcYGAxdJySmHpump",
+          "eligible": 294,
+          "allocationRaw": "50000000000000",
+          "claimedRaw": "0",
+          "claimedCount": 0,
+          "rootVerified": true
+        }
+      ],
+      "fees": {
+        "childPending": "0",
+        "totalSol": "525303234836",
+        "treasuryPaid": "306426886987",
+        "devPaid": "62536099385",
+        "parentAAllocated": "78170124231",
+        "parentBAllocated": "78170124231",
+        "parentASpent": "31000000000",
+        "parentBSpent": "0",
+        "parentABurned": "19208253466",
+        "parentBBurned": "0",
+        "childBurned": "36999700237900"
+      },
+      "vesting": null,
+      "liquidityLocked": null,
+      "mintAuthorityRevoked": true,
+      "freezeAuthorityRevoked": true
+    },
+    {
+      "role": "archived",
+      "identity": {
+        "genesisHash": "5eykt4UsFv8P8NJdTREpY1vzqKqZKvdpKuc147dw2N9d",
+        "programId": "BLiaZWNQoPm4mG4cXNm4sXifFqs1Xmxx12qD9T4Y5NeN",
+        "campaign": "4y13ccgNQTTRJ6UTNfkMeSB2DLNzfBmRG9PW4ChJVPve"
+      },
+      "mode": "family",
+      "terms": {
+        "soft": "100000000000",
+        "hard": "500000000000",
+        "deadlineSeconds": 86400
+      },
+      "plannedAt": "2026-09-22T22:42:29.332Z",
+      "token": null,
+      "note": "test campaign; runtime files archived on the API volume under localnet/.runtime/archive/<campaign>/"
+    },
+    {
+      "role": "archived",
+      "identity": {
+        "genesisHash": "5eykt4UsFv8P8NJdTREpY1vzqKqZKvdpKuc147dw2N9d",
+        "programId": "BLiaZWNQoPm4mG4cXNm4sXifFqs1Xmxx12qD9T4Y5NeN",
+        "campaign": "8LmwBAa5XquvtUrsKrvspfV6da9T7sHiXXMVDmEdYew"
+      },
+      "mode": "family",
+      "terms": {
+        "soft": "1000000000",
+        "hard": "5000000000",
+        "deadlineSeconds": 600
+      },
+      "plannedAt": "2026-09-23T01:48:17.662Z",
+      "token": null,
+      "note": "test campaign; runtime files archived on the API volume under localnet/.runtime/archive/<campaign>/"
+    },
+    {
+      "role": "archived",
+      "identity": {
+        "genesisHash": "5eykt4UsFv8P8NJdTREpY1vzqKqZKvdpKuc147dw2N9d",
+        "programId": "BLiaZWNQoPm4mG4cXNm4sXifFqs1Xmxx12qD9T4Y5NeN",
+        "campaign": "8VGyvxeczUz31PGGZMFg1dwHqo8qxiUNMddrtSVYmSgv"
+      },
+      "mode": "family",
+      "terms": {
+        "soft": "1000000000",
+        "hard": "5000000000",
+        "deadlineSeconds": 600
+      },
+      "plannedAt": "2026-09-23T16:11:50.105Z",
+      "token": "KTEST",
+      "note": "test campaign; runtime files archived on the API volume under localnet/.runtime/archive/<campaign>/"
+    },
+    {
+      "role": "archived",
+      "identity": {
+        "genesisHash": "5eykt4UsFv8P8NJdTREpY1vzqKqZKvdpKuc147dw2N9d",
+        "programId": "BLiaZWNQoPm4mG4cXNm4sXifFqs1Xmxx12qD9T4Y5NeN",
+        "campaign": "9zT7cyDvveF4t5LTs8vcyfFQeZwJv6B6KFEMWg1G6ZLT"
+      },
+      "mode": "family",
+      "terms": {
+        "soft": "1000000000",
+        "hard": "5000000000",
+        "deadlineSeconds": 180
+      },
+      "plannedAt": "2026-09-23T01:35:20.639Z",
+      "token": null,
+      "note": "test campaign; runtime files archived on the API volume under localnet/.runtime/archive/<campaign>/"
+    },
+    {
+      "role": "historical",
+      "identity": {
+        "genesisHash": "5eykt4UsFv8P8NJdTREpY1vzqKqZKvdpKuc147dw2N9d",
+        "programId": "BLiaZWNQoPm4mG4cXNm4sXifFqs1Xmxx12qD9T4Y5NeN",
+        "campaign": "8LmwBAa5XquvtUrsKrvspfV6da9T7sHiXXMVDmEdYew"
+      },
+      "mode": "family",
+      "mint": "8P47V2fj1yfg1C76YAZEXJBVzDJBFfURUUTeJjVJq5bz",
+      "pool": "FAThun8yCqyatCAmcUAfqdmD83zHN3RZieEk6FkB5Zcn",
+      "launchedAt": "2026-09-23T02:08:49Z",
+      "note": "First campaign 9zT7cyDv… (3-minute window) closed without commitments at 01:47 UTC; its coin GF28FYe4… exists on mainnet unused."
+    }
+  ],
+  "liabilities": {
+    "activeCampaign": "9FjwHicbkzP17NEW94UasBa3LfWtqmsmddzstq8UqKxP",
+    "solStillRefundable": "0",
+    "participantTokensUnclaimedNote": "43.5 % of supply less claims; per-receipt claim flags on chain (claims tab)",
+    "parentReserveUnclaimedRaw": "100000000000000",
+    "parentBuybackBudgetLamports": {
+      "a": "47170124231",
+      "b": "78170124231"
+    },
+    "childFeesPendingBurnRaw": "0"
+  },
+  "poolConfigs": {
+    "cpmmProgram": "CPMMoo8L3F4NbTegBCKVNunggL7H1ZpdTHKxQB5qKP1C",
+    "tiers": [
+      {
+        "key": "2fGXL8uhqxJ4tpgtosHZXT4zcQap6j62z3bMDxdkMvy5",
+        "bps": null,
+        "index": 2
+      },
+      {
+        "key": "ESLj2Rzmvn3RhDo4Z18hY1wYmGyC9xM4ZtRXhvoFkDAi",
+        "bps": null,
+        "index": 7
+      }
+    ],
+    "newPoolConfig": "2fGXL8uhqxJ4tpgtosHZXT4zcQap6j62z3bMDxdkMvy5",
+    "parentPoolConfig": "2fGXL8uhqxJ4tpgtosHZXT4zcQap6j62z3bMDxdkMvy5",
+    "lockProgram": "LockrWmn6K5twhz3y9w1dQERbmgSaRkfnTeTKbpofwE"
+  },
+  "signerPolicy": {
+    "sourceCommit": "e24c5eb773332ac0c64f1a4485190e3b0e33f08f",
+    "signerPolicyBlob": "7f0f7dc182d25293e5abbea9ef11ee29916045a7",
+    "signerServiceBlob": "e5338c96ac4b501759e729afd604df37c718221b",
+    "feeKeeperBlob": "5beb78dbc1721aabc6ad88b51f3803f2fa270506",
+    "activeLaunchBlob": "c943468c1289164b7c9fc8d76267543fb8d406e7"
+  },
+  "notes": [
+    "claims and refunds of archived and historical campaigns are reachable on chain but not through the site until the multi-campaign registry (P1) exists"
+  ]
+}
