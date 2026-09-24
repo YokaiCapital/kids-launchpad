@@ -95,7 +95,7 @@ async function tokenPrograms(connection,mints){const infos=await connection.getM
 /** Fee harvesting redeems the accrued fee share of the locked LP position (Raydium CollectCpFees then Withdraw): each
  * collect moves a few LP units into the fee custody. A collect that harvests less than the thresholds is dust (network
  * fees paid for no value); the next collect is then delayed with a growing backoff, reset by the first worthwhile harvest.
- * Codex verified repeated no-op collections on the live pool on 23 September 2026. */
+ * Repeated no-op collections were verified on the live pool on 23 September 2026. */
 // The SOL half of a harvest is worth the same as the coin half at the pool price, so the SOL side alone measures value.
 export const COLLECT_THRESHOLDS=Object.freeze({lamports:500_000n,maxBackoffSeconds:6*3600});
 export function nextCollectionDelay({delta,current,base,max=COLLECT_THRESHOLDS.maxBackoffSeconds}){
