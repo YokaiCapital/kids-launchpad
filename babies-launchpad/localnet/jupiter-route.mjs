@@ -9,6 +9,9 @@ import {CPMM,PARENT_AMM_CONFIG} from './atomic-launch.mjs';
 export const JUPITER_PROGRAM=new PublicKey('JUP6LkbZbjS1jKKwapdHNy74zcZ3tLUZoi5QNyVTaV4');
 export const JUPITER_EVENT_AUTHORITY=PublicKey.findProgramAddressSync([Buffer.from('__event_authority')],JUPITER_PROGRAM)[0];
 export const ROUTE_V2_DISCRIMINATOR=Buffer.from('bb64facc31c4af14','hex');
+/** Jupiter's classic `route` (what the public swap API returns): route_plan vec first, then in_amount u64 | quoted_out u64 |
+ * slippage_bps u16 | platform_fee_bps u8 as the last 19 bytes. The program accepts both. */
+export const ROUTE_DISCRIMINATOR=Buffer.from('e517cb977ae3ad2a','hex');
 export const SWAP_RAYDIUM_CP=46; // Swap enum index in Jupiter's on-chain IDL (read 20 Sep 2026)
 export const MAX_SLIPPAGE_BPS=100,MAX_SLICE_LAMPORTS=500000000n,MAX_STEPS=8;
 const u64=n=>{const b=Buffer.alloc(8);b.writeBigUInt64LE(BigInt(n));return b;},u16=n=>{const b=Buffer.alloc(2);b.writeUInt16LE(n);return b;},u32=n=>{const b=Buffer.alloc(4);b.writeUInt32LE(n);return b;};
@@ -18,9 +21,17 @@ export function encodeRouteV2({inAmount,quotedOut,slippageBps,platformFeeBps=0,p
  return Buffer.concat([ROUTE_V2_DISCRIMINATOR,u64(inAmount),u64(quotedOut),u16(slippageBps),u16(platformFeeBps),u16(positiveSlippageBps),plan]);
 }
 /** Reads the route_v2 header the program checks; throws on anything the program would refuse. */
+/** Encodes the classic `route` data for tests: disc | route_plan vec | in_amount | quoted_out | slippage u16 | platform_fee u8. */
+export function encodeRoute({inAmount,quotedOut,slippageBps,platformFeeBps=0,steps}){
+ const plan=Buffer.concat([u32(steps.length),...steps.map(s=>Buffer.concat([Buffer.from([s.swap]),u16(s.bps),Buffer.from([s.inputIndex,s.outputIndex])]))]);
+ return Buffer.concat([ROUTE_DISCRIMINATOR,plan,u64(inAmount),u64(quotedOut),u16(slippageBps),Buffer.from([platformFeeBps])]);
+}
 export function decodeRouteV2Header(data,{amount,minOut}){
- if(!Buffer.isBuffer(data)||data.length<34||!data.subarray(0,8).equals(ROUTE_V2_DISCRIMINATOR))throw Error('Not a Jupiter route_v2 instruction');
- const h={inAmount:data.readBigUInt64LE(8),quotedOut:data.readBigUInt64LE(16),slippageBps:data.readUInt16LE(24),platformFeeBps:data.readUInt16LE(26),positiveSlippageBps:data.readUInt16LE(28),steps:data.readUInt32LE(30)};
+ if(!Buffer.isBuffer(data)||data.length<34)throw Error('Not a Jupiter route instruction');
+ let h;
+ if(data.subarray(0,8).equals(ROUTE_V2_DISCRIMINATOR))h={kind:'route_v2',inAmount:data.readBigUInt64LE(8),quotedOut:data.readBigUInt64LE(16),slippageBps:data.readUInt16LE(24),platformFeeBps:data.readUInt16LE(26),positiveSlippageBps:data.readUInt16LE(28),steps:data.readUInt32LE(30)};
+ else if(data.subarray(0,8).equals(ROUTE_DISCRIMINATOR)){const n=data.length;h={kind:'route',inAmount:data.readBigUInt64LE(n-19),quotedOut:data.readBigUInt64LE(n-11),slippageBps:data.readUInt16LE(n-3),platformFeeBps:data[n-1],positiveSlippageBps:0,steps:data.readUInt32LE(8)};}
+ else throw Error('Not a Jupiter route instruction');
  if(h.inAmount!==BigInt(amount))throw Error('Route input amount is not the buyback slice');
  if(h.slippageBps>MAX_SLIPPAGE_BPS)throw Error('Route slippage above 1%');
  if(h.platformFeeBps!==0)throw Error('Route carries a platform fee');
@@ -59,9 +70,12 @@ export async function fetchJupiterParentRoute({apiBase='https://lite-api.jup.ag/
   return {mint:new PublicKey(mint),ata:new PublicKey(ata),tokenProgram:new PublicKey(tokenProgram)};
  });
  if(swap.cleanupInstruction||(swap.otherInstructions??[]).length)throw Error('Jupiter wants cleanup or other instructions; refused');
- const data=Buffer.from(ix.data,'base64');decodeRouteV2Header(data,{amount,minOut});
+ const data=Buffer.from(ix.data,'base64');const header=decodeRouteV2Header(data,{amount,minOut});
  const accounts=ix.accounts.map(a=>({pubkey:new PublicKey(a.pubkey),isSigner:!!a.isSigner,isWritable:!!a.isWritable}));
- const expectedHead=[feeAuthority,getAssociatedTokenAddressSync(NATIVE_MINT,feeAuthority,true),getAssociatedTokenAddressSync(parentMint,feeAuthority,true,parentProgram),NATIVE_MINT,parentMint,TOKEN_PROGRAM_ID,parentProgram,JUPITER_PROGRAM,JUPITER_EVENT_AUTHORITY,JUPITER_PROGRAM];
+ const wsolAta=getAssociatedTokenAddressSync(NATIVE_MINT,feeAuthority,true),parentAta=getAssociatedTokenAddressSync(parentMint,feeAuthority,true,parentProgram);
+ // route_v2 head (10) vs classic route head (9): the program rebuilds exactly this head from its own accounts, so the
+ // optional destination_token_account and platform_fee_account must be the None placeholder (the Jupiter program id).
+ const expectedHead=header.kind==='route_v2'?[feeAuthority,wsolAta,parentAta,NATIVE_MINT,parentMint,TOKEN_PROGRAM_ID,parentProgram,JUPITER_PROGRAM,JUPITER_EVENT_AUTHORITY,JUPITER_PROGRAM]:[TOKEN_PROGRAM_ID,feeAuthority,wsolAta,parentAta,JUPITER_PROGRAM,parentMint,JUPITER_PROGRAM,JUPITER_EVENT_AUTHORITY,JUPITER_PROGRAM];
  if(accounts.length<expectedHead.length||!expectedHead.every((k,i)=>accounts[i].pubkey.equals(k)))throw Error('Jupiter route does not use the fee custody accounts as its user accounts');
- return {data,setup,remainingAccounts:accounts.slice(expectedHead.length).map(a=>({...a,isSigner:false})),lookupTables:(swap.addressLookupTableAddresses??[]).map(x=>new PublicKey(x)),quotedOut:BigInt(quote.outAmount),quote:{outAmount:String(quote.outAmount),priceImpactPct:String(quote.priceImpactPct??'0')},source:'jupiter-api'};
+ return {data,setup,remainingAccounts:accounts.slice(expectedHead.length).map(a=>({...a,isSigner:false})),lookupTables:(swap.addressLookupTableAddresses??[]).map(x=>new PublicKey(x)),quotedOut:BigInt(quote.outAmount),quote:{outAmount:String(quote.outAmount),priceImpactPct:String(quote.priceImpactPct??'0')},kind:header.kind,source:'jupiter-api'};
 }

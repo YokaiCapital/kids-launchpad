@@ -17,6 +17,9 @@ const WSOL:Pubkey=pubkey!("So11111111111111111111111111111111111111112");
 // verifies the effects (exact SOL spent, parent received, then burned). Jupiter is a third-party upgradeable program.
 const JUPITER:Pubkey=pubkey!("JUP6LkbZbjS1jKKwapdHNy74zcZ3tLUZoi5QNyVTaV4");
 const JUPITER_ROUTE_V2:[u8;8]=[0xbb,0x64,0xfa,0xcc,0x31,0xc4,0xaf,0x14];
+/// Jupiter's classic `route` (what the public swap API returns): route_plan vec first, then in_amount u64 |
+/// quoted_out_amount u64 | slippage_bps u16 | platform_fee_bps u8 as the last 19 bytes.
+const JUPITER_ROUTE_V1:[u8;8]=[0xe5,0x17,0xcb,0x97,0x7a,0xe3,0xad,0x2a];
 /// Largest single buyback slice through the aggregator (0.5 SOL): a bad fill on one slice stays small.
 const JUPITER_MAX_SLICE:u64=500_000_000;
 const JUPITER_MAX_SLIPPAGE_BPS:u16=100;
@@ -183,10 +186,17 @@ pub(super) fn process(program:&Pubkey,a:&[AccountInfo],body:&[u8],tag:u8)->Progr
    executable(&a[11],&JUPITER)?;pda(&a[12],&[b"__event_authority"],&JUPITER)?;
    let parent_custody=|acc:&AccountInfo|->Result<u64,ProgramError>{parent_ata(acc,&authority,&parent_mint,&parent_program)?;parent_token(acc,&parent_mint,&authority,&parent_program)};
    let input=custody(&a[4],&WSOL,&authority)?;let output=parent_custody(&a[5])?;require(input>=state.liability()?)?;
-   require(jupiter_route_ok(route,amount,min))?;
-   // route_v2 accounts: user_transfer_authority (our PDA signs), user source, user destination, source mint, destination mint,
-   // source token program, destination token program, destination_token_account (omitted: the program id), event authority, program.
-   cpi_forward(a,11,&[(3,true,false),(4,false,true),(5,false,true),(8,false,false),(7,false,false),(9,false,false),(10,false,false),(11,false,false),(12,false,false),(11,false,false)],13,route.to_vec(),seeds)?;
+   let kind=jupiter_route_kind(route,amount,min).ok_or(ProgramError::InvalidInstructionData)?;
+   if kind==2{
+    // route_v2 accounts: user_transfer_authority (our PDA signs), user source, user destination, source mint, destination mint,
+    // source token program, destination token program, destination_token_account (omitted: the program id), event authority, program.
+    cpi_forward(a,11,&[(3,true,false),(4,false,true),(5,false,true),(8,false,false),(7,false,false),(9,false,false),(10,false,false),(11,false,false),(12,false,false),(11,false,false)],13,route.to_vec(),seeds)?;
+   }else{
+    // route accounts: token program, user_transfer_authority (our PDA signs), user source, user destination,
+    // destination_token_account (omitted: the program id), destination mint, platform_fee_account (omitted: the program id),
+    // event authority, program. Both optional slots are pinned to the program id so nothing can be redirected.
+    cpi_forward(a,11,&[(9,false,false),(3,true,false),(4,false,true),(5,false,true),(11,false,false),(7,false,false),(11,false,false),(12,false,false),(11,false,false)],13,route.to_vec(),seeds)?;
+   }
    require(custody(&a[4],&WSOL,&authority)?==input-amount)?;
    let received=parent_custody(&a[5])?.checked_sub(output).ok_or(err(61))?;require(received>=min)?;
    let mut burn=vec![8];burn.extend_from_slice(&received.to_le_bytes());cpi(a,10,&[(5,false,true),(7,false,true),(3,true,false)],burn,seeds)?;
@@ -212,11 +222,20 @@ pub(super) fn process(program:&Pubkey,a:&[AccountInfo],body:&[u8],tag:u8)->Progr
 /// route_v2 header: disc 8 | in_amount u64 | quoted_out_amount u64 | slippage_bps u16 | platform_fee_bps u16 |
 /// positive_slippage_bps u16 | route_plan vec (u32 length prefix). The slice must be spent exactly, the quote minus the
 /// allowed slippage must still clear our minimum, slippage is capped, no platform fee, 1 to 8 steps.
-fn jupiter_route_ok(route:&[u8],amount:u64,min:u64)->bool{
- if route.len()<34||route[..8]!=JUPITER_ROUTE_V2{return false}
- let (Ok(in_amount),Ok(quoted))=(read64(route,8),read64(route,16)) else {return false};
- let slippage=u16::from_le_bytes([route[24],route[25]]);let platform_fee=u16::from_le_bytes([route[26],route[27]]);let steps=u32::from_le_bytes([route[30],route[31],route[32],route[33]]);
- in_amount==amount&&quoted>=min&&slippage<=JUPITER_MAX_SLIPPAGE_BPS&&platform_fee==0&&(1..=8).contains(&steps)&&quoted.saturating_sub((quoted as u128*slippage as u128/10_000) as u64)>=min
+fn jupiter_route_ok(route:&[u8],amount:u64,min:u64)->bool{jupiter_route_kind(route,amount,min).is_some()}
+/// Which Jupiter instruction the bytes are, once every header rule holds: Some(2) for `route_v2`, Some(1) for `route`,
+/// None for anything else. `route` keeps its fixed fields at the END (route_plan vec first, its length at bytes 8..12).
+fn jupiter_route_kind(route:&[u8],amount:u64,min:u64)->Option<u8>{
+ if route.len()<34{return None}
+ let (in_amount,quoted,slippage,platform_fee,steps,kind)=if route[..8]==JUPITER_ROUTE_V2{
+  let (Ok(i),Ok(q))=(read64(route,8),read64(route,16)) else {return None};
+  (i,q,u16::from_le_bytes([route[24],route[25]]),u16::from_le_bytes([route[26],route[27]]),u32::from_le_bytes([route[30],route[31],route[32],route[33]]),2u8)
+ }else if route[..8]==JUPITER_ROUTE_V1{
+  let n=route.len();let (Ok(i),Ok(q))=(read64(route,n-19),read64(route,n-11)) else {return None};
+  (i,q,u16::from_le_bytes([route[n-3],route[n-2]]),route[n-1] as u16,u32::from_le_bytes([route[8],route[9],route[10],route[11]]),1u8)
+ }else{return None};
+ let ok=in_amount==amount&&quoted>=min&&slippage<=JUPITER_MAX_SLIPPAGE_BPS&&platform_fee==0&&(1..=8).contains(&steps)&&quoted.saturating_sub((quoted as u128*slippage as u128/10_000) as u64)>=min;
+ if ok{Some(kind)}else{None}
 }
 #[cfg(test)]mod tests{
  #[test]fn jupiter_route_header_rules(){use super::*;
@@ -227,7 +246,16 @@ fn jupiter_route_ok(route:&[u8],amount:u64,min:u64)->bool{
   assert!(!jupiter_route_ok(&header(1000,10_000,101,0,1),1000,1),"slippage capped at 1%");
   assert!(!jupiter_route_ok(&header(1000,10_000,10,5,1),1000,1),"no platform fee");
   assert!(!jupiter_route_ok(&header(1000,10_000,10,0,0),1000,1)&&!jupiter_route_ok(&header(1000,10_000,10,0,9),1000,1),"1 to 8 steps");
-  let mut wrong=header(1000,10_000,10,0,1);wrong[0]^=1;assert!(!jupiter_route_ok(&wrong,1000,1),"only route_v2");
+  let mut wrong=header(1000,10_000,10,0,1);wrong[0]^=1;assert!(!jupiter_route_ok(&wrong,1000,1),"only Jupiter route instructions");
+  // Classic `route`: disc | route_plan vec (len u32 + steps) | in_amount | quoted | slippage u16 | platform_fee u8.
+  let v1=|in_amount:u64,quoted:u64,slippage:u16,fee:u8,steps:u32|{let mut r=JUPITER_ROUTE_V1.to_vec();r.extend_from_slice(&steps.to_le_bytes());for _ in 0..steps{r.extend_from_slice(&[46,0,100,0,1]);}r.extend_from_slice(&in_amount.to_le_bytes());r.extend_from_slice(&quoted.to_le_bytes());r.extend_from_slice(&slippage.to_le_bytes());r.push(fee);r};
+  assert_eq!(jupiter_route_kind(&v1(1000,10_000,100,0,1),1000,9_900),Some(1));assert_eq!(jupiter_route_kind(&header(1000,10_000,100,0,1),1000,9_900),Some(2));
+  assert_eq!(jupiter_route_kind(&v1(1000,10_000,100,0,2),1000,9_900),Some(1),"the tail is found whatever the plan length");
+  assert!(jupiter_route_kind(&v1(999,10_000,50,0,1),1000,9_000).is_none(),"route: in_amount must equal the slice");
+  assert!(jupiter_route_kind(&v1(1000,10_000,101,0,1),1000,1).is_none(),"route: slippage capped at 1%");
+  assert!(jupiter_route_kind(&v1(1000,10_000,10,1,1),1000,1).is_none(),"route: no platform fee");
+  assert!(jupiter_route_kind(&v1(1000,10_000,10,0,0),1000,1).is_none()&&jupiter_route_kind(&v1(1000,10_000,10,0,9),1000,1).is_none(),"route: 1 to 8 steps");
+  assert!(jupiter_route_kind(&v1(1000,10_000,100,0,1),1000,9_901).is_none(),"route: slippage may not eat below min");
   assert!(!jupiter_route_ok(&header(1000,10_000,10,0,1)[..30],1000,1),"short data refused");
   assert_eq!(JUPITER_MAX_SLICE,500_000_000);
  }
