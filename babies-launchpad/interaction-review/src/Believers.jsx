@@ -58,6 +58,12 @@ export function Believers(){
     :<div className="kc-state" role="status"><strong>{supporters.reason==='not-published'?'Not published yet':'Could not load the list'}</strong><p>{readFailureText(supporters.reason,'believers list')}</p>{supporters.reason!=='not-published'&&<button type="button" onClick={()=>setAttempt(n=>n+1)}>Try again</button>}</div>}
    </div>
   </section>
+  <section className="kc-article" aria-labelledby="kc-article-title">
+   <h2 id="kc-article-title">not on the list yet?</h2>
+   <p>reply, quote or repost the article and you show up on the next refresh, it runs every 30 minutes on its own, no form, no sign up, just show up</p>
+   <a className="kc-follow" href="https://x.com/YokaiCapital/status/2102902367901339720" target="_blank" rel="noopener noreferrer">read the article<ArrowUpRight size={16} aria-hidden="true"/></a>
+   <small>the ones who keep showing up are the ones we see first. your “since” date never changes once you are on.</small>
+  </section>
   {supporters.status==='ready'&&<section className="kc-check" aria-labelledby="kc-check-title">
    <h2 id="kc-check-title">are you on the list?</h2><label className="kc-hint" htmlFor="kc-search">type your @ or your name</label>
    <div className="kc-search"><MagnifyingGlass size={22} aria-hidden="true"/><input id="kc-search" type="search" value={query} autoComplete="off" spellCheck="false" placeholder="@yourhandle" onChange={e=>setQuery(e.target.value)}/>{query&&<button type="button" className="kc-clear" onClick={()=>setQuery('')}>Clear</button>}</div>

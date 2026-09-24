@@ -167,3 +167,5 @@ a.kc-badge:hover{background:#c0aaff;text-decoration:none}
  .kc-follow{width:100%;justify-content:center;text-align:center}
  .kc-legend>div{grid-template-columns:120px minmax(0,1fr)}
 }
+
+.kc-article{margin:0 0 22px;padding:18px 20px;border:1px solid var(--pink,#ff77ce);border-radius:16px;background:rgba(255,119,206,.08);display:flex;flex-direction:column;gap:10px}.kc-article h2{margin:0;font-size:22px;letter-spacing:-.02em}.kc-article p{margin:0;font-size:16px;line-height:1.5}.kc-article .kc-follow{margin-top:2px}.kc-article small{color:var(--muted,#b8a9c5);font-size:13px}
