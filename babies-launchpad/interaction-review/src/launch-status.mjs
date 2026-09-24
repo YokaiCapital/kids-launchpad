@@ -23,7 +23,10 @@ export function describeLaunch(data,nowUnix){const live=data?.network==='mainnet
  }
  const total=BigInt(data.totalLamports||0),soft=BigInt(data.softCapLamports||1),hard=BigInt(data.hardCapLamports||soft),reached=total>=soft;
  const subscribed=Number(total*10000n/hard)/100,full=total>=hard;
- const progress={raised:solText(total),soft:solText(soft),hard:solText(hard),pct:Math.min(100,subscribed),subscribed,full,softPct:Math.min(100,Number(soft*10000n/hard)/100),reached};
+ // The bar never stops at the hard cap: above it the track stretches (total × 1.25) so every new commitment still moves
+ // the fill, and the soft and hard cap markers slide left. Under the cap the track is the hard cap.
+ const track=total>hard?total*125n/100n:hard;const pctOf=v=>Number(v*10000n/track)/100;
+ const progress={raised:solText(total),soft:solText(soft),hard:solText(hard),pct:Math.min(100,pctOf(total)),subscribed,full,softPct:pctOf(soft),hardPct:pctOf(hard),reached};
  const closeIn=data.deadlineUnix-nowUnix,launchWindowIn=data.launchDeadlineUnix-nowUnix;
  if(data.phase==='open')return {phase:'open',tone:'live',pill:'Open',headline:full?'Hard cap reached. You can still commit.':reached?'Soft cap reached. Still open.':'Open for commitments',sub:full?'Allocation is proportional: every wallet gets the same share of the coin per accepted SOL. Only '+progress.hard+' SOL goes into the pool; the rest is refunded to everyone pro rata after the close. Committing now still earns a share, at the same rate as everyone else.':reached?'Up to the hard cap of '+progress.hard+' SOL, committed SOL joins the pool at launch. Anything above the hard cap is refunded pro rata after the close.':'Reach '+progress.soft+' SOL before the clock runs out and the coin launches by itself.',countdown:{label:'Closes in',seconds:closeIn,at:data.deadlineUnix},progress,addresses:null};
  if(data.phase==='awaiting-launch')return {phase:'awaiting-launch',tone:'pending',pill:'Launching',headline:'Funding closed. Launching now.',sub:'Every commitment is being settled, then the pool is created and locked. This usually takes under a minute. If the launch could not happen within 24 hours, every commitment would be refunded in full.',countdown:null,progress,addresses:null};

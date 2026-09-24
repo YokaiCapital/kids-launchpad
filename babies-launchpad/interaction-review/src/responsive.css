@@ -198,3 +198,5 @@
 .commit-panel .rail-refund{width:100%;margin-top:10px;min-height:44px}
 @media(max-width:1050px){.funding-history-stats{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:760px){.campaign-overview .funding-visual.is-history{padding:14px}}
+
+.launch-bar i.is-hard{background:var(--pink,#ff77ce);opacity:.9}
