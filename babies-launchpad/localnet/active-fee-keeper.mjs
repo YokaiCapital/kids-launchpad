@@ -38,9 +38,10 @@ export const worthwhileBudget=(lamports,ceiling=OPERATION_COST_CEILING_LAMPORTS)
 /** The configured minimum can only raise the floor: whatever KIDS_BUYBACK_MIN_LAMPORTS says, a budget below fifty times
  * the cost ceiling is never spent. */
 export const BUYBACK_FLOOR_LAMPORTS=OPERATION_COST_CEILING_LAMPORTS*50n;
-/** Slippage for parent buybacks on the Jupiter route, in basis points: KIDS_PARENT_BUYBACK_SLIPPAGE_BPS, default 300
- * (3 %, owner, 24 Sep 2026), bounded 1..1000. The reference-price guard and the impact cap still apply on top. */
-export function parentBuybackSlippageBps(env=process.env){const n=Number(env.KIDS_PARENT_BUYBACK_SLIPPAGE_BPS||'300');if(!Number.isInteger(n)||n<1||n>1000)throw Error('KIDS_PARENT_BUYBACK_SLIPPAGE_BPS must be an integer from 1 to 1000');return n;}
+/** Slippage for parent buybacks on the Jupiter route, in basis points: KIDS_PARENT_BUYBACK_SLIPPAGE_BPS, default 100.
+ * The route (jupiter-route.mjs MAX_SLIPPAGE_BPS) and the on-chain program (fees.rs JUPITER_MAX_SLIPPAGE_BPS) both cap it
+ * at 1 %, so more than 100 is refused before signing. The reference-price guard and the impact cap apply on top. */
+export function parentBuybackSlippageBps(env=process.env){const n=Number(env.KIDS_PARENT_BUYBACK_SLIPPAGE_BPS||'100');if(!Number.isInteger(n)||n<1||n>100)throw Error('KIDS_PARENT_BUYBACK_SLIPPAGE_BPS must be an integer from 1 to 100 (the route and the program cap slippage at 1 %)');return n;}
 export function effectiveBuybackMinimum(env=process.env){let v=0n;try{v=BigInt(env.KIDS_BUYBACK_MIN_LAMPORTS||'5000000');}catch{v=0n;}return v>BUYBACK_FLOOR_LAMPORTS?v:BUYBACK_FLOOR_LAMPORTS;}
 export const BUYBACK_MIN_LAMPORTS=effectiveBuybackMinimum();
 export const burnWorthwhile=(valueLamports,minimum=BURN_MIN_VALUE_LAMPORTS)=>BigInt(valueLamports)>=minimum;
