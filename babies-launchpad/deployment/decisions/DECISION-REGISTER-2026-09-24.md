@@ -13,7 +13,7 @@ preset hash and policy version recorded in the release evidence. Existing funded
 | Dev supply | 3 % of original supply: 1 % at successful launch, 2 % linear over three calendar months (UTC, month-end clamp), no cliff | owner; deployed vesting |
 | Funding | Timed commitments to program escrow; reaching the hard cap does not close funding | deployed behaviour |
 | Oversubscription | Proportional allocation `accepted_i = floor(commit_i × min(T,H) / T)`; excess refundable; no first-come priority | deployed behaviour (Shartcoin: 2,500 committed, 1,000 accepted) |
-| Soft caps | New public launches around 50 to 100 SOL | owner via Codex handoff |
+| Soft caps | New public launches around 50 to 100 SOL | owner, via the reviewer handoff |
 | Liquidity | Accepted SOL funds the pool; LP principal permanently locked (Raydium lock, fee NFT to the program) | deployed behaviour |
 | Authorities | Mint and freeze authority revoked at successful launch; program upgrade authority and metadata authority disclosed separately | deployed behaviour (freeze at creation, mint at launch on build 2+) |
 | Token-side fees | Burned, never sold | owner 23 Sep; tag 26 |
@@ -47,7 +47,7 @@ preset hash and policy version recorded in the release evidence. Existing funded
 | Campaign identity | (genesis hash, program id, campaign address); slug is an alias only | plan §8 |
 | Operational records | Postgres for registry, intents, jobs, leases, chain events, market cursors; chain stays authoritative for balances and entitlements | plan §8 |
 | Signing | Existing policy-bound signer service, per-campaign keeper capability with no recipient, supply, claim or root power; creator wallet never signs operations | plan §7 |
-| Branch | `feature/public-launches` in the one checkout, rebased onto `main` daily, merged by the deployer when the owner says ship | CLAUDE.md §1 |
+| Branch | `feature/public-launches` in the one checkout, rebased onto `main` daily, merged by the deployer when the owner says ship | repository rules, section 1 |
 
 ## Activation records
 

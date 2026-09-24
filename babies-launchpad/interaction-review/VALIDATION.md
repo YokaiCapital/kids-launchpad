@@ -12,7 +12,7 @@ Working directory: babies-launchpad/interaction-review. Local Vite preview: http
 
 ## Browser checks actually performed
 
-Codex in-app browser at 1488×1058 and 390×844:
+Reviewer in-app browser at 1488×1058 and 390×844:
 - Selected Sprout 97, went to final page: selection retained, final five entries accessible, Page 28 of 28.
 - Selected final-page Fizz 82 and recorded a demo vote. Chose Nib 81; simulated offline acceptance failure. Fizz 82 receipt remained unchanged.
 - Searched KID248 from another page; returned Miso 248 while previous selection remained.
