@@ -141,6 +141,9 @@ export function createActiveFeeKeeper({resolve=()=>resolvePostlaunchCampaign('ac
      }
      if(!operation){
       const plan=feePlan(await readFees(ctx,campaign,mint),manifestFeatures(ctx.manifest));
+      // Both parents take turns: after a slice for one parent the other parent's slice comes first next time, so a
+      // large budget on one side never starves the other (24 Sep 2026: Fartcoin ran 40 slices before Buttcoin's first).
+      if(plan.filter(x=>x.kind==='buy-burn').length===2&&journal.lastBuybackParent===0){const i=plan.findIndex(x=>x.kind==='buy-burn'&&x.index===1),j=plan.findIndex(x=>x.kind==='buy-burn'&&x.index===0);if(i>j){const [b]=plan.splice(i,1);plan.splice(j,0,b);}}
       for(const item of plan){if(item.kind==='buy-burn-waiting'){console.log(JSON.stringify({event:'buyback-waiting-for-budget',campaign:identity.campaign,parent:item.index,budgetLamports:item.amount,minimumLamports:item.minimum}));continue;}
        if(item.kind==='burn'){let value=null;try{value=(await boundedQuote(c,mint,NATIVE_MINT,BigInt(item.amount),state.pool)).quote;}catch(error){if(error.message!=='Trade too small')throw error;value=0n;}if(!burnWorthwhile(value)){console.log(JSON.stringify({event:'burn-waiting-for-value',campaign:identity.campaign,childPendingRaw:item.amount,valueLamports:value.toString(),minimumLamports:BURN_MIN_VALUE_LAMPORTS.toString()}));continue;}operation=item;break;}
        if(item.kind==='distribute'){operation=item;break;}try{await boundedQuote(c,item.kind==='convert'?mint:NATIVE_MINT,item.kind==='convert'?NATIVE_MINT:parents[item.index],BigInt(item.amount));operation=item;break;}catch(error){if(error.message!=='Trade too small')throw error;}}
@@ -208,6 +211,7 @@ export function createActiveFeeKeeper({resolve=()=>resolvePostlaunchCampaign('ac
     throw error;
    }
    const after=await readFees(ctx,campaign,mint).catch(()=>null);appendFeeEvent(journal,{id:operation.id,kind:operation.kind,index:operation.index??null,amount:operation.executedAmount??operation.slice??operation.amount??null,budget:operation.amount??null,signature,at:await chainTime(c),delta:feeDelta(before,after)});
+   if(operation.kind==='buy-burn')journal.lastBuybackParent=operation.index;
    if(operation.kind==='collect'){journal.lastCollectedAt=await chainTime(c);journal.collectDelaySeconds=nextCollectionDelay({delta:feeDelta(before,after),current:journal.collectDelaySeconds,base:collectionIntervalSeconds});if(journal.collectDelaySeconds>collectionIntervalSeconds)console.log(JSON.stringify({event:'fees-collect-backoff',campaign:identity.campaign,nextInSeconds:journal.collectDelaySeconds}));}journal.current=null;persist();
    return {status:'completed',operation:operation.kind,signature,campaign:identity.campaign};
   }finally{running=false;}
