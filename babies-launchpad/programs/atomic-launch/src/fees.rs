@@ -193,7 +193,9 @@ pub(super) fn process(program:&Pubkey,a:&[AccountInfo],body:&[u8],tag:u8)->Progr
     let other=super::claims::validated_parent_mint(program,&a[6],a[0].key,1-parent)?;
     let other_classic=Pubkey::find_program_address(&[authority.as_ref(),TOKEN.as_ref(),other.as_ref()],&ata).0;
     let other_2022=Pubkey::find_program_address(&[authority.as_ref(),super::TOKEN_2022_PROGRAM.as_ref(),other.as_ref()],&ata).0;
-    for info in &a[13..]{require(*info.key!=child_custody&&*info.key!=other_classic&&*info.key!=other_2022&&*info.key!=*a[4].key)?;}}
+    // (Jupiter lists the wSOL and parent custody accounts again among the remaining accounts for its swap steps; those are
+    // the accounts the effect checks below bound, so they stay allowed.)
+    for info in &a[13..]{require(*info.key!=child_custody&&*info.key!=other_classic&&*info.key!=other_2022)?;}}
    let kind=jupiter_route_kind(route,amount,min).ok_or(ProgramError::InvalidInstructionData)?;
    if kind==2{
     // route_v2 accounts: user_transfer_authority (our PDA signs), user source, user destination, source mint, destination mint,
