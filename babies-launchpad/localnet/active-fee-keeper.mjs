@@ -158,6 +158,7 @@ export function createActiveFeeKeeper({resolve=()=>resolvePostlaunchCampaign('ac
      }
      if(!operation){
       const plan=feePlan(await readFees(ctx,campaign,mint),manifestFeatures(ctx.manifest));
+      const collectDelay=journal.collectDelaySeconds||collectionIntervalSeconds,collectDue=journal.lastCollectedAt===null||now-journal.lastCollectedAt>=collectDelay;
       // Both parents take turns: after a slice for one parent the other parent's slice comes first next time, so a
       // large budget on one side never starves the other (24 Sep 2026: Fartcoin ran 40 slices before Buttcoin's first).
       if(plan.filter(x=>x.kind==='buy-burn').length===2&&journal.lastBuybackParent===0){const i=plan.findIndex(x=>x.kind==='buy-burn'&&x.index===1),j=plan.findIndex(x=>x.kind==='buy-burn'&&x.index===0);if(i>j){const [b]=plan.splice(i,1);plan.splice(j,0,b);}}
@@ -166,10 +167,13 @@ export function createActiveFeeKeeper({resolve=()=>resolvePostlaunchCampaign('ac
        if(item.kind==='distribute'){operation=item;break;}
        // A parent buyback on a Jupiter route is quoted by Jupiter when it runs; the canonical CPMM pool (empty for both parents
        // on mainnet) must not decide whether the slice is attempted.
+       // A due collection comes before the parent buybacks: with hundreds of small slices queued, the buybacks would
+       // otherwise keep the harvest, and the treasury and dev payouts that follow it, waiting for hours (24 Sep 2026:
+       // no collection between 12:07 and the 16:28 restart while the buyback queue held the keeper).
+       if(item.kind==='buy-burn'&&collectDue){operation={kind:'collect'};break;}
        if(item.kind==='buy-burn'&&(process.env.KIDS_PARENT_BUYBACK_ROUTE||'cpmm')!=='cpmm'){operation=item;break;}
        try{await boundedQuote(c,item.kind==='convert'?mint:NATIVE_MINT,item.kind==='convert'?NATIVE_MINT:parents[item.index],BigInt(item.amount));operation=item;break;}catch(error){if(error.message!=='Trade too small')throw error;}}
-      const collectDelay=journal.collectDelaySeconds||collectionIntervalSeconds;
-      if(!operation&&(journal.lastCollectedAt===null||now-journal.lastCollectedAt>=collectDelay))operation={kind:'collect'};
+      if(!operation&&collectDue)operation={kind:'collect'};
      }
     }
     if(!operation)return {status:'idle'};
