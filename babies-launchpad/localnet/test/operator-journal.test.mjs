@@ -27,3 +27,12 @@ test('the signer operation id is the journal id when it fits and its hash when a
  const long='extend:'+'A'.repeat(44)+':'+Array.from({length:20},()=>'B'.repeat(44)).join(',');
  const id=signerOperationId(long);assert.ok(long.length>120);assert.ok(id.length<=120);assert.match(id,/^sha256:[0-9a-f]{64}$/);assert.equal(signerOperationId(long),id);
 });
+
+test('a rebuilt attempt is a new signer operation: the id carries the blockhash, so an expired attempt never collides with the registry',async()=>{
+ const {createOperatorSender}=await import('../operator-journal.mjs');const ids=[];let height=0;const statuses={};
+ const c={async getLatestBlockhash(){return {blockhash:'H'+(++height),lastValidBlockHeight:height};},async getSignatureStatuses(){return {value:[null]};},async getBlockHeight(){return 1000;},async sendRawTransaction(){return 'sig'+height;},async confirmTransaction(){return {value:{err:null}};}};
+ const journal={attempts:{}};const send=createOperatorSender({connection:c,journal,persist(){}});
+ const build=async(block,operationId)=>{ids.push(operationId);const {Transaction,Keypair,SystemProgram}=await import('@solana/web3.js');const k=Keypair.generate();const tx=new Transaction({feePayer:k.publicKey,...block}).add(SystemProgram.transfer({fromPubkey:k.publicKey,toPubkey:k.publicKey,lamports:1}));tx.sign(k);return tx;};
+ await send('settle:x',build).catch(()=>{});journal.attempts={};await send('settle:x',build).catch(()=>{});
+ assert.equal(ids.length,2);assert.notEqual(ids[0],ids[1]);assert.ok(ids[0].startsWith('settle:x:H'));
+});

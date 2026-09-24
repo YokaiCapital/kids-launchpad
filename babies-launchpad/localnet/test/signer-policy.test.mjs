@@ -17,8 +17,8 @@ test('REPRODUCTION: a compute-only message with a 1.4 SOL priority fee is refuse
  const sane=ev([ComputeBudgetProgram.setComputeUnitLimit({units:1_200_000}),ComputeBudgetProgram.setComputeUnitPrice({microLamports:10_000n}),kids(21)]);assert.equal(sane.ok,true);assert.equal(sane.priorityFeeLamports,12_000n);
 });
 test('user-signed tags, unknown tags and unserved campaigns are refused; keeper tags on a served campaign pass',()=>{
- for(const tag of [1,3,7,8,10,11,99])assert.equal(ev([kids(tag)]).ok,false,'tag '+tag);
- for(const tag of [2,4,5,6,20,21,22,23,24,25,26])assert.equal(ev([kids(tag)]).ok,true,'tag '+tag);
+ for(const tag of [1,7,8,10,11,99])assert.equal(ev([kids(tag)]).ok,false,'tag '+tag);
+ for(const tag of [2,3,4,5,6,20,21,22,23,24,25,26])assert.equal(ev([kids(tag)]).ok,true,'tag '+tag);
  const served=new Set([campaign.toBase58()]);assert.equal(ev([kids(21)],{campaigns:served}).ok,true);
  assert.match(ev([kids(21,[{pubkey:other.publicKey,isSigner:false,isWritable:true}])],{campaigns:served}).reason,/not served/);
  assert.match(ev([kids(0)]).reason,/not allowed/);assert.equal(ev([kids(0,[{pubkey:operator.publicKey,isSigner:true,isWritable:true},{pubkey:campaign,isSigner:false,isWritable:true}])],{provisioning:true,campaigns:served}).ok,true);
@@ -81,4 +81,8 @@ test('metadata creation is a provisioning-only operation: immutable, operator as
  const foreign=createMetadataInstruction({mint,mintAuthority:other.publicKey,payer:operator.publicKey,name:'x',symbol:'X',uri:'https://a'});assert.match(ev([foreign],{provisioning:true}).reason,/authority|payer/);
  const mutable=createMetadataInstruction({mint,mintAuthority:operator.publicKey,payer:operator.publicKey,name:'x',symbol:'X',uri:'https://a'});mutable.data[mutable.data.length-2]=1;assert.match(ev([mutable],{provisioning:true}).reason,/not allowed/);
  const http=createMetadataInstruction({mint,mintAuthority:operator.publicKey,payer:operator.publicKey,name:'x',symbol:'X',uri:'http://a'});assert.match(ev([http],{provisioning:true}).reason,/bounds/);
+});
+
+test('the keeper may pay refunds (tag 3): the program binds the payout to the receipt owner',async()=>{
+ const {KEEPER_TAGS,USER_TAGS}=await import('../signer-policy.mjs');assert.ok(KEEPER_TAGS.has(3));assert.ok(!USER_TAGS.has(3));
 });

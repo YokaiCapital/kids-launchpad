@@ -20,7 +20,9 @@ export function createOperatorSender({connection:c,journal,persist,now=Date.now,
     if(failed||expired){journal.attempts[id+':'+old.createdAt]={...old,closedReason:failed?'failed':'expired'};delete journal.attempts[id];old=null;persist();}
    }
    if(!old){
-    const block=await c.getLatestBlockhash('confirmed'),tx=await build(block,signerOperationId(id));
+    // A rebuilt attempt (the previous one expired or failed on chain, verified above) is a NEW signer operation: the
+    // signer's replay guard binds an id to one exact message for 24 h, so the id carries this attempt's blockhash.
+    const block=await c.getLatestBlockhash('confirmed'),tx=await build(block,signerOperationId(id+':'+block.blockhash));
     const signature=encodeBase58(tx instanceof VersionedTransaction?tx.signatures[0]:tx.signature);
     old={block,signature,wire:Buffer.from(tx.serialize()).toString('base64'),createdAt:now()};journal.attempts[id]=old;
    }

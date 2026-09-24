@@ -5,9 +5,9 @@
 // spending limit. Replay-safe operation ids: the same id may only ever sign the same message.
 import {PublicKey} from '@solana/web3.js';import {decodeMetadataInstruction,LIMITS as METADATA_LIMITS} from './token-metadata.mjs';
 export const PROGRAMS={compute:'ComputeBudget111111111111111111111111111111',ata:'ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL',token:'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA',token2022:'TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb',alt:'AddressLookupTab1e1111111111111111111111111',metadata:'metaqbxxUerdq28cj1RbAWkYQm3ybzjb6a8bt518x1s',system:'11111111111111111111111111111111'};
-export const KEEPER_TAGS=new Set([2,4,5,6,20,21,22,23,24,25,26]);// finalize, settle, ready, launch, fee cycle incl. burn
+export const KEEPER_TAGS=new Set([2,3,4,5,6,20,21,22,23,24,25,26]);// finalize, refund (tag 3: the program binds the payout to the receipt owner, idempotent; the keeper pays over-cap and failed-campaign refunds), settle, ready, launch, fee cycle incl. burn
 export const PROVISIONING_TAGS=new Set([0,9]);// init campaign, configure parents
-export const USER_TAGS=new Set([1,3,7,8,10]);// commit, refund, claims: never operator-signed
+export const USER_TAGS=new Set([1,7,8,10]);// commit, refund, claims: never operator-signed
 export const DEFAULT_LIMITS={maxComputeUnits:1_400_000,maxPriorityFeeLamports:50_000_000,maxTransferLamports:500_000_000,maxRentLamports:20_000_000,maxHourlyLamports:1_000_000_000,maxInstructions:24};
 const u32=(d,o=0)=>d.length>=o+4?d.readUInt32LE(o):null,u64=(d,o=0)=>d.length>=o+8?d.readBigUInt64LE(o):null;
 export function feeAuthority(programId,campaign){return PublicKey.findProgramAddressSync([Buffer.from('fee_authority'),new PublicKey(campaign).toBuffer()],new PublicKey(programId))[0].toBase58();}
