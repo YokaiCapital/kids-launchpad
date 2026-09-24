@@ -49,7 +49,11 @@ if(profile.network==='mainnet'&&authority===operator.publicKey.toBase58())consol
 if(existsSync(new URL('./campaign-plan.json',import.meta.url))){
  // A finished test campaign (failed, every commitment refunded) is archived first when KIDS_ACTIVE_CAMPAIGN_RENEW is set;
  // a launched campaign is never replaced here. The new campaign then comes from the (new) plan.
- const renewSetting=process.env.KIDS_ACTIVE_CAMPAIGN_RENEW;
+ // KIDS_ACTIVE_CAMPAIGN_RESTORE=<campaign>: put an archived campaign back before anything else runs (used once on
+ // 24 Sep 2026 after a renewal archived the launched coin). With it set, renewal is skipped entirely.
+ const restoreSetting=process.env.KIDS_ACTIVE_CAMPAIGN_RESTORE;
+ if(restoreSetting){const renew=await import('../../localnet/renew-active-launch.mjs');try{renew.restoreActiveCampaign(restoreSetting.trim(),line=>console.log(JSON.stringify(line)));}catch(error){console.log(JSON.stringify({event:'active-campaign-restore-skipped',reason:String(error.message).slice(0,200)}));}}
+ const renewSetting=restoreSetting?null:process.env.KIDS_ACTIVE_CAMPAIGN_RENEW;
  if(renewSetting){const renew=await import('../../localnet/renew-active-launch.mjs');const setting=renew.parseRenewSetting(renewSetting);if(setting?.refused)console.log(JSON.stringify({event:'active-campaign-renew-refused',reason:setting.refused}));else if(setting){try{const r=await renew.renewFinishedActiveLaunch({mode:setting.mode,token:setting.token,log:line=>console.log(JSON.stringify(line))});console.log(JSON.stringify({event:'active-campaign-renew',...r}));}catch(error){console.log(JSON.stringify({event:'active-campaign-renew-failed',reason:String(error.message).slice(0,200)}));}}}
  const {provisionActiveLaunch}=await import('../../localnet/provision-active-launch.mjs');
  // A scheduled opening (plan.opensAt): the coin is made now, the campaign at the scheduled time. The supervisor keeps

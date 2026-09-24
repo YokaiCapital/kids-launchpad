@@ -1,5 +1,5 @@
 import test from 'node:test';import assert from 'node:assert/strict';import {mkdtempSync,writeFileSync,existsSync,readFileSync,mkdirSync} from 'node:fs';import {tmpdir} from 'node:os';import {join} from 'node:path';
-import {canRenewActiveCampaign,archiveActiveCampaignFiles,unresolvedIntents,parseRenewSetting,tokenAlreadyApplied,ACTIVE_CAMPAIGN_FILES} from '../renew-active-launch.mjs';
+import {canRenewActiveCampaign,archiveActiveCampaignFiles,restoreArchivedCampaignFiles,unresolvedIntents,parseRenewSetting,tokenAlreadyApplied,ACTIVE_CAMPAIGN_FILES} from '../renew-active-launch.mjs';
 const failed={configured:true,phase:'failed',totalLamports:'16000000',refundedLamports:'16000000',receiptCount:'6',settledReceiptCount:'6',escrowAddress:'J7KdyyREzrcyzZWpEVo2t2oGYncXyh4gSotgCVxj7ske'};
 test('only a failed, fully refunded, fully settled campaign may be renewed',()=>{
  assert.equal(canRenewActiveCampaign(failed).ok,true);
@@ -54,4 +54,15 @@ test("'any' needs a token so a restart never archives a launched coin twice; 'fi
  assert.equal(parseRenewSetting('bogus'),null);assert.equal(parseRenewSetting(''),null);assert.equal(parseRenewSetting(undefined),null);
  const dir=mkdtempSync(join(tmpdir(),'kids-renew-token-'));assert.equal(tokenAlreadyApplied(dir,'t1'),false);
  writeFileSync(join(dir,'renew-applied.json'),JSON.stringify({tokens:['t1']}));assert.equal(tokenAlreadyApplied(dir,'t1'),true);assert.equal(tokenAlreadyApplied(dir,'t2'),false);assert.equal(tokenAlreadyApplied(dir,null),false);
+});
+
+test('restoring an archived campaign moves every file back and keeps whatever replaced it aside; nothing is deleted',()=>{
+ const dir=mkdtempSync(join(tmpdir(),'kids-restore-'));const campaign='9FjwHicbkzP17NEW94UasBa3LfWtqmsmddzstq8UqKxP';
+ for(const name of ACTIVE_CAMPAIGN_FILES)writeFileSync(join(dir,name),JSON.stringify({real:true,name}));writeFileSync(join(dir,'parent-snapshot-'+campaign+'.json'),'{"real":true}');
+ const archived=archiveActiveCampaignFiles(dir,campaign);assert.equal(archived.moved.length,ACTIVE_CAMPAIGN_FILES.length+1);
+ writeFileSync(join(dir,'active-launch.json'),JSON.stringify({real:false,ready:false}));writeFileSync(join(dir,'active-launch-setup-keys.json'),'{"fresh":true}');
+ const r=restoreArchivedCampaignFiles(dir,campaign,'stamp');
+ assert.equal(r.moved.length,ACTIVE_CAMPAIGN_FILES.length+1);assert.deepEqual(r.replaced.sort(),['active-launch-setup-keys.json','active-launch.json']);
+ assert.equal(JSON.parse(readFileSync(join(dir,'active-launch.json'),'utf8')).real,true);assert.equal(JSON.parse(readFileSync(join(dir,'archive',campaign+'-replaced-stamp','active-launch.json'),'utf8')).real,false);
+ assert.throws(()=>restoreArchivedCampaignFiles(dir,campaign,'again'),/No archived campaign files/);assert.throws(()=>restoreArchivedCampaignFiles(dir,'bad address'),/invalid/);
 });
