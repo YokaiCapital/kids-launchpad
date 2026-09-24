@@ -51,7 +51,9 @@ export async function fetchJupiterParentRoute({apiBase='https://lite-api.jup.ag/
  if(slippageBps>MAX_SLIPPAGE_BPS)throw Error('Slippage above 1%');if(BigInt(amount)>MAX_SLICE_LAMPORTS)throw Error('Slice above 0.5 SOL');
  // Some venues refuse a swap whose user is a program address signing by CPI (HumidiFi: 'real_user did not sign the
  // transaction', 24 Sep 2026). They are excluded from the quote; KIDS_JUPITER_EXCLUDE_DEXES extends the list.
- const excludeDexes=[...new Set(['HumidiFi',...String(process.env.KIDS_JUPITER_EXCLUDE_DEXES||'').split(',').map(x=>x.trim()).filter(Boolean)])].join(',');
+ // Live 24 Sep 2026: Kipseli refused ('real_user did not sign'), Quantum failed (0x9); the other private market makers
+ // share the real-user rule. Pools that any signer may use (Raydium, Meteora, Orca, Pump.fun, Flux, Manifest, Scorch) stay.
+ const excludeDexes=[...new Set(['HumidiFi','Kipseli','Quantum','SolFi','SolFi V2','Obric V2','ZeroFi','GoonFi',...String(process.env.KIDS_JUPITER_EXCLUDE_DEXES||'').split(',').map(x=>x.trim()).filter(Boolean)])].join(',');
  const q=new URLSearchParams({inputMint:NATIVE_MINT.toBase58(),outputMint:parentMint.toBase58(),amount:String(amount),slippageBps:String(slippageBps),swapMode:'ExactIn',restrictIntermediateTokens:'true',maxAccounts:'40',excludeDexes});
  const quoteRes=await fetchImpl(apiBase+'/quote?'+q,{signal:AbortSignal.timeout(15000)});if(!quoteRes.ok)throw Error('Jupiter quote unavailable ('+quoteRes.status+')');const quote=await quoteRes.json();
  if(quote.inputMint!==NATIVE_MINT.toBase58()||quote.outputMint!==parentMint.toBase58()||String(quote.inAmount)!==String(amount))throw Error('Jupiter quote does not match the request');
