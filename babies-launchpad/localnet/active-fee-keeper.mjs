@@ -152,7 +152,7 @@ export function createActiveFeeKeeper({resolve=()=>resolvePostlaunchCampaign('ac
     if(!Number.isSafeInteger(journal.sequence)||journal.sequence<0)throw Error('Invalid fee journal sequence');
     journal.current={...operation,id:'fee:'+journal.sequence++};persist();operation=journal.current;
    }
-   let instruction,lookupTables=[];
+   let instruction,lookupTables=[];let setupInstructions=[];
    if(operation.kind==='init')instruction=initFeesInstruction(ctx,campaign,admin.publicKey,mint);
    else if(operation.kind==='ata'){
     const pair=atas[operation.index];if(!pair)throw Error('Invalid ATA operation');const [tokenMint,owner]=pair;instruction=createAssociatedTokenAccountIdempotentInstruction(admin.publicKey,getAssociatedTokenAddressSync(tokenMint,owner,true,programOf(tokenMint)),owner,tokenMint,programOf(tokenMint));
@@ -188,6 +188,9 @@ export function createActiveFeeKeeper({resolve=()=>resolvePostlaunchCampaign('ac
      }
      else throw Error('Unknown parent buyback route mode');
      operation.slice=executed.toString();operation.executedAmount=executed.toString();lookupTables=route.lookupTables;
+     // Token accounts the route needs for the fee authority (wSOL, the parent, an intermediate token): created in the same
+     // transaction, idempotently, rent paid by the operator; the signer allows creates owned by the fee authority.
+     setupInstructions=(route.setup||[]).map(x=>createAssociatedTokenAccountIdempotentInstruction(admin.publicKey,x.ata,f.authority,x.mint,x.tokenProgram));if(setupInstructions.length)operation.setupAccounts=(route.setup||[]).map(x=>x.ata.toBase58());
      const sliceUsed=executed;
      instruction=jupiterBuyBurnInstruction(ctx,campaign,admin.publicKey,mint,output,operation.index,sliceUsed,minOutput,expiry,programOf(output),route);
     }
@@ -196,8 +199,8 @@ export function createActiveFeeKeeper({resolve=()=>resolvePostlaunchCampaign('ac
    const before=await readFees(ctx,campaign,mint).catch(()=>null);
    let signature;
    try{signature=await send(operation.id,async(block,operationId)=>{
-    if(!tables.length){const tx=new Transaction({feePayer:admin.publicKey,...block}).add(ComputeBudgetProgram.setComputeUnitLimit({units:1200000}),instruction);await admin.sign(tx,{operationId});return tx;}
-    const message=new TransactionMessage({payerKey:admin.publicKey,recentBlockhash:block.blockhash,instructions:[ComputeBudgetProgram.setComputeUnitLimit({units:1200000}),instruction]}).compileToV0Message(tables);const tx=new VersionedTransaction(message);await admin.sign(tx,{operationId});return tx;});
+    if(!tables.length){const tx=new Transaction({feePayer:admin.publicKey,...block}).add(ComputeBudgetProgram.setComputeUnitLimit({units:1200000}),...setupInstructions,instruction);await admin.sign(tx,{operationId});return tx;}
+    const message=new TransactionMessage({payerKey:admin.publicKey,recentBlockhash:block.blockhash,instructions:[ComputeBudgetProgram.setComputeUnitLimit({units:1200000}),...setupInstructions,instruction]}).compileToV0Message(tables);const tx=new VersionedTransaction(message);await admin.sign(tx,{operationId});return tx;});
    }catch(error){
     // Accrued pool fees too small to withdraw (CPMM ZeroTradingTokens): nothing to collect yet. Release the operation and
     // wait a full interval instead of retrying the same transaction every tick.

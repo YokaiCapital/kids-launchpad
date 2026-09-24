@@ -45,10 +45,23 @@ export async function fetchJupiterParentRoute({apiBase='https://lite-api.jup.ag/
  const swapRes=await fetchImpl(apiBase+'/swap-instructions',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(body),signal:AbortSignal.timeout(15000)});if(!swapRes.ok)throw Error('Jupiter swap instructions unavailable ('+swapRes.status+')');const swap=await swapRes.json();
  if(swap.error)throw Error('Jupiter refused: '+String(swap.error).slice(0,120));
  const ix=swap.swapInstruction;if(!ix||ix.programId!==JUPITER_PROGRAM.toBase58())throw Error('Swap instruction is not Jupiter');
- if((swap.setupInstructions??[]).length||swap.cleanupInstruction||(swap.otherInstructions??[]).length)throw Error('Jupiter wants setup or cleanup instructions; the fee custody accounts must already exist');
+ // Jupiter (skipUserAccountsRpcCalls) lists idempotent token-account creates for the fee authority as setup: the wSOL and
+ // parent custody accounts plus any intermediate-token account its route needs. Those are harmless and the keeper
+ // creates them itself, rent paid by the operator (the fee authority is a program address and cannot pay). Anything
+ // else (a different program, a different owner, a non-idempotent create, cleanup or other instructions) is refused.
+ const ATA_PROGRAM='ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL';
+ const setup=(swap.setupInstructions??[]).map(si=>{
+  if(si.programId!==ATA_PROGRAM||si.data!=='AQ=='||!Array.isArray(si.accounts)||si.accounts.length!==6)throw Error('Jupiter setup instruction is not an idempotent token-account create');
+  const [payer,ata,owner,mint,system,tokenProgram]=si.accounts.map(a=>a.pubkey);
+  if(owner!==feeAuthority.toBase58())throw Error('Jupiter setup creates a token account for another owner');
+  if(system!=='11111111111111111111111111111111'||![TOKEN_PROGRAM_ID.toBase58(),'TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb'].includes(tokenProgram))throw Error('Jupiter setup uses an unknown program');
+  const expected=getAssociatedTokenAddressSync(new PublicKey(mint),feeAuthority,true,new PublicKey(tokenProgram)).toBase58();if(expected!==ata)throw Error('Jupiter setup token account is not the fee authority ATA');
+  return {mint:new PublicKey(mint),ata:new PublicKey(ata),tokenProgram:new PublicKey(tokenProgram)};
+ });
+ if(swap.cleanupInstruction||(swap.otherInstructions??[]).length)throw Error('Jupiter wants cleanup or other instructions; refused');
  const data=Buffer.from(ix.data,'base64');decodeRouteV2Header(data,{amount,minOut});
  const accounts=ix.accounts.map(a=>({pubkey:new PublicKey(a.pubkey),isSigner:!!a.isSigner,isWritable:!!a.isWritable}));
  const expectedHead=[feeAuthority,getAssociatedTokenAddressSync(NATIVE_MINT,feeAuthority,true),getAssociatedTokenAddressSync(parentMint,feeAuthority,true,parentProgram),NATIVE_MINT,parentMint,TOKEN_PROGRAM_ID,parentProgram,JUPITER_PROGRAM,JUPITER_EVENT_AUTHORITY,JUPITER_PROGRAM];
  if(accounts.length<expectedHead.length||!expectedHead.every((k,i)=>accounts[i].pubkey.equals(k)))throw Error('Jupiter route does not use the fee custody accounts as its user accounts');
- return {data,remainingAccounts:accounts.slice(expectedHead.length).map(a=>({...a,isSigner:false})),lookupTables:(swap.addressLookupTableAddresses??[]).map(x=>new PublicKey(x)),quotedOut:BigInt(quote.outAmount),quote:{outAmount:String(quote.outAmount),priceImpactPct:String(quote.priceImpactPct??'0')},source:'jupiter-api'};
+ return {data,setup,remainingAccounts:accounts.slice(expectedHead.length).map(a=>({...a,isSigner:false})),lookupTables:(swap.addressLookupTableAddresses??[]).map(x=>new PublicKey(x)),quotedOut:BigInt(quote.outAmount),quote:{outAmount:String(quote.outAmount),priceImpactPct:String(quote.priceImpactPct??'0')},source:'jupiter-api'};
 }
