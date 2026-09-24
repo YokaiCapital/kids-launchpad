@@ -103,6 +103,23 @@ export function nextCollectionDelay({delta,current,base,max=COLLECT_THRESHOLDS.m
  if(sol>=COLLECT_THRESHOLDS.lamports)return base;
  return Math.min(max,Math.max(base,(Number(current)||base)*4));
 }
+/** A parent buyback the tick could not place: the quote was refused (price impact over the cap after halving, Jupiter
+ * unavailable or inconsistent) or the RPC refused the signed packet at preflight (nothing was broadcast). Returns the
+ * category, or null for every other error (those keep the existing behaviour: rethrow, retry the same operation). */
+export function buybackRefusal(error){const m=String(error?.message||error);
+ if(/price impact/i.test(m))return 'price-impact';
+ if(/Jupiter (quote|swap instructions) unavailable|Jupiter quote (does not match|too small)|Jupiter route/i.test(m))return 'jupiter-quote';
+ if(/Transaction simulation failed|Simulation failed/i.test(m)&&!/Blockhash not found/i.test(m))return 'simulation';
+ return null;}
+/** Release a refused buyback so the next tick starts fresh and the OTHER parent takes the next turn (24 Sep 2026: a
+ * Buttcoin packet refused at preflight was resumed every tick and Fartcoin never ran). A signed but refused packet is
+ * kept in the journal under a closed key, never deleted. */
+export function releaseRefusedBuyback(journal,operation,reason,now=Date.now){
+ const old=journal.attempts?.[operation.id];
+ if(old&&!old.confirmed){journal.attempts[operation.id+':'+old.createdAt]={...old,closedReason:'refused:'+reason};delete journal.attempts[operation.id];}
+ journal.current=null;journal.lastBuybackParent=operation.index;
+ const counts=journal.buybackRefusals||{};counts[operation.index]=(counts[operation.index]||0)+1;journal.buybackRefusals=counts;journal.lastBuybackRefusal={parent:operation.index,reason,at:now()};
+ return journal;}
 export function isNothingToCollect(operation,error){return operation?.kind==='collect'&&/0x1776|ZeroTradingTokens/.test(String(error?.message||error));}
 /** Counter changes caused by one confirmed fee operation (strings, only the counters that moved). */
 export function feeDelta(before,after){if(!before||!after)return null;const out={};for(const k of Object.keys(after)){const d=BigInt(after[k])-BigInt(before[k]||0n);if(d!==0n)out[k]=d.toString();}return out;}
@@ -159,6 +176,7 @@ export function createActiveFeeKeeper({resolve=()=>resolvePostlaunchCampaign('ac
     if(!Number.isSafeInteger(journal.sequence)||journal.sequence<0)throw Error('Invalid fee journal sequence');
     journal.current={...operation,id:'fee:'+journal.sequence++};persist();operation=journal.current;
    }
+   try{
    let instruction,lookupTables=[];let setupInstructions=[];
    if(operation.kind==='init')instruction=initFeesInstruction(ctx,campaign,admin.publicKey,mint);
    else if(operation.kind==='ata'){
@@ -221,6 +239,12 @@ export function createActiveFeeKeeper({resolve=()=>resolvePostlaunchCampaign('ac
    if(operation.kind==='buy-burn'){journal.lastBuybackParent=operation.index;persist();}
    if(operation.kind==='collect'){journal.lastCollectedAt=await chainTime(c);journal.collectDelaySeconds=nextCollectionDelay({delta:feeDelta(before,after),current:journal.collectDelaySeconds,base:collectionIntervalSeconds});if(journal.collectDelaySeconds>collectionIntervalSeconds)console.log(JSON.stringify({event:'fees-collect-backoff',campaign:identity.campaign,nextInSeconds:journal.collectDelaySeconds}));}journal.current=null;persist();
    return {status:'completed',operation:operation.kind,signature,campaign:identity.campaign};
+   }catch(error){
+    const reason=operation.kind==='buy-burn'?buybackRefusal(error):null;if(!reason)throw error;
+    releaseRefusedBuyback(journal,operation,reason);persist();
+    console.log(JSON.stringify({event:'buyback-refused',campaign:identity.campaign,parent:operation.index,reason,detail:String(error.message).replace(/\s+/g,' ').slice(0,160)}));
+    return {status:'buyback-refused',parent:operation.index,reason,campaign:identity.campaign};
+   }
   }finally{running=false;}
  };
 }

@@ -3,7 +3,7 @@ import {LOCK} from '../atomic-launch.mjs';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {Keypair} from '@solana/web3.js';
-import {createActiveFeeKeeper,lockedPositionAmount,feePlan,validateActiveFeeIdentity} from '../active-fee-keeper.mjs';
+import {createActiveFeeKeeper,lockedPositionAmount,feePlan,validateActiveFeeIdentity,buybackRefusal,releaseRefusedBuyback} from '../active-fee-keeper.mjs';
 const counters=()=>({childPending:0n,totalSol:168n,treasuryPaid:0n,devPaid:0n,parentAAllocated:0n,parentBAllocated:0n,parentASpent:0n,parentBSpent:0n});
 function selected(){const admin=Keypair.generate(),mint=Keypair.generate().publicKey,feeNft=Keypair.generate().publicKey,campaign=Keypair.generate().publicKey,programId=Keypair.generate().publicKey,dev=Keypair.generate().publicKey;const value={scope:'active-localnet',ctx:{programId,connection:{rpcEndpoint:'http://127.0.0.1:19099'},manifest:{network:'localnet',rpcUrl:'http://127.0.0.1:19099',genesisHash:'genesis',sha256:'binary'}},campaign,state:{phase:3,mint,feeNft,creator:admin.publicKey,treasury:admin.publicKey,dev}};value.record={network:'localnet',ready:true,address:campaign.toBase58(),mint:mint.toBase58(),feeNft:feeNft.toBase58(),creator:admin.publicKey.toBase58(),treasury:admin.publicKey.toBase58(),dev:dev.toBase58(),genesisHash:'genesis',programId:programId.toBase58(),programSha256:'binary',parentMints:[Keypair.generate().publicKey.toBase58(),Keypair.generate().publicKey.toBase58()]};return {value,admin};}
 test('fee plan burns the coin-side fees before cumulative distribution and remaining parent budgets',()=>{
@@ -64,3 +64,28 @@ test('resumed operations: an already signed one is never re-planned; an unsigned
 });
 
 test('parent buyback slippage defaults to 1 % and never exceeds the route cap',async()=>{const {parentBuybackSlippageBps}=await import('../active-fee-keeper.mjs');assert.equal(parentBuybackSlippageBps({}),100);assert.equal(parentBuybackSlippageBps({KIDS_PARENT_BUYBACK_SLIPPAGE_BPS:'50'}),50);assert.throws(()=>parentBuybackSlippageBps({KIDS_PARENT_BUYBACK_SLIPPAGE_BPS:'0'}));assert.throws(()=>parentBuybackSlippageBps({KIDS_PARENT_BUYBACK_SLIPPAGE_BPS:'300'}),/1 %/);const {MAX_SLIPPAGE_BPS}=await import('../jupiter-route.mjs');assert.ok(parentBuybackSlippageBps({})<=MAX_SLIPPAGE_BPS);});
+
+test('buybackRefusal classifies only refusals the next tick can re-plan',()=>{
+ assert.equal(buybackRefusal(Error('Quote price impact 57 bps exceeds the cap')),'price-impact');
+ assert.equal(buybackRefusal(Error('Jupiter quote unavailable (429)')),'jupiter-quote');
+ assert.equal(buybackRefusal(Error('Jupiter quote does not match the request')),'jupiter-quote');
+ assert.equal(buybackRefusal(Error('Simulation failed. \nMessage: Transaction simulation failed: Error processing Instruction 3: custom program error: 0x1.')),'simulation');
+ assert.equal(buybackRefusal(Error('Simulation failed. \nMessage: Transaction simulation failed: Blockhash not found.')),null);
+ assert.equal(buybackRefusal(Error('Operator confirmation unresolved; retry saved transaction')),null);
+ assert.equal(buybackRefusal(Error('fetch failed')),null);
+});
+test('releaseRefusedBuyback passes the turn, clears the operation and keeps the refused packet under a closed key',()=>{
+ const journal={attempts:{'fee:7':{signature:'sig7',wire:'w',createdAt:1000,block:{}}},current:{kind:'buy-burn',index:1,id:'fee:7'},lastBuybackParent:0};
+ releaseRefusedBuyback(journal,journal.current,'simulation',()=>2000);
+ assert.equal(journal.current,null);
+ assert.equal(journal.lastBuybackParent,1);
+ assert.equal(journal.attempts['fee:7'],undefined);
+ assert.equal(journal.attempts['fee:7:1000'].closedReason,'refused:simulation');
+ assert.equal(journal.attempts['fee:7:1000'].signature,'sig7');
+ assert.deepEqual(journal.buybackRefusals,{1:1});
+ assert.deepEqual(journal.lastBuybackRefusal,{parent:1,reason:'simulation',at:2000});
+ const confirmed={attempts:{'fee:8':{signature:'sig8',confirmed:true,createdAt:1}},current:{kind:'buy-burn',index:0,id:'fee:8'}};
+ releaseRefusedBuyback(confirmed,confirmed.current,'price-impact',()=>3000);
+ assert.equal(confirmed.attempts['fee:8'].confirmed,true,'a confirmed attempt is never moved');
+ assert.equal(confirmed.lastBuybackParent,0);
+});
