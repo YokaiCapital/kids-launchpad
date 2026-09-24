@@ -1,6 +1,7 @@
 import {escrowIntentRetry} from './escrow-intent-retry.mjs';
 import {walletDenied,DENIED_MESSAGE} from '../shared/denylist.mjs';
 import {acceptedProgramHash} from './program-lineage.mjs';
+import {manifestFeatures} from './program-builds.mjs';
 import {createIntentRetention,intentHistorySize,summarizeIntents} from '../shared/intent-retention.mjs';
 import {reconcileSignedIntents} from './chain-reconcile.mjs';
 import {createOperatorSender} from './operator-journal.mjs';
@@ -86,7 +87,7 @@ export async function readActive(owner){
  {const raw=read(manifestPath);if(raw.ready!==true&&raw.opensAt)return {configured:false,scheduled:true,mint:raw.mint||null,opensAt:raw.opensAt,network:PROFILE.network,next:readLaunchSchedule(),chainTimeUnix:Math.floor(Date.now()/1000)};}
  const {ctx,m,c,now}=await publicCampaign();
  const r=owner?await readActiveReceipt(ctx,c.address,owner):{committed:0n,refunded:0n,sequence:0n},a=activeAmounts(c,r,now);
- return {configured:true,network:PROFILE.network,version:3,scope:scopeFor(PROFILE),next:readLaunchSchedule(),genesisHash:ctx.manifest.genesisHash,programId:ctx.programId.toBase58(),escrowAddress:m.address,mint:m.mint,phase:a.phase,chainTimeUnix:now,deadlineUnix:c.deadline,launchDeadlineUnix:c.launchDeadline,totalLamports:c.total.toString(),softCapLamports:c.soft.toString(),hardCapLamports:c.hard.toString(),refundedLamports:c.refunded.toString(),settledAcceptedLamports:c.settledAccepted.toString(),receiptCount:c.receiptCount.toString(),settledReceiptCount:c.settledReceiptCount.toString(),poolSoftUsd:poolUsd(c.soft),poolHardUsd:poolUsd(c.hard),referenceSolUsd:REFERENCE_SOL_USD,explorerUrl:PROFILE.explorerUrl,explorerCluster:PROFILE.explorerCluster,mintExplorerUrl:explorerLink(PROFILE,'token',m.mint),pool:c.phase===3?c.pool.toBase58():null,user:owner?{owner,committedLamports:r.committed.toString(),acceptedLamports:a.accepted.toString(),refundableLamports:a.refundable.toString(),refundedLamports:r.refunded.toString(),settled:r.settled}:null};
+ return {configured:true,network:PROFILE.network,version:3,scope:scopeFor(PROFILE),next:readLaunchSchedule(),programFeatures:manifestFeatures(ctx.manifest),genesisHash:ctx.manifest.genesisHash,programId:ctx.programId.toBase58(),escrowAddress:m.address,mint:m.mint,phase:a.phase,chainTimeUnix:now,deadlineUnix:c.deadline,launchDeadlineUnix:c.launchDeadline,totalLamports:c.total.toString(),softCapLamports:c.soft.toString(),hardCapLamports:c.hard.toString(),refundedLamports:c.refunded.toString(),settledAcceptedLamports:c.settledAccepted.toString(),receiptCount:c.receiptCount.toString(),settledReceiptCount:c.settledReceiptCount.toString(),poolSoftUsd:poolUsd(c.soft),poolHardUsd:poolUsd(c.hard),referenceSolUsd:REFERENCE_SOL_USD,explorerUrl:PROFILE.explorerUrl,explorerCluster:PROFILE.explorerCluster,mintExplorerUrl:explorerLink(PROFILE,'token',m.mint),pool:c.phase===3?c.pool.toBase58():null,user:owner?{owner,committedLamports:r.committed.toString(),acceptedLamports:a.accepted.toString(),refundableLamports:a.refundable.toString(),refundedLamports:r.refunded.toString(),settled:r.settled}:null};
 }
 let intents=existsSync(intentPath)?read(intentPath):{};
 const history=createIntentRetention({file:intentPath,service:'active-launch',intents,persist:()=>save(intentPath,intents),isBusy:key=>sending.has(key),describe:async (i,key,memo)=>{
