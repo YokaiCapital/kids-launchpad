@@ -33,6 +33,12 @@ const E_DISTRIBUTION_PROGRAM_INVALID:u32=41;
 const E_DISTRIBUTION_FUNDING_MISMATCH:u32=42;
 const E_LAUNCH_ACCOUNT_COUNT:u32=43;
 const E_VAULT_NOT_CREATED:u32=44;
+/// Free parent rewards (tag 10) can be claimed for 30 days after the launch time the campaign records at offset 232
+/// (owner, 24 September 2026). Tag 11 then burns what was not claimed.
+/// 45: tag 10 after the claim window closed. 46: tag 11 while the claim window is still open.
+const PARENT_CLAIM_WINDOW:i64=2_592_000;
+const E_PARENT_CLAIM_EXPIRED:u32=45;
+const E_PARENT_CLAIM_WINDOW_OPEN:u32=46;
 fn err(n:u32)->ProgramError{ProgramError::Custom(n)}
 fn read64(d:&[u8],at:usize)->Result<u64,ProgramError>{Ok(u64::from_le_bytes(d.get(at..at+8).ok_or(ProgramError::InvalidInstructionData)?.try_into().unwrap()))}
 fn read_key(d:&[u8],at:usize)->Result<Pubkey,ProgramError>{Ok(Pubkey::new_from_array(d.get(at..at+32).ok_or(ProgramError::InvalidAccountData)?.try_into().unwrap()))}
@@ -75,10 +81,6 @@ fn parent_token(a:&AccountInfo,mint:&Pubkey,owner:&Pubkey,token_program:&Pubkey)
  if read_key(&d,0)?!=*mint||read_key(&d,32)?!=*owner||d[108]!=1||d[72..76]!=[0;4]||d[129..133]!=[0;4]{return Err(err(72))}
  read64(&d,64)
 }
-fn parent_ata(a:&AccountInfo,owner:&Pubkey,mint:&Pubkey,token_program:&Pubkey)->ProgramResult{
- let ata=solana_program::pubkey!("ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL");
- if *a.key==Pubkey::find_program_address(&[owner.as_ref(),token_program.as_ref(),mint.as_ref()],&ata).0{Ok(())}else{Err(err(72))}
-}
 #[cfg(test)]mod parent_token_tests{use super::*;use solana_program::account_info::AccountInfo;
  fn mint_data(supply:u64,len:usize,tlv:&[(u16,usize)])->Vec<u8>{let mut d=vec![0u8;len.max(82)];d[36..44].copy_from_slice(&supply.to_le_bytes());d[45]=1;if len>82{d[165]=1;let mut at=166;for (k,l) in tlv{d.extend_from_slice(&[0;0]);if at+4+l>d.len(){d.resize(at+4+l,0);}d[at..at+2].copy_from_slice(&k.to_le_bytes());d[at+2..at+4].copy_from_slice(&(*l as u16).to_le_bytes());at+=4+l;}}d}
  fn info<'a>(key:&'a Pubkey,owner:&'a Pubkey,data:&'a mut Vec<u8>,lamports:&'a mut u64)->AccountInfo<'a>{AccountInfo::new(key,false,false,lamports,data,owner,false,0)}
@@ -117,6 +119,8 @@ impl Campaign{
  fn write(&self,a:&AccountInfo)->ProgramResult{let mut d=a.try_borrow_mut_data()?;d[..8].copy_from_slice(CAMPAIGN_MAGIC);d[8..40].copy_from_slice(self.creator.as_ref());for(at,n)in[(40,self.nonce),(48,self.soft),(56,self.hard),(64,self.deadline as u64),(72,self.launch_deadline as u64),(80,self.total),(88,self.refunded)]{put64(&mut d,at,n)}d[96]=self.phase;d[97]=self.bump;put64(&mut d,104,self.receipt_count);put64(&mut d,112,self.settled_count);put64(&mut d,120,self.settled_accepted);put64(&mut d,160,self.supply);put64(&mut d,232,self.launch_time as u64);for(at,key)in[(128,self.child_mint),(168,self.dev),(200,self.treasury),(240,self.pool),(272,self.fee_nft),(OFF_DISTRIBUTION_PROGRAM,self.distribution_program)]{d[at..at+32].copy_from_slice(key.as_ref());}d[OFF_DISTRIBUTION_ACTIVATED]=self.distribution_activated as u8;Ok(())}
  /// Claims for this campaign are paid by the distribution program once tag 6 has activated it.
  fn refuse_claims_after_activation(&self)->ProgramResult{if self.distribution_activated{Err(err(E_DISTRIBUTION_ACTIVATED))}else{Ok(())}}
+ /// First second at which tag 10 is refused and tag 11 is allowed: 30 days after the recorded launch time.
+ fn parent_claims_expire_at(&self)->Result<i64,ProgramError>{if self.launch_time<=0{return Err(err(10))}self.launch_time.checked_add(PARENT_CLAIM_WINDOW).ok_or(err(10))}
 }
 /// Tag 0 may name a distribution program as its optional fourth account. It must be an executable program under the
 /// upgradeable loader and not this program. Absent, no distribution is recorded (zero key) and tag 6 keeps the
@@ -256,9 +260,12 @@ pub fn process_instruction(program:&Pubkey,accounts:&[AccountInfo],data:&[u8])->
   8=>claims::dev(program,accounts,body),
   9=>claims::configure(program,accounts,body),
   10=>claims::parent(program,accounts,body),
-  // Tag 22 (sell coin-side fees for SOL) is retired: coin-side fees are burned (tag 26), never sold (owner, 23 September 2026).
-  22=>Err(ProgramError::InvalidInstructionData),
-  20..=26=>fees::process(program,accounts,body,tag),
+  11=>claims::burn_expired_parent_reserves(program,accounts,body),
+  // Retired: 22 sold coin-side fees for SOL (they are burned by tag 26 since 23 September 2026); 24 and 25 bought and burned
+  // a parent through the canonical pool or Jupiter (the parent budgets buy and burn the coin through tag 27 since
+  // 24 September 2026). The keeper of an older build that sends one of these gets InvalidInstructionData and nothing moves.
+  22|24|25=>Err(ProgramError::InvalidInstructionData),
+  20|21|23|26|27=>fees::process(program,accounts,body,tag),
   _=>Err(ProgramError::InvalidInstructionData),
  }
 }
@@ -279,6 +286,7 @@ pub fn process_instruction(program:&Pubkey,accounts:&[AccountInfo],data:&[u8])->
  use super::*;
  #[test]fn rejects_alternate_supply_before_allocating_campaign(){
   let program=Pubkey::new_unique();let creator=Pubkey::new_unique();let campaign=Pubkey::new_unique();let sys=system_program::id();
+  host_tests::install(&program,0); // tag 0 reads the clock before it checks the supply
   let(mut a,mut b,mut d)=(0,0,0);let(mut x,mut y,mut z)=(vec![],vec![],vec![]);
   let accounts=[AccountInfo::new(&creator,true,true,&mut a,&mut x,&sys,false,0),AccountInfo::new(&campaign,false,true,&mut b,&mut y,&sys,false,0),AccountInfo::new(&sys,false,false,&mut d,&mut z,&sys,true,0)];
   let mut instruction=vec![0u8;145];instruction[41..73].copy_from_slice(Pubkey::new_unique().as_ref());instruction[81..113].copy_from_slice(Pubkey::new_unique().as_ref());instruction[113..145].copy_from_slice(Pubkey::new_unique().as_ref());

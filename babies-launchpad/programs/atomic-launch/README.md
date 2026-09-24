@@ -24,12 +24,14 @@ Canonical programs, configuration, vaults, mint, ATA ownership, delegates and au
 | 7 | Claim participant allocation to receipt owner (custody claims; error 40 once a distribution is activated) |
 | 8 | Claim vested dev allocation to fixed dev (custody claims; error 40 once a distribution is activated) |
 | 9 | Bind immutable parent snapshot roots before commitments |
-| 10 | Claim parent allocation with recipient-bound proof (custody claims; error 40 once a distribution is activated) |
+| 10 | Claim parent allocation with recipient-bound proof within 30 days of the launch (custody claims; error 40 once a distribution is activated; error 45 after the window) |
+| 11 | Burn the unclaimed rest of both parent reserves once the 30-day window has closed; permissionless and idempotent (error 46 while the window is open) |
 | 20 | Initialize fee accounting |
 | 21 | Collect actual LP earnings using campaign Fee Key |
-| 22 | Convert child fees to WSOL through campaign pool |
-| 23 | Distribute cumulative treasury/dev shares; reserve parent budgets |
-| 24 | Buy and burn one parent's pending budget atomically |
+| 23 | Distribute cumulative treasury/dev shares; reserve the two parent budgets |
+| 26 | Burn coin-side fees held in custody |
+| 27 | Buy the coin with a slice of the parent budgets (0.5 SOL at most) through the campaign's own pool and burn it |
+| 22, 24, 25 | Retired (sell coin fees; buy and burn a parent through the canonical pool or Jupiter): refused with InvalidInstructionData |
 
 Campaign: 384 bytes, `KIDSESC3`. Receipt: 112 bytes, `KIDSREC3`. Builders and exact instruction account order: `localnet/atomic-launch.mjs`. Reproduction commands: `docs/LAUNCH-QUALIFICATION.md`.
 
@@ -47,9 +49,11 @@ Error codes added: 40 claims refused after activation, 41 the distribution progr
 
 The remaining supply funds participant claims (43.5%), parent A/B reserves (5% each), and dev allocation (3%). Dev vesting begins at actual successful launch: 1% immediately plus 2% linearly over three UTC calendar months. Parent claims require the 0.05% snapshot threshold and Merkle proofs bound to campaign, parent, owner, balance and allocation. Roots are immutable before commitments, but their historical-balance assertions still trust the publisher. Current circulating supply may fall through voluntary burns without invalidating original-supply entitlements.
 
-The Fee Key remains with the campaign PDA. Separate `fee_authority` custody collects child/WSOL earnings, converts child fees to WSOL, and distributes actual realized proceeds cumulatively in weights 98:20:25:25/168. Parent spending and SPL burns are atomic; rounding dust remains reserved. Only the creator keeper can initiate fee actions, and fixed recipients/mints cannot be redirected. Parent pools are pinned to canonical CPMM index 2. Swaps require a positive minimum output, no more than 120 seconds of quote validity, and at least 98% of the execution-time spot quote. This is not oracle-based pricing or complete manipulation protection.
+Parent claims close 30 days (2,592,000 seconds) after the launch time the campaign records at offset 232. Tag 10 refuses a claim from that second on with error 45. Tag 11 may then be sent by anyone: it burns `reserve - claimed - burned` for each parent from launch custody in one Token burn signed by the launch authority, records the burned amounts in the parents account (parent A at 224, parent B at 232) and the time of the first run at 240, and burns nothing on a second run. Participant claims, dev claims and refunds have no window and are not touched.
 
-Fee state: 128 bytes, `KIDSFEE1`; parent state: 256 bytes, `KIDSPAR1`. Exact account/body layouts are in `localnet/atomic-claims.mjs` and `localnet/atomic-fees.mjs`.
+The Fee Key remains with the campaign PDA. Separate `fee_authority` custody collects coin/WSOL earnings, burns the coin side (tag 26), and distributes realized WSOL proceeds cumulatively in weights 98:20:25:25/168 (tag 23). The two 25/168 shares are one coin buyback budget: tag 27 spends a slice of at most 0.5 SOL and at most the two pending budgets together through the campaign's own pool (the one recorded at campaign offset 240, its config on the allowlist, vaults, mints and observation account bound to that pool), requires the fill to be at least 1 % under the spot quote from the pool's live reserves (the keeper's `min_out` may be stricter, never looser), burns every received coin unit, and books the SOL against parent A's pending budget first, then parent B's, adding the burned units to `burned_child`. Swaps require a positive minimum output and no more than 120 seconds of quote validity. Only the creator keeper can initiate fee actions, and fixed recipients/mints cannot be redirected. This is not oracle-based pricing or complete manipulation protection.
+
+Fee state: 128 bytes, `KIDSFEE1` (child 40, total 48, treasury 56, dev 64, parent A 72, parent B 80, spent A 88, spent B 96, burned A 104, burned B 112, burned child 120); parent state: 256 bytes, `KIDSPAR1` (layout next to `PARENTS_LEN` in `src/claims.rs`). Exact account/body layouts are in `localnet/atomic-claims.mjs` and `localnet/atomic-fees.mjs`; tags 11 and 27 are listed in `deployment/decisions/BUILD-6-2026-09-24.md` until the keeper builders exist.
 
 ## Verified and remaining
 

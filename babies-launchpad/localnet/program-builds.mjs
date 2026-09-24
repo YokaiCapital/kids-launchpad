@@ -3,7 +3,9 @@
 // recorded in deployment/MAINNET-IDENTITIES.json (`program.builds`), each with the features it introduces; the keeper
 // plans only what the live build supports (a v1 program has no burn instruction, so coin-side fees are converted).
 import {createHash} from 'node:crypto';
-export const CURRENT_FEATURES=Object.freeze(['burn-child-fees','cpmm-config-allowlist','claim-vaults','revoke-at-creation','jupiter-route']);
+// Build 6 refuses tags 24 and 25, so 'jupiter-route' is not a feature of the current source: the keeper must not plan a
+// parent buyback on a build that lists 'child-buyback'.
+export const CURRENT_FEATURES=Object.freeze(['burn-child-fees','cpmm-config-allowlist','claim-vaults','revoke-at-creation','parent-claim-expiry','child-buyback']);
 /** Every build the service accepts on chain: the recorded primary first, then the listed ones. */
 export function acceptedBuilds(program={}){
  const out=[];const push=b=>{if(b?.sha256&&Number.isSafeInteger(b.binarySize)&&b.binarySize>0&&!out.some(o=>o.sha256===b.sha256))out.push({sha256:b.sha256,binarySize:b.binarySize,features:Object.freeze([...(b.features||[])])});};

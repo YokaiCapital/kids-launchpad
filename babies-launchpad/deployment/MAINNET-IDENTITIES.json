@@ -125,6 +125,21 @@
           "jupiter-route"
         ],
         "note": "reproducible CI build 9aa084e (24 September 2026, runners identical): build 4 minus the over-strict custody guard that refused every live Jupiter route (the wSOL custody is repeated by Jupiter among the route's working accounts); coin custody and the other parent's custody stay refused"
+      },
+      {
+        "version": 6,
+        "sha256": null,
+        "binarySize": null,
+        "status": "pending: source patched 24 September 2026, no CI build, not deployed; record the CI hash and size here before the upgrade",
+        "features": [
+          "burn-child-fees",
+          "cpmm-config-allowlist",
+          "claim-vaults",
+          "revoke-at-creation",
+          "parent-claim-expiry",
+          "child-buyback"
+        ],
+        "note": "owner decisions of 24 September 2026 (deployment/decisions/BUILD-6-2026-09-24.md): parent claims (tag 10) close 30 days after the recorded launch time (error 45) and tag 11 then burns the unclaimed rest of both reserves from launch custody, recorded at KIDSPAR1 offsets 224/232/240; the parent buyback budgets buy and burn the coin through the campaign's own pool (tag 27, 0.5 SOL slices, 1 % sealed slippage, parent A's pending budget first); tags 24 and 25 refused, their code removed; 'jupiter-route' is not carried forward. Every live account keeps its layout; no migration"
       }
     ],
     "buildsNote": "The service accepts any listed build on chain and records the live one in its program manifest; the keeper plans only what the live build supports. Move `binarySha256`/`binarySize` to version 2 once the upgrade is verified on chain.",

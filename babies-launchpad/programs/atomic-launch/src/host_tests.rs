@@ -1,6 +1,9 @@
-//! Host-side handler tests for the campaign layout, tag 0, tag 6 account parsing, the activation CPI and the
-//! claim refusals. A syscall stub serves the clock and rent, logs every CPI and refuses it with
-//! `HOST_CPI_UNSUPPORTED`, so a handler that reaches its first CPI has passed every check before it.
+//! Host-side handler tests for the campaign layout, tag 0, tag 6 account parsing, the activation CPI, the claim
+//! refusals, the parent claim window (tags 10 and 11) and the fee handlers (tags 23 and 27). A syscall stub serves
+//! the clock and rent and logs every CPI. By default it refuses the CPI with `HOST_CPI_UNSUPPORTED`, so a handler
+//! that reaches its first CPI has passed every check before it. With `simulate_token_cpis(true)` it applies Token
+//! transfers and burns and the CPMM swap to the passed accounts, so the state a handler writes after its CPIs can be
+//! read back.
 use super::*;
 use launch::{activate_distribution,custody_after_activation,distribution_record_matches,launch_account_count,share,vault_allocations,verify_activation,DISTRIBUTION_LEN,LAUNCH_ACCOUNTS,LAUNCH_ACCOUNTS_WITH_DISTRIBUTION,LIQUIDITY_BPS};
 use solana_program::{instruction::Instruction,program_stubs::{set_syscall_stubs,SyscallStubs}};
@@ -9,23 +12,47 @@ use std::sync::Once;
 const HOST_CPI_UNSUPPORTED:u32=0xF00D;
 const TOKEN:Pubkey=solana_program::pubkey!("TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA");
 const ATA:Pubkey=solana_program::pubkey!("ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL");
+const CPMM:Pubkey=solana_program::pubkey!("CPMMoo8L3F4NbTegBCKVNunggL7H1ZpdTHKxQB5qKP1C");
+const WSOL:Pubkey=solana_program::pubkey!("So11111111111111111111111111111111111111112");
+/// Raydium's mainnet 2.5 % tier, the one the live campaign's pool uses.
+const MAINNET_CONFIG:Pubkey=solana_program::pubkey!("ESLj2Rzmvn3RhDo4Z18hY1wYmGyC9xM4ZtRXhvoFkDAi");
+const TOKEN_TRANSFER:u8=3;
+const TOKEN_BURN:u8=8;
 /// One logged CPI: the instruction and the keys the caller signed for through seeds.
 struct LoggedCpi{instruction:Instruction,signed_by_seeds:Vec<Pubkey>}
-thread_local!{static NOW:RefCell<i64>=RefCell::new(0);static PROGRAM:RefCell<Pubkey>=RefCell::new(Pubkey::default());static CPI_LOG:RefCell<Vec<LoggedCpi>>=RefCell::new(vec![]);}
+thread_local!{static NOW:RefCell<i64>=RefCell::new(0);static PROGRAM:RefCell<Pubkey>=RefCell::new(Pubkey::default());static CPI_LOG:RefCell<Vec<LoggedCpi>>=RefCell::new(vec![]);static SIMULATE:RefCell<bool>=RefCell::new(false);static SWAP_FILL:RefCell<u64>=RefCell::new(0);}
 struct HostStubs;
 impl SyscallStubs for HostStubs{
  fn sol_log(&self,_message:&str){}
  fn sol_get_clock_sysvar(&self,var_addr:*mut u8)->u64{let clock=Clock{unix_timestamp:NOW.with(|n|*n.borrow()),..Clock::default()};unsafe{std::ptr::write(var_addr as *mut Clock,clock)};0}
  fn sol_get_rent_sysvar(&self,var_addr:*mut u8)->u64{unsafe{std::ptr::write(var_addr as *mut Rent,Rent::default())};0}
- fn sol_invoke_signed(&self,instruction:&Instruction,_infos:&[AccountInfo],signers_seeds:&[&[&[u8]]])->ProgramResult{
+ fn sol_invoke_signed(&self,instruction:&Instruction,infos:&[AccountInfo],signers_seeds:&[&[&[u8]]])->ProgramResult{
   let program=PROGRAM.with(|p|*p.borrow());
   let signed_by_seeds=signers_seeds.iter().filter_map(|seeds|Pubkey::create_program_address(seeds,&program).ok()).collect();
   CPI_LOG.with(|l|l.borrow_mut().push(LoggedCpi{instruction:instruction.clone(),signed_by_seeds}));
-  Err(err(HOST_CPI_UNSUPPORTED))
+  if SIMULATE.with(|s|*s.borrow()){simulate(instruction,infos)}else{Err(err(HOST_CPI_UNSUPPORTED))}
  }
 }
+/// Applies the token movements of a Token transfer or burn, or of a CPMM `swap_base_input` (the input custody pays the
+/// input vault, the output vault pays the output custody `SWAP_FILL` units, or `min_out` when the fill is zero). Any other
+/// CPI stays refused.
+fn simulate(instruction:&Instruction,infos:&[AccountInfo])->ProgramResult{
+ let account=|i:usize|infos.iter().find(|info|*info.key==instruction.accounts[i].pubkey).ok_or(err(HOST_CPI_UNSUPPORTED));
+ let adjust=|i:usize,at:usize,delta:i128|->ProgramResult{let info=account(i)?;let mut d=info.try_borrow_mut_data()?;let n=u64::try_from(read64(&d,at)? as i128+delta).map_err(|_|err(HOST_CPI_UNSUPPORTED))?;put64(&mut d,at,n);Ok(())};
+ let data=&instruction.data;
+ if instruction.program_id==TOKEN&&data.len()==9&&data[0]==TOKEN_TRANSFER{let amount=read64(data,1)? as i128;adjust(0,64,-amount)?;return adjust(1,64,amount)}
+ if instruction.program_id==TOKEN&&data.len()==9&&data[0]==TOKEN_BURN{let amount=read64(data,1)? as i128;adjust(0,64,-amount)?;return adjust(1,36,-amount)}
+ if instruction.program_id==CPMM&&data.len()==24&&data[..8]==solana_program::hash::hash(b"global:swap_base_input").to_bytes()[..8]{
+  let amount=read64(data,8)? as i128;let min_out=read64(data,16)?;let fill=SWAP_FILL.with(|f|*f.borrow());let fill=if fill==0{min_out}else{fill} as i128;
+  adjust(4,64,-amount)?;adjust(6,64,amount)?;adjust(7,64,-fill)?;return adjust(5,64,fill)
+ }
+ Err(err(HOST_CPI_UNSUPPORTED))
+}
 static INSTALL:Once=Once::new();
-fn install(program:&Pubkey,now:i64){INSTALL.call_once(||{set_syscall_stubs(Box::new(HostStubs));});PROGRAM.with(|p|*p.borrow_mut()=*program);NOW.with(|n|*n.borrow_mut()=now);CPI_LOG.with(|l|l.borrow_mut().clear());}
+pub(super) fn install(program:&Pubkey,now:i64){INSTALL.call_once(||{set_syscall_stubs(Box::new(HostStubs));});PROGRAM.with(|p|*p.borrow_mut()=*program);NOW.with(|n|*n.borrow_mut()=now);CPI_LOG.with(|l|l.borrow_mut().clear());SIMULATE.with(|s|*s.borrow_mut()=false);SWAP_FILL.with(|f|*f.borrow_mut()=0);}
+fn set_now(now:i64){NOW.with(|n|*n.borrow_mut()=now);}
+fn simulate_token_cpis(on:bool){SIMULATE.with(|s|*s.borrow_mut()=on);}
+fn set_swap_fill(fill:u64){SWAP_FILL.with(|f|*f.borrow_mut()=fill);}
 fn cpi_count()->usize{CPI_LOG.with(|l|l.borrow().len())}
 fn last_cpi()->(Instruction,Vec<Pubkey>){CPI_LOG.with(|l|{let l=l.borrow();let last=l.last().expect("a CPI was logged");(last.instruction.clone(),last.signed_by_seeds.clone())})}
 struct Acc{key:Pubkey,lamports:u64,data:Vec<u8>,owner:Pubkey,signer:bool,writable:bool,executable:bool}
@@ -229,4 +256,189 @@ fn init_body(nonce:u64,supply:u64,deadline:i64)->Vec<u8>{
   assert_eq!(total+custody_after_activation(supply).unwrap(),supply,"supply {supply}");assert!(custody_after_activation(supply).unwrap()<10_000);
  }
  assert_eq!(custody_after_activation(7).unwrap(),7,"a supply below one share unit stays in custody in full");
+}
+const PARENT_SNAPSHOT_SUPPLY:u64=1_000_000;
+/// KIDSPAR1 for the campaign with both parents at a 1,000,000 snapshot supply fully eligible, so a claimant holding the
+/// whole snapshot is allocated the whole reserve. `claimed` and `burned` land at 208/216 and 224/232.
+fn parents_data(w:&World,claimed:[u64;2],burned:[u64;2])->Vec<u8>{
+ let mut d=vec![0u8;256];d[..8].copy_from_slice(b"KIDSPAR1");d[8..40].copy_from_slice(w.campaign_key.as_ref());
+ d[40..72].copy_from_slice(&[0xA1;32]);d[72..104].copy_from_slice(&[0xB2;32]);
+ for (at,n) in [(168,PARENT_SNAPSHOT_SUPPLY),(176,PARENT_SNAPSHOT_SUPPLY),(184,7),(192,PARENT_SNAPSHOT_SUPPLY),(200,PARENT_SNAPSHOT_SUPPLY),(208,claimed[0]),(216,claimed[1]),(224,burned[0]),(232,burned[1])]{put64(&mut d,at,n);}d
+}
+fn parent_reserve(c:&Campaign)->u64{c.supply/10000*500}
+fn program_account(key:Pubkey)->Acc{Acc::program(key,BPF_LOADER_UPGRADEABLE)}
+/// A tag 10 call whose proof (depth 0: the root is the leaf) is valid for parent A: 11 accounts and the 18-byte body.
+fn parent_claim(w:&World,c:&Campaign)->(Vec<Acc>,Vec<u8>){
+ let owner=Pubkey::new_unique();let allocation=parent_reserve(c);
+ let mut parents=parents_data(w,[0,0],[0,0]);let root=claims::merkle(&w.campaign_key,0,&owner,PARENT_SNAPSHOT_SUPPLY,allocation,&[]);parents[104..136].copy_from_slice(&root);
+ let claim=Pubkey::find_program_address(&[b"parent_claim",w.campaign_key.as_ref(),&[0],owner.as_ref()],&w.program).0;
+ let accounts=vec![Acc::empty(Pubkey::new_unique()).signer(),w.campaign_acc(c),Acc::new(w.parents_key(),w.program,parents),Acc::empty(claim),Acc::empty(owner),Acc::empty(w.authority),
+  Acc::new(c.child_mint,TOKEN,mint_data(c.supply,None)),Acc::new(ata_key(&w.authority,&c.child_mint),TOKEN,token_data(&c.child_mint,&w.authority,c.supply)),Acc::new(ata_key(&owner,&c.child_mint),TOKEN,token_data(&c.child_mint,&owner,0)),program_account(TOKEN),Acc::program(system_program::id(),Pubkey::default())];
+ let mut body=vec![10u8,0];body.extend_from_slice(&PARENT_SNAPSHOT_SUPPLY.to_le_bytes());body.extend_from_slice(&allocation.to_le_bytes());body.push(0);
+ (accounts,body)
+}
+/// Tag 11 accounts: custody holds everything but the liquidity share and what the parents already claimed.
+fn burn_accounts(w:&World,c:&Campaign,claimed:[u64;2],burned:[u64;2])->Vec<Acc>{
+ let custody=c.supply-share(c.supply,LIQUIDITY_BPS)-claimed[0]-claimed[1]-burned[0]-burned[1];
+ vec![w.campaign_acc(c),Acc::new(w.parents_key(),w.program,parents_data(w,claimed,burned)),Acc::empty(w.authority),Acc::new(c.child_mint,TOKEN,mint_data(c.supply-burned[0]-burned[1],None)),Acc::new(ata_key(&w.authority,&c.child_mint),TOKEN,token_data(&c.child_mint,&w.authority,custody)),program_account(TOKEN)]
+}
+#[test]fn parent_claims_close_thirty_days_after_the_recorded_launch_time(){
+ let w=World::new(None);let c=w.launched();let expires=LAUNCH_NOW+2_592_000;
+ assert_eq!(PARENT_CLAIM_WINDOW,30*86_400);assert_eq!(c.parent_claims_expire_at().unwrap(),expires);
+ assert_eq!(w.campaign.parent_claims_expire_at().unwrap_err(),err(10),"no launch time before the launch");
+ let (mut open,body)=parent_claim(&w,&c);set_now(expires-1);
+ assert_eq!(run(&w,&mut open,&body).unwrap_err(),err(HOST_CPI_UNSUPPORTED),"one second before the window closes every check passes up to the claim account creation");
+ assert_eq!(last_cpi().0.program_id,system_program::id());let count=cpi_count();
+ for now in [expires,expires+1,expires+30*86_400]{let (mut closed,body)=parent_claim(&w,&c);set_now(now);assert_eq!(run(&w,&mut closed,&body).unwrap_err(),err(E_PARENT_CLAIM_EXPIRED),"at {now}");}
+ let (mut replay,body)=parent_claim(&w,&c);replay[3]=Acc::new(replay[3].key,w.program,vec![0u8;80]);set_now(expires);
+ assert_eq!(run(&w,&mut replay,&body).unwrap_err(),err(E_PARENT_CLAIM_EXPIRED),"an existing claim account is refused the same way after the window");
+ assert_eq!(cpi_count(),count,"nothing moved after the window");
+ let mut participant:Vec<Acc>=(0..7).map(|_|Acc::empty(Pubkey::new_unique())).collect();participant[0]=w.campaign_acc(&c);
+ let mut dev:Vec<Acc>=(0..6).map(|_|Acc::empty(Pubkey::new_unique())).collect();dev[0]=w.campaign_acc(&c);
+ assert_ne!(run(&w,&mut participant,&[7]).unwrap_err(),err(E_PARENT_CLAIM_EXPIRED),"participant claims have no window");
+ assert_ne!(run(&w,&mut dev,&[8]).unwrap_err(),err(E_PARENT_CLAIM_EXPIRED),"dev claims have no window");
+}
+#[test]fn expired_parent_reserves_burn_exactly_the_unclaimed_remainder_once(){
+ let w=World::new(None);let c=w.launched();let expires=LAUNCH_NOW+2_592_000;let reserve=parent_reserve(&c);
+ let claimed=[20_000_000_000_000u64,7_000_000_000_000];let remainder=[reserve-claimed[0],reserve-claimed[1]];
+ let mut early=burn_accounts(&w,&c,claimed,[0,0]);set_now(expires-1);
+ assert_eq!(run(&w,&mut early,&[11]).unwrap_err(),err(E_PARENT_CLAIM_WINDOW_OPEN));assert_eq!(cpi_count(),0);
+ set_now(expires);
+ let mut refused=burn_accounts(&w,&c,claimed,[0,0]);assert_eq!(run(&w,&mut refused,&[11]).unwrap_err(),err(HOST_CPI_UNSUPPORTED),"the burn CPI is the first CPI");
+ assert_eq!(refused[1].data,parents_data(&w,claimed,[0,0]),"a failed burn records nothing");
+ let (burn,signed)=last_cpi();assert_eq!(burn.program_id,TOKEN);assert_eq!(burn.data,[vec![TOKEN_BURN],(remainder[0]+remainder[1]).to_le_bytes().to_vec()].concat(),"exactly both remainders");
+ assert_eq!(burn.accounts.iter().map(|m|(m.pubkey,m.is_signer,m.is_writable)).collect::<Vec<_>>(),vec![(ata_key(&w.authority,&c.child_mint),false,true),(c.child_mint,false,true),(w.authority,true,false)]);
+ assert_eq!(signed,vec![w.authority]);
+ simulate_token_cpis(true);let before=parents_data(&w,claimed,[0,0]);
+ let mut accounts=burn_accounts(&w,&c,claimed,[0,0]);let custody=read64(&accounts[4].data,64).unwrap();let supply=read64(&accounts[3].data,36).unwrap();
+ run(&w,&mut accounts,&[11]).unwrap();let count=cpi_count();
+ assert_eq!(read64(&accounts[4].data,64).unwrap(),custody-remainder[0]-remainder[1],"custody lost the two remainders and nothing else");
+ assert_eq!(read64(&accounts[3].data,36).unwrap(),supply-remainder[0]-remainder[1]);
+ assert_eq!(&accounts[1].data[..224],&before[..224],"nothing below 224 changes");
+ assert_eq!(read64(&accounts[1].data,224).unwrap(),remainder[0]);assert_eq!(read64(&accounts[1].data,232).unwrap(),remainder[1]);assert_eq!(read64(&accounts[1].data,240).unwrap(),expires as u64);
+ assert!(accounts[1].data[248..].iter().all(|b|*b==0));
+ let recorded=accounts[1].data.clone();set_now(expires+86_400);
+ run(&w,&mut accounts,&[11]).unwrap();assert_eq!(cpi_count(),count,"a second call burns nothing");assert_eq!(accounts[1].data,recorded,"and keeps the first burn time");
+ assert_eq!(read64(&accounts[4].data,64).unwrap(),custody-remainder[0]-remainder[1]);
+ let mut resumed=burn_accounts(&w,&c,claimed,[remainder[0],0]);run(&w,&mut resumed,&[11]).unwrap();
+ assert_eq!(last_cpi().0.data,[vec![TOKEN_BURN],remainder[1].to_le_bytes().to_vec()].concat(),"a parent already burned is skipped");
+ assert_eq!((read64(&resumed[1].data,224).unwrap(),read64(&resumed[1].data,232).unwrap()),(remainder[0],remainder[1]));
+ let count=cpi_count();let mut fully_claimed=burn_accounts(&w,&c,[reserve,reserve],[0,0]);run(&w,&mut fully_claimed,&[11]).unwrap();
+ assert_eq!(cpi_count(),count,"fully claimed reserves leave nothing to burn");assert_eq!(read64(&fully_claimed[1].data,240).unwrap(),(expires+86_400) as u64);
+ let good=||burn_accounts(&w,&c,claimed,[0,0]);
+ let mut body=good();assert_eq!(run(&w,&mut body,&[11,0]).unwrap_err(),err(30));
+ let mut wrong_parents=good();wrong_parents[1].key=Pubkey::new_unique();assert_eq!(run(&w,&mut wrong_parents,&[11]).unwrap_err(),err(30));
+ let mut foreign_parents=good();foreign_parents[1].owner=Pubkey::new_unique();assert_eq!(run(&w,&mut foreign_parents,&[11]).unwrap_err(),err(30));
+ let mut readonly_parents=good();readonly_parents[1].writable=false;assert_eq!(run(&w,&mut readonly_parents,&[11]).unwrap_err(),err(30));
+ let mut other_campaign=good();other_campaign[1].data[8..40].copy_from_slice(Pubkey::new_unique().as_ref());assert_eq!(run(&w,&mut other_campaign,&[11]).unwrap_err(),err(30));
+ let mut wrong_authority=good();wrong_authority[2]=Acc::empty(Pubkey::new_unique());assert_eq!(run(&w,&mut wrong_authority,&[11]).unwrap_err(),err(30));
+ let mut wrong_mint=good();wrong_mint[3].key=Pubkey::new_unique();assert_eq!(run(&w,&mut wrong_mint,&[11]).unwrap_err(),err(30));
+ let mut other_custody=good();let stranger=Pubkey::new_unique();other_custody[4]=Acc::new(ata_key(&stranger,&c.child_mint),TOKEN,token_data(&c.child_mint,&stranger,c.supply));assert_eq!(run(&w,&mut other_custody,&[11]).unwrap_err(),err(30),"only launch custody burns");
+ let mut short_custody=good();put64(&mut short_custody[4].data,64,remainder[0]+remainder[1]-1);assert_eq!(run(&w,&mut short_custody,&[11]).unwrap_err(),err(30));
+ let mut not_executable=good();not_executable[5].executable=false;assert_eq!(run(&w,&mut not_executable,&[11]).unwrap_err(),err(30));
+ let mut activated=c;activated.distribution_activated=true;let mut vaulted=burn_accounts(&w,&activated,claimed,[0,0]);assert_eq!(run(&w,&mut vaulted,&[11]).unwrap_err(),err(E_DISTRIBUTION_ACTIVATED));
+ let mut unlaunched=burn_accounts(&w,&w.campaign,claimed,[0,0]);assert_eq!(run(&w,&mut unlaunched,&[11]).unwrap_err(),err(30));
+ assert_eq!(cpi_count(),count,"no refused call reached the burn");
+}
+#[test]fn retired_fee_tags_22_24_and_25_are_refused_before_any_check(){
+ let w=World::new(None);let c=w.launched();
+ for (tag,len) in [(22u8,16usize),(24,18),(25,20)]{
+  let mut accounts:Vec<Acc>=(0..len).map(|_|Acc::empty(Pubkey::new_unique())).collect();accounts[0]=w.campaign_acc(&c);accounts[1]=Acc::empty(c.creator).signer();
+  assert_eq!(run(&w,&mut accounts,&[vec![tag],vec![0u8;25]].concat()).unwrap_err(),ProgramError::InvalidInstructionData,"tag {tag}");
+  assert_eq!(run(&w,&mut accounts,&[tag]).unwrap_err(),ProgramError::InvalidInstructionData,"tag {tag} without a body");
+ }
+ assert_eq!(cpi_count(),0);
+}
+/// Fee custody and the campaign's own CPMM pool for tags 23 and 27.
+struct FeeWorld{authority:Pubkey,state_key:Pubkey,pool:Pubkey,vault_authority:Pubkey,forward:bool}
+impl FeeWorld{
+ fn new(w:&World,c:&Campaign)->Self{
+  let (mint0,mint1)=if WSOL<c.child_mint{(WSOL,c.child_mint)}else{(c.child_mint,WSOL)};
+  Self{authority:Pubkey::find_program_address(&[b"fee_authority",w.campaign_key.as_ref()],&w.program).0,state_key:Pubkey::find_program_address(&[b"fees",w.campaign_key.as_ref()],&w.program).0,
+   pool:Pubkey::find_program_address(&[b"pool",MAINNET_CONFIG.as_ref(),mint0.as_ref(),mint1.as_ref()],&CPMM).0,vault_authority:Pubkey::find_program_address(&[b"vault_and_lp_mint_auth_seed"],&CPMM).0,forward:mint0==WSOL}
+ }
+ /// KIDSFEE1: child, total, treasury, dev, parent A, parent B, spent A, spent B, burned A, burned B, burned child at 40..128.
+ fn state(&self,w:&World,counters:[u64;11])->Acc{let mut d=vec![0u8;128];d[..8].copy_from_slice(b"KIDSFEE1");d[8..40].copy_from_slice(w.campaign_key.as_ref());for (i,n) in counters.iter().enumerate(){put64(&mut d,40+8*i,*n);}Acc::new(self.state_key,w.program,d)}
+ fn counters(acc:&Acc)->[u64;11]{std::array::from_fn(|i|read64(&acc.data,40+8*i).unwrap())}
+ fn config()->Acc{let mut d=vec![0u8;236];d[..8].copy_from_slice(&solana_program::hash::hash(b"account:AmmConfig").to_bytes()[..8]);d[10..12].copy_from_slice(&7u16.to_le_bytes());put64(&mut d,12,25000);put64(&mut d,20,120000);put64(&mut d,28,40000);Acc::new(MAINNET_CONFIG,CPMM,d)}
+ /// The 16 accounts of a tag 27 call: the pool holds `reserve_sol` lamports of WSOL and `reserve_child` raw coin units.
+ fn buyback_accounts(&self,w:&World,c:&Campaign,counters:[u64;11],wsol_custody:u64,reserve_sol:u64,reserve_child:u64)->Vec<Acc>{
+  let vault_sol=Pubkey::new_unique();let vault_child=Pubkey::new_unique();let observation=Pubkey::new_unique();
+  let (vault0,vault1,mint0,mint1)=if self.forward{(vault_sol,vault_child,WSOL,c.child_mint)}else{(vault_child,vault_sol,c.child_mint,WSOL)};
+  let mut pool=vec![0u8;637];pool[..8].copy_from_slice(&solana_program::hash::hash(b"account:PoolState").to_bytes()[..8]);
+  for (i,key) in [MAINNET_CONFIG,Pubkey::new_unique(),vault0,vault1,Pubkey::new_unique(),mint0,mint1,TOKEN,TOKEN,observation].iter().enumerate(){pool[8+i*32..40+i*32].copy_from_slice(key.as_ref());}
+  vec![w.campaign_acc(c),Acc::empty(c.creator).signer(),self.state(w,counters),Acc::empty(self.authority),
+   Acc::new(ata_key(&self.authority,&WSOL),TOKEN,token_data(&WSOL,&self.authority,wsol_custody)),Acc::new(ata_key(&self.authority,&c.child_mint),TOKEN,token_data(&c.child_mint,&self.authority,counters[0])),
+   Acc::new(self.pool,CPMM,pool),Self::config(),Acc::empty(self.vault_authority),
+   Acc::new(vault_sol,TOKEN,token_data(&WSOL,&self.vault_authority,reserve_sol)),Acc::new(vault_child,TOKEN,token_data(&c.child_mint,&self.vault_authority,reserve_child)),
+   Acc::new(WSOL,TOKEN,mint_data(reserve_sol,None)),Acc::new(c.child_mint,TOKEN,mint_data(c.supply,None)),Acc::empty(observation),Acc::program(CPMM,BPF_LOADER_UPGRADEABLE),program_account(TOKEN)]
+ }
+ /// The floor tag 27 enforces right now: 1 % under the spot quote from the two vault balances.
+ fn floor(accounts:&[Acc],amount:u64)->u64{fees::quote_floor(amount,read64(&accounts[9].data,64).unwrap(),read64(&accounts[10].data,64).unwrap(),25000,fees::CHILD_BUYBACK_MAX_SLIPPAGE_BPS).unwrap()}
+ fn body(amount:u64,min_out:u64,expiry:i64)->Vec<u8>{let mut b=vec![27u8];b.extend_from_slice(&amount.to_le_bytes());b.extend_from_slice(&min_out.to_le_bytes());b.extend_from_slice(&(expiry as u64).to_le_bytes());b}
+}
+const SOL:u64=1_000_000_000;
+const BUDGET:[u64;11]=[0,1_200_000_000,0,0,200_000_000,1_000_000_000,0,0,0,0,0];
+#[test]fn child_buyback_needs_the_campaign_pool_and_a_floor_one_percent_under_spot(){
+ let w=World::new(None);let mut c=w.launched();let f=FeeWorld::new(&w,&c);c.pool=f.pool;
+ let fixture=||f.buyback_accounts(&w,&c,BUDGET,1_200_000_000,10*SOL,400_000_000_000_000);
+ let amount=SOL/2;let floor=FeeWorld::floor(&fixture(),amount);let expiry=LAUNCH_NOW+90;
+ let mut low=fixture();assert_eq!(run(&w,&mut low,&FeeWorld::body(amount,floor-1,expiry)).unwrap_err(),err(60),"one unit under the floor is refused");assert_eq!(cpi_count(),0);
+ let mut refused=fixture();assert_eq!(run(&w,&mut refused,&FeeWorld::body(amount,floor,expiry)).unwrap_err(),err(HOST_CPI_UNSUPPORTED),"at the floor the swap is the first CPI");
+ let (swap,signed)=last_cpi();assert_eq!(swap.program_id,CPMM);assert_eq!(swap.data,[solana_program::hash::hash(b"global:swap_base_input").to_bytes()[..8].to_vec(),amount.to_le_bytes().to_vec(),floor.to_le_bytes().to_vec()].concat());
+ assert_eq!(signed,vec![f.authority]);assert_eq!(swap.accounts[3].pubkey,f.pool);assert_eq!(swap.accounts[4].pubkey,ata_key(&f.authority,&WSOL));assert_eq!(swap.accounts[5].pubkey,ata_key(&f.authority,&c.child_mint));
+ assert_eq!(FeeWorld::counters(&refused[2]),BUDGET,"a failed swap books nothing");
+ simulate_token_cpis(true);
+ let mut accounts=fixture();let supply=read64(&accounts[12].data,36).unwrap();run(&w,&mut accounts,&FeeWorld::body(amount,floor,expiry)).unwrap();
+ let (burn,signed)=last_cpi();assert_eq!(burn.program_id,TOKEN);assert_eq!(burn.data,[vec![TOKEN_BURN],floor.to_le_bytes().to_vec()].concat(),"every received unit is burned");
+ assert_eq!(burn.accounts.iter().map(|m|m.pubkey).collect::<Vec<_>>(),vec![ata_key(&f.authority,&c.child_mint),c.child_mint,f.authority]);assert_eq!(signed,vec![f.authority]);
+ assert_eq!(FeeWorld::counters(&accounts[2]),[0,1_200_000_000,0,0,200_000_000,1_000_000_000,200_000_000,300_000_000,0,0,floor],"A's 0.2 SOL first, then 0.3 SOL of B; burned child grows by the fill");
+ assert_eq!(read64(&accounts[4].data,64).unwrap(),700_000_000);assert_eq!(read64(&accounts[5].data,64).unwrap(),0,"nothing bought stays in custody");assert_eq!(read64(&accounts[12].data,36).unwrap(),supply-floor);
+ let stricter=floor+1_000_000;let mut strict=fixture();run(&w,&mut strict,&FeeWorld::body(amount,stricter,expiry)).unwrap();assert_eq!(FeeWorld::counters(&strict[2])[10],stricter,"the keeper may ask for more than the floor");
+ set_swap_fill(floor-1);let mut short_fill=fixture();assert_eq!(run(&w,&mut short_fill,&FeeWorld::body(amount,floor,expiry)).unwrap_err(),err(60),"a fill under min_out fails the effect check");assert_eq!(FeeWorld::counters(&short_fill[2]),BUDGET);set_swap_fill(0);
+ let count=cpi_count();
+ let mut other_pool=c;other_pool.pool=Pubkey::new_unique();let mut wrong_campaign_pool=f.buyback_accounts(&w,&other_pool,BUDGET,1_200_000_000,10*SOL,400_000_000_000_000);assert_eq!(run(&w,&mut wrong_campaign_pool,&FeeWorld::body(amount,floor,expiry)).unwrap_err(),err(60),"the pool must be the campaign's recorded pool");
+ let mut wrong_pool=fixture();wrong_pool[6].key=Pubkey::new_unique();assert_eq!(run(&w,&mut wrong_pool,&FeeWorld::body(amount,floor,expiry)).unwrap_err(),err(60));
+ let mut wrong_config=fixture();wrong_config[7].key=Pubkey::new_unique();assert_eq!(run(&w,&mut wrong_config,&FeeWorld::body(amount,floor,expiry)).unwrap_err(),err(60));
+ let mut wrong_vault=fixture();wrong_vault[9].key=Pubkey::new_unique();assert_eq!(run(&w,&mut wrong_vault,&FeeWorld::body(amount,floor,expiry)).unwrap_err(),err(60));
+ let mut swapped_vaults=fixture();swapped_vaults.swap(9,10);assert_eq!(run(&w,&mut swapped_vaults,&FeeWorld::body(amount,floor,expiry)).unwrap_err(),err(60));
+ let mut foreign_vault=fixture();foreign_vault[10].data=token_data(&c.child_mint,&Pubkey::new_unique(),400_000_000_000_000);assert_eq!(run(&w,&mut foreign_vault,&FeeWorld::body(amount,floor,expiry)).unwrap_err(),err(72),"a vault not owned by the CPMM authority");
+ let mut wrong_mint=fixture();wrong_mint[12]=Acc::new(Pubkey::new_unique(),TOKEN,mint_data(1,None));assert_eq!(run(&w,&mut wrong_mint,&FeeWorld::body(amount,floor,expiry)).unwrap_err(),err(60));
+ let mut wrong_observation=fixture();wrong_observation[13].key=Pubkey::new_unique();assert_eq!(run(&w,&mut wrong_observation,&FeeWorld::body(amount,floor,expiry)).unwrap_err(),err(60));
+ let mut other_custody=fixture();other_custody[5]=Acc::new(ata_key(&Pubkey::new_unique(),&c.child_mint),TOKEN,token_data(&c.child_mint,&f.authority,0));assert_eq!(run(&w,&mut other_custody,&FeeWorld::body(amount,floor,expiry)).unwrap_err(),err(60));
+ let mut over_slice=fixture();assert_eq!(run(&w,&mut over_slice,&FeeWorld::body(SOL/2+1,floor,expiry)).unwrap_err(),err(60),"0.5 SOL is the largest slice");
+ let mut over_budget=f.buyback_accounts(&w,&c,[0,300_000_000,0,0,100_000_000,100_000_000,0,0,0,0,0],300_000_000,10*SOL,400_000_000_000_000);assert_eq!(run(&w,&mut over_budget,&FeeWorld::body(200_000_001,1,expiry)).unwrap_err(),err(60),"the two pending budgets together are the cap");
+ let mut zero_min=fixture();assert_eq!(run(&w,&mut zero_min,&FeeWorld::body(amount,0,expiry)).unwrap_err(),err(60));
+ let mut stale=fixture();assert_eq!(run(&w,&mut stale,&FeeWorld::body(amount,floor,LAUNCH_NOW-1)).unwrap_err(),err(60));
+ let mut far=fixture();assert_eq!(run(&w,&mut far,&FeeWorld::body(amount,floor,LAUNCH_NOW+121)).unwrap_err(),err(60));
+ let mut unsigned=fixture();unsigned[1].signer=false;assert_eq!(run(&w,&mut unsigned,&FeeWorld::body(amount,floor,expiry)).unwrap_err(),err(60));
+ let mut stranger=fixture();stranger[1]=Acc::empty(Pubkey::new_unique()).signer();assert_eq!(run(&w,&mut stranger,&FeeWorld::body(amount,floor,expiry)).unwrap_err(),err(60),"only the creator keeper");
+ let mut short_body=fixture();assert_eq!(run(&w,&mut short_body,&FeeWorld::body(amount,floor,expiry)[..24]).unwrap_err(),err(60));
+ let mut fifteen=fixture();fifteen.pop();assert_eq!(run(&w,&mut fifteen,&FeeWorld::body(amount,floor,expiry)).unwrap_err(),err(60));
+ assert_eq!(cpi_count(),count,"no refused call reached a CPI");
+}
+#[test]fn child_buyback_books_parent_a_first_then_parent_b_and_stops_at_the_combined_budget(){
+ let w=World::new(None);let mut c=w.launched();let f=FeeWorld::new(&w,&c);c.pool=f.pool;simulate_token_cpis(true);
+ let mut accounts=f.buyback_accounts(&w,&c,BUDGET,1_200_000_000,10*SOL,400_000_000_000_000);let expiry=LAUNCH_NOW+90;
+ let mut burned=0u64;
+ for (slice,expected_spent) in [(SOL/2,(200_000_000,300_000_000)),(SOL/2,(200_000_000,800_000_000)),(SOL/5,(200_000_000,1_000_000_000))]{
+  let floor=FeeWorld::floor(&accounts,slice);run(&w,&mut accounts,&FeeWorld::body(slice,floor,expiry)).unwrap();burned+=floor;
+  let counters=FeeWorld::counters(&accounts[2]);assert_eq!((counters[6],counters[7]),expected_spent);assert_eq!(counters[10],burned);
+  assert_eq!(&counters[..6],&BUDGET[..6],"allocations and totals never move");assert_eq!((counters[8],counters[9]),(0,0),"no parent is burned");
+  assert_eq!(read64(&accounts[4].data,64).unwrap(),1_200_000_000-counters[6]-counters[7],"custody equals what is still owed");
+ }
+ let count=cpi_count();assert_eq!(run(&w,&mut accounts,&FeeWorld::body(1,1,expiry)).unwrap_err(),err(60),"the budget is spent");assert_eq!(cpi_count(),count);
+ assert_eq!(read64(&accounts[4].data,64).unwrap(),0);assert_eq!(read64(&accounts[5].data,64).unwrap(),0);
+}
+#[test]fn distribute_keeps_its_weights_and_the_fee_state_layout(){
+ let w=World::new(None);let c=w.launched();let f=FeeWorld::new(&w,&c);simulate_token_cpis(true);
+ let accounts=|total:u64,custody:u64|vec![w.campaign_acc(&c),Acc::empty(c.creator).signer(),f.state(&w,[0,total,0,0,0,0,0,0,0,0,0]),Acc::empty(f.authority),
+  Acc::new(ata_key(&f.authority,&WSOL),TOKEN,token_data(&WSOL,&f.authority,custody)),Acc::new(ata_key(&c.treasury,&WSOL),TOKEN,token_data(&WSOL,&c.treasury,0)),Acc::new(ata_key(&c.dev,&WSOL),TOKEN,token_data(&WSOL,&c.dev,0)),program_account(TOKEN)];
+ let mut first=accounts(1_680_000_000,1_680_000_000);run(&w,&mut first,&[23]).unwrap();
+ assert_eq!(FeeWorld::counters(&first[2]),[0,1_680_000_000,980_000_000,200_000_000,250_000_000,250_000_000,0,0,0,0,0],"98:20:25:25 of 168 at offsets 56, 64, 72, 80");
+ assert_eq!(read64(&first[5].data,64).unwrap(),980_000_000);assert_eq!(read64(&first[6].data,64).unwrap(),200_000_000);assert_eq!(read64(&first[4].data,64).unwrap(),500_000_000,"both parent shares stay in custody as the coin buyback budget");
+ let count=cpi_count();run(&w,&mut first,&[23]).unwrap();assert_eq!(cpi_count(),count,"nothing new to pay");
+ put64(&mut first[2].data,48,3_360_000_000);put64(&mut first[4].data,64,2_180_000_000);run(&w,&mut first,&[23]).unwrap();
+ assert_eq!(FeeWorld::counters(&first[2]),[0,3_360_000_000,1_960_000_000,400_000_000,500_000_000,500_000_000,0,0,0,0,0],"cumulative: only the difference is paid");
+ assert_eq!(read64(&first[5].data,64).unwrap(),1_960_000_000);assert_eq!(read64(&first[4].data,64).unwrap(),1_000_000_000);
 }
