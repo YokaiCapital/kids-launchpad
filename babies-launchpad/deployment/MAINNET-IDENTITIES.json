@@ -128,9 +128,9 @@
       },
       {
         "version": 6,
-        "sha256": null,
-        "binarySize": null,
-        "status": "pending: source patched 24 September 2026, no CI build, not deployed; record the CI hash and size here before the upgrade",
+        "sha256": "d940770300e25d48e05cc952ae53c22a309cf351f44b2368e45c0d5fd24c8e3d",
+        "binarySize": 197440,
+        "status": "built: reproducible CI build ee85f05 (24 September 2026, runners ubuntu-22.04 and ubuntu-24.04 identical); not deployed until the owner runs the upgrade",
         "features": [
           "burn-child-fees",
           "cpmm-config-allowlist",
@@ -139,7 +139,7 @@
           "parent-claim-expiry",
           "child-buyback"
         ],
-        "note": "owner decisions of 24 September 2026 (deployment/decisions/BUILD-6-2026-09-24.md): parent claims (tag 10) close 30 days after the recorded launch time (error 45) and tag 11 then burns the unclaimed rest of both reserves from launch custody, recorded at KIDSPAR1 offsets 224/232/240; the parent buyback budgets buy and burn the coin through the campaign's own pool (tag 27, 0.5 SOL slices, 1 % sealed slippage, parent A's pending budget first); tags 24 and 25 refused, their code removed; 'jupiter-route' is not carried forward. Every live account keeps its layout; no migration"
+        "note": "owner decisions of 24 September 2026 (deployment/decisions/BUILD-6-2026-09-24.md): parent claims (tag 10) close 30 days after the recorded launch time (error 45) and tag 11 then burns the unclaimed rest of both reserves from launch custody, recorded at KIDSPAR1 offsets 224/232/240; the parent buyback budgets buy and burn the coin through the campaign's own pool (tag 27, 0.5 SOL slices, 1 % sealed slippage, parent A's pending budget first); tags 24 and 25 refused, their code removed; 'jupiter-route' is not carried forward. Every live account keeps its layout; no migration CI run 36039516112."
       }
     ],
     "buildsNote": "The service accepts any listed build on chain and records the live one in its program manifest; the keeper plans only what the live build supports. Move `binarySha256`/`binarySize` to version 2 once the upgrade is verified on chain.",
@@ -184,7 +184,7 @@
     "launchedAt": "2026-09-23T02:08:49Z",
     "terms": "1 SOL soft, 5 SOL hard, 10 minutes (owner test)",
     "committed": "2 SOL by the owner",
-    "note": "First campaign 9zT7cyDv\u2026 (3-minute window) closed without commitments at 01:47 UTC; its coin GF28FYe4\u2026 exists on mainnet unused."
+    "note": "First campaign 9zT7cyDv… (3-minute window) closed without commitments at 01:47 UTC; its coin GF28FYe4… exists on mainnet unused."
   },
   "governanceKey": {
     "address": "EPwoPzJ5wuFgvMxUs7gQyUgb48dfZh4k6TxpZsTpWf2Y",
