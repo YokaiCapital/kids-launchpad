@@ -38,6 +38,9 @@ export const worthwhileBudget=(lamports,ceiling=OPERATION_COST_CEILING_LAMPORTS)
 /** The configured minimum can only raise the floor: whatever KIDS_BUYBACK_MIN_LAMPORTS says, a budget below fifty times
  * the cost ceiling is never spent. */
 export const BUYBACK_FLOOR_LAMPORTS=OPERATION_COST_CEILING_LAMPORTS*50n;
+/** Slippage for parent buybacks on the Jupiter route, in basis points: KIDS_PARENT_BUYBACK_SLIPPAGE_BPS, default 300
+ * (3 %, owner, 24 Sep 2026), bounded 1..1000. The reference-price guard and the impact cap still apply on top. */
+export function parentBuybackSlippageBps(env=process.env){const n=Number(env.KIDS_PARENT_BUYBACK_SLIPPAGE_BPS||'300');if(!Number.isInteger(n)||n<1||n>1000)throw Error('KIDS_PARENT_BUYBACK_SLIPPAGE_BPS must be an integer from 1 to 1000');return n;}
 export function effectiveBuybackMinimum(env=process.env){let v=0n;try{v=BigInt(env.KIDS_BUYBACK_MIN_LAMPORTS||'5000000');}catch{v=0n;}return v>BUYBACK_FLOOR_LAMPORTS?v:BUYBACK_FLOOR_LAMPORTS;}
 export const BUYBACK_MIN_LAMPORTS=effectiveBuybackMinimum();
 export const burnWorthwhile=(valueLamports,minimum=BURN_MIN_VALUE_LAMPORTS)=>BigInt(valueLamports)>=minimum;
@@ -174,11 +177,12 @@ export function createActiveFeeKeeper({resolve=()=>resolvePostlaunchCampaign('ac
      if(routeMode==='jupiter-localnet'){const quote=await boundedQuote(c,input,output,slice);minOutput=quote.minOutput;route=localnetParentRoute({feeAuthority:f.authority,parentMint:output,parentProgram:programOf(output),amount:slice,quotedOut:quote.quote});}
      else if(routeMode==='jupiter'){
       const feed=parentPythFeed(output);const guardedSlice=feed?slice:(slice>100000000n?100000000n:slice);executed=guardedSlice;
-      route=await fetchJupiterParentRoute({apiBase:process.env.KIDS_JUPITER_API||undefined,feeAuthority:f.authority,parentMint:output,parentProgram:programOf(output),amount:guardedSlice,minOut:1n,slippageBps:100});
+      const slippageBps=parentBuybackSlippageBps();
+      route=await fetchJupiterParentRoute({apiBase:process.env.KIDS_JUPITER_API||undefined,feeAuthority:f.authority,parentMint:output,parentProgram:programOf(output),amount:guardedSlice,minOut:1n,slippageBps});
       const decimals=(await c.getParsedAccountInfo(output)).value?.data?.parsed?.info?.decimals;if(!Number.isInteger(decimals))throw Error('Parent decimals unreadable');
       // Reference-price guard (price-guard.mjs): Pyth on-chain feeds when the parent has one, impact cap always; the result is journaled.
       operation.priceGuard=await guardBuybackQuote(c,{quote:route.quote,amountLamports:guardedSlice,parentDecimals:decimals,parentFeed:feed});
-      minOutput=route.quotedOut-route.quotedOut*100n/10000n;if(minOutput<1n)throw Error('Jupiter quote too small');
+      minOutput=route.quotedOut-route.quotedOut*BigInt(slippageBps)/10000n;if(minOutput<1n)throw Error('Jupiter quote too small');operation.slippageBps=slippageBps;
       if(guardedSlice!==slice)operation.sliceReducedNoReference=true;
      }
      else throw Error('Unknown parent buyback route mode');

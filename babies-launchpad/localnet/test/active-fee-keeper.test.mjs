@@ -62,3 +62,5 @@ test('resumed operations: an already signed one is never re-planned; an unsigned
  assert.equal(resumedOperationWithheld({id:'fee:11',kind:'burn',amount:'5'},{attempts:{},burnValueLamports:600000n}),null);
  assert.equal(resumedOperationWithheld({id:'fee:12',kind:'distribute'},{attempts:{}}),null);
 });
+
+test('parent buyback slippage defaults to 3 % and is bounded',async()=>{const {parentBuybackSlippageBps}=await import('../active-fee-keeper.mjs');assert.equal(parentBuybackSlippageBps({}),300);assert.equal(parentBuybackSlippageBps({KIDS_PARENT_BUYBACK_SLIPPAGE_BPS:'150'}),150);assert.throws(()=>parentBuybackSlippageBps({KIDS_PARENT_BUYBACK_SLIPPAGE_BPS:'0'}));assert.throws(()=>parentBuybackSlippageBps({KIDS_PARENT_BUYBACK_SLIPPAGE_BPS:'1001'}));});
