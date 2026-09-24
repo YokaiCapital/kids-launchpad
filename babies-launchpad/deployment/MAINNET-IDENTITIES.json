@@ -102,8 +102,8 @@
       },
       {
         "version": 4,
-        "sha256": "9fa0f4520a989ea53c4381ae031b0b4d7c8ac28a9866f8051dba5300bf9dae20",
-        "binarySize": 209232,
+        "sha256": "21a911e04e36e995b1df921c007fe582d34e6663c3cc284a7a249400bcb51e1e",
+        "binarySize": 210664,
         "features": [
           "burn-child-fees",
           "cpmm-config-allowlist",
@@ -111,7 +111,7 @@
           "revoke-at-creation",
           "jupiter-route"
         ],
-        "note": "reproducible CI build dcf7d96 (24 September 2026, runners ubuntu-22.04 and ubuntu-24.04 identical): tag 25 also accepts Jupiter's classic route instruction (the public API's), so parent buybacks can run; carries the claim-vault integration and revoke-at-creation of build 3 (inactive for campaigns without a distribution program); program-data account grows by 8,448 bytes (extend); upgrade signed by the governance key"
+        "note": "reproducible CI build 755ff9d (24 September 2026, runners ubuntu-22.04 and ubuntu-24.04 identical): tag 25 also accepts Jupiter's classic route instruction (the public API's), slot 0 = the parent's token program, no custody account may appear among a route's remaining accounts; carries the claim-vault integration and revoke-at-creation of build 3 (inactive for campaigns without a distribution program); program-data account grows by 9,880 bytes (extend, loader minimum 10,240); upgrade signed by the governance key"
       }
     ],
     "buildsNote": "The service accepts any listed build on chain and records the live one in its program manifest; the keeper plans only what the live build supports. Move `binarySha256`/`binarySize` to version 2 once the upgrade is verified on chain.",
