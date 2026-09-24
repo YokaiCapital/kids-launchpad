@@ -186,6 +186,14 @@ pub(super) fn process(program:&Pubkey,a:&[AccountInfo],body:&[u8],tag:u8)->Progr
    executable(&a[11],&JUPITER)?;pda(&a[12],&[b"__event_authority"],&JUPITER)?;
    let parent_custody=|acc:&AccountInfo|->Result<u64,ProgramError>{parent_ata(acc,&authority,&parent_mint,&parent_program)?;parent_token(acc,&parent_mint,&authority,&parent_program)};
    let input=custody(&a[4],&WSOL,&authority)?;let output=parent_custody(&a[5])?;require(input>=state.liability()?)?;
+   // The fee authority signs the whole route, so no remaining account may be one of its other custody accounts (the
+   // coin custody or the other parent's custody): a route step could otherwise spend from them unchecked.
+   {let ata=solana_program::pubkey!("ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL");
+    let child_custody=Pubkey::find_program_address(&[authority.as_ref(),TOKEN.as_ref(),c.child_mint.as_ref()],&ata).0;
+    let other=super::claims::validated_parent_mint(program,&a[6],a[0].key,1-parent)?;
+    let other_classic=Pubkey::find_program_address(&[authority.as_ref(),TOKEN.as_ref(),other.as_ref()],&ata).0;
+    let other_2022=Pubkey::find_program_address(&[authority.as_ref(),super::TOKEN_2022_PROGRAM.as_ref(),other.as_ref()],&ata).0;
+    for info in &a[13..]{require(*info.key!=child_custody&&*info.key!=other_classic&&*info.key!=other_2022&&*info.key!=*a[4].key)?;}}
    let kind=jupiter_route_kind(route,amount,min).ok_or(ProgramError::InvalidInstructionData)?;
    if kind==2{
     // route_v2 accounts: user_transfer_authority (our PDA signs), user source, user destination, source mint, destination mint,
@@ -195,7 +203,9 @@ pub(super) fn process(program:&Pubkey,a:&[AccountInfo],body:&[u8],tag:u8)->Progr
     // route accounts: token program, user_transfer_authority (our PDA signs), user source, user destination,
     // destination_token_account (omitted: the program id), destination mint, platform_fee_account (omitted: the program id),
     // event authority, program. Both optional slots are pinned to the program id so nothing can be redirected.
-    cpi_forward(a,11,&[(9,false,false),(3,true,false),(4,false,true),(5,false,true),(11,false,false),(7,false,false),(11,false,false),(12,false,false),(11,false,false)],13,route.to_vec(),seeds)?;
+    // Slot 0 is the token program of the destination mint (Jupiter fills it with the parent's program: classic for
+    // Fartcoin, Token-2022 for Buttcoin); it only serves the two optional transfers, both None here.
+    cpi_forward(a,11,&[(10,false,false),(3,true,false),(4,false,true),(5,false,true),(11,false,false),(7,false,false),(11,false,false),(12,false,false),(11,false,false)],13,route.to_vec(),seeds)?;
    }
    require(custody(&a[4],&WSOL,&authority)?==input-amount)?;
    let received=parent_custody(&a[5])?.checked_sub(output).ok_or(err(61))?;require(received>=min)?;

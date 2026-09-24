@@ -75,7 +75,7 @@ export async function fetchJupiterParentRoute({apiBase='https://lite-api.jup.ag/
  const wsolAta=getAssociatedTokenAddressSync(NATIVE_MINT,feeAuthority,true),parentAta=getAssociatedTokenAddressSync(parentMint,feeAuthority,true,parentProgram);
  // route_v2 head (10) vs classic route head (9): the program rebuilds exactly this head from its own accounts, so the
  // optional destination_token_account and platform_fee_account must be the None placeholder (the Jupiter program id).
- const expectedHead=header.kind==='route_v2'?[feeAuthority,wsolAta,parentAta,NATIVE_MINT,parentMint,TOKEN_PROGRAM_ID,parentProgram,JUPITER_PROGRAM,JUPITER_EVENT_AUTHORITY,JUPITER_PROGRAM]:[TOKEN_PROGRAM_ID,feeAuthority,wsolAta,parentAta,JUPITER_PROGRAM,parentMint,JUPITER_PROGRAM,JUPITER_EVENT_AUTHORITY,JUPITER_PROGRAM];
+ const expectedHead=header.kind==='route_v2'?[feeAuthority,wsolAta,parentAta,NATIVE_MINT,parentMint,TOKEN_PROGRAM_ID,parentProgram,JUPITER_PROGRAM,JUPITER_EVENT_AUTHORITY,JUPITER_PROGRAM]:[parentProgram,feeAuthority,wsolAta,parentAta,JUPITER_PROGRAM,parentMint,JUPITER_PROGRAM,JUPITER_EVENT_AUTHORITY,JUPITER_PROGRAM];
  if(accounts.length<expectedHead.length||!expectedHead.every((k,i)=>accounts[i].pubkey.equals(k)))throw Error('Jupiter route does not use the fee custody accounts as its user accounts');
  return {data,setup,remainingAccounts:accounts.slice(expectedHead.length).map(a=>({...a,isSigner:false})),lookupTables:(swap.addressLookupTableAddresses??[]).map(x=>new PublicKey(x)),quotedOut:BigInt(quote.outAmount),quote:{outAmount:String(quote.outAmount),priceImpactPct:String(quote.priceImpactPct??'0')},kind:header.kind,source:'jupiter-api'};
 }

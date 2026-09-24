@@ -51,7 +51,7 @@ test('Jupiter setup: idempotent token-account creates for the fee authority are 
 
 test("Jupiter's classic route (the public API's instruction) is accepted with its head of nine accounts and its header read from the tail",async()=>{
  const source=getAssociatedTokenAddressSync(NATIVE_MINT,authority,true),dest=getAssociatedTokenAddressSync(parent,authority,true,TOKEN_PROGRAM_ID);
- const head=[TOKEN_PROGRAM_ID,authority,source,dest,JUPITER_PROGRAM,parent,JUPITER_PROGRAM,JUPITER_EVENT_AUTHORITY,JUPITER_PROGRAM,Keypair.generate().publicKey];
+ const head=[TOKEN_PROGRAM_ID,authority,source,dest,JUPITER_PROGRAM,parent,JUPITER_PROGRAM,JUPITER_EVENT_AUTHORITY,JUPITER_PROGRAM,Keypair.generate().publicKey]; // slot 0 = the parent's token program (classic here)
  const ok=await fetchJupiterParentRoute({fetchImpl:apiFixture({classic:true,head}),feeAuthority:authority,parentMint:parent,parentProgram:TOKEN_PROGRAM_ID,amount:1000n,minOut:9000n});
  assert.equal(ok.kind,'route');assert.equal(ok.remainingAccounts.length,1);assert.ok(ok.data.subarray(0,8).equals(ROUTE_DISCRIMINATOR));
  const h=decodeRouteV2Header(ok.data,{amount:1000n,minOut:9000n});assert.equal(h.kind,'route');assert.equal(h.inAmount,1000n);assert.equal(h.quotedOut,10000n);assert.equal(h.slippageBps,100);assert.equal(h.platformFeeBps,0);assert.equal(h.steps,2);
