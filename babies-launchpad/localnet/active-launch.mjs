@@ -196,8 +196,15 @@ async function settleActiveInternal(){
  const send=(ix,stage='')=>sender(createHash('sha256').update(Buffer.concat([ix.data,...ix.keys.map(k=>k.pubkey.toBuffer())])).update(':phase:'+c.phase+':'+stage).digest('hex'),async(block,operationId)=>{const tx=new Transaction({feePayer:admin.publicKey,...block}).add(ix);await admin.sign(tx,{operationId});return tx;});
  if(c.phase===0||now>=c.launchDeadline&&c.phase===1)await send(finalizeInstruction(ctx,m.address));
  const rows=await ctx.connection.getProgramAccounts(ctx.programId,{filters:[{dataSize:112},{memcmp:{offset:8,bytes:m.address}}]});let settled=0,refunded=0;
- for(const row of rows){if(row.account.data.subarray(0,8).toString()!=='KIDSREC3')throw Error('Unexpected registered receipt');const owner=new PublicKey(row.account.data.subarray(40,72));let r=await readActiveReceipt(ctx,m.address,owner);if(!r.settled){await send(settleInstruction(ctx,m.address,owner));settled++;}r=await readActiveReceipt(ctx,m.address,owner);if(activeAmounts(c,r,await chainTime(ctx.connection)).refundable>0n){await send(refundInstruction(ctx,m.address,owner),'refunded:'+r.refunded);refunded++;}}
- return {settled,refunded,state:await readActive()};
+ const owners=[];for(const row of rows){if(row.account.data.subarray(0,8).toString()!=='KIDSREC3')throw Error('Unexpected registered receipt');owners.push(new PublicKey(row.account.data.subarray(40,72)));}
+ // Settle every receipt first: the launch needs settled counts only (never refunds), so nothing about a refund can hold it.
+ for(const owner of owners){const r=await readActiveReceipt(ctx,m.address,owner);if(!r.settled){await send(settleInstruction(ctx,m.address,owner));settled++;}}
+ // Refunds second, one receipt at a time; a refund that fails (transient RPC, signer refusal) is logged and skipped so the
+ // pass finishes; the next tick, and every tick after the launch, retries what is still refundable (payout is idempotent).
+ const refundErrors=[];
+ for(const owner of owners){try{const r=await readActiveReceipt(ctx,m.address,owner);if(activeAmounts(c,r,await chainTime(ctx.connection)).refundable>0n){await send(refundInstruction(ctx,m.address,owner),'refunded:'+r.refunded);refunded++;}}catch(e){refundErrors.push({owner:owner.toBase58(),error:String(e?.message||e).slice(0,160)});}}
+ if(refundErrors.length)console.log(JSON.stringify({event:'active-refunds-deferred',count:refundErrors.length,settled,refunded,first:refundErrors[0]}));
+ return {settled,refunded,refundErrors,state:await readActive()};
 }
 /** Startup reconciliation (docs/ENGINEERING-RULES.md): classify every finalized outcome against the chain before writes reopen. */
 export async function reconcile(){
