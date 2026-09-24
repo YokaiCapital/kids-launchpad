@@ -49,7 +49,10 @@ export function localnetParentRoute({feeAuthority,parentMint,parentProgram,amoun
 /** Mainnet route from Jupiter's API. Requests a non-shared route for the fee authority and refuses anything the program would. */
 export async function fetchJupiterParentRoute({apiBase='https://lite-api.jup.ag/swap/v1',fetchImpl=globalThis.fetch,feeAuthority,parentMint,parentProgram,amount,minOut,slippageBps=100}){
  if(slippageBps>MAX_SLIPPAGE_BPS)throw Error('Slippage above 1%');if(BigInt(amount)>MAX_SLICE_LAMPORTS)throw Error('Slice above 0.5 SOL');
- const q=new URLSearchParams({inputMint:NATIVE_MINT.toBase58(),outputMint:parentMint.toBase58(),amount:String(amount),slippageBps:String(slippageBps),swapMode:'ExactIn',restrictIntermediateTokens:'true',maxAccounts:'40'});
+ // Some venues refuse a swap whose user is a program address signing by CPI (HumidiFi: 'real_user did not sign the
+ // transaction', 24 Sep 2026). They are excluded from the quote; KIDS_JUPITER_EXCLUDE_DEXES extends the list.
+ const excludeDexes=[...new Set(['HumidiFi',...String(process.env.KIDS_JUPITER_EXCLUDE_DEXES||'').split(',').map(x=>x.trim()).filter(Boolean)])].join(',');
+ const q=new URLSearchParams({inputMint:NATIVE_MINT.toBase58(),outputMint:parentMint.toBase58(),amount:String(amount),slippageBps:String(slippageBps),swapMode:'ExactIn',restrictIntermediateTokens:'true',maxAccounts:'40',excludeDexes});
  const quoteRes=await fetchImpl(apiBase+'/quote?'+q,{signal:AbortSignal.timeout(15000)});if(!quoteRes.ok)throw Error('Jupiter quote unavailable ('+quoteRes.status+')');const quote=await quoteRes.json();
  if(quote.inputMint!==NATIVE_MINT.toBase58()||quote.outputMint!==parentMint.toBase58()||String(quote.inAmount)!==String(amount))throw Error('Jupiter quote does not match the request');
  const body={quoteResponse:quote,userPublicKey:feeAuthority.toBase58(),wrapAndUnwrapSol:false,useSharedAccounts:false,asLegacyTransaction:false,dynamicComputeUnitLimit:false,skipUserAccountsRpcCalls:true};
