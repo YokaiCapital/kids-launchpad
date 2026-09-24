@@ -200,3 +200,13 @@
 @media(max-width:760px){.campaign-overview .funding-visual.is-history{padding:14px}}
 
 .launch-bar i.is-hard{background:var(--pink,#ff77ce);opacity:.9}
+
+/* Oversubscribed: the card glows, the fill beyond the hard cap is a striped, moving overflow with a floating % badge. */
+.launch-status.is-over{border-color:#ff77ce;box-shadow:0 0 0 1px rgba(255,119,206,.35),0 0 32px rgba(255,119,206,.18)}
+.launch-status.is-over .launch-pill{background:#ff77ce;color:#250d2a;animation:kids-pulse 1.6s ease-in-out infinite}
+.launch-bar{overflow:visible}.launch-bar>div{position:relative;z-index:1}
+.launch-bar-over{position:absolute;top:0;height:100%;border-radius:0 999px 999px 0;z-index:2;background:repeating-linear-gradient(135deg,#ff77ce 0 8px,#ffb3e6 8px 16px);background-size:32px 32px;animation:kids-stripes 1.2s linear infinite;box-shadow:0 0 14px rgba(255,119,206,.6)}
+.launch-bar-badge{position:absolute;top:-30px;transform:translateX(-50%);padding:2px 8px;border-radius:999px;background:#ff77ce;color:#250d2a;font-size:12px;font-weight:800;font-variant-numeric:tabular-nums;white-space:nowrap;z-index:3}
+.launch-momentum{margin:6px 0 0;font-size:13px;color:#ffd0ee}.launch-momentum strong{color:#fff}.launch-momentum span{color:#b8a9c5}
+@keyframes kids-stripes{to{background-position:32px 0}}@keyframes kids-pulse{0%,100%{opacity:1}50%{opacity:.72}}
+@media(prefers-reduced-motion:reduce){.launch-bar-over,.launch-status.is-over .launch-pill{animation:none}}

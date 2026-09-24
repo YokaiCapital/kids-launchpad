@@ -1,4 +1,4 @@
-import {useEffect,useState} from 'react';
+import {useEffect,useState,useRef} from 'react';
 import {CoinSkeleton} from './CoinSkeleton';
 import {CoinPfp} from './CoinPfp';
 import {explorerAccount,netLabel} from './network-label.mjs';
@@ -43,14 +43,19 @@ export function LaunchStatus({data,go,onRefresh}){
  const nowUnix=Math.floor((now+skew)/1000),d=describeLaunch(data,nowUnix);
  // When a countdown hits zero the phase changes on the ledger; ask for a fresh read once.
  useEffect(()=>{if(d.countdown&&d.countdown.seconds<=0&&onRefresh){const id=setTimeout(onRefresh,1500);return()=>clearTimeout(id);}},[d.countdown&&d.countdown.seconds<=0,d.phase]);
+ // Momentum while open: how many commitments landed in the last five minutes and how long ago the last one was.
+ const history=useRef([]);
+ useEffect(()=>{if(d.phase!=='open')return;const n=Number(data?.receiptCount||0),h=history.current,last=h[h.length-1];if(!last||last.n!==n)h.push({t:Date.now(),n});history.current=h.filter(x=>Date.now()-x.t<=5*60*1000+1000).slice(-200);},[data,d.phase]);
+ const momentum=(()=>{if(d.phase!=='open')return null;const h=history.current;if(h.length<2)return null;const recent=h[h.length-1].n-h[0].n;const ago=Math.max(0,Math.floor((now-h[h.length-1].t)/1000));return {recent,ago};})();
  if(!data)return <section className="launch-status"><CoinSkeleton variant="status"/></section>;
  if(d.phase==='launched')return <LaunchedCard d={d} data={data} go={go}/>;
- return <section className={'launch-status tone-'+d.tone} aria-live="polite">
+ return <section className={'launch-status tone-'+d.tone+(d.progress?.full?' is-over':'')} aria-live="polite">
   <div className="launch-status-head"><span className="launch-pill">{d.pill}</span>{d.countdown&&<span className="launch-when">{d.countdown.label.replace(' in','')} {formatUtc(d.countdown.at)}</span>}</div>
   <h2>{d.headline}</h2>
   {d.countdown&&<div className="launch-countdown"><span>{d.countdown.label}</span><strong>{formatCountdown(d.countdown.seconds)}</strong></div>}
   <p>{d.sub}</p>
-  {d.progress&&<div className="launch-progress" role="img" aria-label={d.progress.raised+' SOL committed, soft cap '+d.progress.soft+' SOL, hard cap '+d.progress.hard+' SOL'}><div className="launch-bar"><div style={{width:d.progress.pct+'%'}}/><i style={{left:d.progress.softPct+'%'}} title="Soft cap"/>{d.progress.hardPct<100&&<i className="is-hard" style={{left:d.progress.hardPct+'%'}} title="Hard cap"/>}</div><div className="launch-progress-labels"><span><strong>{d.progress.raised} SOL</strong> committed{d.progress.subscribed>0?' · '+d.progress.subscribed.toLocaleString('en-GB',{maximumFractionDigits:1})+'% of the hard cap':''}</span><span>Soft cap {d.progress.soft} SOL{d.progress.reached?' ✓':''}</span><span>Hard cap {d.progress.hard} SOL{d.progress.full?' ✓':''}</span></div></div>}
+  {momentum&&<p className="launch-momentum"><strong>{momentum.recent>0?'+'+momentum.recent+' commitment'+(momentum.recent===1?'':'s')+' in the last 5 minutes':'Watching for new commitments'}</strong>{momentum.recent>0&&<span> · last one {momentum.ago<60?momentum.ago+' s':Math.floor(momentum.ago/60)+' min'} ago</span>}</p>}
+  {d.progress&&<div className="launch-progress" role="img" aria-label={d.progress.raised+' SOL committed, soft cap '+d.progress.soft+' SOL, hard cap '+d.progress.hard+' SOL'}><div className="launch-bar"><div style={{width:d.progress.pct+'%'}}/>{d.progress.full&&<em className="launch-bar-over" style={{left:d.progress.hardPct+'%',width:Math.max(0,d.progress.pct-d.progress.hardPct)+'%'}}/>}{d.progress.full&&<b className="launch-bar-badge" style={{left:d.progress.pct+'%'}}>{d.progress.subscribed.toLocaleString('en-GB',{maximumFractionDigits:1})}%</b>}<i style={{left:d.progress.softPct+'%'}} title="Soft cap"/>{d.progress.hardPct<100&&<i className="is-hard" style={{left:d.progress.hardPct+'%'}} title="Hard cap"/>}</div><div className="launch-progress-labels"><span><strong>{d.progress.raised} SOL</strong> committed{d.progress.subscribed>0?' · '+d.progress.subscribed.toLocaleString('en-GB',{maximumFractionDigits:1})+'% of the hard cap':''}</span><span>Soft cap {d.progress.soft} SOL{d.progress.reached?' ✓':''}</span><span>Hard cap {d.progress.hard} SOL{d.progress.full?' ✓':''}</span></div></div>}
   {d.addresses&&<div className="launch-addresses">{d.addresses.map(a=><Address key={a.label} {...a}/>)}<small>{d.explorerUrl?<a href={d.explorerUrl+'/token/'+(data?.mint||'')+(data?.explorerCluster||'')} target="_blank" rel="noreferrer">View the coin on the explorer</a>:'Private test ledger: these addresses do not appear on public explorers or trading terminals.'}</small></div>}
   {d.phase==='launched'&&go&&<button className="primary launch-cta" onClick={()=>go('PostLaunch')}>Open the coin page: claim and trade <ArrowRight size={20}/></button>}
  </section>;
