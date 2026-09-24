@@ -112,6 +112,19 @@
           "jupiter-route"
         ],
         "note": "reproducible CI build 755ff9d (24 September 2026, runners ubuntu-22.04 and ubuntu-24.04 identical): tag 25 also accepts Jupiter's classic route instruction (the public API's), slot 0 = the parent's token program, no custody account may appear among a route's remaining accounts; carries the claim-vault integration and revoke-at-creation of build 3 (inactive for campaigns without a distribution program); program-data account grows by 9,880 bytes (extend, loader minimum 10,240); upgrade signed by the governance key"
+      },
+      {
+        "version": 5,
+        "sha256": "245b4f4878f767c7181349306e56a266157095f0db6e74ba67b4ddbdee7fbf1b",
+        "binarySize": 210560,
+        "features": [
+          "burn-child-fees",
+          "cpmm-config-allowlist",
+          "claim-vaults",
+          "revoke-at-creation",
+          "jupiter-route"
+        ],
+        "note": "reproducible CI build 9aa084e (24 September 2026, runners identical): build 4 minus the over-strict custody guard that refused every live Jupiter route (the wSOL custody is repeated by Jupiter among the route's working accounts); coin custody and the other parent's custody stay refused"
       }
     ],
     "buildsNote": "The service accepts any listed build on chain and records the live one in its program manifest; the keeper plans only what the live build supports. Move `binarySha256`/`binarySize` to version 2 once the upgrade is verified on chain.",
