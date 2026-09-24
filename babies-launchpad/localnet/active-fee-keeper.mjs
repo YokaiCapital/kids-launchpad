@@ -146,7 +146,11 @@ export function createActiveFeeKeeper({resolve=()=>resolvePostlaunchCampaign('ac
       if(plan.filter(x=>x.kind==='buy-burn').length===2&&journal.lastBuybackParent===0){const i=plan.findIndex(x=>x.kind==='buy-burn'&&x.index===1),j=plan.findIndex(x=>x.kind==='buy-burn'&&x.index===0);if(i>j){const [b]=plan.splice(i,1);plan.splice(j,0,b);}}
       for(const item of plan){if(item.kind==='buy-burn-waiting'){console.log(JSON.stringify({event:'buyback-waiting-for-budget',campaign:identity.campaign,parent:item.index,budgetLamports:item.amount,minimumLamports:item.minimum}));continue;}
        if(item.kind==='burn'){let value=null;try{value=(await boundedQuote(c,mint,NATIVE_MINT,BigInt(item.amount),state.pool)).quote;}catch(error){if(error.message!=='Trade too small')throw error;value=0n;}if(!burnWorthwhile(value)){console.log(JSON.stringify({event:'burn-waiting-for-value',campaign:identity.campaign,childPendingRaw:item.amount,valueLamports:value.toString(),minimumLamports:BURN_MIN_VALUE_LAMPORTS.toString()}));continue;}operation=item;break;}
-       if(item.kind==='distribute'){operation=item;break;}try{await boundedQuote(c,item.kind==='convert'?mint:NATIVE_MINT,item.kind==='convert'?NATIVE_MINT:parents[item.index],BigInt(item.amount));operation=item;break;}catch(error){if(error.message!=='Trade too small')throw error;}}
+       if(item.kind==='distribute'){operation=item;break;}
+       // A parent buyback on a Jupiter route is quoted by Jupiter when it runs; the canonical CPMM pool (empty for both parents
+       // on mainnet) must not decide whether the slice is attempted.
+       if(item.kind==='buy-burn'&&(process.env.KIDS_PARENT_BUYBACK_ROUTE||'cpmm')!=='cpmm'){operation=item;break;}
+       try{await boundedQuote(c,item.kind==='convert'?mint:NATIVE_MINT,item.kind==='convert'?NATIVE_MINT:parents[item.index],BigInt(item.amount));operation=item;break;}catch(error){if(error.message!=='Trade too small')throw error;}}
       const collectDelay=journal.collectDelaySeconds||collectionIntervalSeconds;
       if(!operation&&(journal.lastCollectedAt===null||now-journal.lastCollectedAt>=collectDelay))operation={kind:'collect'};
      }
@@ -180,12 +184,15 @@ export function createActiveFeeKeeper({resolve=()=>resolvePostlaunchCampaign('ac
      const slice=amount>500000000n?500000000n:amount;let route,minOutput,executed=slice;
      if(routeMode==='jupiter-localnet'){const quote=await boundedQuote(c,input,output,slice);minOutput=quote.minOutput;route=localnetParentRoute({feeAuthority:f.authority,parentMint:output,parentProgram:programOf(output),amount:slice,quotedOut:quote.quote});}
      else if(routeMode==='jupiter'){
-      const feed=parentPythFeed(output);const guardedSlice=feed?slice:(slice>100000000n?100000000n:slice);executed=guardedSlice;
+      const feed=parentPythFeed(output);let guardedSlice=feed?slice:(slice>100000000n?100000000n:slice);executed=guardedSlice;
       const slippageBps=parentBuybackSlippageBps();
       route=await fetchJupiterParentRoute({apiBase:process.env.KIDS_JUPITER_API||undefined,feeAuthority:f.authority,parentMint:output,parentProgram:programOf(output),amount:guardedSlice,minOut:1n,slippageBps});
       const decimals=(await c.getParsedAccountInfo(output)).value?.data?.parsed?.info?.decimals;if(!Number.isInteger(decimals))throw Error('Parent decimals unreadable');
       // Reference-price guard (price-guard.mjs): Pyth on-chain feeds when the parent has one, impact cap always; the result is journaled.
-      operation.priceGuard=await guardBuybackQuote(c,{quote:route.quote,amountLamports:guardedSlice,parentDecimals:decimals,parentFeed:feed});
+      // Thin routes: when the quote's impact exceeds the cap, halve the slice (down to 0.05 SOL) and re-quote in the same
+      // tick instead of stalling; the smaller slice is what gets executed and journaled.
+      let guard=null;for(let attempt=0;attempt<4;attempt++){try{guard=await guardBuybackQuote(c,{quote:route.quote,amountLamports:guardedSlice,parentDecimals:decimals,parentFeed:feed});break;}catch(error){if(!/price impact/i.test(String(error.message))||guardedSlice<=100000000n)throw error;guardedSlice=guardedSlice/2n;executed=guardedSlice;console.log(JSON.stringify({event:'buyback-slice-reduced',campaign:identity.campaign,parent:operation.index,sliceLamports:guardedSlice.toString(),reason:String(error.message).slice(0,80)}));route=await fetchJupiterParentRoute({apiBase:process.env.KIDS_JUPITER_API||undefined,feeAuthority:f.authority,parentMint:output,parentProgram:programOf(output),amount:guardedSlice,minOut:1n,slippageBps});}}
+      operation.priceGuard=guard;
       minOutput=route.quotedOut-route.quotedOut*BigInt(slippageBps)/10000n;if(minOutput<1n)throw Error('Jupiter quote too small');operation.slippageBps=slippageBps;
       if(guardedSlice!==slice)operation.sliceReducedNoReference=true;
      }
@@ -211,7 +218,7 @@ export function createActiveFeeKeeper({resolve=()=>resolvePostlaunchCampaign('ac
     throw error;
    }
    const after=await readFees(ctx,campaign,mint).catch(()=>null);appendFeeEvent(journal,{id:operation.id,kind:operation.kind,index:operation.index??null,amount:operation.executedAmount??operation.slice??operation.amount??null,budget:operation.amount??null,signature,at:await chainTime(c),delta:feeDelta(before,after)});
-   if(operation.kind==='buy-burn')journal.lastBuybackParent=operation.index;
+   if(operation.kind==='buy-burn'){journal.lastBuybackParent=operation.index;persist();}
    if(operation.kind==='collect'){journal.lastCollectedAt=await chainTime(c);journal.collectDelaySeconds=nextCollectionDelay({delta:feeDelta(before,after),current:journal.collectDelaySeconds,base:collectionIntervalSeconds});if(journal.collectDelaySeconds>collectionIntervalSeconds)console.log(JSON.stringify({event:'fees-collect-backoff',campaign:identity.campaign,nextInSeconds:journal.collectDelaySeconds}));}journal.current=null;persist();
    return {status:'completed',operation:operation.kind,signature,campaign:identity.campaign};
   }finally{running=false;}
