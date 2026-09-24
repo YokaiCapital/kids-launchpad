@@ -17,6 +17,9 @@ test('every served kind gets a plain-word label; unknown kinds keep their raw na
  assert.equal(labelFor(ev({kind:'buy-burn-routed',detail:'parent-1'}),names),'Buyback and burn: Buttcoin');
  assert.equal(labelFor(ev({kind:'buy-burn',detail:null}),names),'Buyback and burn');
  assert.equal(labelFor(ev({kind:'burn-child'})),'Coin-side fees burned');
+ assert.equal(labelFor(ev({kind:'buy-burn-child'}),names),'Shartcoin buyback and burn','build 6, tag 27');
+ assert.equal(labelFor(ev({kind:'burn-parents-expired'}),names),'Unclaimed parent rewards burned','build 6, tag 11');
+ assert.ok(FILTERS.find(f=>f.key==='burns').kinds.includes('buy-burn-child')&&FILTERS.find(f=>f.key==='burns').kinds.includes('burn-parents-expired'));
  assert.equal(labelFor(ev({kind:'claim-participant'})),'Claim: participant');
  assert.equal(labelFor(ev({kind:'claim-parent',detail:'parent-1'}),names),'Claim: Buttcoin holder');
  assert.equal(labelFor(ev({kind:'vault-claim-parent',detail:'parent-0'}),names),'Claim: Fartcoin holder');
@@ -68,7 +71,7 @@ test('served events are validated, accept both field spellings, and merge newest
 });
 test('chips map to server kinds; the Failed chip is picked out client-side and counts come from the served totals',()=>{
  assert.equal(FILTERS.length,9);assert.equal(kindsParam('all'),null);assert.equal(kindsParam('failed'),null);
- assert.equal(kindsParam('burns'),'buy-burn,buy-burn-routed,burn-child,vault-burn-expired,vault-sweep');
+ assert.equal(kindsParam('burns'),'buy-burn,buy-burn-routed,buy-burn-child,burn-child,burn-parents-expired,vault-burn-expired,vault-sweep');
  assert.ok(kindsParam('claims').includes('vault-claim-parent'));assert.ok(kindsParam('vaults').includes('vault-claim-parent'));
  const rows=[ev({kind:'commit'}),ev({signature:'F',kind:'claim-participant',status:'failed'}),ev({signature:'V',kind:'vault-activate'})];
  assert.deepEqual(applyFilter(rows,'failed').map(e=>e.signature),['F']);

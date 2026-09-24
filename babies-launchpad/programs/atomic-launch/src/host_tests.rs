@@ -283,8 +283,8 @@ fn burn_accounts(w:&World,c:&Campaign,claimed:[u64;2],burned:[u64;2])->Vec<Acc>{
  vec![w.campaign_acc(c),Acc::new(w.parents_key(),w.program,parents_data(w,claimed,burned)),Acc::empty(w.authority),Acc::new(c.child_mint,TOKEN,mint_data(c.supply-burned[0]-burned[1],None)),Acc::new(ata_key(&w.authority,&c.child_mint),TOKEN,token_data(&c.child_mint,&w.authority,custody)),program_account(TOKEN)]
 }
 #[test]fn parent_claims_close_thirty_days_after_the_recorded_launch_time(){
- let w=World::new(None);let c=w.launched();let expires=LAUNCH_NOW+2_592_000;
- assert_eq!(PARENT_CLAIM_WINDOW,30*86_400);assert_eq!(c.parent_claims_expire_at().unwrap(),expires);
+ let w=World::new(None);let c=w.launched();let expires=LAUNCH_NOW+PARENT_CLAIM_WINDOW;
+ assert_eq!(PARENT_CLAIM_WINDOW,0);assert_eq!(c.parent_claims_expire_at().unwrap(),expires);
  assert_eq!(w.campaign.parent_claims_expire_at().unwrap_err(),err(10),"no launch time before the launch");
  let (mut open,body)=parent_claim(&w,&c);set_now(expires-1);
  assert_eq!(run(&w,&mut open,&body).unwrap_err(),err(HOST_CPI_UNSUPPORTED),"one second before the window closes every check passes up to the claim account creation");
@@ -299,7 +299,7 @@ fn burn_accounts(w:&World,c:&Campaign,claimed:[u64;2],burned:[u64;2])->Vec<Acc>{
  assert_ne!(run(&w,&mut dev,&[8]).unwrap_err(),err(E_PARENT_CLAIM_EXPIRED),"dev claims have no window");
 }
 #[test]fn expired_parent_reserves_burn_exactly_the_unclaimed_remainder_once(){
- let w=World::new(None);let c=w.launched();let expires=LAUNCH_NOW+2_592_000;let reserve=parent_reserve(&c);
+ let w=World::new(None);let c=w.launched();let expires=LAUNCH_NOW+PARENT_CLAIM_WINDOW;let reserve=parent_reserve(&c);
  let claimed=[20_000_000_000_000u64,7_000_000_000_000];let remainder=[reserve-claimed[0],reserve-claimed[1]];
  let mut early=burn_accounts(&w,&c,claimed,[0,0]);set_now(expires-1);
  assert_eq!(run(&w,&mut early,&[11]).unwrap_err(),err(E_PARENT_CLAIM_WINDOW_OPEN));assert_eq!(cpi_count(),0);

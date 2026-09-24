@@ -17,7 +17,7 @@ export const LAUNCH_KINDS=['campaign-init','commit','finalize','settle','ready',
 export const CLAIM_KINDS=['claim-participant','claim-dev','claim-parent','vault-claim-participant','vault-claim-parent','vault-claim-dev'];
 export const REFUND_KINDS=['refund'];
 export const FEE_KINDS=['fees-init','fees-collect','fees-sell','fees-distribute'];
-export const BURN_KINDS=['buy-burn','buy-burn-routed','burn-child','vault-burn-expired','vault-sweep'];
+export const BURN_KINDS=['buy-burn','buy-burn-routed','buy-burn-child','burn-child','burn-parents-expired','vault-burn-expired','vault-sweep'];
 export const VAULT_KINDS=['vault-activate','vault-claim-participant','vault-claim-parent','vault-claim-dev','vault-burn-expired','vault-sweep'];
 export const ALL_KINDS=[...new Set([...LAUNCH_KINDS,...CLAIM_KINDS,...REFUND_KINDS,...FEE_KINDS,...BURN_KINDS,...VAULT_KINDS])];
 /**
@@ -144,7 +144,7 @@ const STATIC_LABELS={
  launch:'Launched: pool funded and LP locked','configure-parents':'Parents configured',
  'claim-participant':'Claim: participant','claim-dev':'Claim: dev','vault-claim-participant':'Claim: participant','vault-claim-dev':'Claim: dev',
  refund:'Refund','fees-init':'Fee routing set up','fees-collect':'Fee harvest','fees-sell':'Fee coins sold, retired step','fees-distribute':'Fees distributed: treasury / dev',
- 'burn-child':'Coin-side fees burned','vault-activate':'Vault opened: unclaimed coins moved','vault-sweep':'Vault swept and burned'
+ 'burn-child':'Coin-side fees burned','buy-burn-child':'Shartcoin buyback and burn','burn-parents-expired':'Unclaimed parent rewards burned','vault-activate':'Vault opened: unclaimed coins moved','vault-sweep':'Vault swept and burned'
 };
 /** Plain-word label per kind. `names.parents` = ['Fartcoin','Buttcoin'] by parent index; unknown kinds keep their raw name. */
 export function labelFor(event,names={}){

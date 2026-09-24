@@ -24,6 +24,12 @@ test('keeper converts coin-side fees on a program without the burn instruction a
  assert.deepEqual(feePlan(counters,['burn-child-fees']),[{kind:'burn',amount:'7'}]);
  assert.deepEqual(feePlan(counters),[{kind:'burn',amount:'7'}],'default keeps the localnet behaviour');
 });
+test('the keeper keys the coin buyback and the claim window on the live feature list, never on a date',()=>{
+ const counters={totalSol:16_800n,treasuryPaid:9_800n,devPaid:2_000n,parentAAllocated:2_500n,parentBAllocated:2_500n,parentASpent:1_000n,parentBSpent:0n,childPending:0n};
+ assert.deepEqual(feePlan(counters,['burn-child-fees','jupiter-route'],1n),[{kind:'buy-burn',index:0,amount:'1500'},{kind:'buy-burn',index:1,amount:'2500'}]);
+ assert.deepEqual(feePlan(counters,['burn-child-fees','parent-claim-expiry','child-buyback'],1n),[{kind:'buy-burn-child',amount:'4000'}]);
+ assert.ok(CURRENT_FEATURES.includes('child-buyback')&&CURRENT_FEATURES.includes('parent-claim-expiry'));
+});
 test('manifest features: recorded list wins, localnet defaults to the current source, real networks default to none',()=>{
  assert.deepEqual(manifestFeatures({network:'mainnet',features:['x']}),['x']);
  assert.deepEqual(manifestFeatures({network:'mainnet'}),[]);

@@ -59,5 +59,23 @@ export const DOCS = [
   {title:'What comes next?',paragraphs:['The first focus is the community-parent launch format. Wider public launching and further formats depend on verified contract behavior, operational readiness and the release process. Ideas discussed publicly are not active features or promised token allocations.']}
  ]}
 ];
+/**
+ * The guide in the wording of the live program (program build 6, 24 September 2026). `features` is the API's
+ * `programFeatures` list: 'child-buyback' turns the two parent buyback budgets into one Shartcoin buyback and burn,
+ * 'parent-claim-expiry' closes parent claims at the launch time (window zero from build 6). Null or an empty list keeps today's copy. Never a date.
+ */
+export function docsFor(features){
+ const list=Array.isArray(features)?features:[];const child=list.includes('child-buyback'),expiry=list.includes('parent-claim-expiry');
+ if(!child&&!expiry)return DOCS;
+ const section=(doc,title,replace)=>({...doc,sections:doc.sections.map(s=>s.title===title?replace(s):s)});
+ return DOCS.map(doc=>{
+  if(doc.id==='why'&&child)return section(doc,'Communities can build together',s=>({...s,paragraphs:['A kid connects two parent communities. Each parent has a defined reward reserve, and a share of every trade’s collected liquidity-fee earnings buys and burns the kid coin itself. This creates a connection beyond putting two names on a banner. It does not guarantee demand, trading activity or a higher price.']}));
+  if(doc.id==='parents'&&expiry)return section(doc,'The claim window',s=>({...s,paragraphs:['Parent claims are closed. The launch program in use now refuses every parent claim; the coin page shows the closed state.','What was not claimed is burned. Anyone can send the burn instruction; it burns exactly the unclaimed rest of each parent reserve and nothing else. Purchased allocations, SOL refunds and dev tokens never expire.']}));
+  if(doc.id==='claims'&&expiry)return section(doc,'Choose the right claim',s=>({...s,table:{...s.table,rows:s.table.rows.map(row=>row[0]==='Parent rewards'?[row[0],row[1],'Closed. Unclaimed parent rewards are burned.']:row)}}));
+  if(doc.id==='fees'&&child){let d=section(doc,'Collected SOL-side earnings',s=>({...s,paragraphs:['The fee-routing source assigns collected SOL earnings in weights of 98 : 20 : 50, out of 168: KIDS treasury, dev, and the Shartcoin buyback. That is approximately 58.33%, 11.90% and 29.76% of those collected earnings.','These are not percentages of every trade’s volume. For example, 1.68 SOL of collected SOL-side earnings would allocate 0.98 SOL to KIDS, 0.20 SOL to the dev and 0.50 SOL to the buyback, before integer rounding. Child-token fees follow the separate burn policy, so the SOL distribution must not be advertised as a fixed percentage of all trading volume. Verify the deployed configuration before treating these source rules as live economics.']}));
+   return section(d,'Buybacks and burns',s=>({...s,paragraphs:['A share of every trade buys and burns Shartcoin. The collected child-token fees are burned rather than sold. The buyback budget buys Shartcoin on the coin’s own pool, in slices of at most 0.5 SOL, and burns every coin received. A budget being allocated or queued is not the same as a completed buyback or burn.','Use the transaction history to distinguish collected, paid, queued, spent and burned amounts. Raw integer units are not whole coins. Fee activity requires trades and keeper execution and can be delayed. Burns reduce supply but do not guarantee price appreciation.']}));}
+  return doc;
+ });
+}
 export const docText = doc => [doc.title,doc.summary,...doc.sections.flatMap(s=>[s.title,...(s.paragraphs||[]),...(s.steps||[]),...(s.table?.rows.flat()||[])])].join(' ');
 export const docHref = id => id.startsWith('@') ? '#'+id.slice(1) : '#docs/'+id;

@@ -9,14 +9,16 @@ import {writeDurableJson} from '../shared/durable-json.mjs';
 import {resolvePostlaunchCampaign} from './postlaunch-campaign.mjs';
 import {localKey,chainTime} from './dev-vesting.mjs';
 import {CPMM,PARENT_AMM_CONFIG,LOCK,LOCK_AUTH,authorityAddress,campaignPoolAddresses,checkPoolPolicy} from './atomic-launch.mjs';
-import {burnChildFeesInstruction} from './atomic-fees.mjs';
+import {burnChildFeesInstruction,buyBurnChildInstruction,childBuybackFloor,CHILD_BUYBACK_MAX_SLICE} from './atomic-fees.mjs';
+import {burnExpiredParentReservesInstruction} from './atomic-claims.mjs';
+import {parentClaimExpiryUnix,parentsBurnRecord} from './parent-claim-window.mjs';
 import {CURRENT_FEATURES,manifestFeatures} from './program-builds.mjs';
 import {parentsAddress} from './atomic-claims.mjs';
 import {poolAddresses,decodePool,decodeConfig} from './cpmm.mjs';
 import {localnetParentRoute,fetchJupiterParentRoute} from './jupiter-route.mjs';
 import {networkProfile,scopeFor} from './network.mjs';
 const PROFILE=networkProfile();
-import {guardBuybackQuote} from './price-guard.mjs';
+import {guardBuybackQuote,PRICE_GUARD} from './price-guard.mjs';
 import {operatorSigner,toSigner} from './operator-signer.mjs';
 /** Parent -> Pyth feed id from the recorded mainnet identities; absent parents have no reference (impact cap and small slice only). */
 function parentPythFeed(mint){try{const ids=JSON.parse(readFileSync(new URL('../deployment/MAINNET-IDENTITIES.json',import.meta.url),'utf8'));return ids.parents.find(p=>p.mint===mint.toBase58())?.pythFeedId||null;}catch{return null;}}
@@ -50,7 +52,7 @@ export const burnWorthwhile=(valueLamports,minimum=BURN_MIN_VALUE_LAMPORTS)=>Big
  * returns null when allowed, else the reason it is withheld. `burnValueLamports` is the quoted value for a burn. */
 export function resumedOperationWithheld(operation,{attempts={},burnValueLamports=null,minBuyback=BUYBACK_MIN_LAMPORTS}={}){
  if(!operation)return null;if(attempts[operation.id])return null;
- if(operation.kind==='buy-burn'&&BigInt(operation.amount||0)<minBuyback)return 'buyback budget below the minimum';
+ if((operation.kind==='buy-burn'||operation.kind==='buy-burn-child')&&BigInt(operation.amount||0)<minBuyback)return 'buyback budget below the minimum';
  if(operation.kind==='burn'&&burnValueLamports!==null&&!burnWorthwhile(burnValueLamports))return 'burn value below the threshold';
  return null;
 }
@@ -61,9 +63,42 @@ export function feePlan(state,features=CURRENT_FEATURES,minBuyback=BUYBACK_MIN_L
  if(state.treasuryPaid>treasury||state.devPaid>dev||state.parentAAllocated>parent||state.parentBAllocated>parent||state.parentASpent>state.parentAAllocated||state.parentBSpent>state.parentBAllocated)throw Error('Fee counter accounting mismatch');
  const plan=[];if(state.childPending>0n)plan.push({kind:features.includes('burn-child-fees')?'burn':'convert',amount:state.childPending.toString()});
  if(state.treasuryPaid<treasury||state.devPaid<dev||state.parentAAllocated<parent||state.parentBAllocated<parent)plan.push({kind:'distribute'});
+ // Program build 6 ('child-buyback'): the two parent budgets are one budget that buys and burns the coin itself (tag 27),
+ // so the plan carries one buy-burn-child item for the combined pending budget and never a parent buy-burn (tags 24 and
+ // 25 are refused by that build). Earlier builds keep one buy-burn per parent, unchanged.
+ if(features.includes('child-buyback')){
+  const budget=(state.parentAAllocated-state.parentASpent)+(state.parentBAllocated-state.parentBSpent);
+  if(budget>=minBuyback)plan.push({kind:'buy-burn-child',amount:budget.toString()});else if(budget>0n)plan.push({kind:'buy-burn-child-waiting',amount:budget.toString(),minimum:minBuyback.toString()});
+  return plan;
+ }
  for(const index of [0,1]){const budget=index?state.parentBAllocated-state.parentBSpent:state.parentAAllocated-state.parentASpent;if(budget>=minBuyback)plan.push({kind:'buy-burn',index,amount:budget.toString()});else if(budget>0n)plan.push({kind:'buy-burn-waiting',index,amount:budget.toString(),minimum:minBuyback.toString()});}
  return plan;
 }
+/** Coin buyback (tag 27): one slice, at most 0.5 SOL and at most the combined pending budget. */
+export function childBuybackSlice(budgetLamports,max=CHILD_BUYBACK_MAX_SLICE){const budget=raw(BigInt(budgetLamports));if(budget<=0n)throw Error('Coin buyback budget is empty');return budget>max?max:budget;}
+/** Reserve-based guard for a coin buyback quote (boundedQuote on the campaign's own pool). The coin has no reference
+ * price, so only the impact cap applies (price-guard.mjs PRICE_GUARD.maxImpactBps): the net input over the input
+ * reserve plus it, which is how far the fill sits under the spot price. The result is journaled like the Pyth guard. */
+export function childBuybackGuard(quote,{maxImpactBps=PRICE_GUARD.maxImpactBps}={}){
+ if(typeof quote?.net!=='bigint'||typeof quote?.reserveIn!=='bigint'||quote.net<=0n||quote.reserveIn<=0n)throw Error('Quote has no reserves');
+ const impactBps=Number(quote.net*10000n/(quote.reserveIn+quote.net));
+ if(impactBps>maxImpactBps)throw Error('Quote price impact '+impactBps+' bps exceeds the cap');
+ return {referenceCheck:'pool-reserves',impactBps,deviationBps:null,note:'the coin has no reference price; the floor is the pool reserves after the fee, less 1 %'};
+}
+/** min_out for tag 27: never under the program floor (spot quote less the sealed 1 %); stricter when the configured
+ * slippage (KIDS_PARENT_BUYBACK_SLIPPAGE_BPS, at most 100) is lower. */
+export function childBuybackMinOut(quote,amount,slippageBps=100){
+ const floor=childBuybackFloor({amount,reserveIn:quote.reserveIn,reserveOut:quote.reserveOut,rate:quote.rate});
+ const bps=BigInt(slippageBps);if(bps<1n||bps>100n)throw Error('Coin buyback slippage must be 1 to 100 bps');
+ const strict=quote.quote-quote.quote*bps/10000n;return strict>floor?strict:floor;
+}
+/** A tag 11 send the program refused (window still open by the chain clock, or any other program error) is released and
+ * retried an hour later; a transport error keeps the existing behaviour (rethrow, the same operation resumes). */
+export function expiredBurnRefusal(error){const m=String(error?.message||error);
+ if(/Transaction simulation failed|Simulation failed/i.test(m)&&!/Blockhash not found/i.test(m))return 'simulation';
+ if(/Operator transaction failed/i.test(m))return 'failed';
+ return null;}
+export const EXPIRED_BURN_RETRY_SECONDS=3600;
 export function validateActiveFeeIdentity(selected,admin){
  const {ctx,campaign,state,record}=selected;
  if(selected.scope!==scopeFor(PROFILE)||ctx.manifest.network!==PROFILE.network||ctx.manifest.rpcUrl!==PROFILE.rpcLabel||ctx.connection.rpcEndpoint!==PROFILE.rpcUrl||record.network!==PROFILE.network||record.ready!==true||state.phase!==3)throw Error('Fee keeper requires a qualified active localnet campaign');
@@ -117,8 +152,16 @@ export function buybackRefusal(error){const m=String(error?.message||error);
 export function releaseRefusedBuyback(journal,operation,reason,now=Date.now){
  const old=journal.attempts?.[operation.id];
  if(old&&!old.confirmed){journal.attempts[operation.id+':'+old.createdAt]={...old,closedReason:'refused:'+reason};delete journal.attempts[operation.id];}
- journal.current=null;journal.lastBuybackParent=operation.index;
- const counts=journal.buybackRefusals||{};counts[operation.index]=(counts[operation.index]||0)+1;journal.buybackRefusals=counts;journal.lastBuybackRefusal={parent:operation.index,reason,at:now()};
+ // The coin buyback (build 6) has no turn to pass: its bucket is 'child' and the parent turn marker is left alone.
+ const bucket=operation.kind==='buy-burn-child'?'child':operation.index;
+ journal.current=null;if(operation.kind!=='buy-burn-child')journal.lastBuybackParent=operation.index;
+ const counts=journal.buybackRefusals||{};counts[bucket]=(counts[bucket]||0)+1;journal.buybackRefusals=counts;journal.lastBuybackRefusal={parent:bucket,reason,at:now()};
+ return journal;}
+/** Release a refused tag 11 (kept under a closed key like a refused buyback) and schedule the next try. */
+export function releaseRefusedExpiredBurn(journal,operation,reason,chainNow,now=Date.now){
+ const old=journal.attempts?.[operation.id];
+ if(old&&!old.confirmed){journal.attempts[operation.id+':'+old.createdAt]={...old,closedReason:'refused:'+reason};delete journal.attempts[operation.id];}
+ journal.current=null;journal.parentsExpiredBurnRetryAt=chainNow+EXPIRED_BURN_RETRY_SECONDS;journal.parentsExpiredBurnRefusal={reason,at:now()};
  return journal;}
 export function isNothingToCollect(operation,error){return operation?.kind==='collect'&&/0x1776|ZeroTradingTokens/.test(String(error?.message||error));}
 /** Counter changes caused by one confirmed fee operation (strings, only the counters that moved). */
@@ -136,7 +179,10 @@ export function createActiveFeeKeeper({resolve=()=>resolvePostlaunchCampaign('ac
    const parentInfo=await c.getAccountInfo(parentsAddress(ctx,campaign));
    if(!parentInfo||!parentInfo.owner.equals(ctx.programId)||parentInfo.data.length!==256||parentInfo.data.subarray(0,8).toString()!=='KIDSPAR1'||!parentInfo.data.subarray(8,40).equals(campaign.toBuffer())||parents.some((p,i)=>!parentInfo.data.subarray(40+i*32,72+i*32).equals(p.toBuffer())))throw Error('On-chain parent registration mismatch');
    // Validate every route before collection: never silently redirect a missing parent pool.
-   const own=await canonicalRoute(ctx,mint,state.pool);if(!own.pool.equals(state.pool))throw Error('Active fee pool mismatch');for(const parent of parents)await canonicalRoute(ctx,parent);
+   const features=manifestFeatures(ctx.manifest),childBuyback=features.includes('child-buyback');
+   const own=await canonicalRoute(ctx,mint,state.pool);if(!own.pool.equals(state.pool))throw Error('Active fee pool mismatch');
+   // On a build that buys the coin itself (build 6) no parent pool is ever traded, so none is required to exist.
+   if(!childBuyback)for(const parent of parents)await canonicalRoute(ctx,parent);
    const journal=existsSync(file)?JSON.parse(readFileSync(file,'utf8')):{identity,sequence:0,attempts:{},lastCollectedAt:null,current:null};
    if(JSON.stringify(journal.identity)!==JSON.stringify(identity))throw Error('Active fee journal identity changed');
    const persist=()=>writeDurableJson(file,journal),send=createOperatorSender({connection:c,journal,persist});
@@ -147,8 +193,12 @@ export function createActiveFeeKeeper({resolve=()=>resolvePostlaunchCampaign('ac
    if(operation&&!journal.attempts[operation.id]){let burnValue=null;if(operation.kind==='burn'){try{burnValue=(await boundedQuote(c,mint,NATIVE_MINT,BigInt(operation.amount),state.pool)).quote;}catch(error){if(error.message!=='Trade too small')throw error;burnValue=0n;}}
     const withheld=resumedOperationWithheld(operation,{attempts:journal.attempts,burnValueLamports:burnValue});if(withheld){console.log(JSON.stringify({event:'resumed-operation-withheld',campaign:identity.campaign,id:operation.id,kind:operation.kind,reason:withheld}));journal.current=null;persist();operation=null;}}
    if(!operation){
-    const feeInfo=await c.getAccountInfo(f.state);
-    if(!feeInfo||feeInfo.owner.equals(SystemProgram.programId)&&feeInfo.data.length===0)operation={kind:'init'};
+    // Program build 6 ('parent-claim-expiry'): once the window has closed, send tag 11 once. The chain record (KIDSPAR1
+    // offset 240) is the guard against a second send; a refused send backs off an hour, a transport error resumes.
+    if(features.includes('parent-claim-expiry')){const expiry=parentClaimExpiryUnix(state.launchedAt,features),record=parentsBurnRecord(parentInfo.data);if(expiry!==null&&now>=expiry&&record.burnedAtUnix===null&&!(journal.parentsExpiredBurnRetryAt>now))operation={kind:'parents-expired-burn'};}
+    const feeInfo=operation?null:await c.getAccountInfo(f.state);
+    if(operation){}
+    else if(!feeInfo||feeInfo.owner.equals(SystemProgram.programId)&&feeInfo.data.length===0)operation={kind:'init'};
     else{
      await readFees(ctx,campaign,mint); // Existing state must be valid, not just present.
      for(const [index,[tokenMint,owner]] of atas.entries()){
@@ -157,12 +207,13 @@ export function createActiveFeeKeeper({resolve=()=>resolvePostlaunchCampaign('ac
       const account=unpackAccount(address,info,programOf(tokenMint));if(!account.owner.equals(owner)||!account.mint.equals(tokenMint)||account.isFrozen||account.delegate||account.closeAuthority)throw Error('Fee custody ATA mismatch');
      }
      if(!operation){
-      const plan=feePlan(await readFees(ctx,campaign,mint),manifestFeatures(ctx.manifest));
+      const plan=feePlan(await readFees(ctx,campaign,mint),features);
       const collectDelay=journal.collectDelaySeconds||collectionIntervalSeconds,collectDue=journal.lastCollectedAt===null||now-journal.lastCollectedAt>=collectDelay;
       // Both parents take turns: after a slice for one parent the other parent's slice comes first next time, so a
       // large budget on one side never starves the other (24 Sep 2026: Fartcoin ran 40 slices before Buttcoin's first).
       if(plan.filter(x=>x.kind==='buy-burn').length===2&&journal.lastBuybackParent===0){const i=plan.findIndex(x=>x.kind==='buy-burn'&&x.index===1),j=plan.findIndex(x=>x.kind==='buy-burn'&&x.index===0);if(i>j){const [b]=plan.splice(i,1);plan.splice(j,0,b);}}
       for(const item of plan){if(item.kind==='buy-burn-waiting'){console.log(JSON.stringify({event:'buyback-waiting-for-budget',campaign:identity.campaign,parent:item.index,budgetLamports:item.amount,minimumLamports:item.minimum}));continue;}
+       if(item.kind==='buy-burn-child-waiting'){console.log(JSON.stringify({event:'buyback-waiting-for-budget',campaign:identity.campaign,parent:'child',budgetLamports:item.amount,minimumLamports:item.minimum}));continue;}
        if(item.kind==='burn'){let value=null;try{value=(await boundedQuote(c,mint,NATIVE_MINT,BigInt(item.amount),state.pool)).quote;}catch(error){if(error.message!=='Trade too small')throw error;value=0n;}if(!burnWorthwhile(value)){console.log(JSON.stringify({event:'burn-waiting-for-value',campaign:identity.campaign,childPendingRaw:item.amount,valueLamports:value.toString(),minimumLamports:BURN_MIN_VALUE_LAMPORTS.toString()}));continue;}operation=item;break;}
        if(item.kind==='distribute'){operation=item;break;}
        // A parent buyback on a Jupiter route is quoted by Jupiter when it runs; the canonical CPMM pool (empty for both parents
@@ -170,7 +221,9 @@ export function createActiveFeeKeeper({resolve=()=>resolvePostlaunchCampaign('ac
        // A due collection comes before the parent buybacks: with hundreds of small slices queued, the buybacks would
        // otherwise keep the harvest, and the treasury and dev payouts that follow it, waiting for hours (24 Sep 2026:
        // no collection between 12:07 and the 16:28 restart while the buyback queue held the keeper).
-       if(item.kind==='buy-burn'&&collectDue){operation={kind:'collect'};break;}
+       if((item.kind==='buy-burn'||item.kind==='buy-burn-child')&&collectDue){operation={kind:'collect'};break;}
+       // The coin buyback is quoted on the campaign's own pool; a slice the pool cannot price is not attempted.
+       if(item.kind==='buy-burn-child'){try{await boundedQuote(c,NATIVE_MINT,mint,childBuybackSlice(item.amount),state.pool);operation=item;break;}catch(error){if(error.message!=='Trade too small')throw error;continue;}}
        if(item.kind==='buy-burn'&&(process.env.KIDS_PARENT_BUYBACK_ROUTE||'cpmm')!=='cpmm'){operation=item;break;}
        try{await boundedQuote(c,item.kind==='convert'?mint:NATIVE_MINT,item.kind==='convert'?NATIVE_MINT:parents[item.index],BigInt(item.amount));operation=item;break;}catch(error){if(error.message!=='Trade too small')throw error;}}
       if(!operation&&collectDue)operation={kind:'collect'};
@@ -192,6 +245,19 @@ export function createActiveFeeKeeper({resolve=()=>resolvePostlaunchCampaign('ac
     instruction=collectFeesInstruction(ctx,campaign,admin.publicKey,mint,state.feeNft,amount,state.pool);
    }else if(operation.kind==='distribute')instruction=distributeFeesInstruction(ctx,campaign,admin.publicKey,mint,state.treasury,state.dev);
    else if(operation.kind==='burn'){instruction=burnChildFeesInstruction(ctx,campaign,admin.publicKey,mint,BigInt(operation.amount));}
+   else if(operation.kind==='parents-expired-burn'){if(!features.includes('parent-claim-expiry'))throw Error('Live program has no parent claim window');instruction=burnExpiredParentReservesInstruction(ctx,campaign,mint);}
+   else if(operation.kind==='buy-burn-child'){
+    // Program build 6, tag 27: the combined parent budget buys the coin on its own pool and burns it. One slice of at most
+    // 0.5 SOL; the quote, the reserve-based impact guard (halving down to 0.05 SOL like the routed path), the floor and
+    // the journal all use the executed slice. No Pyth reference: the coin has none.
+    if(!childBuyback)throw Error('Live program has no coin buyback');
+    const budget=raw(BigInt(operation.amount));let slice=childBuybackSlice(budget),quote=null,guard=null;const expiry=await chainTime(c)+90,slippageBps=parentBuybackSlippageBps();
+    for(let attempt=0;attempt<4;attempt++){quote=await boundedQuote(c,NATIVE_MINT,mint,slice,state.pool);try{guard=childBuybackGuard(quote);break;}catch(error){if(!/price impact/i.test(String(error.message))||slice<=100000000n)throw error;slice=slice/2n;console.log(JSON.stringify({event:'buyback-slice-reduced',campaign:identity.campaign,parent:'child',sliceLamports:slice.toString(),reason:String(error.message).slice(0,80)}));}}
+    if(!guard)throw Error('Quote price impact exceeds the cap');
+    const minOutput=childBuybackMinOut(quote,slice,slippageBps);
+    operation.priceGuard=guard;operation.slippageBps=slippageBps;operation.slice=slice.toString();operation.executedAmount=slice.toString();operation.minOutput=minOutput.toString();operation.quotedOut=quote.quote.toString();
+    instruction=buyBurnChildInstruction(ctx,campaign,admin.publicKey,mint,slice,minOutput,expiry,state.pool);
+   }
    else if(operation.kind==='convert'||operation.kind==='buy-burn'){
     if(operation.kind==='buy-burn'&&![0,1].includes(operation.index))throw Error('Invalid parent index');
     const amount=raw(BigInt(operation.amount)),input=operation.kind==='convert'?mint:NATIVE_MINT,output=operation.kind==='convert'?NATIVE_MINT:parents[operation.index],expiry=await chainTime(c)+90;
@@ -239,15 +305,23 @@ export function createActiveFeeKeeper({resolve=()=>resolvePostlaunchCampaign('ac
     if(isNothingToCollect(operation,error)){journal.current=null;journal.lastCollectedAt=await chainTime(c);journal.collectDelaySeconds=nextCollectionDelay({delta:null,current:journal.collectDelaySeconds,base:collectionIntervalSeconds});persist();console.log(JSON.stringify({event:'fees-nothing-to-collect',campaign:identity.campaign}));return {status:'nothing-to-collect',campaign:identity.campaign};}
     throw error;
    }
-   const after=await readFees(ctx,campaign,mint).catch(()=>null);appendFeeEvent(journal,{id:operation.id,kind:operation.kind,index:operation.index??null,amount:operation.executedAmount??operation.slice??operation.amount??null,budget:operation.amount??null,signature,at:await chainTime(c),delta:feeDelta(before,after)});
+   const after=await readFees(ctx,campaign,mint).catch(()=>null);let delta=feeDelta(before,after);
+   // Tag 11 moves no fee counter: its record is the burned amounts tag 11 wrote in the parents account.
+   if(operation.kind==='parents-expired-burn'){const record=parentsBurnRecord((await c.getAccountInfo(parentsAddress(ctx,campaign))).data);delta={parentAUnclaimedBurned:record.burnedRaw[0].toString(),parentBUnclaimedBurned:record.burnedRaw[1].toString()};journal.parentsExpiredBurn={signature,at:record.burnedAtUnix,burnedRaw:record.burnedRaw.map(String)};}
+   appendFeeEvent(journal,{id:operation.id,kind:operation.kind,index:operation.index??null,amount:operation.executedAmount??operation.slice??operation.amount??null,budget:operation.amount??null,signature,at:await chainTime(c),delta});
    if(operation.kind==='buy-burn'){journal.lastBuybackParent=operation.index;persist();}
+   // Running totals of the coin bucket (build 6): the fee counters mix parent purchases before the upgrade and the
+   // coin-side burns of tag 26, so the site reads the coin buyback's own SOL and burned coins from here.
+   if(operation.kind==='buy-burn-child'){const t=journal.childBuyback||{spentLamports:'0',boughtAndBurnedRaw:'0',slices:0};t.spentLamports=(BigInt(t.spentLamports)+BigInt(delta?.parentASpent||0)+BigInt(delta?.parentBSpent||0)).toString();t.boughtAndBurnedRaw=(BigInt(t.boughtAndBurnedRaw)+BigInt(delta?.childBurned||0)).toString();t.slices+=1;t.lastSignature=signature;journal.childBuyback=t;persist();}
    if(operation.kind==='collect'){journal.lastCollectedAt=await chainTime(c);journal.collectDelaySeconds=nextCollectionDelay({delta:feeDelta(before,after),current:journal.collectDelaySeconds,base:collectionIntervalSeconds});if(journal.collectDelaySeconds>collectionIntervalSeconds)console.log(JSON.stringify({event:'fees-collect-backoff',campaign:identity.campaign,nextInSeconds:journal.collectDelaySeconds}));}journal.current=null;persist();
    return {status:'completed',operation:operation.kind,signature,campaign:identity.campaign};
    }catch(error){
-    const reason=operation.kind==='buy-burn'?buybackRefusal(error):null;if(!reason)throw error;
+    if(operation.kind==='parents-expired-burn'){const reason=expiredBurnRefusal(error);if(!reason)throw error;releaseRefusedExpiredBurn(journal,operation,reason,await chainTime(c));persist();console.log(JSON.stringify({event:'parents-expired-burn-refused',campaign:identity.campaign,reason,retryAt:journal.parentsExpiredBurnRetryAt,detail:String(error.message).replace(/\s+/g,' ').slice(0,160)}));return {status:'parents-expired-burn-refused',reason,campaign:identity.campaign};}
+    const reason=operation.kind==='buy-burn'||operation.kind==='buy-burn-child'?buybackRefusal(error):null;if(!reason)throw error;
     releaseRefusedBuyback(journal,operation,reason);persist();
-    console.log(JSON.stringify({event:'buyback-refused',campaign:identity.campaign,parent:operation.index,reason,detail:String(error.message).replace(/\s+/g,' ').slice(0,160)}));
-    return {status:'buyback-refused',parent:operation.index,reason,campaign:identity.campaign};
+    const parent=operation.kind==='buy-burn-child'?'child':operation.index;
+    console.log(JSON.stringify({event:'buyback-refused',campaign:identity.campaign,parent,reason,detail:String(error.message).replace(/\s+/g,' ').slice(0,160)}));
+    return {status:'buyback-refused',parent,reason,campaign:identity.campaign};
    }
   }finally{running=false;}
  };

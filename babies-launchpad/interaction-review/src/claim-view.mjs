@@ -29,6 +29,26 @@ export function parentState(row,vault=null,decimals=6){
  return {state:'open',remainingRaw:remaining,remainingText:text,expiresAtUnix,deadlineText,note:'Eligible: '+text+' remaining'+(deadlineText?' · claim by '+deadlineText:''),button:'Claim'};
 }
 /**
+ * The parent claim window as served: `claims.parentWindow` (build 6 launch-program rail: launch time + 30 days, with
+ * tag 11's burn record) or the vault's expiry. Null when the live build has no window (rewards never expire).
+ */
+export function parentWindowFor(claims){
+ const w=claims?.parentWindow;
+ if(w&&Number.isFinite(w.expiresAtUnix)){const expired=w.expired===true||w.windowOpen===false;return {expiresAtUnix:w.expiresAtUnix,windowOpen:!expired,expired,burnedRaw:Array.isArray(w.burnedRaw)?w.burnedRaw.map(String):null,burnedAtUnix:Number.isFinite(w.burnedAtUnix)?w.burnedAtUnix:null};}
+ const v=claims?.vault;
+ if(v&&Number.isFinite(v.parentExpiryUnix)){const expired=v.parentExpired===true||v.parentWindowOpen===false;return {expiresAtUnix:v.parentExpiryUnix,windowOpen:!expired,expired,burnedRaw:null,burnedAtUnix:null};}
+ return null;
+}
+/** The one-line note above the parent rows: "Claim by …" while open, the closed state (with the burn once recorded) after. */
+export function parentWindowNote(window,decimals=6){
+ if(!window)return null;const when=formatUtc(window.expiresAtUnix);
+ if(!window.expired)return {closed:false,title:'Claim by '+when,detail:'Unclaimed parent rewards are burned after this deadline.',expiresAtUnix:window.expiresAtUnix};
+ let burned=null;if(window.burnedRaw){burned=0n;for(const v of window.burnedRaw){const n=big(v);if(n!=null)burned+=n;}}
+ const recorded=window.burnedAtUnix!=null||(burned!=null&&burned>0n);
+ const detail=!recorded?'Unclaimed rewards are burned. The burn is not recorded on chain yet.':burned>0n?'Unclaimed rewards burned: '+formatUnits(burned.toString(),decimals,0)+' $Shartcoin.':'Nothing was left to burn: every reward was claimed.';
+ return {closed:true,title:'Parent claims closed on '+when,detail,expiresAtUnix:window.expiresAtUnix,burnedRaw:burned==null?null:burned.toString()};
+}
+/**
  * Dev vesting facts. Public numbers come from the served distribution account when the coin is on the vault rail;
  * otherwise claimed and remaining are known only to the dev wallet (claims.dev) and stay null for everyone else.
  */

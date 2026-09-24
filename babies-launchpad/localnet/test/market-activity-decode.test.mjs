@@ -15,8 +15,9 @@ const only=(r,n=1)=>{assert.equal(r.failed,false);assert.deepEqual(r.skipped,[])
 const common=(e,kind,path,actor)=>{assert.equal(e.campaign,CAMPAIGN);assert.equal(e.kind,kind);assert.equal(e.instructionPath,path);assert.equal(e.actor,actor);assert.equal(e.failed,false);assert.equal(e.decoderVersion,ACTIVITY_DECODER_VERSION);assert.equal(e.program,kind.startsWith('vault-')?'distribution':kind==='authority-revoked'?'token':'launch');};
 const KEEPER='AAuwkFNvXRimHyvdQfh7Zik9baw8W2ufSbc5cyBqsdoE',PARTICIPANT='JBjY3ETQWkJa79G1URqFsgzqxKqxWeNfNycccQLkGVgn';
 
-test('kind tables cover every launch tag (0..10, 20..26) and distribution tag (0..5) with fixed names',()=>{
- assert.deepEqual(Object.keys(LAUNCH_KINDS).map(Number),[0,1,2,3,4,5,6,7,8,9,10,20,21,22,23,24,25,26]);
+test('kind tables cover every launch tag (0..11, 20..27) and distribution tag (0..5) with fixed names',()=>{
+ assert.deepEqual(Object.keys(LAUNCH_KINDS).map(Number),[0,1,2,3,4,5,6,7,8,9,10,11,20,21,22,23,24,25,26,27]);
+ assert.equal(LAUNCH_KINDS[11],'burn-parents-expired');assert.equal(LAUNCH_KINDS[27],'buy-burn-child');
  assert.deepEqual(Object.keys(DISTRIBUTION_KINDS).map(Number),[0,1,2,3,4,5]);
  assert.equal(new Set(KINDS).size,KINDS.length);assert.ok(KINDS.includes('authority-revoked'));
  assert.throws(()=>decodeActivity(fixture('commit'),{...ID,campaign:'short'}),/identity is incomplete: campaign/);
@@ -140,6 +141,16 @@ test('synthetic Jupiter buy-burn (tag 25): SOL out of custody through the route,
  inner[0]={programId:JUP,accounts:[],data:'11',stackHeight:2};// the route; its legs stay at height 3
  const [e]=only(decodeActivity(tx,ID));common(e,'buy-burn-routed','1',KEEPER);assert.equal(e.detail,'parent-0');
  assert.deepEqual(e.assets.map(a=>[a.mint,a.amountRaw,a.direction]),[['SOL','1019612','out'],[FARTCOIN,'6928','burn']]);
+});
+test('synthetic build-6 tag 27 (coin buyback): SOL out of the WSOL custody, the bought coins burned from the coin custody, no parent detail',()=>{
+ const tx=structuredClone(fixture('buy-burn'));const ix=programIx(tx);ix.accounts=ix.accounts.slice(0,16);ix.data=data([27,...Buffer.alloc(24)]);
+ const [e]=only(decodeActivity(tx,ID));common(e,'buy-burn-child','1',KEEPER);assert.equal(e.detail,null);
+ assert.deepEqual(e.assets.map(a=>[a.mint,a.amountRaw,a.direction]),[['SOL','1019612','out'],[FARTCOIN,'6928','burn']]);
+});
+test('synthetic build-6 tag 11 (burn expired parent reserves): the burn from launch custody, no signer, actor is the fee payer',()=>{
+ const tx=structuredClone(fixture('burn-child'));const ix=programIx(tx);const A=ix.accounts;ix.accounts=[A[0],A[2],A[3],A[5],A[4],A[6]];ix.data=data([11]);
+ const [e]=only(decodeActivity(tx,ID));common(e,'burn-parents-expired','1',KEEPER);assert.equal(e.detail,null);
+ assert.deepEqual(e.assets.map(a=>[a.mint,a.amountRaw,a.direction]),[[A[5],'670345318218','burn']]);
 });
 test('a failed transaction is recorded for our program with status failed and no assets, so a failed claim attempt is visible',()=>{
  const tx=structuredClone(fixture('claim-participant'));tx.meta.err={InstructionError:[1,{Custom:30}]};tx.meta.innerInstructions=[];

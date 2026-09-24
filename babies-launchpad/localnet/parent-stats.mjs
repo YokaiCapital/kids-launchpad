@@ -4,6 +4,7 @@
 // stays null; nothing is estimated from current holders.
 import {readFileSync,existsSync} from 'node:fs';import {fileURLToPath} from 'node:url';
 import {PublicKey} from '@solana/web3.js';import {parentsAddress} from './atomic-claims.mjs';import {distributionAddress,decodeDistribution} from './distribution.mjs';import {networkProfile} from './network.mjs';
+import {manifestFeatures} from './program-builds.mjs';import {parentClaimWindow,parentsBurnRecord} from './parent-claim-window.mjs';
 const CACHE_MS=60_000;const cache=new Map();
 function runtimeSnapshot(campaign){const p=new URL('./.runtime/parent-snapshot-'+campaign+'.json',import.meta.url);return existsSync(p)?JSON.parse(readFileSync(p,'utf8')):null;}
 function evidence(network,campaign,mint){try{const p=fileURLToPath(new URL('../deployment/'+network+'/snapshots/'+campaign+'/'+mint+'.json',import.meta.url));return existsSync(p)?JSON.parse(readFileSync(p,'utf8')):null;}catch{return null;}}
@@ -17,6 +18,10 @@ export async function parentStats(ctx,state,{now=Date.now(),profile=networkProfi
  const campaign=state.address,key=campaign.toBase58();const hit=cache.get(key);if(hit&&now-hit.at<CACHE_MS)return hit.value;
  const snap=runtimeSnapshot(key);const parentsInfo=await ctx.connection.getAccountInfo(parentsAddress(ctx,campaign),'confirmed');
  const vault=state.distributionActivated?state.distributionProgram:null;const dist=vault?decodeDistribution(await ctx.connection.getAccountInfo(distributionAddress(vault,campaign),'confirmed'),vault):null;
+ // Launch-program rail on build 6: the window is launch time + 30 days and tag 11 records the burns at 224/232/240.
+ // Without 'parent-claim-expiry' in the live features the window stays null (rewards never expire).
+ const window=dist?{expiresAtUnix:dist.parentExpiry,windowOpen:Math.floor(now/1000)<dist.parentExpiry,expired:Math.floor(now/1000)>=dist.parentExpiry}:parentClaimWindow(state.launchedAt,manifestFeatures(ctx.manifest),Math.floor(now/1000));
+ const burnRecord=!dist&&parentsInfo?.data?.length===256?parentsBurnRecord(parentsInfo.data):null;
  const out=[];
  for(const index of [0,1]){
   const tree=snap?.parents?.[index]||null,onChainRoot=parentsInfo?parentsInfo.data.subarray(104+index*32,136+index*32).toString('hex'):null;
@@ -24,12 +29,12 @@ export async function parentStats(ctx,state,{now=Date.now(),profile=networkProfi
   const ev=tree?evidence(profile.network,key,tree.mint):null;
   const claimedRaw=dist?dist.claimed[1+index]:parentsInfo?parentsInfo.data.readBigUInt64LE(208+index*8):null;
   let claimedCount=null;try{if(rootVerified)claimedCount=(await claimedOnChain(ctx.connection,vault||ctx.programId,campaign,index,!!vault)).count;}catch{claimedCount=null;}
-  const allocationRaw=state.supply*500n/10000n;const burnedRaw=dist?dist.burned[index]:0n;
+  const allocationRaw=state.supply*500n/10000n;const burnedRaw=dist?dist.burned[index]:burnRecord?burnRecord.burnedRaw[index]:0n;
   out.push({index,mint:tree?.mint||null,rootVerified,eligibleOwners:rootVerified?tree.entries.length:null,eligibleTotalRaw:rootVerified?tree.entries.reduce((s,e)=>s+BigInt(e.balance),0n).toString():null,
    snapshotSlot:tree?.slot??snap?.slot??null,snapshotAt:ev?.readAt||null,thresholdRaw:ev?.threshold||null,parentSupplyRaw:ev?.supply||null,
    allocationRaw:allocationRaw.toString(),claimedRaw:claimedRaw===null?null:claimedRaw.toString(),claimedCount,burnedRaw:burnedRaw.toString(),remainingRaw:claimedRaw===null?null:(allocationRaw-claimedRaw-burnedRaw).toString(),
-   expiresAtUnix:dist?dist.parentExpiry:null,evidenceSha256:ev?.snapshotSha256||null});
+   expiresAtUnix:window.expiresAtUnix,windowOpen:window.windowOpen,expired:window.expired,burnedAtUnix:dist?null:burnRecord?.burnedAtUnix??null,evidenceSha256:ev?.snapshotSha256||null});
  }
- const value={verifiedAt:new Date(now).toISOString(),parents:out};cache.set(key,{at:now,value});return value;
+ const value={verifiedAt:new Date(now).toISOString(),parents:out,window:{...window,burnedAtUnix:dist?null:burnRecord?.burnedAtUnix??null,burnedRaw:out.map(p=>p.burnedRaw)}};cache.set(key,{at:now,value});return value;
 }
 export function resetParentStatsCache(){cache.clear();}

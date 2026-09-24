@@ -23,6 +23,7 @@ import {claimableItems,claimedAll,custodyFacts,networkFact,parentState,remaining
 import {Exact,Help} from './Help';
 import {CoinPfp,SHART_PFP} from './CoinPfp';
 import {parentStatsList} from './valuation.mjs';
+import {feeMode,feeSentence,collectedHelp,childBuybackBucket,feeRoutingFacts} from './fee-view.mjs';
 const formatWhole=(value,decimals=6)=>value==null?'—':Math.round(Number(value)/10**decimals).toLocaleString('en-GB');
 const format=(value,decimals=6)=>value==null?'—':(Number(value)/10**decimals).toLocaleString('en-GB',{maximumFractionDigits:decimals===9?4:2});
 function moveTab(event){const tabs=[...event.currentTarget.querySelectorAll('[role="tab"]')],index=tabs.indexOf(event.target);if(index<0)return;let next;if(event.key==='ArrowRight')next=(index+1)%tabs.length;else if(event.key==='ArrowLeft')next=(index+tabs.length-1)%tabs.length;else if(event.key==='Home')next=0;else if(event.key==='End')next=tabs.length-1;else return;event.preventDefault();tabs[next].focus();tabs[next].click();}
@@ -31,21 +32,22 @@ const PARENT_NAMES=['Fartcoin','Buttcoin'];
 const Burn=()=><Fire size={14} weight="fill" aria-hidden="true"/>;
 /** A tile figure: the short number is an Exact toggle (tap, focus or hover shows the full value); nothing lives only in a title. */
 const Figure=({raw,decimals,unit,label})=>{const v=compactUnits(raw,decimals,unit);return <strong><Exact label={label} detail={v.exact}>{v.text}</Exact> <small>{unit}</small></strong>;};
-/** The fee sentence reads the pool fee the API served; the LP share the program harvests is not a fixed number here, and the rest of the pool fee is Raydium's protocol and fund share. */
-function feeSentence(bps){const fee=Number(bps)>0?(bps/100).toLocaleString('en-GB')+' %':null;return (fee?'Every trade pays the pool fee of '+fee+'.':'Every trade pays the pool fee.')+' The program harvests the LP share of that fee. The rest of the pool fee is Raydium’s protocol and fund share. The SOL side is split: KIDS treasury, the dev, and buybacks of both parents that are burned. The coin side is burned outright, never sold.';}
+/** The fee sentence reads the pool fee the API served and the live build's routing (fee-view.mjs): build 6 buys and burns Shartcoin, earlier builds buy and burn both parents. */
 function Flywheel({data,verified}){
- const f=verified?data.fees:null;
+ const f=verified?data.fees:null,mode=feeMode(verified?data.programFeatures:null);
  // Token counters are raw base units: the child mint's decimals from the record (6), parents at 6. SOL is lamports.
  const childDecimals=Number.isInteger(data?.decimals)?data.decimals:6,parentDecimals=6;
  const childBurned=compactUnits(f?.childBurned,childDecimals,'coins');
  const parentStats=parentStatsList(data);
  const names={coin:verified?data.mint:null,parentMints:PARENT_NAMES.map((_,i)=>parentStats.find(p=>p?.index===i)?.mint||null),parents:PARENT_NAMES};
- return <section className="post-flywheel"><div className="post-flywheel-head"><div><h2>Every trade feeds the family.</h2><p>{feeSentence(verified?data.tradeFeeBps:null)}</p></div><span className="post-preview-badge">{f?format(f.totalSol,9)+' SOL collected':'No fees yet'}<Help label="SOL collected">All the SOL the pool fee has brought in since launch. It is split between the KIDS treasury, the dev and buybacks of both parents.</Help></span></div>
+ const bucket=mode==='child'?childBuybackBucket(f,{coinDecimals:childDecimals,parentDecimals}):null;
+ return <section className="post-flywheel"><div className="post-flywheel-head"><div><h2>Every trade feeds the family.</h2><p>{feeSentence(verified?data.tradeFeeBps:null,mode)}</p></div><span className="post-preview-badge">{f?format(f.totalSol,9)+' SOL collected':'No fees yet'}<Help label="SOL collected">{collectedHelp(mode)}</Help></span></div>
   <div className="post-flywheel-grid">
    <div className="post-flywheel-tile is-burn"><span>$Shartcoin burned from fees<Help label="$Shartcoin burned from fees">The coin side of the pool fee. These coins are destroyed for good, never sold back into the pool.</Help></span><strong><Exact label="Exact $Shartcoin burned" detail={childBurned.exact}>{childBurned.text}</Exact> <small>coins</small></strong><em><Burn/> never sold</em></div>
    <div className="post-flywheel-tile"><span>KIDS treasury<Help label="KIDS treasury">The part of the SOL fee that has been paid to the KIDS treasury so far.</Help></span><Figure raw={f?.treasuryPaid} decimals={9} unit="SOL" label="Exact SOL to KIDS treasury"/></div>
    <div className="post-flywheel-tile"><span>Dev<Help label="Dev">The part of the SOL fee that has been paid to the Shartcoin dev wallet so far.</Help></span><Figure raw={f?.devPaid} decimals={9} unit="SOL" label="Exact SOL to dev"/></div>
-   {PARENT_NAMES.map((name,i)=>{const spent=f?(i?f.parentBSpent:f.parentASpent):null,burned=compactUnits(f?(i?f.parentBBurned:f.parentABurned):null,parentDecimals,name+' burned');let queued=null;try{if(f){const q=BigInt(i?f.parentBAllocated:f.parentAAllocated)-BigInt(spent);if(q>0n)queued=q;}}catch{}
+   {mode==='child'?<div className="post-flywheel-tile is-burn"><span><Burn/> Shartcoin buyback and burn<Help label="Shartcoin buyback and burn">The parents’ share of the SOL fee buys Shartcoin on its own pool. Every coin bought this way is burned.</Help></span><Figure raw={bucket?.spentLamports??null} decimals={9} unit="SOL" label="Exact SOL spent buying Shartcoin"/><em><Burn/> <Exact label="Exact $Shartcoin bought and burned" detail={bucket?.burned.exact??null}>{bucket?.burned.text??'—'}</Exact> burned</em>{bucket?.pendingText&&<small>{bucket.pendingText}</small>}{bucket?.earlierText&&<small>{bucket.earlierText}</small>}</div>
+   :PARENT_NAMES.map((name,i)=>{const spent=f?(i?f.parentBSpent:f.parentASpent):null,burned=compactUnits(f?(i?f.parentBBurned:f.parentABurned):null,parentDecimals,name+' burned');let queued=null;try{if(f){const q=BigInt(i?f.parentBAllocated:f.parentAAllocated)-BigInt(spent);if(q>0n)queued=q;}}catch{}
     return <div key={name} className="post-flywheel-tile is-burn"><span><ParentIcon name={name}/> {name} buyback<Help label={name+' buyback'}>SOL from the fee that bought {name} on the open market. Every coin bought this way is burned.</Help></span><Figure raw={spent} decimals={9} unit="SOL" label={'Exact SOL spent on '+name}/><em><Burn/> <Exact label={'Exact '+name+' burned'} detail={burned.exact}>{burned.text}</Exact> burned</em>{queued!=null&&<small>{format(queued,9)} SOL queued, not yet bought</small>}</div>;})}
   </div>
   <ActivityFeed campaign={verified?data.campaign:null} data={verified?data:null} names={names} enabled={verified}/>
@@ -153,7 +155,7 @@ export function PostLaunch({identity,onSignIn,profile,posts=[],go,preview=false}
      <dt>Unclaimed coins</dt><dd>{verified&&data.launchAuthority?'Held at '+data.launchAuthority+', a program-derived address with no private key. The launch program’s rules decide what moves them; see the program rows above.':'—'}</dd>
      <dt>Supply split</dt><dd>43.5 % prelaunch · 43.5 % liquidity · 5 % each parent · 3 % dev{verified&&data.supplyRaw?<small>Supply now {formatWhole(data.supplyRaw,decimals)} $Shartcoin</small>:null}</dd>
      {verified&&(data.distribution?.devStartUnix||data.launchedAt)&&<><dt>Dev vesting</dt><dd>1 % at launch, 2 % linear from {formatUtc(data.distribution?.devStartUnix||data.launchedAt)}{data.distribution?.devEndUnix?' to '+formatUtc(data.distribution.devEndUnix):''}.</dd></>}
-     <dt>Fee routing</dt><dd>{data?.fees?`${format(data.fees.treasuryPaid,9)} SOL to KIDS · ${format(data.fees.devPaid,9)} SOL to dev`:'Not initialized for this pool'}</dd>{data?.fees&&<><dt>Parent buybacks</dt><dd>{format(data.fees.parentASpent,9)} SOL / {format(data.fees.parentBSpent,9)} SOL spent</dd></>}
+     {feeRoutingFacts(data?.fees||null,feeMode(data?.programFeatures)).map(([label,value])=><div key={label} className="post-fact"><dt>{label}</dt><dd>{value}</dd></div>)}
     </dl></details></div>
    </div>
    <aside className="post-rail" ref={railRef}>

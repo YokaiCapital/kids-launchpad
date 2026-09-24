@@ -17,8 +17,8 @@ test('REPRODUCTION: a compute-only message with a 1.4 SOL priority fee is refuse
  const sane=ev([ComputeBudgetProgram.setComputeUnitLimit({units:1_200_000}),ComputeBudgetProgram.setComputeUnitPrice({microLamports:10_000n}),kids(21)]);assert.equal(sane.ok,true);assert.equal(sane.priorityFeeLamports,12_000n);
 });
 test('user-signed tags, unknown tags and unserved campaigns are refused; keeper tags on a served campaign pass',()=>{
- for(const tag of [1,7,8,10,11,99])assert.equal(ev([kids(tag)]).ok,false,'tag '+tag);
- for(const tag of [2,3,4,5,6,20,21,22,23,24,25,26])assert.equal(ev([kids(tag)]).ok,true,'tag '+tag);
+ for(const tag of [1,7,8,10,12,99])assert.equal(ev([kids(tag)]).ok,false,'tag '+tag);
+ for(const tag of [2,3,4,5,6,11,20,21,22,23,24,25,26,27])assert.equal(ev([kids(tag)]).ok,true,'tag '+tag);
  const served=new Set([campaign.toBase58()]);assert.equal(ev([kids(21)],{campaigns:served}).ok,true);
  assert.match(ev([kids(21,[{pubkey:other.publicKey,isSigner:false,isWritable:true}])],{campaigns:served}).reason,/not served/);
  assert.match(ev([kids(0)]).reason,/not allowed/);assert.equal(ev([kids(0,[{pubkey:operator.publicKey,isSigner:true,isWritable:true},{pubkey:campaign,isSigner:false,isWritable:true}])],{provisioning:true,campaigns:served}).ok,true);
@@ -85,4 +85,12 @@ test('metadata creation is a provisioning-only operation: immutable, operator as
 
 test('the keeper may pay refunds (tag 3): the program binds the payout to the receipt owner',async()=>{
  const {KEEPER_TAGS,USER_TAGS}=await import('../signer-policy.mjs');assert.ok(KEEPER_TAGS.has(3));assert.ok(!USER_TAGS.has(3));
+});
+test('build 6: the keeper may send tag 11 (no signer, fee only) and tag 27 (coin buyback) on a served campaign; limits unchanged',async()=>{
+ const {KEEPER_TAGS,USER_TAGS,DEFAULT_LIMITS}=await import('../signer-policy.mjs');assert.ok(KEEPER_TAGS.has(11));assert.ok(KEEPER_TAGS.has(27));assert.ok(!USER_TAGS.has(11));assert.ok(USER_TAGS.has(10));
+ assert.deepEqual(DEFAULT_LIMITS,{maxComputeUnits:1_400_000,maxPriorityFeeLamports:50_000_000,maxTransferLamports:500_000_000,maxRentLamports:20_000_000,maxHourlyLamports:1_000_000_000,maxInstructions:24});
+ const served=new Set([campaign.toBase58()]);
+ const burn=kids(11,[{pubkey:campaign,isSigner:false,isWritable:false},{pubkey:other.publicKey,isSigner:false,isWritable:true}]);assert.equal(ev([burn],{campaigns:served}).ok,true);
+ assert.match(ev([kids(11,[{pubkey:other.publicKey,isSigner:false,isWritable:false}])],{campaigns:served}).reason,/not served/);
+ const r=ev([ComputeBudgetProgram.setComputeUnitLimit({units:1_200_000}),kids(27)],{campaigns:served});assert.equal(r.ok,true);assert.deepEqual(r.operations,['cu-limit','kids:27']);assert.equal(r.spendLamports,5_000n,'base fee only');
 });

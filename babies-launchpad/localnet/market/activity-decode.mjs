@@ -15,15 +15,16 @@ export const ACTIVITY_DECODER_VERSION=1;
 const SYSTEM='11111111111111111111111111111111';
 const TOKEN_PROGRAMS=new Set(['TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA','TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb']);
 const U64=/^\d{1,20}$/,ADDRESS=/^[1-9A-HJ-NP-Za-km-z]{32,44}$/;
-/** Launch program tags (programs/atomic-launch/src/lib.rs) to event kinds. Tag 22 is retired on chain but exists in history. */
-export const LAUNCH_KINDS=Object.freeze({0:'campaign-init',1:'commit',2:'finalize',3:'refund',4:'settle',5:'ready',6:'launch',7:'claim-participant',8:'claim-dev',9:'configure-parents',10:'claim-parent',20:'fees-init',21:'fees-collect',22:'fees-sell',23:'fees-distribute',24:'buy-burn',25:'buy-burn-routed',26:'burn-child'});
+/** Launch program tags (programs/atomic-launch/src/lib.rs) to event kinds. Tags 22, 24 and 25 are retired on chain (build 6)
+ * but exist in history; tag 11 (burn expired parent reserves) and tag 27 (coin buyback and burn) arrive with build 6. */
+export const LAUNCH_KINDS=Object.freeze({0:'campaign-init',1:'commit',2:'finalize',3:'refund',4:'settle',5:'ready',6:'launch',7:'claim-participant',8:'claim-dev',9:'configure-parents',10:'claim-parent',11:'burn-parents-expired',20:'fees-init',21:'fees-collect',22:'fees-sell',23:'fees-distribute',24:'buy-burn',25:'buy-burn-routed',26:'burn-child',27:'buy-burn-child'});
 /** Distribution program tags (programs/kids-distribution/src/lib.rs). */
 export const DISTRIBUTION_KINDS=Object.freeze({0:'vault-activate',1:'vault-claim-participant',2:'vault-claim-parent',3:'vault-claim-dev',4:'vault-burn-expired',5:'vault-sweep'});
 export const TOKEN_KINDS=Object.freeze(['authority-revoked']);
 export const KINDS=Object.freeze([...Object.values(LAUNCH_KINDS),...Object.values(DISTRIBUTION_KINDS),...TOKEN_KINDS]);
 export const ROLES=Object.freeze(['pool','lock','vault','treasury','dev']);
 /** Index of the campaign account in each launch instruction's fixed account order. */
-const CAMPAIGN_INDEX={0:1,1:1,2:0,3:0,4:0,5:0,6:0,7:0,8:0,9:1,10:1,20:0,21:0,22:0,23:0,24:0,25:0,26:0};
+const CAMPAIGN_INDEX={0:1,1:1,2:0,3:0,4:0,5:0,6:0,7:0,8:0,9:1,10:1,11:0,20:0,21:0,22:0,23:0,24:0,25:0,26:0,27:0};
 /** Distribution tags bind by the campaign (tag 0, account 2) or by the distribution record (tags 1..3 account 1, tags 4..5 account 0). */
 const DISTRIBUTION_BIND={0:{campaign:2},1:{distribution:1},2:{distribution:1},3:{distribution:1},4:{distribution:0},5:{distribution:0}};
 function bytesOf(data){try{return decodeBase58(data);}catch{return null;}}
@@ -118,6 +119,8 @@ export function decodeActivity(tx,identity){
    case 'buy-burn':outOf(A[4],null,null,WSOL_MINT);burned(A[5],A[12]);break;
    case 'buy-burn-routed':outOf(A[4],null,null,WSOL_MINT);burned(A[5],A[7]);break;
    case 'burn-child':burned(A[4],A[5]);break;
+   case 'buy-burn-child':outOf(A[4],null,null,WSOL_MINT);burned(A[5],A[12]);break;
+   case 'burn-parents-expired':burned(A[4],A[3]);break;
    case 'vault-activate':outOf(A[5],[A[11],A[12],A[13],A[14]],'vault',identity.mint);for(const v of [A[11],A[12],A[13],A[14]])burned(v,identity.mint);break;
    case 'vault-claim-participant':outOf(A[6],[A[7]],null,identity.mint);break;
    case 'vault-claim-parent':outOf(A[5],[A[6]],null,identity.mint);break;

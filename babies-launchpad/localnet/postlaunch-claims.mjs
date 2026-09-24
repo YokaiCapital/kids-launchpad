@@ -9,6 +9,7 @@ import {localKey,chainTime} from './dev-vesting.mjs';
 import {qualifiedCampaign} from './postlaunch-campaign.mjs';
 import {networkProfile} from './network.mjs';
 import {distributionAddress,claimReceiptAddress,decodeDistribution,distributionSummary,claimParticipantInstruction as vaultParticipantClaim,claimParentInstruction as vaultParentClaim,claimDevInstruction as vaultDevClaim} from './distribution.mjs';
+import {manifestFeatures} from './program-builds.mjs';import {parentClaimWindow,parentsBurnRecord,parentWindowClosedMessage} from './parent-claim-window.mjs';
 /** Vault-side view for an activated campaign: counters from the Distribution account and the owner's claim receipts. */
 async function vaultView(ctx,state,campaign,wallet,now){
  const dp=state.distributionProgram;const infos=await ctx.connection.getMultipleAccountsInfo([distributionAddress(dp,campaign),...[0,1,2].map(p=>claimReceiptAddress(dp,campaign,p,wallet))],'confirmed');
@@ -54,7 +55,15 @@ export async function postlaunchClaims(owner,expectedCampaign){
   parents.forEach((row,index)=>{if(row.eligible===null)return;row.claimedRaw=v.claimed[index?'parentB':'parentA']?row.allocationRaw:'0';row.windowOpen=v.summary.parentWindowOpen;row.expiresAtUnix=v.dist.parentExpiry;if(!v.summary.parentWindowOpen&&row.claimedRaw==='0')row.expired=true;});
   devClaimed=v.dist.claimed[3];
  }
- return {owner:wallet.toBase58(),genesisHash:ctx.manifest.genesisHash,campaign:campaign.toBase58(),participant,refund,parents,dev:{isDev,totalRaw:plan.totalRaw,claimableRaw:isDev?(unlocked>devClaimed?unlocked-devClaimed:0n).toString():'0',claimedRaw:isDev?devClaimed.toString():'0',endUnix:plan.end},vault,externalClaimEnabled:true,localClaimEnabled:!!localClaimIdentity(owner)};
+ // Launch-program rail on build 6 ('parent-claim-expiry'): claims close 30 days after the recorded launch time (chain
+ // clock) and tag 11 burns what is left. The window block is null on a build without the feature: nothing expires.
+ let parentWindow=null;
+ if(!state.distributionActivated){
+  const w=parentClaimWindow(state.launchedAt,manifestFeatures(ctx.manifest),now);
+  if(w.expiresAtUnix!==null){const record=parentsBurnRecord(config.data);parentWindow={...w,burnedRaw:record.burnedRaw.map(String),burnedAtUnix:record.burnedAtUnix};
+   parents.forEach(row=>{if(row.eligible===null)return;row.windowOpen=w.windowOpen;row.expiresAtUnix=w.expiresAtUnix;if(w.expired&&row.claimedRaw==='0')row.expired=true;});}
+ }else if(vault)parentWindow={expiresAtUnix:vault.parentExpiryUnix,windowOpen:vault.parentWindowOpen,expired:vault.parentExpired,burnedRaw:null,burnedAtUnix:null};
+ return {owner:wallet.toBase58(),genesisHash:ctx.manifest.genesisHash,campaign:campaign.toBase58(),participant,refund,parents,dev:{isDev,totalRaw:plan.totalRaw,claimableRaw:isDev?(unlocked>devClaimed?unlocked-devClaimed:0n).toString():'0',claimedRaw:isDev?devClaimed.toString():'0',endUnix:plan.end},vault,parentWindow,externalClaimEnabled:true,localClaimEnabled:!!localClaimIdentity(owner)};
 }
 const pending=new Map();
 export async function claimPostlaunch(owner,input){
@@ -90,7 +99,7 @@ export async function buildPostlaunchClaim(owner,action,expectedCampaign){
   }else{
    const index=action==='parentA'?0:1,row=claims.parents[index];
    if(!row.eligible||BigInt(row.allocationRaw)<=BigInt(row.claimedRaw))throw Error('No parent tokens remain to claim');
-   if(row.windowOpen===false)throw Error('The parent claim window closed on '+new Date(row.expiresAtUnix*1000).toISOString().slice(0,16).replace('T',' ')+' UTC');
+   if(row.windowOpen===false)throw Error(parentWindowClosedMessage(row.expiresAtUnix));
    const entry=snapshot(campaign).parents[index].entries.find(e=>e.owner===owner);
    instruction=state.distributionActivated?vaultParentClaim({programId:state.distributionProgram,campaign,mint:state.mint,owner:wallet,index,balance:BigInt(entry.balance),allocation:BigInt(entry.allocation),proof:entry.proof.map(p=>Buffer.from(p,'hex'))}):parentClaimInstruction(ctx,campaign,wallet,state.mint,index,wallet,BigInt(entry.balance),BigInt(entry.allocation),entry.proof.map(p=>Buffer.from(p,'hex')));
   }

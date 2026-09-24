@@ -4,7 +4,7 @@ import {accountApi} from './Account';
 import {ParentIcon} from './Parents';
 import {formatUnits,formatSolAmount} from './flywheel-format.mjs';
 import {formatUtc} from './launch-status.mjs';
-import {remainingRaw,claimedAll,parentState,devSchedule} from './claim-view.mjs';
+import {remainingRaw,claimedAll,parentState,devSchedule,parentWindowFor,parentWindowNote} from './claim-view.mjs';
 import {ParentClaimValue} from './ParentClaimValue';
 import {parentStatsFor} from './valuation.mjs';
 import {fetchMarket} from './market-data.mjs';
@@ -31,7 +31,7 @@ export function ClaimPanel({owner,claims,data,verified,loading,error,onSignIn,ac
  const participantState=claimedAll(claims.participant?.allocatedRaw,claims.participant?.claimedRaw)?'claimed':participantLeft&&BigInt(participantLeft)>0n?'open':'off';
  const refundState=refundLeft&&BigInt(refundLeft)>0n?'open':BigInt(claims.refund?.refundedLamports||0)>0n?'claimed':'off';
  const dev=devSchedule(claims,data);
- const parentDeadline=claims.vault?.parentExpiryUnix?formatUtc(claims.vault.parentExpiryUnix):'';
+ const windowNote=parentWindowNote(parentWindowFor(claims),decimals);
  return <div className="claim-panel">
   <div className="claim-panel-wallet"><span>Wallet</span><code title={owner}>{short(owner)}</code>{claims.campaign&&<code className="claim-panel-campaign" title={'Campaign '+claims.campaign}>Campaign {short(claims.campaign)}</code>}</div>
   {result&&<div className={'trade-feedback '+(result.ok?'is-ok':'is-problem')} role="status"><strong>{result.title}</strong>{result.detail&&<p>{result.detail}</p>}{result.technical&&<details><summary>{result.ok?'Transaction signature':'Technical details'}</summary><code>{result.technical}</code></details>}</div>}
@@ -40,7 +40,7 @@ export function ClaimPanel({owner,claims,data,verified,loading,error,onSignIn,ac
   <Row label="Prelaunch tokens" state={participantState} amount={formatUnits(participantLeft,decimals,2)} unit="$Shartcoin left" note={participantState==='claimed'?'All claimed: these coins are in your wallet.':participantState==='off'?'No prelaunch allocation for this wallet.':`Allocated ${formatUnits(claims.participant.allocatedRaw,decimals,2)} · claimed ${formatUnits(claims.participant.claimedRaw,decimals,2)}. No deadline.`}>{button('participant',0,'Claim')}</Row>
   <Row label="SOL refund" state={refundState} amount={formatSolAmount(refundLeft).text} note={refundState==='claimed'?`${formatSolAmount(claims.refund.refundedLamports).text} refunded. Nothing left.`:refundState==='off'?'No refund due for this wallet.':`Excess over your accepted commitment. ${formatSolAmount(claims.refund.refundedLamports).text} refunded so far. No deadline.`}>{button('refund',0,'Claim refund')}</Row>
   <h3 className="claim-group-title">Parent rewards <small>5 % of supply each · either parent counts<Help label="Parent rewards">Wallets that held a parent at its snapshot get a share of that parent's Shartcoin pool. Holding either parent is enough; holding both gives a share of each.</Help></small></h3>
-  {parentDeadline&&<p className="claim-group-note"><b>Claim by {parentDeadline}</b><time dateTime={new Date(claims.vault.parentExpiryUnix*1000).toISOString()}> · {new Date(claims.vault.parentExpiryUnix*1000).toLocaleString()} your time</time>. Unclaimed parent rewards are burned after this deadline.</p>}
+  {windowNote&&<p className={'claim-group-note'+(windowNote.closed?' is-closed':'')}><b>{windowNote.title}</b>{!windowNote.closed&&<time dateTime={new Date(windowNote.expiresAtUnix*1000).toISOString()}> · {new Date(windowNote.expiresAtUnix*1000).toLocaleString()} your time</time>}{windowNote.closed?' · ':'. '}{windowNote.detail}</p>}
   {PARENTS.map((name,index)=>{const row=claims.parents?.[index],p=parentState(row,claims.vault,decimals),stats=parentStatsFor(data,index);
    return <Row key={`${name}:${owner}:${claims.campaign||''}`} icon={<ParentIcon name={name}/>} label={name+' holders'} tag={p.state==='open'?'Eligible':p.state==='claimed'?'Claimed':p.state==='expired'?'Closed':p.state==='ineligible'?'Not eligible':'Unknown'} state={p.state==='ineligible'||p.state==='unknown'?'off':p.state} amount={p.state==='open'||p.state==='expired'?p.remainingText:null} unit={p.state==='open'||p.state==='expired'?'$Shartcoin left':null} note={p.note+(p.state==='open'&&row?.claimedRaw&&BigInt(row.claimedRaw)>0n?` Allocated ${formatUnits(row.allocationRaw,decimals,2)} · claimed ${formatUnits(row.claimedRaw,decimals,2)}.`:'')}>{p.state==='open'?button('parent',index,'Claim'):null}<ParentClaimValue name={name} stats={stats} row={row} state={p} decimals={decimals} priceSol={priceSol} data={data}/></Row>;})}
   <h3 className="claim-group-title">Dev vesting <small>3 % of supply · 1 % at launch, 2 % linear over three months</small></h3>

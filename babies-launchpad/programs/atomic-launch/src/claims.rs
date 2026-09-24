@@ -1,7 +1,7 @@
 //! Fixed-recipient claims paid from launch custody. Parent roots attest a publisher's snapshot; they do
 //! not independently prove historical ownership of a parent token. A campaign whose distribution was
 //! activated in tag 6 refuses every claim here (error 40): its vaults and terms live in the distribution program.
-//! Parent claims (tag 10) close 30 days after the launch; tag 11 then burns the unclaimed rest of both reserves.
+//! Parent claims (tag 10) close at launch time plus PARENT_CLAIM_WINDOW (zero in build 6); tag 11 then burns the unclaimed rest of both reserves.
 use super::*;
 use solana_program::{instruction::{AccountMeta,Instruction},pubkey,hash::hashv};
 const TOKEN:Pubkey=pubkey!("TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA");

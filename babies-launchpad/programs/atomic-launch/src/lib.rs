@@ -33,10 +33,10 @@ const E_DISTRIBUTION_PROGRAM_INVALID:u32=41;
 const E_DISTRIBUTION_FUNDING_MISMATCH:u32=42;
 const E_LAUNCH_ACCOUNT_COUNT:u32=43;
 const E_VAULT_NOT_CREATED:u32=44;
-/// Free parent rewards (tag 10) can be claimed for 30 days after the launch time the campaign records at offset 232
+/// Free parent rewards (tag 10) close at the launch time the campaign records at offset 232 plus PARENT_CLAIM_WINDOW (owner, 24 Sep 2026: zero, so the window closes the moment build 6 is live)
 /// (owner, 24 September 2026). Tag 11 then burns what was not claimed.
 /// 45: tag 10 after the claim window closed. 46: tag 11 while the claim window is still open.
-const PARENT_CLAIM_WINDOW:i64=2_592_000;
+const PARENT_CLAIM_WINDOW:i64=0;
 const E_PARENT_CLAIM_EXPIRED:u32=45;
 const E_PARENT_CLAIM_WINDOW_OPEN:u32=46;
 fn err(n:u32)->ProgramError{ProgramError::Custom(n)}
@@ -119,7 +119,7 @@ impl Campaign{
  fn write(&self,a:&AccountInfo)->ProgramResult{let mut d=a.try_borrow_mut_data()?;d[..8].copy_from_slice(CAMPAIGN_MAGIC);d[8..40].copy_from_slice(self.creator.as_ref());for(at,n)in[(40,self.nonce),(48,self.soft),(56,self.hard),(64,self.deadline as u64),(72,self.launch_deadline as u64),(80,self.total),(88,self.refunded)]{put64(&mut d,at,n)}d[96]=self.phase;d[97]=self.bump;put64(&mut d,104,self.receipt_count);put64(&mut d,112,self.settled_count);put64(&mut d,120,self.settled_accepted);put64(&mut d,160,self.supply);put64(&mut d,232,self.launch_time as u64);for(at,key)in[(128,self.child_mint),(168,self.dev),(200,self.treasury),(240,self.pool),(272,self.fee_nft),(OFF_DISTRIBUTION_PROGRAM,self.distribution_program)]{d[at..at+32].copy_from_slice(key.as_ref());}d[OFF_DISTRIBUTION_ACTIVATED]=self.distribution_activated as u8;Ok(())}
  /// Claims for this campaign are paid by the distribution program once tag 6 has activated it.
  fn refuse_claims_after_activation(&self)->ProgramResult{if self.distribution_activated{Err(err(E_DISTRIBUTION_ACTIVATED))}else{Ok(())}}
- /// First second at which tag 10 is refused and tag 11 is allowed: 30 days after the recorded launch time.
+ /// First second at which tag 10 is refused and tag 11 is allowed: the recorded launch time plus the window.
  fn parent_claims_expire_at(&self)->Result<i64,ProgramError>{if self.launch_time<=0{return Err(err(10))}self.launch_time.checked_add(PARENT_CLAIM_WINDOW).ok_or(err(10))}
 }
 /// Tag 0 may name a distribution program as its optional fourth account. It must be an executable program under the

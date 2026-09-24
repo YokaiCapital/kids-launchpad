@@ -21,6 +21,12 @@ export function parentClaimInstruction(ctx,campaign,payer,mint,index,owner,balan
  if(![0,1].includes(index)||proof.length>32)throw Error('Invalid parent proof');const authority=authorityAddress(ctx,campaign);
  return ix(ctx,10,[[payer,true,true],[campaign],[parentsAddress(ctx,campaign),false,true],[parentClaimAddress(ctx,campaign,index,owner),false,true],[owner],[authority],[mint],[ata(mint,authority),false,true],[destination,false,true],[TOKEN_PROGRAM_ID],[SystemProgram.programId]],Buffer.concat([Buffer.from([index]),u64(balance),u64(allocation),Buffer.from([proof.length]),...proof.map(p=>Buffer.from(p))]));
 }
+/** Tag 11 (program build 6): after the parent claim window, burn the unclaimed rest of both parent reserves from launch
+ * custody. No signer and no body; anyone may send it and a second call burns nothing more. Accounts per the build-6
+ * table: campaign, parents (writable), launch authority, coin mint (writable), launch custody (writable), Token. */
+export function burnExpiredParentReservesInstruction(ctx,campaign,mint){
+ const authority=authorityAddress(ctx,campaign);return ix(ctx,11,[[campaign],[parentsAddress(ctx,campaign),false,true],[authority],[mint,false,true],[ata(mint,authority),false,true],[TOKEN_PROGRAM_ID]]);
+}
 export function parentLeaf(campaign,index,owner,balance,allocation){return sha(Buffer.concat([Buffer.from('kids-parent-v1'),pub(campaign).toBuffer(),Buffer.from([index]),pub(owner).toBuffer(),u64(balance),u64(allocation)]));}
 const pair=(a,b)=>sha(Buffer.concat(Buffer.compare(a,b)<=0?[a,b]:[b,a]));
 // Snapshot adapter: aggregate each owner's balance BEFORE calling; threshold is

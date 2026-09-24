@@ -32,6 +32,26 @@ function swapFeesInstruction(ctx,campaign,keeper,mint,inputMint,outputMint,amoun
  if(parent)extra.push([pda(ctx.programId,'parents',campaign),false,false],[outputProgram,false,false]);
  return instructionFor(ctx,campaign,keeper,mint,parent?24:22,extra,Buffer.concat([...(parent?[Buffer.from([parentIndex])]:[]),u64(amount),u64(minOutput),u64(expiry)]));
 }
+/** Program build 6 limits for tag 27 (programs/atomic-launch/src/fees.rs): one slice at most 0.5 SOL, fill at most 1 % under the spot quote. */
+export const CHILD_BUYBACK_MAX_SLICE=500_000_000n,CHILD_BUYBACK_MAX_SLIPPAGE_BPS=100n;
+/** Tag 27: buy the coin with `amount` lamports of the parents' buyback budget on the campaign's own pool and burn what
+ * arrives. Account order per the build-6 table: 4 WSOL custody, 5 coin custody, 6 pool, 7 config, 8 CPMM vault authority,
+ * 9 WSOL vault, 10 coin vault, 11 WSOL mint, 12 coin mint (writable, burned), 13 observation, 14 CPMM, 15 Token. */
+export function buyBurnChildInstruction(ctx,campaign,keeper,mint,amount,minOutput,expiry,pool){
+ if(!pool)throw Error('Coin buyback needs the campaign pool');
+ const a=BigInt(amount),m=BigInt(minOutput);if(a<=0n||a>CHILD_BUYBACK_MAX_SLICE)throw Error('Coin buyback slice out of bounds');if(m<=0n)throw Error('Coin buyback minimum must be positive');
+ const f=feeAddresses(ctx,campaign,mint),p=campaignPoolAddresses(mint,pool),forward=p.mint0.equals(NATIVE_MINT);
+ const extra=[[f.wsol,false,true],[f.child,false,true],[p.pool,false,true],[p.config,false,false],[p.authority,false,false],[forward?p.vault0:p.vault1,false,true],[forward?p.vault1:p.vault0,false,true],[NATIVE_MINT,false,false],[mint,false,true],[p.observation,false,true],[CPMM,false,false],[TOKEN_PROGRAM_ID,false,false]];
+ return instructionFor(ctx,campaign,keeper,mint,27,extra,Buffer.concat([u64(a),u64(m),u64(expiry)]));
+}
+/** The program's floor for tag 27 (fees.rs quote_floor): constant product after the pool fee, less the sealed 1 %, at least 1. */
+export function childBuybackFloor({amount,reserveIn,reserveOut,rate}){
+ const input=BigInt(amount),rIn=BigInt(reserveIn),rOut=BigInt(reserveOut),r=BigInt(rate);
+ if(input<=0n||rIn<=0n||rOut<=0n||r>=1_000_000n)throw Error('Quote floor unavailable');
+ const net=input-(input*r+999_999n)/1_000_000n;if(net<=0n)throw Error('Trade too small');
+ const quote=net*rOut/(rIn+net);if(quote<=0n)throw Error('Trade too small');
+ const floor=quote*(10_000n-CHILD_BUYBACK_MAX_SLIPPAGE_BPS)/10_000n;return floor>1n?floor:1n;
+}
 export function distributeFeesInstruction(ctx,campaign,keeper,mint,treasury,dev){const f=feeAddresses(ctx,campaign,mint);return instructionFor(ctx,campaign,keeper,mint,23,[[f.wsol,false,true],[ata(NATIVE_MINT,treasury),false,true],[ata(NATIVE_MINT,dev),false,true],[TOKEN_PROGRAM_ID,false,false]]);}
 export async function readFees(ctx,campaign,mint){
  const f=feeAddresses(ctx,campaign,mint),account=await ctx.connection.getAccountInfo(f.state);
@@ -43,7 +63,7 @@ export async function boundedQuote(connection,inputMint,outputMint,amount,ownPoo
  if(!pool||!config||!v0||!v1)throw Error('Pool unavailable');
  const d=pool.data,fees0=d.readBigUInt64LE(341)+d.readBigUInt64LE(357)+d.readBigUInt64LE(397),fees1=d.readBigUInt64LE(349)+d.readBigUInt64LE(365)+d.readBigUInt64LE(405),r0=v0.data.readBigUInt64LE(64)-fees0,r1=v1.data.readBigUInt64LE(64)-fees1;
  const forward=p.mint0.equals(inputMint),reserveIn=forward?r0:r1,reserveOut=forward?r1:r0,rate=config.data.readBigUInt64LE(12),net=amount-(amount*rate+999999n)/1000000n;
- const quote=net*reserveOut/(reserveIn+net);if(quote<=0n)throw Error('Trade too small');return {quote,minOutput:quote*99n/100n||1n,pool:p};
+ const quote=net*reserveOut/(reserveIn+net);if(quote<=0n)throw Error('Trade too small');return {quote,minOutput:quote*99n/100n||1n,pool:p,reserveIn,reserveOut,net,rate};
 }
 /** Tag 25: buy-and-burn through Jupiter. Fixed accounts 0..12, then the route's remaining accounts verbatim. */
 export function jupiterBuyBurnInstruction(ctx,campaign,keeper,mint,parentMint,parentIndex,amount,minOutput,expiry,parentProgram,route){

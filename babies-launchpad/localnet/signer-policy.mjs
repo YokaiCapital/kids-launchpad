@@ -5,7 +5,7 @@
 // spending limit. Replay-safe operation ids: the same id may only ever sign the same message.
 import {PublicKey} from '@solana/web3.js';import {decodeMetadataInstruction,LIMITS as METADATA_LIMITS} from './token-metadata.mjs';
 export const PROGRAMS={compute:'ComputeBudget111111111111111111111111111111',ata:'ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL',token:'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA',token2022:'TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb',alt:'AddressLookupTab1e1111111111111111111111111',metadata:'metaqbxxUerdq28cj1RbAWkYQm3ybzjb6a8bt518x1s',system:'11111111111111111111111111111111'};
-export const KEEPER_TAGS=new Set([2,3,4,5,6,20,21,22,23,24,25,26]);// finalize, refund (tag 3: the program binds the payout to the receipt owner, idempotent; the keeper pays over-cap and failed-campaign refunds), settle, ready, launch, fee cycle incl. burn
+export const KEEPER_TAGS=new Set([2,3,4,5,6,11,20,21,22,23,24,25,26,27]);// finalize, refund (tag 3: the program binds the payout to the receipt owner, idempotent; the keeper pays over-cap and failed-campaign refunds), settle, ready, launch, fee cycle incl. burn; build 6: tag 11 (burn expired parent reserves: no signer, the operator only pays the fee) and tag 27 (coin buyback, creator-signed)
 export const PROVISIONING_TAGS=new Set([0,9]);// init campaign, configure parents
 export const USER_TAGS=new Set([1,7,8,10]);// commit, refund, claims: never operator-signed
 export const DEFAULT_LIMITS={maxComputeUnits:1_400_000,maxPriorityFeeLamports:50_000_000,maxTransferLamports:500_000_000,maxRentLamports:20_000_000,maxHourlyLamports:1_000_000_000,maxInstructions:24};
