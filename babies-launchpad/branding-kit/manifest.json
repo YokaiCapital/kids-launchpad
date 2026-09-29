@@ -1,0 +1,61 @@
+{
+  "version": 1,
+  "date": "2026-09-20",
+  "source": "babies-launchpad/interaction-review",
+  "assets": [
+    {
+      "path": "README.md",
+      "bytes": 5969,
+      "sha256": "8253d611f1bcd3f561556b09273bc7c0a9fa730e8b4f5f7812cc06df84a58deb"
+    },
+    {
+      "path": "assets/kids-logo-integrated-v1.png",
+      "bytes": 592230,
+      "sha256": "82bca511bd38fa71a2c13fc7e0fde9d9d761c1e137cdd0744c6c69725fc66106",
+      "width": 2172,
+      "height": 724,
+      "transparent": true
+    },
+    {
+      "path": "assets/kids-mutt-v4.png",
+      "bytes": 1237116,
+      "sha256": "d22bff7e358b2086280743845edbd44685c2a3a472312c4f1e72cde07bc3f5a8",
+      "width": 1254,
+      "height": 1254,
+      "transparent": false
+    },
+    {
+      "path": "assets/wordmark-kids-v2.png",
+      "bytes": 463959,
+      "sha256": "72dbf36be99f998cfc19bc9ae6e0d4975aa5b709c250dd2b50609febaea308d0",
+      "width": 2172,
+      "height": 724,
+      "transparent": true
+    },
+    {
+      "path": "brand-board.html",
+      "bytes": 7902,
+      "sha256": "b74a82934862463092031bffc3565a6d1491abda1e3bb05bc92fe8a3f0a29d9a"
+    },
+    {
+      "path": "fonts/manrope-OFL.txt",
+      "bytes": 4384,
+      "sha256": "e01b637272e0cbdfb240184dd98ea5cc671556d9894dae2668d92ab2c906787c"
+    },
+    {
+      "path": "fonts/manrope-variable.woff2",
+      "bytes": 53472,
+      "sha256": "5e27cd8033cd59893207938c66fba171f16d6b87ee6d8bbc9f6fe0d75e7be2c7"
+    },
+    {
+      "path": "tokens.css",
+      "bytes": 326,
+      "sha256": "b294d57b652e602245de57aac26809e9ba3fc6dd57eb26276a60672d5be76ae6"
+    },
+    {
+      "path": "tokens.json",
+      "bytes": 1051,
+      "sha256": "bb4af86581c3b1976b00ed87ceed5fc30a02056df829d2eff57f77d488243ed2"
+    }
+  ]
+}

@@ -1,0 +1,3017 @@
+{
+  "network": "mainnet",
+  "genesisHash": "5eykt4UsFv8P8NJdTREpY1vzqKqZKvdpKuc147dw2N9d",
+  "mint": "9BB6NFEcjBCtnNLFko2FqVQBq8HHM13kCyYcdQbgpump",
+  "tokenProgram": "spl-token",
+  "decimals": 6,
+  "supply": "999971195797646",
+  "mintAuthority": null,
+  "freezeAuthority": null,
+  "mintExtensions": [],
+  "threshold": "499985597899",
+  "thresholdRule": "balance * 2000 >= supply",
+  "methodology": "helius-das-getTokenAccounts nominates (union of two concurrent passes); finalized getMultipleAccounts read-back at or after the last pass decides",
+  "passes": 2,
+  "nominationPasses": [
+    {
+      "slotBefore": 449516476,
+      "slotAfter": 449516854,
+      "sourceSlots": null,
+      "pages": 186,
+      "accountsScanned": 184374,
+      "indexTotalRaw": "1000172060236247",
+      "indexOverSupplyRaw": "200864438601",
+      "duplicateRows": 0,
+      "skippedRows": 0,
+      "candidateOwners": 187
+    },
+    {
+      "slotBefore": 449516476,
+      "slotAfter": 449516851,
+      "sourceSlots": null,
+      "pages": 186,
+      "accountsScanned": 184374,
+      "indexTotalRaw": "1000171596929400",
+      "indexOverSupplyRaw": "200401131754",
+      "duplicateRows": 0,
+      "skippedRows": 0,
+      "candidateOwners": 187
+    }
+  ],
+  "slotBefore": 449516476,
+  "slotAfter": 449516851,
+  "readBackMinContextSlot": 449516854,
+  "readBackContextSlots": {
+    "min": 449516855,
+    "max": 449516855
+  },
+  "pages": 372,
+  "accountsScanned": 184374,
+  "indexTotalRaw": "1000171596929400",
+  "indexOverSupplyRaw": "200401131754",
+  "duplicateRows": 0,
+  "skippedRows": 0,
+  "complete": true,
+  "exclusions": {
+    "version": "2026-09-20-confirmed-v3",
+    "applied": [
+      {
+        "owner": "22Wnk8PwyWZV7BfkZGJEKT9jGGdtvu7xY6EXeRh7zkBa",
+        "reason": "custodial signal: ~839,207 SOL, 1000+ token accounts; 0.34% of the Fartcoin pool (after the confirmed exclusions)"
+      },
+      {
+        "owner": "28RWPC6XPxSxUVjd27KiNRtcHVxKtd6cjms7eBcxiqdV",
+        "reason": "custodial signal: ~2,002 SOL, 149 token accounts; 1.2% of the Fartcoin pool"
+      },
+      {
+        "owner": "2Ejnns2Fd5gsZdFJbnkZmQEwbrgoiMc2ikKcS2z2Ps3e",
+        "reason": "custodial signal: ~25,022 SOL, 909 token accounts; 1.3% of the Fartcoin pool"
+      },
+      {
+        "owner": "2UL8hbNaoErAYNePqgQYPP9yDCDRZGWbzKW4krLqkhNL",
+        "reason": "custodial signal: ~42,603 SOL, 253 token accounts; 0.66% of the Fartcoin pool (after the confirmed exclusions)"
+      },
+      {
+        "owner": "3V11R3pEGSt5XeRaoLDcCdkAB8zVSaKRCm8y3uKBgnsr",
+        "reason": "custodial signal: ~3,035 SOL, 328 token accounts; 0.16% of the Fartcoin pool (after the confirmed exclusions)"
+      },
+      {
+        "owner": "49mvMufixEbUMzZEUVAnbQ8hLLuEWy789XfKUNTz7wCv",
+        "reason": "custodial signal: ~23,316 SOL, 176 token accounts; 0.59% of the Fartcoin pool (after the confirmed exclusions)"
+      },
+      {
+        "owner": "4GC3a1RkRXx5shwGP8pTY6cxXgSWkbfc66vM53a6qSKj",
+        "reason": "custodial signal: ~87,555 SOL, 1000+ token accounts; 0.29% of the Fartcoin pool (after the confirmed exclusions)"
+      },
+      {
+        "owner": "4QuB7hY3H512CLG1orbVrA7HTeXbBYCPxBpNfQ6gs5ru",
+        "reason": "custodial signal: ~152,890 SOL, 119 token accounts; 2.6% of the Fartcoin pool"
+      },
+      {
+        "owner": "4RwinJ2Rc1KPGYnifqoouQePA7hohgMD12hjBjjV77fG",
+        "reason": "custodial signal: ~13,196 SOL, 126 token accounts; 0.5% of the Fartcoin pool (after the confirmed exclusions)"
+      },
+      {
+        "owner": "5PAhQiYdLBd6SVdjzBQDxUAEFyDdF5ExNPQfcscnPRj5",
+        "reason": "custodial signal: ~375,854 SOL, 1000+ token accounts; 1.06% of the Fartcoin pool (after the confirmed exclusions)"
+      },
+      {
+        "owner": "5tzFkiKscXHK5ZXCGbXZxdw7gTjjD1mBwuoFbhUvuAi9",
+        "reason": "custodial signal: ~1,298,169 SOL, 1000+ token accounts; 0.17% of the Fartcoin pool (after the confirmed exclusions)"
+      },
+      {
+        "owner": "6FEVkH17P9y8Q9aCkDdPcMDjvj7SVxrTETaYEm8f51Jy",
+        "reason": "custodial signal: ~441,852 SOL, 1000+ token accounts; 1.44% of the Fartcoin pool (after the confirmed exclusions)"
+      },
+      {
+        "owner": "6JGvsM8dMXXLheM6td1vGtQwarCZoPCwBqVNX1W6cEGE",
+        "reason": "custodial signal: ~69,001 SOL, 133 token accounts; 0.27% of the Fartcoin pool (after the confirmed exclusions)"
+      },
+      {
+        "owner": "6LY1JzAFVZsP2a2xKrtU6znQMQ5h4i7tocWdgrkZzkzF",
+        "reason": "custodial signal: ~200,599 SOL, 1000+ token accounts; 2.2% of the Fartcoin pool"
+      },
+      {
+        "owner": "6xfPFKnwv48XvxpFf4athewqGFvSTKQcMmfzYapgZ2sG",
+        "reason": "custodial signal: ~9,605 SOL, 492 token accounts; 0.43% of the Fartcoin pool (after the confirmed exclusions)"
+      },
+      {
+        "owner": "7TWnq4WeYcwQWBCwKeEX2Q9xqVtthPGkB7adNvueuVuh",
+        "reason": "custodial signal: ~871,160 SOL, 249 token accounts; 4.5% of the Fartcoin pool"
+      },
+      {
+        "owner": "7jzQekjqQT2ZYe7TAidjCzD1AJjJMneHKy1mVf1hChh7",
+        "reason": "custodial signal: ~275,532 SOL, 297 token accounts; 0.99% of the Fartcoin pool (after the confirmed exclusions)"
+      },
+      {
+        "owner": "8XczZeEmUpyvbYF6mbzFX2kTreAu9zLxygRqX4hCUBRv",
+        "reason": "custodial signal: ~9,114 SOL, 113 token accounts; 0.51% of the Fartcoin pool (after the confirmed exclusions)"
+      },
+      {
+        "owner": "9A9dUreQvTNoqNrqQC2DN1onfZWBtCBsTiuA6oGXZwc6",
+        "reason": "custodial signal: ~52,664 SOL, 738 token accounts; 0.56% of the Fartcoin pool (after the confirmed exclusions)"
+      },
+      {
+        "owner": "9D8xSHWqF9NJWqCtn3rNxYEox63aCbWxYzTMfMur7Cc9",
+        "reason": "custodial signal: ~111,067 SOL, 314 token accounts; 0.29% of the Fartcoin pool (after the confirmed exclusions)"
+      },
+      {
+        "owner": "9SLPTL41SPsYkgdsMzdfJsxymEANKr5bYoBsQzJyKpKS",
+        "reason": "custodial signal: ~361,822 SOL, 384 token accounts; 13.4% of the Fartcoin pool"
+      },
+      {
+        "owner": "9rrsyYStsj5TVQ63REsJS5AFXCRV2fkjpqH8gy8WVUNb",
+        "reason": "custodial signal: ~2,804 SOL, 102 token accounts; 0.27% of the Fartcoin pool (after the confirmed exclusions)"
+      },
+      {
+        "owner": "ASTyfSima4LLAdDgoFGkgqoKowG1LZFDr9fAQrg7iaJZ",
+        "reason": "custodial signal: ~29,705 SOL, 1000+ token accounts; 1.7% of the Fartcoin pool"
+      },
+      {
+        "owner": "BmFdpraQhkiDQE6SnfG5omcA1VwzqfXrwtNYBwWTymy6",
+        "reason": "custodial signal: ~33,643 SOL, 1000+ token accounts; 0.25% of the Fartcoin pool (after the confirmed exclusions)"
+      },
+      {
+        "owner": "CSEncqtqbmNRjve42sNnbs5cCSmrjUNsAEwc17XY2RCs",
+        "reason": "custodial signal: ~18,968 SOL, 1000+ token accounts; 0.16% of the Fartcoin pool (after the confirmed exclusions)"
+      },
+      {
+        "owner": "E2RvJg2myWpKcbkhBuF81gfhYr6KvmNcDbSmr5qnatYy",
+        "reason": "custodial signal: ~7,287 SOL, 306 token accounts; 5.0% of the Fartcoin pool"
+      },
+      {
+        "owner": "EFE3j1pcSP1paUzA86zW7989ZjsFP2J7ginyUqo4ewqR",
+        "reason": "custodial signal: ~115,801 SOL, 297 token accounts; 2.4% of the Fartcoin pool"
+      },
+      {
+        "owner": "EWJH1tZ7i7FsZBZVYVXyTu1rAyYtxWSS9gv1MJaknxdU",
+        "reason": "custodial signal: ~69,251 SOL, 102 token accounts; 0.17% of the Fartcoin pool (after the confirmed exclusions)"
+      },
+      {
+        "owner": "FixDET3jRBMjT9M69Wim8iRpMQiJHkSSfD7wivStuuph",
+        "reason": "custodial signal: ~47,948 SOL, 806 token accounts; 0.67% of the Fartcoin pool (after the confirmed exclusions)"
+      },
+      {
+        "owner": "HFWv1riXSRJ3nVnnLZ9xi1K4r3zppRvcfVuiAGqAA8Y6",
+        "reason": "custodial signal: ~5,315 SOL, 483 token accounts; 0.12% of the Fartcoin pool (after the confirmed exclusions)"
+      },
+      {
+        "owner": "HiXhw6DyaFsGVntujTDrRcmutEWMfgD3edAhXZidv2PV",
+        "reason": "custodial signal: ~34,000 SOL, 191 token accounts; 1.13% of the Fartcoin pool (after the confirmed exclusions)"
+      },
+      {
+        "owner": "M2St7Gra11AKvk3tC4fJPkxviWYKpLZSMmKcHNoDtxp",
+        "reason": "custodial signal: ~20,625 SOL, 316 token accounts; 0.33% of the Fartcoin pool (after the confirmed exclusions)"
+      },
+      {
+        "owner": "u6PJ8DtQuPFnfmwHbGFULQ4u4EgjDiyYKjVEsynXq2w",
+        "reason": "custodial signal: ~275,258 SOL, 1000+ token accounts; 8.9% of the Fartcoin pool"
+      }
+    ],
+    "proposedNotApplied": []
+  },
+  "custodialSignals": {
+    "rule": {
+      "minSol": 1000,
+      "minTokenAccounts": 100,
+      "rule": "sol >= 1000 and tokenAccounts >= 100",
+      "confidence": "low: on-chain profile only; exchange status is confirmed by the owner in the exclusion list"
+    },
+    "expected": 139,
+    "resolved": 139,
+    "unresolved": 0,
+    "complete": true,
+    "entries": [
+      {
+        "owner": "22bV6DDJxvhRSKWTF2LBSExTiBx7Sawvi4a8bUFW22tA",
+        "status": "resolved",
+        "facts": {
+          "lamports": 1651406850034,
+          "sol": 1651.407,
+          "tokenAccounts": 63,
+          "contextSlot": 449516855
+        },
+        "heuristic": {
+          "rule": "sol >= 1000 and tokenAccounts >= 100",
+          "flagged": false,
+          "confidence": "low: on-chain profile only; exchange status is confirmed by the owner in the exclusion list"
+        },
+        "failure": null
+      },
+      {
+        "owner": "24BLFjSAcUPPWs8F7nhwthfRPvh5mopNYfu5WXTkLChr",
+        "status": "resolved",
+        "facts": {
+          "lamports": 173445949,
+          "sol": 0.173,
+          "tokenAccounts": 399,
+          "contextSlot": 449516855
+        },
+        "heuristic": {
+          "rule": "sol >= 1000 and tokenAccounts >= 100",
+          "flagged": false,
+          "confidence": "low: on-chain profile only; exchange status is confirmed by the owner in the exclusion list"
+        },
+        "failure": null
+      },
+      {
+        "owner": "2Eg5WkWdnVYcoMYAH5UVmSQSWeE9pH2qDpXfRquxeF2C",
+        "status": "resolved",
+        "facts": {
+          "lamports": 857131187,
+          "sol": 0.857,
+          "tokenAccounts": 32,
+          "contextSlot": 449516856
+        },
+        "heuristic": {
+          "rule": "sol >= 1000 and tokenAccounts >= 100",
+          "flagged": false,
+          "confidence": "low: on-chain profile only; exchange status is confirmed by the owner in the exclusion list"
+        },
+        "failure": null
+      },
+      {
+        "owner": "2JT2cPvV45VFV1LJJ4qBvvpYyEuGE1Ey46ku7WTL1Jvg",
+        "status": "resolved",
+        "facts": {
+          "lamports": 7000061182,
+          "sol": 7,
+          "tokenAccounts": 46,
+          "contextSlot": 449516856
+        },
+        "heuristic": {
+          "rule": "sol >= 1000 and tokenAccounts >= 100",
+          "flagged": false,
+          "confidence": "low: on-chain profile only; exchange status is confirmed by the owner in the exclusion list"
+        },
+        "failure": null
+      },
+      {
+        "owner": "2WfeaMXh31wc2kzXDQGuKAYCBrCs8J6vBCwdLjMs8Uzr",
+        "status": "resolved",
+        "facts": {
+          "lamports": 474363778,
+          "sol": 0.474,
+          "tokenAccounts": 59,
+          "contextSlot": 449516856
+        },
+        "heuristic": {
+          "rule": "sol >= 1000 and tokenAccounts >= 100",
+          "flagged": false,
+          "confidence": "low: on-chain profile only; exchange status is confirmed by the owner in the exclusion list"
+        },
+        "failure": null
+      },
+      {
+        "owner": "2Y8k6Zc8yM9sFGbtB9zXHs7RkGPW7QWXy35ReGmMS3gi",
+        "status": "resolved",
+        "facts": {
+          "lamports": 655495854,
+          "sol": 0.655,
+          "tokenAccounts": 166,
+          "contextSlot": 449516856
+        },
+        "heuristic": {
+          "rule": "sol >= 1000 and tokenAccounts >= 100",
+          "flagged": false,
+          "confidence": "low: on-chain profile only; exchange status is confirmed by the owner in the exclusion list"
+        },
+        "failure": null
+      },
+      {
+        "owner": "2kN6XgaBRikJ2SYAVvUrvSj2My7yKEHDA2vd8o4LB4xp",
+        "status": "resolved",
+        "facts": {
+          "lamports": 1755528118,
+          "sol": 1.756,
+          "tokenAccounts": 65,
+          "contextSlot": 449516856
+        },
+        "heuristic": {
+          "rule": "sol >= 1000 and tokenAccounts >= 100",
+          "flagged": false,
+          "confidence": "low: on-chain profile only; exchange status is confirmed by the owner in the exclusion list"
+        },
+        "failure": null
+      },
+      {
+        "owner": "2qFWtmCJnCEdBvvforrTCrhRkFj6hFBWoivMmSRTWJjE",
+        "status": "resolved",
+        "facts": {
+          "lamports": 2500000,
+          "sol": 0.003,
+          "tokenAccounts": 21,
+          "contextSlot": 449516857
+        },
+        "heuristic": {
+          "rule": "sol >= 1000 and tokenAccounts >= 100",
+          "flagged": false,
+          "confidence": "low: on-chain profile only; exchange status is confirmed by the owner in the exclusion list"
+        },
+        "failure": null
+      },
+      {
+        "owner": "2w8MAdjrW1t5wzSy2ahsGmx83tRnxL3Rio9h6eSf8oi9",
+        "status": "resolved",
+        "facts": {
+          "lamports": 119558420961,
+          "sol": 119.558,
+          "tokenAccounts": 5,
+          "contextSlot": 449516857
+        },
+        "heuristic": {
+          "rule": "sol >= 1000 and tokenAccounts >= 100",
+          "flagged": false,
+          "confidence": "low: on-chain profile only; exchange status is confirmed by the owner in the exclusion list"
+        },
+        "failure": null
+      },
+      {
+        "owner": "38ESLHdJkqNvMbJmbgsHJGXjJPpsL4TkvSUgXegYgvpr",
+        "status": "resolved",
+        "facts": {
+          "lamports": 2692444490,
+          "sol": 2.692,
+          "tokenAccounts": 546,
+          "contextSlot": 449516857
+        },
+        "heuristic": {
+          "rule": "sol >= 1000 and tokenAccounts >= 100",
+          "flagged": false,
+          "confidence": "low: on-chain profile only; exchange status is confirmed by the owner in the exclusion list"
+        },
+        "failure": null
+      },
+      {
+        "owner": "3QLTMUsSeywkHp1vTNsfSPgAW8jm1x4zSqRFTR96EBkd",
+        "status": "resolved",
+        "facts": {
+          "lamports": 900880,
+          "sol": 0.001,
+          "tokenAccounts": 13,
+          "contextSlot": 449516857
+        },
+        "heuristic": {
+          "rule": "sol >= 1000 and tokenAccounts >= 100",
+          "flagged": false,
+          "confidence": "low: on-chain profile only; exchange status is confirmed by the owner in the exclusion list"
+        },
+        "failure": null
+      },
+      {
+        "owner": "44P5Ct5JkPz76Rs2K6juC65zXMpFRDrHatxcASJ4Dyra",
+        "status": "resolved",
+        "facts": {
+          "lamports": 138267436714742,
+          "sol": 138267.437,
+          "tokenAccounts": 753,
+          "contextSlot": 449516857
+        },
+        "heuristic": {
+          "rule": "sol >= 1000 and tokenAccounts >= 100",
+          "flagged": true,
+          "confidence": "low: on-chain profile only; exchange status is confirmed by the owner in the exclusion list"
+        },
+        "failure": null
+      },
+      {
+        "owner": "49f6AWD2o3kpnZbLhjka85yDbcnXCrZ2AkFNUTWJatoJ",
+        "status": "resolved",
+        "facts": {
+          "lamports": 525294915,
+          "sol": 0.525,
+          "tokenAccounts": 164,
+          "contextSlot": 449516857
+        },
+        "heuristic": {
+          "rule": "sol >= 1000 and tokenAccounts >= 100",
+          "flagged": false,
+          "confidence": "low: on-chain profile only; exchange status is confirmed by the owner in the exclusion list"
+        },
+        "failure": null
+      },
+      {
+        "owner": "4GQeEya6ZTwvXre4Br6ZfDyfe2WQMkcDz2QbkJZazVqS",
+        "status": "resolved",
+        "facts": {
+          "lamports": 35002510661,
+          "sol": 35.003,
+          "tokenAccounts": 957,
+          "contextSlot": 449516857
+        },
+        "heuristic": {
+          "rule": "sol >= 1000 and tokenAccounts >= 100",
+          "flagged": false,
+          "confidence": "low: on-chain profile only; exchange status is confirmed by the owner in the exclusion list"
+        },
+        "failure": null
+      },
+      {
+        "owner": "4JB1Xs1a15szk61yTcLyLptA3FVU6YVFxv6teNBtPaQs",
+        "status": "resolved",
+        "facts": {
+          "lamports": 50000000,
+          "sol": 0.05,
+          "tokenAccounts": 2,
+          "contextSlot": 449516858
+        },
+        "heuristic": {
+          "rule": "sol >= 1000 and tokenAccounts >= 100",
+          "flagged": false,
+          "confidence": "low: on-chain profile only; exchange status is confirmed by the owner in the exclusion list"
+        },
+        "failure": null
+      },
+      {
+        "owner": "4U5KGSLEzBpT6z7dsDY7Wp1GqvMCSHk1h2UR3u5VhFQ2",
+        "status": "resolved",
+        "facts": {
+          "lamports": 0,
+          "sol": 0,
+          "tokenAccounts": 17,
+          "contextSlot": 449516858
+        },
+        "heuristic": {
+          "rule": "sol >= 1000 and tokenAccounts >= 100",
+          "flagged": false,
+          "confidence": "low: on-chain profile only; exchange status is confirmed by the owner in the exclusion list"
+        },
+        "failure": null
+      },
+      {
+        "owner": "4ZrobGEDm47U9FNzDx2tLhioRv8vzoGnz8pBRXsEKxr4",
+        "status": "resolved",
+        "facts": {
+          "lamports": 3676064992,
+          "sol": 3.676,
+          "tokenAccounts": 51,
+          "contextSlot": 449516858
+        },
+        "heuristic": {
+          "rule": "sol >= 1000 and tokenAccounts >= 100",
+          "flagged": false,
+          "confidence": "low: on-chain profile only; exchange status is confirmed by the owner in the exclusion list"
+        },
+        "failure": null
+      },
+      {
+        "owner": "4fVBLqB9PoEyhG72dbr7cTLs2ggdMw3b6aGfELXSvFTX",
+        "status": "resolved",
+        "facts": {
+          "lamports": 90122175,
+          "sol": 0.09,
+          "tokenAccounts": 22,
+          "contextSlot": 449516858
+        },
+        "heuristic": {
+          "rule": "sol >= 1000 and tokenAccounts >= 100",
+          "flagged": false,
+          "confidence": "low: on-chain profile only; exchange status is confirmed by the owner in the exclusion list"
+        },
+        "failure": null
+      },
+      {
+        "owner": "4wfL88cWENcYnvRYy8v3oYbJccQcZEzPA7fcQvoZoEB3",
+        "status": "resolved",
+        "facts": {
+          "lamports": 2918320719,
+          "sol": 2.918,
+          "tokenAccounts": 271,
+          "contextSlot": 449516858
+        },
+        "heuristic": {
+          "rule": "sol >= 1000 and tokenAccounts >= 100",
+          "flagged": false,
+          "confidence": "low: on-chain profile only; exchange status is confirmed by the owner in the exclusion list"
+        },
+        "failure": null
+      },
+      {
+        "owner": "51j9pR4HSEhaq9dun8LGFhNF3grVeaFRfME8MvFJYRQm",
+        "status": "resolved",
+        "facts": {
+          "lamports": 1219074939,
+          "sol": 1.219,
+          "tokenAccounts": 21,
+          "contextSlot": 449516858
+        },
+        "heuristic": {
+          "rule": "sol >= 1000 and tokenAccounts >= 100",
+          "flagged": false,
+          "confidence": "low: on-chain profile only; exchange status is confirmed by the owner in the exclusion list"
+        },
+        "failure": null
+      },
+      {
+        "owner": "57bLoghjgoLtiUQpLiL78fP4VeVUqFc3sYzKoUhvvZZ2",
+        "status": "resolved",
+        "facts": {
+          "lamports": 7929067357444,
+          "sol": 7929.067,
+          "tokenAccounts": 11,
+          "contextSlot": 449516858
+        },
+        "heuristic": {
+          "rule": "sol >= 1000 and tokenAccounts >= 100",
+          "flagged": false,
+          "confidence": "low: on-chain profile only; exchange status is confirmed by the owner in the exclusion list"
+        },
+        "failure": null
+      },
+      {
+        "owner": "5F9C7nNantk4gvHQg9T9M5zPdVKqzxfgdUMjkQWE1nLH",
+        "status": "resolved",
+        "facts": {
+          "lamports": 167671000,
+          "sol": 0.168,
+          "tokenAccounts": 59,
+          "contextSlot": 449516859
+        },
+        "heuristic": {
+          "rule": "sol >= 1000 and tokenAccounts >= 100",
+          "flagged": false,
+          "confidence": "low: on-chain profile only; exchange status is confirmed by the owner in the exclusion list"
+        },
+        "failure": null
+      },
+      {
+        "owner": "5U1e8CsFC8eyQLwS5AYmADCpuSRoZL5D6FJKuuFH6XvL",
+        "status": "resolved",
+        "facts": {
+          "lamports": 62296162542,
+          "sol": 62.296,
+          "tokenAccounts": 12,
+          "contextSlot": 449516859
+        },
+        "heuristic": {
+          "rule": "sol >= 1000 and tokenAccounts >= 100",
+          "flagged": false,
+          "confidence": "low: on-chain profile only; exchange status is confirmed by the owner in the exclusion list"
+        },
+        "failure": null
+      },
+      {
+        "owner": "5Z44heGLtP1r8e9sZULLnfqa6jGon7vZcfwYxvQrpCff",
+        "status": "resolved",
+        "facts": {
+          "lamports": 18545529976,
+          "sol": 18.546,
+          "tokenAccounts": 6,
+          "contextSlot": 449516859
+        },
+        "heuristic": {
+          "rule": "sol >= 1000 and tokenAccounts >= 100",
+          "flagged": false,
+          "confidence": "low: on-chain profile only; exchange status is confirmed by the owner in the exclusion list"
+        },
+        "failure": null
+      },
+      {
+        "owner": "5qi3Bfa8EaydQDZQ7u6qjauqefuDJNFcFH75YBr7zHuJ",
+        "status": "resolved",
+        "facts": {
+          "lamports": 10963806602,
+          "sol": 10.964,
+          "tokenAccounts": 246,
+          "contextSlot": 449516859
+        },
+        "heuristic": {
+          "rule": "sol >= 1000 and tokenAccounts >= 100",
+          "flagged": false,
+          "confidence": "low: on-chain profile only; exchange status is confirmed by the owner in the exclusion list"
+        },
+        "failure": null
+      },
+      {
+        "owner": "5wTLevkkUWzKgRTWKcSjrgdoP8TnrEnXYGaAxFKibsS5",
+        "status": "resolved",
+        "facts": {
+          "lamports": 867198433290,
+          "sol": 867.198,
+          "tokenAccounts": 1000,
+          "contextSlot": 449516859
+        },
+        "heuristic": {
+          "rule": "sol >= 1000 and tokenAccounts >= 100",
+          "flagged": false,
+          "confidence": "low: on-chain profile only; exchange status is confirmed by the owner in the exclusion list"
+        },
+        "failure": null
+      },
+      {
+        "owner": "654iWmri2bNsLJJqNxAGWTjRKFH2ggJUJoVwabjzNn1K",
+        "status": "resolved",
+        "facts": {
+          "lamports": 5017342646,
+          "sol": 5.017,
+          "tokenAccounts": 28,
+          "contextSlot": 449516859
+        },
+        "heuristic": {
+          "rule": "sol >= 1000 and tokenAccounts >= 100",
+          "flagged": false,
+          "confidence": "low: on-chain profile only; exchange status is confirmed by the owner in the exclusion list"
+        },
+        "failure": null
+      },
+      {
+        "owner": "69CDDjW9pFEdbqcbfZTr9oSRo1kuRU8PEWCZYW11duJp",
+        "status": "resolved",
+        "facts": {
+          "lamports": 504325733,
+          "sol": 0.504,
+          "tokenAccounts": 14,
+          "contextSlot": 449516860
+        },
+        "heuristic": {
+          "rule": "sol >= 1000 and tokenAccounts >= 100",
+          "flagged": false,
+          "confidence": "low: on-chain profile only; exchange status is confirmed by the owner in the exclusion list"
+        },
+        "failure": null
+      },
+      {
+        "owner": "6DXYmRSkyjgmi2E11c1JfDqGmRfmRNikpw1YUoeEporp",
+        "status": "resolved",
+        "facts": {
+          "lamports": 1896384891,
+          "sol": 1.896,
+          "tokenAccounts": 30,
+          "contextSlot": 449516860
+        },
+        "heuristic": {
+          "rule": "sol >= 1000 and tokenAccounts >= 100",
+          "flagged": false,
+          "confidence": "low: on-chain profile only; exchange status is confirmed by the owner in the exclusion list"
+        },
+        "failure": null
+      },
+      {
+        "owner": "6KmixQCTuG7gNvXcPorntCMFTfJCH8s93KiaP197cutR",
+        "status": "resolved",
+        "facts": {
+          "lamports": 896002186,
+          "sol": 0.896,
+          "tokenAccounts": 28,
+          "contextSlot": 449516860
+        },
+        "heuristic": {
+          "rule": "sol >= 1000 and tokenAccounts >= 100",
+          "flagged": false,
+          "confidence": "low: on-chain profile only; exchange status is confirmed by the owner in the exclusion list"
+        },
+        "failure": null
+      },
+      {
+        "owner": "6N3HNQXq6hj5VyzHRAAsFGT6NBcsVEZPimMqnusZuRr2",
+        "status": "resolved",
+        "facts": {
+          "lamports": 359153449,
+          "sol": 0.359,
+          "tokenAccounts": 498,
+          "contextSlot": 449516860
+        },
+        "heuristic": {
+          "rule": "sol >= 1000 and tokenAccounts >= 100",
+          "flagged": false,
+          "confidence": "low: on-chain profile only; exchange status is confirmed by the owner in the exclusion list"
+        },
+        "failure": null
+      },
+      {
+        "owner": "6Nw3UBkpHQXUdam8RftAUepmzifdwKMwL68e9p2QjqDi",
+        "status": "resolved",
+        "facts": {
+          "lamports": 543506363,
+          "sol": 0.544,
+          "tokenAccounts": 39,
+          "contextSlot": 449516860
+        },
+        "heuristic": {
+          "rule": "sol >= 1000 and tokenAccounts >= 100",
+          "flagged": false,
+          "confidence": "low: on-chain profile only; exchange status is confirmed by the owner in the exclusion list"
+        },
+        "failure": null
+      },
+      {
+        "owner": "6SDKTuavnDi75hJwZiZxNEpYjY4edAL7PkZh4SvErr3V",
+        "status": "resolved",
+        "facts": {
+          "lamports": 9955000,
+          "sol": 0.01,
+          "tokenAccounts": 23,
+          "contextSlot": 449516861
+        },
+        "heuristic": {
+          "rule": "sol >= 1000 and tokenAccounts >= 100",
+          "flagged": false,
+          "confidence": "low: on-chain profile only; exchange status is confirmed by the owner in the exclusion list"
+        },
+        "failure": null
+      },
+      {
+        "owner": "6Sk8cKr4RSCg6VMcuSXbswVqkaHVBt7fpXoXbvygq4Ss",
+        "status": "resolved",
+        "facts": {
+          "lamports": 968383804,
+          "sol": 0.968,
+          "tokenAccounts": 141,
+          "contextSlot": 449516861
+        },
+        "heuristic": {
+          "rule": "sol >= 1000 and tokenAccounts >= 100",
+          "flagged": false,
+          "confidence": "low: on-chain profile only; exchange status is confirmed by the owner in the exclusion list"
+        },
+        "failure": null
+      },
+      {
+        "owner": "6WprovCGXF7BBMUQ9PtgDwRnwzBfwJZjQCfdrZCvkTja",
+        "status": "resolved",
+        "facts": {
+          "lamports": 1727992830,
+          "sol": 1.728,
+          "tokenAccounts": 32,
+          "contextSlot": 449516861
+        },
+        "heuristic": {
+          "rule": "sol >= 1000 and tokenAccounts >= 100",
+          "flagged": false,
+          "confidence": "low: on-chain profile only; exchange status is confirmed by the owner in the exclusion list"
+        },
+        "failure": null
+      },
+      {
+        "owner": "6g7NphUCPN8965YrbZDTQyaMoEnKe817Q8DmKE7516rX",
+        "status": "resolved",
+        "facts": {
+          "lamports": 4678701590,
+          "sol": 4.679,
+          "tokenAccounts": 759,
+          "contextSlot": 449516861
+        },
+        "heuristic": {
+          "rule": "sol >= 1000 and tokenAccounts >= 100",
+          "flagged": false,
+          "confidence": "low: on-chain profile only; exchange status is confirmed by the owner in the exclusion list"
+        },
+        "failure": null
+      },
+      {
+        "owner": "6kFvf2qdoX7wsJKzhxwKVbw24qxPp1FxNjGJ4RufnGb5",
+        "status": "resolved",
+        "facts": {
+          "lamports": 367464097,
+          "sol": 0.367,
+          "tokenAccounts": 161,
+          "contextSlot": 449516861
+        },
+        "heuristic": {
+          "rule": "sol >= 1000 and tokenAccounts >= 100",
+          "flagged": false,
+          "confidence": "low: on-chain profile only; exchange status is confirmed by the owner in the exclusion list"
+        },
+        "failure": null
+      },
+      {
+        "owner": "6z823m5cVMo24TFr8fkhNtKPiZet9iCoP43RhY9272AW",
+        "status": "resolved",
+        "facts": {
+          "lamports": 97958020,
+          "sol": 0.098,
+          "tokenAccounts": 9,
+          "contextSlot": 449516862
+        },
+        "heuristic": {
+          "rule": "sol >= 1000 and tokenAccounts >= 100",
+          "flagged": false,
+          "confidence": "low: on-chain profile only; exchange status is confirmed by the owner in the exclusion list"
+        },
+        "failure": null
+      },
+      {
+        "owner": "77v5PKZU6s5kMg8TXq2nknmTC7i8tnhbHnqLtS3nDRzE",
+        "status": "resolved",
+        "facts": {
+          "lamports": 564723209,
+          "sol": 0.565,
+          "tokenAccounts": 48,
+          "contextSlot": 449516862
+        },
+        "heuristic": {
+          "rule": "sol >= 1000 and tokenAccounts >= 100",
+          "flagged": false,
+          "confidence": "low: on-chain profile only; exchange status is confirmed by the owner in the exclusion list"
+        },
+        "failure": null
+      },
+      {
+        "owner": "7B7hpcosqSbkqWCFg84Kdc6FL4E3HkrKYAg9fFBAj7oJ",
+        "status": "resolved",
+        "facts": {
+          "lamports": 439848637,
+          "sol": 0.44,
+          "tokenAccounts": 13,
+          "contextSlot": 449516862
+        },
+        "heuristic": {
+          "rule": "sol >= 1000 and tokenAccounts >= 100",
+          "flagged": false,
+          "confidence": "low: on-chain profile only; exchange status is confirmed by the owner in the exclusion list"
+        },
+        "failure": null
+      },
+      {
+        "owner": "7QAFvj11sS5kgNh7otR3EGEZbGRHR3nMwNz31rTcDm8P",
+        "status": "resolved",
+        "facts": {
+          "lamports": 4814392869,
+          "sol": 4.814,
+          "tokenAccounts": 103,
+          "contextSlot": 449516862
+        },
+        "heuristic": {
+          "rule": "sol >= 1000 and tokenAccounts >= 100",
+          "flagged": false,
+          "confidence": "low: on-chain profile only; exchange status is confirmed by the owner in the exclusion list"
+        },
+        "failure": null
+      },
+      {
+        "owner": "7iBFUna6yLia5EtnR2VapvnSEPBApYh1SxRfbAvN5LpH",
+        "status": "resolved",
+        "facts": {
+          "lamports": 60158580907,
+          "sol": 60.159,
+          "tokenAccounts": 72,
+          "contextSlot": 449516862
+        },
+        "heuristic": {
+          "rule": "sol >= 1000 and tokenAccounts >= 100",
+          "flagged": false,
+          "confidence": "low: on-chain profile only; exchange status is confirmed by the owner in the exclusion list"
+        },
+        "failure": null
+      },
+      {
+        "owner": "7k6fHANgwdHjUrPXsrExcTGtXNNzSq7hNipjj9JbzhwM",
+        "status": "resolved",
+        "facts": {
+          "lamports": 2763174023,
+          "sol": 2.763,
+          "tokenAccounts": 194,
+          "contextSlot": 449516862
+        },
+        "heuristic": {
+          "rule": "sol >= 1000 and tokenAccounts >= 100",
+          "flagged": false,
+          "confidence": "low: on-chain profile only; exchange status is confirmed by the owner in the exclusion list"
+        },
+        "failure": null
+      },
+      {
+        "owner": "7p6LQRCo24aMkNHmiDahBXMFqkW3MFbny629qdR2J1A5",
+        "status": "resolved",
+        "facts": {
+          "lamports": 5451204762,
+          "sol": 5.451,
+          "tokenAccounts": 45,
+          "contextSlot": 449516862
+        },
+        "heuristic": {
+          "rule": "sol >= 1000 and tokenAccounts >= 100",
+          "flagged": false,
+          "confidence": "low: on-chain profile only; exchange status is confirmed by the owner in the exclusion list"
+        },
+        "failure": null
+      },
+      {
+        "owner": "7yMSDwTMS9MFTDS7PN3vnhB68ghpXsdxv64nTNb4FeDz",
+        "status": "resolved",
+        "facts": {
+          "lamports": 4013459121,
+          "sol": 4.013,
+          "tokenAccounts": 351,
+          "contextSlot": 449516863
+        },
+        "heuristic": {
+          "rule": "sol >= 1000 and tokenAccounts >= 100",
+          "flagged": false,
+          "confidence": "low: on-chain profile only; exchange status is confirmed by the owner in the exclusion list"
+        },
+        "failure": null
+      },
+      {
+        "owner": "8AByvcbajbjmuD1xez4ahgzoUp7ovB5wJE6znQKST8Hz",
+        "status": "resolved",
+        "facts": {
+          "lamports": 12715066360,
+          "sol": 12.715,
+          "tokenAccounts": 459,
+          "contextSlot": 449516863
+        },
+        "heuristic": {
+          "rule": "sol >= 1000 and tokenAccounts >= 100",
+          "flagged": false,
+          "confidence": "low: on-chain profile only; exchange status is confirmed by the owner in the exclusion list"
+        },
+        "failure": null
+      },
+      {
+        "owner": "8BD1qaT6a4WCa4Kz1nURKfPmZd2ohxHYoXuPNijRABXv",
+        "status": "resolved",
+        "facts": {
+          "lamports": 606003526,
+          "sol": 0.606,
+          "tokenAccounts": 165,
+          "contextSlot": 449516863
+        },
+        "heuristic": {
+          "rule": "sol >= 1000 and tokenAccounts >= 100",
+          "flagged": false,
+          "confidence": "low: on-chain profile only; exchange status is confirmed by the owner in the exclusion list"
+        },
+        "failure": null
+      },
+      {
+        "owner": "8Hkbb3fkyBZi92dtGEXWuZyErRhUHSnHwTQJjxr32upg",
+        "status": "resolved",
+        "facts": {
+          "lamports": 1058193747,
+          "sol": 1.058,
+          "tokenAccounts": 184,
+          "contextSlot": 449516863
+        },
+        "heuristic": {
+          "rule": "sol >= 1000 and tokenAccounts >= 100",
+          "flagged": false,
+          "confidence": "low: on-chain profile only; exchange status is confirmed by the owner in the exclusion list"
+        },
+        "failure": null
+      },
+      {
+        "owner": "8MPekTtxX6cCMXXJu2f8ZVJPtAkLCxgkUnn35uPGmjV3",
+        "status": "resolved",
+        "facts": {
+          "lamports": 96166043,
+          "sol": 0.096,
+          "tokenAccounts": 8,
+          "contextSlot": 449516864
+        },
+        "heuristic": {
+          "rule": "sol >= 1000 and tokenAccounts >= 100",
+          "flagged": false,
+          "confidence": "low: on-chain profile only; exchange status is confirmed by the owner in the exclusion list"
+        },
+        "failure": null
+      },
+      {
+        "owner": "8NBEbxLknGv5aRYefFrW2qFXoDZyi9fSHJNiJRvEcMBE",
+        "status": "resolved",
+        "facts": {
+          "lamports": 22181719162,
+          "sol": 22.182,
+          "tokenAccounts": 1000,
+          "contextSlot": 449516864
+        },
+        "heuristic": {
+          "rule": "sol >= 1000 and tokenAccounts >= 100",
+          "flagged": false,
+          "confidence": "low: on-chain profile only; exchange status is confirmed by the owner in the exclusion list"
+        },
+        "failure": null
+      },
+      {
+        "owner": "8TSfBNY3NGBu2PnWs5Wu4yDT5wgVFGjx1Pdga6fjkYqo",
+        "status": "resolved",
+        "facts": {
+          "lamports": 416927007,
+          "sol": 0.417,
+          "tokenAccounts": 1000,
+          "contextSlot": 449516864
+        },
+        "heuristic": {
+          "rule": "sol >= 1000 and tokenAccounts >= 100",
+          "flagged": false,
+          "confidence": "low: on-chain profile only; exchange status is confirmed by the owner in the exclusion list"
+        },
+        "failure": null
+      },
+      {
+        "owner": "8rMiwHGEmtJNWvjniLrTU5a94ujNaqZBfsSf5CXrKgF4",
+        "status": "resolved",
+        "facts": {
+          "lamports": 997905497,
+          "sol": 0.998,
+          "tokenAccounts": 78,
+          "contextSlot": 449516864
+        },
+        "heuristic": {
+          "rule": "sol >= 1000 and tokenAccounts >= 100",
+          "flagged": false,
+          "confidence": "low: on-chain profile only; exchange status is confirmed by the owner in the exclusion list"
+        },
+        "failure": null
+      },
+      {
+        "owner": "98zoZTYqK4hDB5MZvv2sYhRbKf3ZbUxJp3ZDfL8pibcF",
+        "status": "resolved",
+        "facts": {
+          "lamports": 2013827835,
+          "sol": 2.014,
+          "tokenAccounts": 72,
+          "contextSlot": 449516864
+        },
+        "heuristic": {
+          "rule": "sol >= 1000 and tokenAccounts >= 100",
+          "flagged": false,
+          "confidence": "low: on-chain profile only; exchange status is confirmed by the owner in the exclusion list"
+        },
+        "failure": null
+      },
+      {
+        "owner": "9DyiP4usme2Hg8jigwcLeUKF1Y6DBNQXMUWCe6NdBYwh",
+        "status": "resolved",
+        "facts": {
+          "lamports": 99372002,
+          "sol": 0.099,
+          "tokenAccounts": 16,
+          "contextSlot": 449516865
+        },
+        "heuristic": {
+          "rule": "sol >= 1000 and tokenAccounts >= 100",
+          "flagged": false,
+          "confidence": "low: on-chain profile only; exchange status is confirmed by the owner in the exclusion list"
+        },
+        "failure": null
+      },
+      {
+        "owner": "9NRVvH2nz5HhFspDRX7CF7KAdUcCZCJgxYaiKCirRR1d",
+        "status": "resolved",
+        "facts": {
+          "lamports": 13010000,
+          "sol": 0.013,
+          "tokenAccounts": 1,
+          "contextSlot": 449516865
+        },
+        "heuristic": {
+          "rule": "sol >= 1000 and tokenAccounts >= 100",
+          "flagged": false,
+          "confidence": "low: on-chain profile only; exchange status is confirmed by the owner in the exclusion list"
+        },
+        "failure": null
+      },
+      {
+        "owner": "9nj4oySaZLZDj9VM11ex8Yq9PMkBaRAF25pjFDZ5YZm4",
+        "status": "resolved",
+        "facts": {
+          "lamports": 1250000000,
+          "sol": 1.25,
+          "tokenAccounts": 43,
+          "contextSlot": 449516865
+        },
+        "heuristic": {
+          "rule": "sol >= 1000 and tokenAccounts >= 100",
+          "flagged": false,
+          "confidence": "low: on-chain profile only; exchange status is confirmed by the owner in the exclusion list"
+        },
+        "failure": null
+      },
+      {
+        "owner": "9oCW6Td21emfx7ED2p1xX4ZmZ2ufFmbAEfMRALBhu6ys",
+        "status": "resolved",
+        "facts": {
+          "lamports": 10189937825839,
+          "sol": 10189.938,
+          "tokenAccounts": 4,
+          "contextSlot": 449516865
+        },
+        "heuristic": {
+          "rule": "sol >= 1000 and tokenAccounts >= 100",
+          "flagged": false,
+          "confidence": "low: on-chain profile only; exchange status is confirmed by the owner in the exclusion list"
+        },
+        "failure": null
+      },
+      {
+        "owner": "9omHFqveuhLn75DEqQsvwbvhWGYmW4BiBW5afw4ordAH",
+        "status": "resolved",
+        "facts": {
+          "lamports": 481033197,
+          "sol": 0.481,
+          "tokenAccounts": 33,
+          "contextSlot": 449516866
+        },
+        "heuristic": {
+          "rule": "sol >= 1000 and tokenAccounts >= 100",
+          "flagged": false,
+          "confidence": "low: on-chain profile only; exchange status is confirmed by the owner in the exclusion list"
+        },
+        "failure": null
+      },
+      {
+        "owner": "9yXbXUzbPSVa4XKbkqpZbpD5f8HFfMQwmeF1dst4VYnp",
+        "status": "resolved",
+        "facts": {
+          "lamports": 409555004,
+          "sol": 0.41,
+          "tokenAccounts": 19,
+          "contextSlot": 449516866
+        },
+        "heuristic": {
+          "rule": "sol >= 1000 and tokenAccounts >= 100",
+          "flagged": false,
+          "confidence": "low: on-chain profile only; exchange status is confirmed by the owner in the exclusion list"
+        },
+        "failure": null
+      },
+      {
+        "owner": "AA21BSr7LZAdkyv7UF4EuMDnNEeczjmaDQWBa1rcVxH9",
+        "status": "resolved",
+        "facts": {
+          "lamports": 769087823,
+          "sol": 0.769,
+          "tokenAccounts": 291,
+          "contextSlot": 449516866
+        },
+        "heuristic": {
+          "rule": "sol >= 1000 and tokenAccounts >= 100",
+          "flagged": false,
+          "confidence": "low: on-chain profile only; exchange status is confirmed by the owner in the exclusion list"
+        },
+        "failure": null
+      },
+      {
+        "owner": "ABGmmHMRrA8yj6zZyuy4YDW341B4iCEkHczDeQtJ3hWY",
+        "status": "resolved",
+        "facts": {
+          "lamports": 704784371,
+          "sol": 0.705,
+          "tokenAccounts": 53,
+          "contextSlot": 449516866
+        },
+        "heuristic": {
+          "rule": "sol >= 1000 and tokenAccounts >= 100",
+          "flagged": false,
+          "confidence": "low: on-chain profile only; exchange status is confirmed by the owner in the exclusion list"
+        },
+        "failure": null
+      },
+      {
+        "owner": "AGiAVqZiQrz32m1zKC5T4UfQKcDoGNG34sqSHSVNgwtv",
+        "status": "resolved",
+        "facts": {
+          "lamports": 2054199658,
+          "sol": 2.054,
+          "tokenAccounts": 209,
+          "contextSlot": 449516866
+        },
+        "heuristic": {
+          "rule": "sol >= 1000 and tokenAccounts >= 100",
+          "flagged": false,
+          "confidence": "low: on-chain profile only; exchange status is confirmed by the owner in the exclusion list"
+        },
+        "failure": null
+      },
+      {
+        "owner": "AGwxVWZgwA3P2681PPaNhi7dUDDDAbMiJeBAKxiCutkd",
+        "status": "resolved",
+        "facts": {
+          "lamports": 632418506,
+          "sol": 0.632,
+          "tokenAccounts": 147,
+          "contextSlot": 449516867
+        },
+        "heuristic": {
+          "rule": "sol >= 1000 and tokenAccounts >= 100",
+          "flagged": false,
+          "confidence": "low: on-chain profile only; exchange status is confirmed by the owner in the exclusion list"
+        },
+        "failure": null
+      },
+      {
+        "owner": "AZJtbjhgEdhMx1T3CLbSHquwKs5k26UCDHXnMqRxo6dd",
+        "status": "resolved",
+        "facts": {
+          "lamports": 15322959461537,
+          "sol": 15322.959,
+          "tokenAccounts": 32,
+          "contextSlot": 449516867
+        },
+        "heuristic": {
+          "rule": "sol >= 1000 and tokenAccounts >= 100",
+          "flagged": false,
+          "confidence": "low: on-chain profile only; exchange status is confirmed by the owner in the exclusion list"
+        },
+        "failure": null
+      },
+      {
+        "owner": "AdfkNiA7gg3RJ4fyLZA4o5LCAG1TweLnALzCH1cpapmW",
+        "status": "resolved",
+        "facts": {
+          "lamports": 1999922062,
+          "sol": 2,
+          "tokenAccounts": 52,
+          "contextSlot": 449516867
+        },
+        "heuristic": {
+          "rule": "sol >= 1000 and tokenAccounts >= 100",
+          "flagged": false,
+          "confidence": "low: on-chain profile only; exchange status is confirmed by the owner in the exclusion list"
+        },
+        "failure": null
+      },
+      {
+        "owner": "AhxzRPdizP8Dg52aJHrczQphEcsPv36QocHujrcPtarU",
+        "status": "resolved",
+        "facts": {
+          "lamports": 19317663193254,
+          "sol": 19317.663,
+          "tokenAccounts": 90,
+          "contextSlot": 449516868
+        },
+        "heuristic": {
+          "rule": "sol >= 1000 and tokenAccounts >= 100",
+          "flagged": false,
+          "confidence": "low: on-chain profile only; exchange status is confirmed by the owner in the exclusion list"
+        },
+        "failure": null
+      },
+      {
+        "owner": "Au1GUWfcadx7jMzhsg6gHGUgViYJrnPfL1vbdqnvLK4i",
+        "status": "resolved",
+        "facts": {
+          "lamports": 8906614879,
+          "sol": 8.907,
+          "tokenAccounts": 1000,
+          "contextSlot": 449516868
+        },
+        "heuristic": {
+          "rule": "sol >= 1000 and tokenAccounts >= 100",
+          "flagged": false,
+          "confidence": "low: on-chain profile only; exchange status is confirmed by the owner in the exclusion list"
+        },
+        "failure": null
+      },
+      {
+        "owner": "B1BKCShnRNw63fVkPmxH44jtBjYhL6zUQcPeSUfJ3cNZ",
+        "status": "resolved",
+        "facts": {
+          "lamports": 88917586,
+          "sol": 0.089,
+          "tokenAccounts": 9,
+          "contextSlot": 449516868
+        },
+        "heuristic": {
+          "rule": "sol >= 1000 and tokenAccounts >= 100",
+          "flagged": false,
+          "confidence": "low: on-chain profile only; exchange status is confirmed by the owner in the exclusion list"
+        },
+        "failure": null
+      },
+      {
+        "owner": "B8pF2FLxDq8Z5pGzWLTHq4DHf4gT156GmEXx4egnKyVd",
+        "status": "resolved",
+        "facts": {
+          "lamports": 3984871881,
+          "sol": 3.985,
+          "tokenAccounts": 153,
+          "contextSlot": 449516868
+        },
+        "heuristic": {
+          "rule": "sol >= 1000 and tokenAccounts >= 100",
+          "flagged": false,
+          "confidence": "low: on-chain profile only; exchange status is confirmed by the owner in the exclusion list"
+        },
+        "failure": null
+      },
+      {
+        "owner": "BGApG7c57PPdDfBdeHQFQ9D2PD6TZTDze6gxCFydAe48",
+        "status": "resolved",
+        "facts": {
+          "lamports": 265498989,
+          "sol": 0.265,
+          "tokenAccounts": 2,
+          "contextSlot": 449516868
+        },
+        "heuristic": {
+          "rule": "sol >= 1000 and tokenAccounts >= 100",
+          "flagged": false,
+          "confidence": "low: on-chain profile only; exchange status is confirmed by the owner in the exclusion list"
+        },
+        "failure": null
+      },
+      {
+        "owner": "Bb7H8QK6CQsmkfrcA5vULesS1RmegWosgkrrYyd1UEpv",
+        "status": "resolved",
+        "facts": {
+          "lamports": 51987000,
+          "sol": 0.052,
+          "tokenAccounts": 24,
+          "contextSlot": 449516868
+        },
+        "heuristic": {
+          "rule": "sol >= 1000 and tokenAccounts >= 100",
+          "flagged": false,
+          "confidence": "low: on-chain profile only; exchange status is confirmed by the owner in the exclusion list"
+        },
+        "failure": null
+      },
+      {
+        "owner": "BgePMzgz3ahSvgqCioRVUUNB5aEKAHfn9VctZiwA9Vhe",
+        "status": "resolved",
+        "facts": {
+          "lamports": 47070428,
+          "sol": 0.047,
+          "tokenAccounts": 65,
+          "contextSlot": 449516868
+        },
+        "heuristic": {
+          "rule": "sol >= 1000 and tokenAccounts >= 100",
+          "flagged": false,
+          "confidence": "low: on-chain profile only; exchange status is confirmed by the owner in the exclusion list"
+        },
+        "failure": null
+      },
+      {
+        "owner": "Bm5mwGjU5MAXZqtA5xUsedziAaWTS8w9eqDWTxGMYMYQ",
+        "status": "resolved",
+        "facts": {
+          "lamports": 1010000,
+          "sol": 0.001,
+          "tokenAccounts": 22,
+          "contextSlot": 449516868
+        },
+        "heuristic": {
+          "rule": "sol >= 1000 and tokenAccounts >= 100",
+          "flagged": false,
+          "confidence": "low: on-chain profile only; exchange status is confirmed by the owner in the exclusion list"
+        },
+        "failure": null
+      },
+      {
+        "owner": "Bq2RWav5LtfnAs8refzrYjfroDGK9vjYULmTqJX7yXfJ",
+        "status": "resolved",
+        "facts": {
+          "lamports": 4326445400,
+          "sol": 4.326,
+          "tokenAccounts": 217,
+          "contextSlot": 449516868
+        },
+        "heuristic": {
+          "rule": "sol >= 1000 and tokenAccounts >= 100",
+          "flagged": false,
+          "confidence": "low: on-chain profile only; exchange status is confirmed by the owner in the exclusion list"
+        },
+        "failure": null
+      },
+      {
+        "owner": "BxLRTSYSTsypnx4yWvaQoURCPv4a7VzcDsSUM4eBVMSa",
+        "status": "resolved",
+        "facts": {
+          "lamports": 6464526963,
+          "sol": 6.465,
+          "tokenAccounts": 280,
+          "contextSlot": 449516869
+        },
+        "heuristic": {
+          "rule": "sol >= 1000 and tokenAccounts >= 100",
+          "flagged": false,
+          "confidence": "low: on-chain profile only; exchange status is confirmed by the owner in the exclusion list"
+        },
+        "failure": null
+      },
+      {
+        "owner": "C1BRMDfsbW25FtFcUta81vuhgtZDSPmn1NENNf4akg9R",
+        "status": "resolved",
+        "facts": {
+          "lamports": 9979999,
+          "sol": 0.01,
+          "tokenAccounts": 25,
+          "contextSlot": 449516869
+        },
+        "heuristic": {
+          "rule": "sol >= 1000 and tokenAccounts >= 100",
+          "flagged": false,
+          "confidence": "low: on-chain profile only; exchange status is confirmed by the owner in the exclusion list"
+        },
+        "failure": null
+      },
+      {
+        "owner": "C1j61Hg8CQDEudPw4UJTAV7yRUQ33d8AgC3dqRtQu92N",
+        "status": "resolved",
+        "facts": {
+          "lamports": 1210074236,
+          "sol": 1.21,
+          "tokenAccounts": 126,
+          "contextSlot": 449516869
+        },
+        "heuristic": {
+          "rule": "sol >= 1000 and tokenAccounts >= 100",
+          "flagged": false,
+          "confidence": "low: on-chain profile only; exchange status is confirmed by the owner in the exclusion list"
+        },
+        "failure": null
+      },
+      {
+        "owner": "C1roCAftE7vYubc3MeNNbryAyQNU4E9nihEwrJV2C483",
+        "status": "resolved",
+        "facts": {
+          "lamports": 1020547067,
+          "sol": 1.021,
+          "tokenAccounts": 4,
+          "contextSlot": 449516869
+        },
+        "heuristic": {
+          "rule": "sol >= 1000 and tokenAccounts >= 100",
+          "flagged": false,
+          "confidence": "low: on-chain profile only; exchange status is confirmed by the owner in the exclusion list"
+        },
+        "failure": null
+      },
+      {
+        "owner": "C7nWs22x7fCKVGxc1wU3yyG7zwa5sED3XqgwxVqm8ULk",
+        "status": "resolved",
+        "facts": {
+          "lamports": 3000040079,
+          "sol": 3,
+          "tokenAccounts": 37,
+          "contextSlot": 449516869
+        },
+        "heuristic": {
+          "rule": "sol >= 1000 and tokenAccounts >= 100",
+          "flagged": false,
+          "confidence": "low: on-chain profile only; exchange status is confirmed by the owner in the exclusion list"
+        },
+        "failure": null
+      },
+      {
+        "owner": "C8XzHPYLiy6X8qDhe5cBocLEUEs4hdYDCha9i6Ex75Y3",
+        "status": "resolved",
+        "facts": {
+          "lamports": 3227982590797,
+          "sol": 3227.983,
+          "tokenAccounts": 62,
+          "contextSlot": 449516869
+        },
+        "heuristic": {
+          "rule": "sol >= 1000 and tokenAccounts >= 100",
+          "flagged": false,
+          "confidence": "low: on-chain profile only; exchange status is confirmed by the owner in the exclusion list"
+        },
+        "failure": null
+      },
+      {
+        "owner": "CRcheT7YEMRS6TzFEyxDEC8urw57YL4voiESdV2xkMv2",
+        "status": "resolved",
+        "facts": {
+          "lamports": 80371400,
+          "sol": 0.08,
+          "tokenAccounts": 34,
+          "contextSlot": 449516870
+        },
+        "heuristic": {
+          "rule": "sol >= 1000 and tokenAccounts >= 100",
+          "flagged": false,
+          "confidence": "low: on-chain profile only; exchange status is confirmed by the owner in the exclusion list"
+        },
+        "failure": null
+      },
+      {
+        "owner": "Cb4krsYnEoGfT7hcDsZrp4wiX2UPauKA5nKwEEu3m6uJ",
+        "status": "resolved",
+        "facts": {
+          "lamports": 2282449083,
+          "sol": 2.282,
+          "tokenAccounts": 48,
+          "contextSlot": 449516870
+        },
+        "heuristic": {
+          "rule": "sol >= 1000 and tokenAccounts >= 100",
+          "flagged": false,
+          "confidence": "low: on-chain profile only; exchange status is confirmed by the owner in the exclusion list"
+        },
+        "failure": null
+      },
+      {
+        "owner": "Ck3Aoerh7FmVN9G8FscUscV7t7LyEXtSKMbwmTRFHF5P",
+        "status": "resolved",
+        "facts": {
+          "lamports": 694679378,
+          "sol": 0.695,
+          "tokenAccounts": 107,
+          "contextSlot": 449516870
+        },
+        "heuristic": {
+          "rule": "sol >= 1000 and tokenAccounts >= 100",
+          "flagged": false,
+          "confidence": "low: on-chain profile only; exchange status is confirmed by the owner in the exclusion list"
+        },
+        "failure": null
+      },
+      {
+        "owner": "CreQJ2t94QK5dsxUZGXfPJ8Nx7wA9LHr5chxjSMkbNft",
+        "status": "resolved",
+        "facts": {
+          "lamports": 411227326508,
+          "sol": 411.227,
+          "tokenAccounts": 416,
+          "contextSlot": 449516870
+        },
+        "heuristic": {
+          "rule": "sol >= 1000 and tokenAccounts >= 100",
+          "flagged": false,
+          "confidence": "low: on-chain profile only; exchange status is confirmed by the owner in the exclusion list"
+        },
+        "failure": null
+      },
+      {
+        "owner": "CwMa649C1g1zNxEBQjuyD3rHyTH9cLRVoLVSUAtNUWpa",
+        "status": "resolved",
+        "facts": {
+          "lamports": 2510000,
+          "sol": 0.003,
+          "tokenAccounts": 18,
+          "contextSlot": 449516870
+        },
+        "heuristic": {
+          "rule": "sol >= 1000 and tokenAccounts >= 100",
+          "flagged": false,
+          "confidence": "low: on-chain profile only; exchange status is confirmed by the owner in the exclusion list"
+        },
+        "failure": null
+      },
+      {
+        "owner": "CyQMjdDttJAY7rGqSz1hoLzrj6yQVtyGcySzYJGWA2fZ",
+        "status": "resolved",
+        "facts": {
+          "lamports": 1577233053,
+          "sol": 1.577,
+          "tokenAccounts": 68,
+          "contextSlot": 449516870
+        },
+        "heuristic": {
+          "rule": "sol >= 1000 and tokenAccounts >= 100",
+          "flagged": false,
+          "confidence": "low: on-chain profile only; exchange status is confirmed by the owner in the exclusion list"
+        },
+        "failure": null
+      },
+      {
+        "owner": "D9uhxpc5uYvCTF4LHZUjp3Gt3UsG1V6BtB9h9pk2hjc7",
+        "status": "resolved",
+        "facts": {
+          "lamports": 21415914,
+          "sol": 0.021,
+          "tokenAccounts": 9,
+          "contextSlot": 449516870
+        },
+        "heuristic": {
+          "rule": "sol >= 1000 and tokenAccounts >= 100",
+          "flagged": false,
+          "confidence": "low: on-chain profile only; exchange status is confirmed by the owner in the exclusion list"
+        },
+        "failure": null
+      },
+      {
+        "owner": "DEM2VDtjAmgMRpyw4qBMQM8QWMEr6DFvmoWxvdUkMieL",
+        "status": "resolved",
+        "facts": {
+          "lamports": 92315743,
+          "sol": 0.092,
+          "tokenAccounts": 9,
+          "contextSlot": 449516871
+        },
+        "heuristic": {
+          "rule": "sol >= 1000 and tokenAccounts >= 100",
+          "flagged": false,
+          "confidence": "low: on-chain profile only; exchange status is confirmed by the owner in the exclusion list"
+        },
+        "failure": null
+      },
+      {
+        "owner": "DRLs1jwiZRhMgr8UPmQ24tfGqfXzxGUWTGFN5VPmwEtL",
+        "status": "resolved",
+        "facts": {
+          "lamports": 79593134,
+          "sol": 0.08,
+          "tokenAccounts": 9,
+          "contextSlot": 449516871
+        },
+        "heuristic": {
+          "rule": "sol >= 1000 and tokenAccounts >= 100",
+          "flagged": false,
+          "confidence": "low: on-chain profile only; exchange status is confirmed by the owner in the exclusion list"
+        },
+        "failure": null
+      },
+      {
+        "owner": "DSFWxvJjgvLbVqoQ1Zwoe1iVHhwFgrfSiF3ZK1h7nd1K",
+        "status": "resolved",
+        "facts": {
+          "lamports": 755849776987,
+          "sol": 755.85,
+          "tokenAccounts": 164,
+          "contextSlot": 449516871
+        },
+        "heuristic": {
+          "rule": "sol >= 1000 and tokenAccounts >= 100",
+          "flagged": false,
+          "confidence": "low: on-chain profile only; exchange status is confirmed by the owner in the exclusion list"
+        },
+        "failure": null
+      },
+      {
+        "owner": "DWjd65nVaCv16CF2VHdoZmZWGS6XSVq5R3nKeUMnnPRM",
+        "status": "resolved",
+        "facts": {
+          "lamports": 907027273,
+          "sol": 0.907,
+          "tokenAccounts": 43,
+          "contextSlot": 449516871
+        },
+        "heuristic": {
+          "rule": "sol >= 1000 and tokenAccounts >= 100",
+          "flagged": false,
+          "confidence": "low: on-chain profile only; exchange status is confirmed by the owner in the exclusion list"
+        },
+        "failure": null
+      },
+      {
+        "owner": "DoazN4C8ijbPrXnG9ZnLMqgVPpLCHGDDWBEE7JrH5hra",
+        "status": "resolved",
+        "facts": {
+          "lamports": 1072493279,
+          "sol": 1.072,
+          "tokenAccounts": 54,
+          "contextSlot": 449516871
+        },
+        "heuristic": {
+          "rule": "sol >= 1000 and tokenAccounts >= 100",
+          "flagged": false,
+          "confidence": "low: on-chain profile only; exchange status is confirmed by the owner in the exclusion list"
+        },
+        "failure": null
+      },
+      {
+        "owner": "DrBjamqiet7iuryCD95dC2gY6yqwfB6B2rvRsTubMJf7",
+        "status": "resolved",
+        "facts": {
+          "lamports": 301771232984,
+          "sol": 301.771,
+          "tokenAccounts": 22,
+          "contextSlot": 449516871
+        },
+        "heuristic": {
+          "rule": "sol >= 1000 and tokenAccounts >= 100",
+          "flagged": false,
+          "confidence": "low: on-chain profile only; exchange status is confirmed by the owner in the exclusion list"
+        },
+        "failure": null
+      },
+      {
+        "owner": "Dtd2cDkh2uKfHpcdJfwuKoFYXRRXs2YAK9P46wxXGceb",
+        "status": "resolved",
+        "facts": {
+          "lamports": 41757090,
+          "sol": 0.042,
+          "tokenAccounts": 30,
+          "contextSlot": 449516872
+        },
+        "heuristic": {
+          "rule": "sol >= 1000 and tokenAccounts >= 100",
+          "flagged": false,
+          "confidence": "low: on-chain profile only; exchange status is confirmed by the owner in the exclusion list"
+        },
+        "failure": null
+      },
+      {
+        "owner": "E5gxHm2VYxBhSLiQevBucQrGAgk74oRFa5wsiMFDDSMr",
+        "status": "resolved",
+        "facts": {
+          "lamports": 5010000,
+          "sol": 0.005,
+          "tokenAccounts": 1,
+          "contextSlot": 449516872
+        },
+        "heuristic": {
+          "rule": "sol >= 1000 and tokenAccounts >= 100",
+          "flagged": false,
+          "confidence": "low: on-chain profile only; exchange status is confirmed by the owner in the exclusion list"
+        },
+        "failure": null
+      },
+      {
+        "owner": "EKTPg1SSZgXNskhWCXbD33Ccu7SdGi4pxCTzqW8x3j1a",
+        "status": "resolved",
+        "facts": {
+          "lamports": 34611375906,
+          "sol": 34.611,
+          "tokenAccounts": 10,
+          "contextSlot": 449516872
+        },
+        "heuristic": {
+          "rule": "sol >= 1000 and tokenAccounts >= 100",
+          "flagged": false,
+          "confidence": "low: on-chain profile only; exchange status is confirmed by the owner in the exclusion list"
+        },
+        "failure": null
+      },
+      {
+        "owner": "Eb71c6ABPQGkYkrDrHQzHbfXaKuj91Qr3WEFJhSu5fmk",
+        "status": "resolved",
+        "facts": {
+          "lamports": 236780731933,
+          "sol": 236.781,
+          "tokenAccounts": 128,
+          "contextSlot": 449516872
+        },
+        "heuristic": {
+          "rule": "sol >= 1000 and tokenAccounts >= 100",
+          "flagged": false,
+          "confidence": "low: on-chain profile only; exchange status is confirmed by the owner in the exclusion list"
+        },
+        "failure": null
+      },
+      {
+        "owner": "Egy3Dy35niWx5fCa3bgdGtnei5w7KFAfXWYCyoyuSKdt",
+        "status": "resolved",
+        "facts": {
+          "lamports": 3639188900,
+          "sol": 3.639,
+          "tokenAccounts": 232,
+          "contextSlot": 449516872
+        },
+        "heuristic": {
+          "rule": "sol >= 1000 and tokenAccounts >= 100",
+          "flagged": false,
+          "confidence": "low: on-chain profile only; exchange status is confirmed by the owner in the exclusion list"
+        },
+        "failure": null
+      },
+      {
+        "owner": "EiiAnQsfcruxHFkDabAmH4gzqLUZoEVwRuqEFQGP11xw",
+        "status": "resolved",
+        "facts": {
+          "lamports": 150783401007,
+          "sol": 150.783,
+          "tokenAccounts": 789,
+          "contextSlot": 449516872
+        },
+        "heuristic": {
+          "rule": "sol >= 1000 and tokenAccounts >= 100",
+          "flagged": false,
+          "confidence": "low: on-chain profile only; exchange status is confirmed by the owner in the exclusion list"
+        },
+        "failure": null
+      },
+      {
+        "owner": "EjtCjDWj3HyL1a4dRritZLTtZrwvD3E1AAzp6evMUmVB",
+        "status": "resolved",
+        "facts": {
+          "lamports": 16765338076,
+          "sol": 16.765,
+          "tokenAccounts": 508,
+          "contextSlot": 449516872
+        },
+        "heuristic": {
+          "rule": "sol >= 1000 and tokenAccounts >= 100",
+          "flagged": false,
+          "confidence": "low: on-chain profile only; exchange status is confirmed by the owner in the exclusion list"
+        },
+        "failure": null
+      },
+      {
+        "owner": "EvUMWEsN5b2zPJABjfwkMENUYJzbXvyuDGENk72Rs5zy",
+        "status": "resolved",
+        "facts": {
+          "lamports": 96230121,
+          "sol": 0.096,
+          "tokenAccounts": 21,
+          "contextSlot": 449516873
+        },
+        "heuristic": {
+          "rule": "sol >= 1000 and tokenAccounts >= 100",
+          "flagged": false,
+          "confidence": "low: on-chain profile only; exchange status is confirmed by the owner in the exclusion list"
+        },
+        "failure": null
+      },
+      {
+        "owner": "FFDAamfSQpoKsUKMjzt6rvzLAUQKfnSPFnBZQyZk8HWM",
+        "status": "resolved",
+        "facts": {
+          "lamports": 33219546355928,
+          "sol": 33219.546,
+          "tokenAccounts": 62,
+          "contextSlot": 449516873
+        },
+        "heuristic": {
+          "rule": "sol >= 1000 and tokenAccounts >= 100",
+          "flagged": false,
+          "confidence": "low: on-chain profile only; exchange status is confirmed by the owner in the exclusion list"
+        },
+        "failure": null
+      },
+      {
+        "owner": "FNidxJ3Hwo2AV1dC12iUFxryvv3ubLREoUPM3rToaMg",
+        "status": "resolved",
+        "facts": {
+          "lamports": 551884323,
+          "sol": 0.552,
+          "tokenAccounts": 148,
+          "contextSlot": 449516873
+        },
+        "heuristic": {
+          "rule": "sol >= 1000 and tokenAccounts >= 100",
+          "flagged": false,
+          "confidence": "low: on-chain profile only; exchange status is confirmed by the owner in the exclusion list"
+        },
+        "failure": null
+      },
+      {
+        "owner": "FTXpq4CXg6SXkBcqRn3S2brctXAmt3WNusM52RbGBGMf",
+        "status": "resolved",
+        "facts": {
+          "lamports": 831874636,
+          "sol": 0.832,
+          "tokenAccounts": 32,
+          "contextSlot": 449516873
+        },
+        "heuristic": {
+          "rule": "sol >= 1000 and tokenAccounts >= 100",
+          "flagged": false,
+          "confidence": "low: on-chain profile only; exchange status is confirmed by the owner in the exclusion list"
+        },
+        "failure": null
+      },
+      {
+        "owner": "FVQ9tMDxguSAvjN2YNTxbMXgv11CtRzWfX8aYRtquVqT",
+        "status": "resolved",
+        "facts": {
+          "lamports": 1206293233651,
+          "sol": 1206.293,
+          "tokenAccounts": 78,
+          "contextSlot": 449516873
+        },
+        "heuristic": {
+          "rule": "sol >= 1000 and tokenAccounts >= 100",
+          "flagged": false,
+          "confidence": "low: on-chain profile only; exchange status is confirmed by the owner in the exclusion list"
+        },
+        "failure": null
+      },
+      {
+        "owner": "FZaypZv8wh557QZpiwk42VAw6qqe1HuvMZW3No89wK4g",
+        "status": "resolved",
+        "facts": {
+          "lamports": 3001018160,
+          "sol": 3.001,
+          "tokenAccounts": 70,
+          "contextSlot": 449516874
+        },
+        "heuristic": {
+          "rule": "sol >= 1000 and tokenAccounts >= 100",
+          "flagged": false,
+          "confidence": "low: on-chain profile only; exchange status is confirmed by the owner in the exclusion list"
+        },
+        "failure": null
+      },
+      {
+        "owner": "FkFnmrrs1TZGmZsVhar8kn7XvEPqb9qW3KK7D2PJss6d",
+        "status": "resolved",
+        "facts": {
+          "lamports": 1972323435,
+          "sol": 1.972,
+          "tokenAccounts": 3,
+          "contextSlot": 449516874
+        },
+        "heuristic": {
+          "rule": "sol >= 1000 and tokenAccounts >= 100",
+          "flagged": false,
+          "confidence": "low: on-chain profile only; exchange status is confirmed by the owner in the exclusion list"
+        },
+        "failure": null
+      },
+      {
+        "owner": "FkaLnX17cXZGyeu3kZGdHCNdFMJJzBrPPYVvd18B3MZp",
+        "status": "resolved",
+        "facts": {
+          "lamports": 106200398346,
+          "sol": 106.2,
+          "tokenAccounts": 185,
+          "contextSlot": 449516874
+        },
+        "heuristic": {
+          "rule": "sol >= 1000 and tokenAccounts >= 100",
+          "flagged": false,
+          "confidence": "low: on-chain profile only; exchange status is confirmed by the owner in the exclusion list"
+        },
+        "failure": null
+      },
+      {
+        "owner": "FrhLfj81LRpMR3EwSSCGPzHmxsnoq8h628ne68vK5oMN",
+        "status": "resolved",
+        "facts": {
+          "lamports": 84722928175,
+          "sol": 84.723,
+          "tokenAccounts": 401,
+          "contextSlot": 449516874
+        },
+        "heuristic": {
+          "rule": "sol >= 1000 and tokenAccounts >= 100",
+          "flagged": false,
+          "confidence": "low: on-chain profile only; exchange status is confirmed by the owner in the exclusion list"
+        },
+        "failure": null
+      },
+      {
+        "owner": "G1U6FxxH8WpMKUJdg7BJf1jbpvzA4tLiPe9nZ5bbzdHM",
+        "status": "resolved",
+        "facts": {
+          "lamports": 199983141967,
+          "sol": 199.983,
+          "tokenAccounts": 10,
+          "contextSlot": 449516874
+        },
+        "heuristic": {
+          "rule": "sol >= 1000 and tokenAccounts >= 100",
+          "flagged": false,
+          "confidence": "low: on-chain profile only; exchange status is confirmed by the owner in the exclusion list"
+        },
+        "failure": null
+      },
+      {
+        "owner": "G5tj6pUqxhQhoLqYpCifyJsZBTkw1zhWQR9UcRxEWsxZ",
+        "status": "resolved",
+        "facts": {
+          "lamports": 530462504368,
+          "sol": 530.463,
+          "tokenAccounts": 25,
+          "contextSlot": 449516875
+        },
+        "heuristic": {
+          "rule": "sol >= 1000 and tokenAccounts >= 100",
+          "flagged": false,
+          "confidence": "low: on-chain profile only; exchange status is confirmed by the owner in the exclusion list"
+        },
+        "failure": null
+      },
+      {
+        "owner": "GJCpaYJN19zV1Hj4fYiMPqWVVJSaap9FnQZZwPspszs5",
+        "status": "resolved",
+        "facts": {
+          "lamports": 1001697594061,
+          "sol": 1001.698,
+          "tokenAccounts": 12,
+          "contextSlot": 449516875
+        },
+        "heuristic": {
+          "rule": "sol >= 1000 and tokenAccounts >= 100",
+          "flagged": false,
+          "confidence": "low: on-chain profile only; exchange status is confirmed by the owner in the exclusion list"
+        },
+        "failure": null
+      },
+      {
+        "owner": "GJvewfRjqTUPtx6WsBSUnaFbdgXwgXnWfpDyLm65T4YA",
+        "status": "resolved",
+        "facts": {
+          "lamports": 14905124178,
+          "sol": 14.905,
+          "tokenAccounts": 197,
+          "contextSlot": 449516875
+        },
+        "heuristic": {
+          "rule": "sol >= 1000 and tokenAccounts >= 100",
+          "flagged": false,
+          "confidence": "low: on-chain profile only; exchange status is confirmed by the owner in the exclusion list"
+        },
+        "failure": null
+      },
+      {
+        "owner": "GLV3uy4rugcgd1Ukpfz4koWc18Q2eb2wUCYWCwgKRTax",
+        "status": "resolved",
+        "facts": {
+          "lamports": 400165108,
+          "sol": 0.4,
+          "tokenAccounts": 18,
+          "contextSlot": 449516875
+        },
+        "heuristic": {
+          "rule": "sol >= 1000 and tokenAccounts >= 100",
+          "flagged": false,
+          "confidence": "low: on-chain profile only; exchange status is confirmed by the owner in the exclusion list"
+        },
+        "failure": null
+      },
+      {
+        "owner": "GU9ZpULF3qHNApXsWHPCUrWArG5mrdzZCtQSpwL8AQy4",
+        "status": "resolved",
+        "facts": {
+          "lamports": 4653946825,
+          "sol": 4.654,
+          "tokenAccounts": 51,
+          "contextSlot": 449516875
+        },
+        "heuristic": {
+          "rule": "sol >= 1000 and tokenAccounts >= 100",
+          "flagged": false,
+          "confidence": "low: on-chain profile only; exchange status is confirmed by the owner in the exclusion list"
+        },
+        "failure": null
+      },
+      {
+        "owner": "GV9kvNR1x2KVX3kaacQRrcUjaZTzf67PBZcfVD8JA9Ad",
+        "status": "resolved",
+        "facts": {
+          "lamports": 5677814581,
+          "sol": 5.678,
+          "tokenAccounts": 280,
+          "contextSlot": 449516875
+        },
+        "heuristic": {
+          "rule": "sol >= 1000 and tokenAccounts >= 100",
+          "flagged": false,
+          "confidence": "low: on-chain profile only; exchange status is confirmed by the owner in the exclusion list"
+        },
+        "failure": null
+      },
+      {
+        "owner": "Gfgi79vUv9cs1WQu9YQuitgMxc37cymuc38dxChJkrf5",
+        "status": "resolved",
+        "facts": {
+          "lamports": 247329566,
+          "sol": 0.247,
+          "tokenAccounts": 64,
+          "contextSlot": 449516875
+        },
+        "heuristic": {
+          "rule": "sol >= 1000 and tokenAccounts >= 100",
+          "flagged": false,
+          "confidence": "low: on-chain profile only; exchange status is confirmed by the owner in the exclusion list"
+        },
+        "failure": null
+      },
+      {
+        "owner": "GtH8a7vy6NM9RBr8KZhcoyusy5rfqvQVT4sqA2TbtpVA",
+        "status": "resolved",
+        "facts": {
+          "lamports": 4199791246,
+          "sol": 4.2,
+          "tokenAccounts": 25,
+          "contextSlot": 449516876
+        },
+        "heuristic": {
+          "rule": "sol >= 1000 and tokenAccounts >= 100",
+          "flagged": false,
+          "confidence": "low: on-chain profile only; exchange status is confirmed by the owner in the exclusion list"
+        },
+        "failure": null
+      },
+      {
+        "owner": "H1NLEPq7d2UsTazhGzL9wEQmA1VbrJkk6MJirzGArFaG",
+        "status": "resolved",
+        "facts": {
+          "lamports": 5200032066,
+          "sol": 5.2,
+          "tokenAccounts": 19,
+          "contextSlot": 449516876
+        },
+        "heuristic": {
+          "rule": "sol >= 1000 and tokenAccounts >= 100",
+          "flagged": false,
+          "confidence": "low: on-chain profile only; exchange status is confirmed by the owner in the exclusion list"
+        },
+        "failure": null
+      },
+      {
+        "owner": "H34n1FbcNrBRJWLHvFor8JydhX9E5ahinipTuybqAXFb",
+        "status": "resolved",
+        "facts": {
+          "lamports": 5010000,
+          "sol": 0.005,
+          "tokenAccounts": 24,
+          "contextSlot": 449516876
+        },
+        "heuristic": {
+          "rule": "sol >= 1000 and tokenAccounts >= 100",
+          "flagged": false,
+          "confidence": "low: on-chain profile only; exchange status is confirmed by the owner in the exclusion list"
+        },
+        "failure": null
+      },
+      {
+        "owner": "HDWwMbkMDM93hH17ECPU3dtKGJ3AFHE2aQ3rwZxu3QGp",
+        "status": "resolved",
+        "facts": {
+          "lamports": 29083543,
+          "sol": 0.029,
+          "tokenAccounts": 32,
+          "contextSlot": 449516876
+        },
+        "heuristic": {
+          "rule": "sol >= 1000 and tokenAccounts >= 100",
+          "flagged": false,
+          "confidence": "low: on-chain profile only; exchange status is confirmed by the owner in the exclusion list"
+        },
+        "failure": null
+      },
+      {
+        "owner": "HEo97k3x6yFmmdvxDWNV8L5eQTxgQn2FP9r5QePnwZ5r",
+        "status": "resolved",
+        "facts": {
+          "lamports": 1659038908,
+          "sol": 1.659,
+          "tokenAccounts": 79,
+          "contextSlot": 449516876
+        },
+        "heuristic": {
+          "rule": "sol >= 1000 and tokenAccounts >= 100",
+          "flagged": false,
+          "confidence": "low: on-chain profile only; exchange status is confirmed by the owner in the exclusion list"
+        },
+        "failure": null
+      },
+      {
+        "owner": "HST8927q4YpwqarxyCeVKk5bKnhjdXk2kfw6FHmgbcFY",
+        "status": "resolved",
+        "facts": {
+          "lamports": 10617861,
+          "sol": 0.011,
+          "tokenAccounts": 351,
+          "contextSlot": 449516877
+        },
+        "heuristic": {
+          "rule": "sol >= 1000 and tokenAccounts >= 100",
+          "flagged": false,
+          "confidence": "low: on-chain profile only; exchange status is confirmed by the owner in the exclusion list"
+        },
+        "failure": null
+      },
+      {
+        "owner": "HfJQm2Q8wCHVGfsWxLdH3bpd6RQhabPu2ue26YGQvDAE",
+        "status": "resolved",
+        "facts": {
+          "lamports": 32097848763,
+          "sol": 32.098,
+          "tokenAccounts": 20,
+          "contextSlot": 449516877
+        },
+        "heuristic": {
+          "rule": "sol >= 1000 and tokenAccounts >= 100",
+          "flagged": false,
+          "confidence": "low: on-chain profile only; exchange status is confirmed by the owner in the exclusion list"
+        },
+        "failure": null
+      },
+      {
+        "owner": "HgE7rwRkfxKbtBfuERrQZvtpdhUEfJQnMQ4NMj4LZi8Z",
+        "status": "resolved",
+        "facts": {
+          "lamports": 274120909,
+          "sol": 0.274,
+          "tokenAccounts": 57,
+          "contextSlot": 449516877
+        },
+        "heuristic": {
+          "rule": "sol >= 1000 and tokenAccounts >= 100",
+          "flagged": false,
+          "confidence": "low: on-chain profile only; exchange status is confirmed by the owner in the exclusion list"
+        },
+        "failure": null
+      },
+      {
+        "owner": "HwwHraTNpr32Sob715erpFhNtyzLvopuQxhnwSPhP8BG",
+        "status": "resolved",
+        "facts": {
+          "lamports": 297580722,
+          "sol": 0.298,
+          "tokenAccounts": 6,
+          "contextSlot": 449516877
+        },
+        "heuristic": {
+          "rule": "sol >= 1000 and tokenAccounts >= 100",
+          "flagged": false,
+          "confidence": "low: on-chain profile only; exchange status is confirmed by the owner in the exclusion list"
+        },
+        "failure": null
+      },
+      {
+        "owner": "J3miybSbu2YjFALUhKzEZrPFwPG9Jq14sQFd12JypYCN",
+        "status": "resolved",
+        "facts": {
+          "lamports": 0,
+          "sol": 0,
+          "tokenAccounts": 1,
+          "contextSlot": 449516877
+        },
+        "heuristic": {
+          "rule": "sol >= 1000 and tokenAccounts >= 100",
+          "flagged": false,
+          "confidence": "low: on-chain profile only; exchange status is confirmed by the owner in the exclusion list"
+        },
+        "failure": null
+      },
+      {
+        "owner": "J5pZQPTunqDU3VH7utCvpqPjz6PnDcR5cHXtQQXmJ8EF",
+        "status": "resolved",
+        "facts": {
+          "lamports": 11789656772,
+          "sol": 11.79,
+          "tokenAccounts": 58,
+          "contextSlot": 449516878
+        },
+        "heuristic": {
+          "rule": "sol >= 1000 and tokenAccounts >= 100",
+          "flagged": false,
+          "confidence": "low: on-chain profile only; exchange status is confirmed by the owner in the exclusion list"
+        },
+        "failure": null
+      },
+      {
+        "owner": "J5rjAvnxJxWf6MDo3dt5K2NXsokNV5U4VwPmLsMnyxKu",
+        "status": "resolved",
+        "facts": {
+          "lamports": 40932165,
+          "sol": 0.041,
+          "tokenAccounts": 8,
+          "contextSlot": 449516878
+        },
+        "heuristic": {
+          "rule": "sol >= 1000 and tokenAccounts >= 100",
+          "flagged": false,
+          "confidence": "low: on-chain profile only; exchange status is confirmed by the owner in the exclusion list"
+        },
+        "failure": null
+      },
+      {
+        "owner": "J8FNbQnRGmgHaPrmUsjJ7sdM7gaJVbcvEfYGCmVs69bE",
+        "status": "resolved",
+        "facts": {
+          "lamports": 27633024115787,
+          "sol": 27633.024,
+          "tokenAccounts": 92,
+          "contextSlot": 449516878
+        },
+        "heuristic": {
+          "rule": "sol >= 1000 and tokenAccounts >= 100",
+          "flagged": false,
+          "confidence": "low: on-chain profile only; exchange status is confirmed by the owner in the exclusion list"
+        },
+        "failure": null
+      },
+      {
+        "owner": "KANdtnAjqCUtzkpLEPZPc5gc2sQwJpB3bxDFvR5Y1Gz",
+        "status": "resolved",
+        "facts": {
+          "lamports": 59792927,
+          "sol": 0.06,
+          "tokenAccounts": 63,
+          "contextSlot": 449516878
+        },
+        "heuristic": {
+          "rule": "sol >= 1000 and tokenAccounts >= 100",
+          "flagged": false,
+          "confidence": "low: on-chain profile only; exchange status is confirmed by the owner in the exclusion list"
+        },
+        "failure": null
+      },
+      {
+        "owner": "KRGa3msyC2amDzxBuJSVzrT5r4WWzmxXSm1BaMecYdT",
+        "status": "resolved",
+        "facts": {
+          "lamports": 1000030019,
+          "sol": 1,
+          "tokenAccounts": 41,
+          "contextSlot": 449516878
+        },
+        "heuristic": {
+          "rule": "sol >= 1000 and tokenAccounts >= 100",
+          "flagged": false,
+          "confidence": "low: on-chain profile only; exchange status is confirmed by the owner in the exclusion list"
+        },
+        "failure": null
+      },
+      {
+        "owner": "MfDuWeqSHEqTFVYZ7LoexgAK9dxk7cy4DFJWjWMGVWa",
+        "status": "resolved",
+        "facts": {
+          "lamports": 97823800505,
+          "sol": 97.824,
+          "tokenAccounts": 1000,
+          "contextSlot": 449516878
+        },
+        "heuristic": {
+          "rule": "sol >= 1000 and tokenAccounts >= 100",
+          "flagged": false,
+          "confidence": "low: on-chain profile only; exchange status is confirmed by the owner in the exclusion list"
+        },
+        "failure": null
+      },
+      {
+        "owner": "bZdibLtUWiWXRJREYrMaG7AEH8dqr5AgNVddSeY7Hyw",
+        "status": "resolved",
+        "facts": {
+          "lamports": 70516542,
+          "sol": 0.071,
+          "tokenAccounts": 45,
+          "contextSlot": 449516879
+        },
+        "heuristic": {
+          "rule": "sol >= 1000 and tokenAccounts >= 100",
+          "flagged": false,
+          "confidence": "low: on-chain profile only; exchange status is confirmed by the owner in the exclusion list"
+        },
+        "failure": null
+      },
+      {
+        "owner": "d8cdcrdN9qHX1SfjADddqFHWvmTS3VkCPaNebp3Qffv",
+        "status": "resolved",
+        "facts": {
+          "lamports": 497948884,
+          "sol": 0.498,
+          "tokenAccounts": 11,
+          "contextSlot": 449516879
+        },
+        "heuristic": {
+          "rule": "sol >= 1000 and tokenAccounts >= 100",
+          "flagged": false,
+          "confidence": "low: on-chain profile only; exchange status is confirmed by the owner in the exclusion list"
+        },
+        "failure": null
+      },
+      {
+        "owner": "ikJ2hGbkX648nRLMs2zKbv21gaeLDRKNPPGg9JHUnDc",
+        "status": "resolved",
+        "facts": {
+          "lamports": 498828492,
+          "sol": 0.499,
+          "tokenAccounts": 51,
+          "contextSlot": 449516879
+        },
+        "heuristic": {
+          "rule": "sol >= 1000 and tokenAccounts >= 100",
+          "flagged": false,
+          "confidence": "low: on-chain profile only; exchange status is confirmed by the owner in the exclusion list"
+        },
+        "failure": null
+      },
+      {
+        "owner": "k1raAr48PaZ63baKoPMLw9fRcyGFusU2CgdgB9C3W1E",
+        "status": "resolved",
+        "facts": {
+          "lamports": 43246223,
+          "sol": 0.043,
+          "tokenAccounts": 5,
+          "contextSlot": 449516879
+        },
+        "heuristic": {
+          "rule": "sol >= 1000 and tokenAccounts >= 100",
+          "flagged": false,
+          "confidence": "low: on-chain profile only; exchange status is confirmed by the owner in the exclusion list"
+        },
+        "failure": null
+      },
+      {
+        "owner": "tLoQPvd5rdZQgmzaZmGMC1j7xQfPK8FGcaoarqP3yyV",
+        "status": "resolved",
+        "facts": {
+          "lamports": 3011672729,
+          "sol": 3.012,
+          "tokenAccounts": 190,
+          "contextSlot": 449516879
+        },
+        "heuristic": {
+          "rule": "sol >= 1000 and tokenAccounts >= 100",
+          "flagged": false,
+          "confidence": "low: on-chain profile only; exchange status is confirmed by the owner in the exclusion list"
+        },
+        "failure": null
+      },
+      {
+        "owner": "xDb3JW3KABjksRqYKBGdZrcEQH7hd1B6hbNiXyeNzgS",
+        "status": "resolved",
+        "facts": {
+          "lamports": 80443522,
+          "sol": 0.08,
+          "tokenAccounts": 3,
+          "contextSlot": 449516879
+        },
+        "heuristic": {
+          "rule": "sol >= 1000 and tokenAccounts >= 100",
+          "flagged": false,
+          "confidence": "low: on-chain profile only; exchange status is confirmed by the owner in the exclusion list"
+        },
+        "failure": null
+      }
+    ],
+    "flaggedOwners": [
+      "44P5Ct5JkPz76Rs2K6juC65zXMpFRDrHatxcASJ4Dyra"
+    ]
+  },
+  "belowFloorOwners": 183181,
+  "excludedOwners": 33,
+  "offCurveOwners": 15,
+  "candidateOwnersUnion": 187,
+  "candidateOwnersOnlyInSomePasses": 0,
+  "candidateAccounts": 139,
+  "verifiedAccounts": 139,
+  "staleAccounts": 0,
+  "frozenAccounts": 0,
+  "unsupportedAccounts": 0,
+  "eligibleOwners": 139,
+  "eligibleBalance": "396935564609973",
+  "balances": [
+    {
+      "owner": "22bV6DDJxvhRSKWTF2LBSExTiBx7Sawvi4a8bUFW22tA",
+      "balance": "3349529508448"
+    },
+    {
+      "owner": "24BLFjSAcUPPWs8F7nhwthfRPvh5mopNYfu5WXTkLChr",
+      "balance": "1870499532595"
+    },
+    {
+      "owner": "2Eg5WkWdnVYcoMYAH5UVmSQSWeE9pH2qDpXfRquxeF2C",
+      "balance": "583741861000"
+    },
+    {
+      "owner": "2JT2cPvV45VFV1LJJ4qBvvpYyEuGE1Ey46ku7WTL1Jvg",
+      "balance": "1545206599243"
+    },
+    {
+      "owner": "2WfeaMXh31wc2kzXDQGuKAYCBrCs8J6vBCwdLjMs8Uzr",
+      "balance": "2832250223849"
+    },
+    {
+      "owner": "2Y8k6Zc8yM9sFGbtB9zXHs7RkGPW7QWXy35ReGmMS3gi",
+      "balance": "5000067357440"
+    },
+    {
+      "owner": "2kN6XgaBRikJ2SYAVvUrvSj2My7yKEHDA2vd8o4LB4xp",
+      "balance": "600004550959"
+    },
+    {
+      "owner": "2qFWtmCJnCEdBvvforrTCrhRkFj6hFBWoivMmSRTWJjE",
+      "balance": "12098800907017"
+    },
+    {
+      "owner": "2w8MAdjrW1t5wzSy2ahsGmx83tRnxL3Rio9h6eSf8oi9",
+      "balance": "658770100000"
+    },
+    {
+      "owner": "38ESLHdJkqNvMbJmbgsHJGXjJPpsL4TkvSUgXegYgvpr",
+      "balance": "10001172029332"
+    },
+    {
+      "owner": "3QLTMUsSeywkHp1vTNsfSPgAW8jm1x4zSqRFTR96EBkd",
+      "balance": "1524191903507"
+    },
+    {
+      "owner": "44P5Ct5JkPz76Rs2K6juC65zXMpFRDrHatxcASJ4Dyra",
+      "balance": "7001782348307"
+    },
+    {
+      "owner": "49f6AWD2o3kpnZbLhjka85yDbcnXCrZ2AkFNUTWJatoJ",
+      "balance": "806861943985"
+    },
+    {
+      "owner": "4GQeEya6ZTwvXre4Br6ZfDyfe2WQMkcDz2QbkJZazVqS",
+      "balance": "1256543294134"
+    },
+    {
+      "owner": "4JB1Xs1a15szk61yTcLyLptA3FVU6YVFxv6teNBtPaQs",
+      "balance": "855994792985"
+    },
+    {
+      "owner": "4U5KGSLEzBpT6z7dsDY7Wp1GqvMCSHk1h2UR3u5VhFQ2",
+      "balance": "7033874432002"
+    },
+    {
+      "owner": "4ZrobGEDm47U9FNzDx2tLhioRv8vzoGnz8pBRXsEKxr4",
+      "balance": "678042470000"
+    },
+    {
+      "owner": "4fVBLqB9PoEyhG72dbr7cTLs2ggdMw3b6aGfELXSvFTX",
+      "balance": "5897290673608"
+    },
+    {
+      "owner": "4wfL88cWENcYnvRYy8v3oYbJccQcZEzPA7fcQvoZoEB3",
+      "balance": "716429357340"
+    },
+    {
+      "owner": "51j9pR4HSEhaq9dun8LGFhNF3grVeaFRfME8MvFJYRQm",
+      "balance": "630982704851"
+    },
+    {
+      "owner": "57bLoghjgoLtiUQpLiL78fP4VeVUqFc3sYzKoUhvvZZ2",
+      "balance": "691666398991"
+    },
+    {
+      "owner": "5F9C7nNantk4gvHQg9T9M5zPdVKqzxfgdUMjkQWE1nLH",
+      "balance": "1507894342233"
+    },
+    {
+      "owner": "5U1e8CsFC8eyQLwS5AYmADCpuSRoZL5D6FJKuuFH6XvL",
+      "balance": "638266062031"
+    },
+    {
+      "owner": "5Z44heGLtP1r8e9sZULLnfqa6jGon7vZcfwYxvQrpCff",
+      "balance": "505326003285"
+    },
+    {
+      "owner": "5qi3Bfa8EaydQDZQ7u6qjauqefuDJNFcFH75YBr7zHuJ",
+      "balance": "1275693396109"
+    },
+    {
+      "owner": "5wTLevkkUWzKgRTWKcSjrgdoP8TnrEnXYGaAxFKibsS5",
+      "balance": "4434222048264"
+    },
+    {
+      "owner": "654iWmri2bNsLJJqNxAGWTjRKFH2ggJUJoVwabjzNn1K",
+      "balance": "510000308491"
+    },
+    {
+      "owner": "69CDDjW9pFEdbqcbfZTr9oSRo1kuRU8PEWCZYW11duJp",
+      "balance": "503904253336"
+    },
+    {
+      "owner": "6DXYmRSkyjgmi2E11c1JfDqGmRfmRNikpw1YUoeEporp",
+      "balance": "1240298718844"
+    },
+    {
+      "owner": "6KmixQCTuG7gNvXcPorntCMFTfJCH8s93KiaP197cutR",
+      "balance": "526798355239"
+    },
+    {
+      "owner": "6N3HNQXq6hj5VyzHRAAsFGT6NBcsVEZPimMqnusZuRr2",
+      "balance": "1094291234061"
+    },
+    {
+      "owner": "6Nw3UBkpHQXUdam8RftAUepmzifdwKMwL68e9p2QjqDi",
+      "balance": "553087833483"
+    },
+    {
+      "owner": "6SDKTuavnDi75hJwZiZxNEpYjY4edAL7PkZh4SvErr3V",
+      "balance": "12303345856410"
+    },
+    {
+      "owner": "6Sk8cKr4RSCg6VMcuSXbswVqkaHVBt7fpXoXbvygq4Ss",
+      "balance": "590000000000"
+    },
+    {
+      "owner": "6WprovCGXF7BBMUQ9PtgDwRnwzBfwJZjQCfdrZCvkTja",
+      "balance": "1082650495984"
+    },
+    {
+      "owner": "6g7NphUCPN8965YrbZDTQyaMoEnKe817Q8DmKE7516rX",
+      "balance": "987537560109"
+    },
+    {
+      "owner": "6kFvf2qdoX7wsJKzhxwKVbw24qxPp1FxNjGJ4RufnGb5",
+      "balance": "5000067357440"
+    },
+    {
+      "owner": "6z823m5cVMo24TFr8fkhNtKPiZet9iCoP43RhY9272AW",
+      "balance": "3997575538260"
+    },
+    {
+      "owner": "77v5PKZU6s5kMg8TXq2nknmTC7i8tnhbHnqLtS3nDRzE",
+      "balance": "2511542667332"
+    },
+    {
+      "owner": "7B7hpcosqSbkqWCFg84Kdc6FL4E3HkrKYAg9fFBAj7oJ",
+      "balance": "600000615124"
+    },
+    {
+      "owner": "7QAFvj11sS5kgNh7otR3EGEZbGRHR3nMwNz31rTcDm8P",
+      "balance": "7523516675410"
+    },
+    {
+      "owner": "7iBFUna6yLia5EtnR2VapvnSEPBApYh1SxRfbAvN5LpH",
+      "balance": "615445237615"
+    },
+    {
+      "owner": "7k6fHANgwdHjUrPXsrExcTGtXNNzSq7hNipjj9JbzhwM",
+      "balance": "1512960176894"
+    },
+    {
+      "owner": "7p6LQRCo24aMkNHmiDahBXMFqkW3MFbny629qdR2J1A5",
+      "balance": "2127243991168"
+    },
+    {
+      "owner": "7yMSDwTMS9MFTDS7PN3vnhB68ghpXsdxv64nTNb4FeDz",
+      "balance": "5993550951442"
+    },
+    {
+      "owner": "8AByvcbajbjmuD1xez4ahgzoUp7ovB5wJE6znQKST8Hz",
+      "balance": "2087311810273"
+    },
+    {
+      "owner": "8BD1qaT6a4WCa4Kz1nURKfPmZd2ohxHYoXuPNijRABXv",
+      "balance": "5497818954479"
+    },
+    {
+      "owner": "8Hkbb3fkyBZi92dtGEXWuZyErRhUHSnHwTQJjxr32upg",
+      "balance": "929025402285"
+    },
+    {
+      "owner": "8MPekTtxX6cCMXXJu2f8ZVJPtAkLCxgkUnn35uPGmjV3",
+      "balance": "15309688930994"
+    },
+    {
+      "owner": "8NBEbxLknGv5aRYefFrW2qFXoDZyi9fSHJNiJRvEcMBE",
+      "balance": "1277000000000"
+    },
+    {
+      "owner": "8TSfBNY3NGBu2PnWs5Wu4yDT5wgVFGjx1Pdga6fjkYqo",
+      "balance": "6084784087831"
+    },
+    {
+      "owner": "8rMiwHGEmtJNWvjniLrTU5a94ujNaqZBfsSf5CXrKgF4",
+      "balance": "800000000000"
+    },
+    {
+      "owner": "98zoZTYqK4hDB5MZvv2sYhRbKf3ZbUxJp3ZDfL8pibcF",
+      "balance": "929034672497"
+    },
+    {
+      "owner": "9DyiP4usme2Hg8jigwcLeUKF1Y6DBNQXMUWCe6NdBYwh",
+      "balance": "10087021683325"
+    },
+    {
+      "owner": "9NRVvH2nz5HhFspDRX7CF7KAdUcCZCJgxYaiKCirRR1d",
+      "balance": "1530001642615"
+    },
+    {
+      "owner": "9nj4oySaZLZDj9VM11ex8Yq9PMkBaRAF25pjFDZ5YZm4",
+      "balance": "9629763252318"
+    },
+    {
+      "owner": "9oCW6Td21emfx7ED2p1xX4ZmZ2ufFmbAEfMRALBhu6ys",
+      "balance": "1252574164435"
+    },
+    {
+      "owner": "9omHFqveuhLn75DEqQsvwbvhWGYmW4BiBW5afw4ordAH",
+      "balance": "535218796844"
+    },
+    {
+      "owner": "9yXbXUzbPSVa4XKbkqpZbpD5f8HFfMQwmeF1dst4VYnp",
+      "balance": "1182187764665"
+    },
+    {
+      "owner": "AA21BSr7LZAdkyv7UF4EuMDnNEeczjmaDQWBa1rcVxH9",
+      "balance": "5374540753380"
+    },
+    {
+      "owner": "ABGmmHMRrA8yj6zZyuy4YDW341B4iCEkHczDeQtJ3hWY",
+      "balance": "813199987572"
+    },
+    {
+      "owner": "AGiAVqZiQrz32m1zKC5T4UfQKcDoGNG34sqSHSVNgwtv",
+      "balance": "3955553522978"
+    },
+    {
+      "owner": "AGwxVWZgwA3P2681PPaNhi7dUDDDAbMiJeBAKxiCutkd",
+      "balance": "579904739401"
+    },
+    {
+      "owner": "AZJtbjhgEdhMx1T3CLbSHquwKs5k26UCDHXnMqRxo6dd",
+      "balance": "712132716167"
+    },
+    {
+      "owner": "AdfkNiA7gg3RJ4fyLZA4o5LCAG1TweLnALzCH1cpapmW",
+      "balance": "600000000000"
+    },
+    {
+      "owner": "AhxzRPdizP8Dg52aJHrczQphEcsPv36QocHujrcPtarU",
+      "balance": "1089640915116"
+    },
+    {
+      "owner": "Au1GUWfcadx7jMzhsg6gHGUgViYJrnPfL1vbdqnvLK4i",
+      "balance": "978210597619"
+    },
+    {
+      "owner": "B1BKCShnRNw63fVkPmxH44jtBjYhL6zUQcPeSUfJ3cNZ",
+      "balance": "7076628877621"
+    },
+    {
+      "owner": "B8pF2FLxDq8Z5pGzWLTHq4DHf4gT156GmEXx4egnKyVd",
+      "balance": "3300028388419"
+    },
+    {
+      "owner": "BGApG7c57PPdDfBdeHQFQ9D2PD6TZTDze6gxCFydAe48",
+      "balance": "1200006085833"
+    },
+    {
+      "owner": "Bb7H8QK6CQsmkfrcA5vULesS1RmegWosgkrrYyd1UEpv",
+      "balance": "25471104888962"
+    },
+    {
+      "owner": "BgePMzgz3ahSvgqCioRVUUNB5aEKAHfn9VctZiwA9Vhe",
+      "balance": "500069809295"
+    },
+    {
+      "owner": "Bm5mwGjU5MAXZqtA5xUsedziAaWTS8w9eqDWTxGMYMYQ",
+      "balance": "12303345856410"
+    },
+    {
+      "owner": "Bq2RWav5LtfnAs8refzrYjfroDGK9vjYULmTqJX7yXfJ",
+      "balance": "1165958332292"
+    },
+    {
+      "owner": "BxLRTSYSTsypnx4yWvaQoURCPv4a7VzcDsSUM4eBVMSa",
+      "balance": "4350431811088"
+    },
+    {
+      "owner": "C1BRMDfsbW25FtFcUta81vuhgtZDSPmn1NENNf4akg9R",
+      "balance": "1545795475979"
+    },
+    {
+      "owner": "C1j61Hg8CQDEudPw4UJTAV7yRUQ33d8AgC3dqRtQu92N",
+      "balance": "1000001650522"
+    },
+    {
+      "owner": "C1roCAftE7vYubc3MeNNbryAyQNU4E9nihEwrJV2C483",
+      "balance": "990431708545"
+    },
+    {
+      "owner": "C7nWs22x7fCKVGxc1wU3yyG7zwa5sED3XqgwxVqm8ULk",
+      "balance": "1277383120558"
+    },
+    {
+      "owner": "C8XzHPYLiy6X8qDhe5cBocLEUEs4hdYDCha9i6Ex75Y3",
+      "balance": "702383152383"
+    },
+    {
+      "owner": "CRcheT7YEMRS6TzFEyxDEC8urw57YL4voiESdV2xkMv2",
+      "balance": "10018465747564"
+    },
+    {
+      "owner": "Cb4krsYnEoGfT7hcDsZrp4wiX2UPauKA5nKwEEu3m6uJ",
+      "balance": "841700603789"
+    },
+    {
+      "owner": "Ck3Aoerh7FmVN9G8FscUscV7t7LyEXtSKMbwmTRFHF5P",
+      "balance": "511219158970"
+    },
+    {
+      "owner": "CreQJ2t94QK5dsxUZGXfPJ8Nx7wA9LHr5chxjSMkbNft",
+      "balance": "3170393358289"
+    },
+    {
+      "owner": "CwMa649C1g1zNxEBQjuyD3rHyTH9cLRVoLVSUAtNUWpa",
+      "balance": "12098800907017"
+    },
+    {
+      "owner": "CyQMjdDttJAY7rGqSz1hoLzrj6yQVtyGcySzYJGWA2fZ",
+      "balance": "598815822854"
+    },
+    {
+      "owner": "D9uhxpc5uYvCTF4LHZUjp3Gt3UsG1V6BtB9h9pk2hjc7",
+      "balance": "603343420923"
+    },
+    {
+      "owner": "DEM2VDtjAmgMRpyw4qBMQM8QWMEr6DFvmoWxvdUkMieL",
+      "balance": "4045703107129"
+    },
+    {
+      "owner": "DRLs1jwiZRhMgr8UPmQ24tfGqfXzxGUWTGFN5VPmwEtL",
+      "balance": "1838256380669"
+    },
+    {
+      "owner": "DSFWxvJjgvLbVqoQ1Zwoe1iVHhwFgrfSiF3ZK1h7nd1K",
+      "balance": "4477612578159"
+    },
+    {
+      "owner": "DWjd65nVaCv16CF2VHdoZmZWGS6XSVq5R3nKeUMnnPRM",
+      "balance": "700000000000"
+    },
+    {
+      "owner": "DoazN4C8ijbPrXnG9ZnLMqgVPpLCHGDDWBEE7JrH5hra",
+      "balance": "712474047371"
+    },
+    {
+      "owner": "DrBjamqiet7iuryCD95dC2gY6yqwfB6B2rvRsTubMJf7",
+      "balance": "2334348300972"
+    },
+    {
+      "owner": "Dtd2cDkh2uKfHpcdJfwuKoFYXRRXs2YAK9P46wxXGceb",
+      "balance": "2000018727062"
+    },
+    {
+      "owner": "E5gxHm2VYxBhSLiQevBucQrGAgk74oRFa5wsiMFDDSMr",
+      "balance": "2230018076805"
+    },
+    {
+      "owner": "EKTPg1SSZgXNskhWCXbD33Ccu7SdGi4pxCTzqW8x3j1a",
+      "balance": "1051360400842"
+    },
+    {
+      "owner": "Eb71c6ABPQGkYkrDrHQzHbfXaKuj91Qr3WEFJhSu5fmk",
+      "balance": "1043932481415"
+    },
+    {
+      "owner": "Egy3Dy35niWx5fCa3bgdGtnei5w7KFAfXWYCyoyuSKdt",
+      "balance": "921272760327"
+    },
+    {
+      "owner": "EiiAnQsfcruxHFkDabAmH4gzqLUZoEVwRuqEFQGP11xw",
+      "balance": "3775708210072"
+    },
+    {
+      "owner": "EjtCjDWj3HyL1a4dRritZLTtZrwvD3E1AAzp6evMUmVB",
+      "balance": "505844283358"
+    },
+    {
+      "owner": "EvUMWEsN5b2zPJABjfwkMENUYJzbXvyuDGENk72Rs5zy",
+      "balance": "4807582547095"
+    },
+    {
+      "owner": "FFDAamfSQpoKsUKMjzt6rvzLAUQKfnSPFnBZQyZk8HWM",
+      "balance": "2900029711159"
+    },
+    {
+      "owner": "FNidxJ3Hwo2AV1dC12iUFxryvv3ubLREoUPM3rToaMg",
+      "balance": "5000067357439"
+    },
+    {
+      "owner": "FTXpq4CXg6SXkBcqRn3S2brctXAmt3WNusM52RbGBGMf",
+      "balance": "519781228684"
+    },
+    {
+      "owner": "FVQ9tMDxguSAvjN2YNTxbMXgv11CtRzWfX8aYRtquVqT",
+      "balance": "658773004919"
+    },
+    {
+      "owner": "FZaypZv8wh557QZpiwk42VAw6qqe1HuvMZW3No89wK4g",
+      "balance": "10001221649482"
+    },
+    {
+      "owner": "FkFnmrrs1TZGmZsVhar8kn7XvEPqb9qW3KK7D2PJss6d",
+      "balance": "567613819043"
+    },
+    {
+      "owner": "FkaLnX17cXZGyeu3kZGdHCNdFMJJzBrPPYVvd18B3MZp",
+      "balance": "1076570876654"
+    },
+    {
+      "owner": "FrhLfj81LRpMR3EwSSCGPzHmxsnoq8h628ne68vK5oMN",
+      "balance": "506231165440"
+    },
+    {
+      "owner": "G1U6FxxH8WpMKUJdg7BJf1jbpvzA4tLiPe9nZ5bbzdHM",
+      "balance": "750000000000"
+    },
+    {
+      "owner": "G5tj6pUqxhQhoLqYpCifyJsZBTkw1zhWQR9UcRxEWsxZ",
+      "balance": "7710291281934"
+    },
+    {
+      "owner": "GJCpaYJN19zV1Hj4fYiMPqWVVJSaap9FnQZZwPspszs5",
+      "balance": "500000000000"
+    },
+    {
+      "owner": "GJvewfRjqTUPtx6WsBSUnaFbdgXwgXnWfpDyLm65T4YA",
+      "balance": "589002677102"
+    },
+    {
+      "owner": "GLV3uy4rugcgd1Ukpfz4koWc18Q2eb2wUCYWCwgKRTax",
+      "balance": "655400000003"
+    },
+    {
+      "owner": "GU9ZpULF3qHNApXsWHPCUrWArG5mrdzZCtQSpwL8AQy4",
+      "balance": "2522698352790"
+    },
+    {
+      "owner": "GV9kvNR1x2KVX3kaacQRrcUjaZTzf67PBZcfVD8JA9Ad",
+      "balance": "675175713488"
+    },
+    {
+      "owner": "Gfgi79vUv9cs1WQu9YQuitgMxc37cymuc38dxChJkrf5",
+      "balance": "500350250159"
+    },
+    {
+      "owner": "GtH8a7vy6NM9RBr8KZhcoyusy5rfqvQVT4sqA2TbtpVA",
+      "balance": "1275017584640"
+    },
+    {
+      "owner": "H1NLEPq7d2UsTazhGzL9wEQmA1VbrJkk6MJirzGArFaG",
+      "balance": "2735522715886"
+    },
+    {
+      "owner": "H34n1FbcNrBRJWLHvFor8JydhX9E5ahinipTuybqAXFb",
+      "balance": "12259545336123"
+    },
+    {
+      "owner": "HDWwMbkMDM93hH17ECPU3dtKGJ3AFHE2aQ3rwZxu3QGp",
+      "balance": "523464250481"
+    },
+    {
+      "owner": "HEo97k3x6yFmmdvxDWNV8L5eQTxgQn2FP9r5QePnwZ5r",
+      "balance": "1037373419888"
+    },
+    {
+      "owner": "HST8927q4YpwqarxyCeVKk5bKnhjdXk2kfw6FHmgbcFY",
+      "balance": "583680666527"
+    },
+    {
+      "owner": "HfJQm2Q8wCHVGfsWxLdH3bpd6RQhabPu2ue26YGQvDAE",
+      "balance": "1023321860874"
+    },
+    {
+      "owner": "HgE7rwRkfxKbtBfuERrQZvtpdhUEfJQnMQ4NMj4LZi8Z",
+      "balance": "2000018213740"
+    },
+    {
+      "owner": "HwwHraTNpr32Sob715erpFhNtyzLvopuQxhnwSPhP8BG",
+      "balance": "1436285521047"
+    },
+    {
+      "owner": "J3miybSbu2YjFALUhKzEZrPFwPG9Jq14sQFd12JypYCN",
+      "balance": "1296803348675"
+    },
+    {
+      "owner": "J5pZQPTunqDU3VH7utCvpqPjz6PnDcR5cHXtQQXmJ8EF",
+      "balance": "2408007618285"
+    },
+    {
+      "owner": "J5rjAvnxJxWf6MDo3dt5K2NXsokNV5U4VwPmLsMnyxKu",
+      "balance": "851830223478"
+    },
+    {
+      "owner": "J8FNbQnRGmgHaPrmUsjJ7sdM7gaJVbcvEfYGCmVs69bE",
+      "balance": "2595909457890"
+    },
+    {
+      "owner": "KANdtnAjqCUtzkpLEPZPc5gc2sQwJpB3bxDFvR5Y1Gz",
+      "balance": "520639058773"
+    },
+    {
+      "owner": "KRGa3msyC2amDzxBuJSVzrT5r4WWzmxXSm1BaMecYdT",
+      "balance": "587556136580"
+    },
+    {
+      "owner": "MfDuWeqSHEqTFVYZ7LoexgAK9dxk7cy4DFJWjWMGVWa",
+      "balance": "1054880378125"
+    },
+    {
+      "owner": "bZdibLtUWiWXRJREYrMaG7AEH8dqr5AgNVddSeY7Hyw",
+      "balance": "2944022220315"
+    },
+    {
+      "owner": "d8cdcrdN9qHX1SfjADddqFHWvmTS3VkCPaNebp3Qffv",
+      "balance": "537900000000"
+    },
+    {
+      "owner": "ikJ2hGbkX648nRLMs2zKbv21gaeLDRKNPPGg9JHUnDc",
+      "balance": "1111707166892"
+    },
+    {
+      "owner": "k1raAr48PaZ63baKoPMLw9fRcyGFusU2CgdgB9C3W1E",
+      "balance": "1366064614028"
+    },
+    {
+      "owner": "tLoQPvd5rdZQgmzaZmGMC1j7xQfPK8FGcaoarqP3yyV",
+      "balance": "8556027881445"
+    },
+    {
+      "owner": "xDb3JW3KABjksRqYKBGdZrcEQH7hd1B6hbNiXyeNzgS",
+      "balance": "1422802706445"
+    }
+  ],
+  "csvSha256": "2d30935cdc50c297a1bbdd888353ac20489e23944386a95c5c9f3a5b2bc52f2d",
+  "readAt": "2026-09-22T22:44:18.179Z",
+  "snapshotSha256": "1664a0cad755993bd837f30146974e8aa5e209138e3cfcfc46ba5aabd48593e1",
+  "elapsedMs": 107025,
+  "allocation": {
+    "capBps": 200,
+    "capped": 18,
+    "countedTotal": "313204946981712",
+    "eligibleTotal": "313204946981712",
+    "unallocatedBps": 0,
+    "csvSha256": "9c889203d1d4bf391382519e9fe3fcfbeb799018c9dd075966ee5911046a9f46"
+  },
+  "campaign": "4y13ccgNQTTRJ6UTNfkMeSB2DLNzfBmRG9PW4ChJVPve"
+}

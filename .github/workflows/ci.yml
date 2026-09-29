@@ -1,0 +1,101 @@
+name: KIDS release checks
+on:
+  push:
+    branches: [main, release, feature/public-launches]
+  pull_request:
+permissions:
+  contents: read
+concurrency:
+  group: kids-checks-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  application:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38
+        with:
+          node-version: '24'
+      - name: Install locked dependencies without native install scripts
+        run: |
+          npm ci --ignore-scripts --prefix babies-launchpad/localnet
+          npm ci --ignore-scripts --prefix babies-launchpad/interaction-review
+          npm ci --ignore-scripts --prefix babies-launchpad/kids-mint-worker
+      - name: Enforce API dependency mitigations
+        run: |
+          npm --prefix babies-launchpad/localnet run harden
+          node --test babies-launchpad/localnet/security/dependencies.test.mjs
+      - name: Build frontend
+        run: |
+          npm --prefix babies-launchpad/interaction-review run build
+          VITE_KIDS_PUBLIC_LAUNCHES=1 npm --prefix babies-launchpad/interaction-review run build
+      - name: Application, authorization, journal and Linux writer-lock tests
+        working-directory: babies-launchpad
+        run: node --test --test-concurrency=2 interaction-review/tests/*.test.mjs interaction-review/staging/*.test.mjs interaction-review/deployment/*.test.mjs localnet/test/*.test.mjs protocol/test/*.test.mjs localnet/hosted/*.test.mjs
+      - name: Scan public source
+        run: python3 babies-launchpad/scripts/check-publication.py .
+  contract:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
+        with:
+          persist-credentials: false
+      - name: Locked Rust contract tests
+        run: |
+          cargo test --locked --manifest-path babies-launchpad/programs/atomic-launch/Cargo.toml
+          cargo test --locked --manifest-path babies-launchpad/programs/kids-launch-v2/Cargo.toml
+          cargo test --locked --manifest-path babies-launchpad/programs/kids-launch-v3/Cargo.toml
+
+  shared-registry:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_DB: kids_registry_test
+          POSTGRES_USER: kids_test
+          # Ephemeral CI database only, contains synthetic fixtures and no production data.
+          POSTGRES_PASSWORD: kids_ci_only
+        ports:
+          - 127.0.0.1:5432:5432
+        options: >-
+          --health-cmd "pg_isready -U kids_test -d kids_registry_test"
+          --health-interval 5s --health-timeout 5s --health-retries 10
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38
+        with:
+          node-version: '24'
+      - name: Install locked dependencies
+        run: |
+          npm ci --ignore-scripts --prefix babies-launchpad/localnet
+          npm ci --ignore-scripts --prefix babies-launchpad/interaction-review
+          npm ci --ignore-scripts --prefix babies-launchpad/kids-mint-worker
+      - name: Enforce API dependency mitigations
+        run: |
+          npm --prefix babies-launchpad/localnet run harden
+          node --test babies-launchpad/localnet/security/dependencies.test.mjs
+      - name: Install PostgreSQL 16 restore tools and media test codecs
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y postgresql-client-16 ffmpeg
+          test -x /usr/bin/ffmpeg
+          test -x /usr/bin/ffprobe
+      - name: Shared sessions, concurrent money records, worker lanes and restore
+        working-directory: babies-launchpad
+        env:
+          KIDS_TEST_POSTGRES_URL: postgresql://kids_test:kids_ci_only@127.0.0.1:5432/kids_registry_test
+          KIDS_TEST_PG_BIN: /usr/lib/postgresql/16/bin
+          KIDS_TEST_FFMPEG: /usr/bin/ffmpeg
+          KIDS_TEST_FFPROBE: /usr/bin/ffprobe
+        run: node --test --test-concurrency=2 localnet/registry/*.test.mjs localnet/jobs/*.test.mjs localnet/budgets.test.mjs localnet/creation/*.test.mjs localnet/signer/*.test.mjs localnet/mints/leases.test.mjs localnet/protocol-v2/public-wallet.test.mjs localnet/protocol-v2/wallet-outcome.test.mjs localnet/protocol-v2/durable-send.test.mjs localnet/protocol-v2/fee-adapter.test.mjs localnet/protocol-v3/*.test.mjs localnet/market/public-*.test.mjs localnet/security/*.test.mjs shared/replica-csrf.test.mjs shared/durable-json.test.mjs localnet/hosted/registry-drill.test.mjs
+      - name: Crash and restart accounting drill
+        working-directory: babies-launchpad
+        run: node localnet/protocol-v2/recovery-drill.mjs --receipts 196 --crash-after 73

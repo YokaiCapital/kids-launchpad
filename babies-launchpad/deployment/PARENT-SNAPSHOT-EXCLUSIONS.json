@@ -1,0 +1,292 @@
+{
+  "version": "2026-09-20-confirmed-v3",
+  "note": "Owner decision, 20 September 2026: known exchange hot wallets are blocked from parent allocations. Entries with confirmed:true are applied by the snapshot reader and their reasons are published with every snapshot. Program-owned and off-curve accounts (pools, lockers, vesting, escrow, multisig vaults) are excluded automatically and are not listed here. Entries with confirmed:false were flagged by the same signals in the 17:55 UTC run and await the owner's decision; they remain eligible until confirmed.",
+  "owners": [
+    {
+      "owner": "9SLPTL41SPsYkgdsMzdfJsxymEANKr5bYoBsQzJyKpKS",
+      "reason": "custodial signal: ~361,822 SOL, 384 token accounts; 13.4% of the Fartcoin pool",
+      "parent": "Fartcoin",
+      "confirmed": true,
+      "decision": "owner, 20 September 2026: exchange hot wallet profile (custodial signals), blocked"
+    },
+    {
+      "owner": "u6PJ8DtQuPFnfmwHbGFULQ4u4EgjDiyYKjVEsynXq2w",
+      "reason": "custodial signal: ~275,258 SOL, 1000+ token accounts; 8.9% of the Fartcoin pool",
+      "parent": "Fartcoin",
+      "confirmed": true,
+      "decision": "owner, 20 September 2026: exchange hot wallet profile (custodial signals), blocked"
+    },
+    {
+      "owner": "E2RvJg2myWpKcbkhBuF81gfhYr6KvmNcDbSmr5qnatYy",
+      "reason": "custodial signal: ~7,287 SOL, 306 token accounts; 5.0% of the Fartcoin pool",
+      "parent": "Fartcoin",
+      "confirmed": true,
+      "decision": "owner, 20 September 2026: exchange hot wallet profile (custodial signals), blocked"
+    },
+    {
+      "owner": "7TWnq4WeYcwQWBCwKeEX2Q9xqVtthPGkB7adNvueuVuh",
+      "reason": "custodial signal: ~871,160 SOL, 249 token accounts; 4.5% of the Fartcoin pool",
+      "parent": "Fartcoin",
+      "confirmed": true,
+      "decision": "owner, 20 September 2026: exchange hot wallet profile (custodial signals), blocked"
+    },
+    {
+      "owner": "4QuB7hY3H512CLG1orbVrA7HTeXbBYCPxBpNfQ6gs5ru",
+      "reason": "custodial signal: ~152,890 SOL, 119 token accounts; 2.6% of the Fartcoin pool",
+      "parent": "Fartcoin",
+      "confirmed": true,
+      "decision": "owner, 20 September 2026: exchange hot wallet profile (custodial signals), blocked"
+    },
+    {
+      "owner": "EFE3j1pcSP1paUzA86zW7989ZjsFP2J7ginyUqo4ewqR",
+      "reason": "custodial signal: ~115,801 SOL, 297 token accounts; 2.4% of the Fartcoin pool",
+      "parent": "Fartcoin",
+      "confirmed": true,
+      "decision": "owner, 20 September 2026: exchange hot wallet profile (custodial signals), blocked"
+    },
+    {
+      "owner": "6LY1JzAFVZsP2a2xKrtU6znQMQ5h4i7tocWdgrkZzkzF",
+      "reason": "custodial signal: ~200,599 SOL, 1000+ token accounts; 2.2% of the Fartcoin pool",
+      "parent": "Fartcoin",
+      "confirmed": true,
+      "decision": "owner, 20 September 2026: exchange hot wallet profile (custodial signals), blocked"
+    },
+    {
+      "owner": "ASTyfSima4LLAdDgoFGkgqoKowG1LZFDr9fAQrg7iaJZ",
+      "reason": "custodial signal: ~29,705 SOL, 1000+ token accounts; 1.7% of the Fartcoin pool",
+      "parent": "Fartcoin",
+      "confirmed": true,
+      "decision": "owner, 20 September 2026: exchange hot wallet profile (custodial signals), blocked"
+    },
+    {
+      "owner": "2Ejnns2Fd5gsZdFJbnkZmQEwbrgoiMc2ikKcS2z2Ps3e",
+      "reason": "custodial signal: ~25,022 SOL, 909 token accounts; 1.3% of the Fartcoin pool",
+      "parent": "Fartcoin",
+      "confirmed": true,
+      "decision": "owner, 20 September 2026: exchange hot wallet profile (custodial signals), blocked"
+    },
+    {
+      "owner": "28RWPC6XPxSxUVjd27KiNRtcHVxKtd6cjms7eBcxiqdV",
+      "reason": "custodial signal: ~2,002 SOL, 149 token accounts; 1.2% of the Fartcoin pool",
+      "parent": "Fartcoin",
+      "confirmed": true,
+      "decision": "owner, 20 September 2026: exchange hot wallet profile (custodial signals), blocked"
+    },
+    {
+      "owner": "22Wnk8PwyWZV7BfkZGJEKT9jGGdtvu7xY6EXeRh7zkBa",
+      "reason": "custodial signal: ~839,207 SOL, 1000+ token accounts; 0.34% of the Fartcoin pool (after the confirmed exclusions)",
+      "parent": "Fartcoin",
+      "confirmed": true,
+      "flaggedAt": "2026-09-20T17:56:23.653Z",
+      "decision": "owner, 20 September 2026: exchange hot wallet profile above 20,000 SOL, blocked"
+    },
+    {
+      "owner": "2UL8hbNaoErAYNePqgQYPP9yDCDRZGWbzKW4krLqkhNL",
+      "reason": "custodial signal: ~42,603 SOL, 253 token accounts; 0.66% of the Fartcoin pool (after the confirmed exclusions)",
+      "parent": "Fartcoin",
+      "confirmed": true,
+      "flaggedAt": "2026-09-20T17:56:23.653Z",
+      "decision": "owner, 20 September 2026: exchange hot wallet profile above 20,000 SOL, blocked"
+    },
+    {
+      "owner": "3V11R3pEGSt5XeRaoLDcCdkAB8zVSaKRCm8y3uKBgnsr",
+      "reason": "custodial signal: ~3,035 SOL, 328 token accounts; 0.16% of the Fartcoin pool (after the confirmed exclusions)",
+      "parent": "Fartcoin",
+      "confirmed": true,
+      "flaggedAt": "2026-09-20T17:56:23.653Z",
+      "decision": "owner, 20 September 2026: delegated to the operator; exchange/custodial profile (thousands of SOL, 100+ token accounts), blocked"
+    },
+    {
+      "owner": "49mvMufixEbUMzZEUVAnbQ8hLLuEWy789XfKUNTz7wCv",
+      "reason": "custodial signal: ~23,316 SOL, 176 token accounts; 0.59% of the Fartcoin pool (after the confirmed exclusions)",
+      "parent": "Fartcoin",
+      "confirmed": true,
+      "flaggedAt": "2026-09-20T17:56:23.653Z",
+      "decision": "owner, 20 September 2026: exchange hot wallet profile above 20,000 SOL, blocked"
+    },
+    {
+      "owner": "4GC3a1RkRXx5shwGP8pTY6cxXgSWkbfc66vM53a6qSKj",
+      "reason": "custodial signal: ~87,555 SOL, 1000+ token accounts; 0.29% of the Fartcoin pool (after the confirmed exclusions)",
+      "parent": "Fartcoin",
+      "confirmed": true,
+      "flaggedAt": "2026-09-20T17:56:23.653Z",
+      "decision": "owner, 20 September 2026: exchange hot wallet profile above 20,000 SOL, blocked"
+    },
+    {
+      "owner": "4RwinJ2Rc1KPGYnifqoouQePA7hohgMD12hjBjjV77fG",
+      "reason": "custodial signal: ~13,196 SOL, 126 token accounts; 0.5% of the Fartcoin pool (after the confirmed exclusions)",
+      "parent": "Fartcoin",
+      "confirmed": true,
+      "flaggedAt": "2026-09-20T17:56:23.653Z",
+      "decision": "owner, 20 September 2026: delegated to the operator; exchange/custodial profile (thousands of SOL, 100+ token accounts), blocked"
+    },
+    {
+      "owner": "5PAhQiYdLBd6SVdjzBQDxUAEFyDdF5ExNPQfcscnPRj5",
+      "reason": "custodial signal: ~375,854 SOL, 1000+ token accounts; 1.06% of the Fartcoin pool (after the confirmed exclusions)",
+      "parent": "Fartcoin",
+      "confirmed": true,
+      "flaggedAt": "2026-09-20T17:56:23.653Z",
+      "decision": "owner, 20 September 2026: exchange hot wallet profile above 20,000 SOL, blocked"
+    },
+    {
+      "owner": "5tzFkiKscXHK5ZXCGbXZxdw7gTjjD1mBwuoFbhUvuAi9",
+      "reason": "custodial signal: ~1,298,169 SOL, 1000+ token accounts; 0.17% of the Fartcoin pool (after the confirmed exclusions)",
+      "parent": "Fartcoin",
+      "confirmed": true,
+      "flaggedAt": "2026-09-20T17:56:23.653Z",
+      "decision": "owner, 20 September 2026: exchange hot wallet profile above 20,000 SOL, blocked"
+    },
+    {
+      "owner": "6FEVkH17P9y8Q9aCkDdPcMDjvj7SVxrTETaYEm8f51Jy",
+      "reason": "custodial signal: ~441,852 SOL, 1000+ token accounts; 1.44% of the Fartcoin pool (after the confirmed exclusions)",
+      "parent": "Fartcoin",
+      "confirmed": true,
+      "flaggedAt": "2026-09-20T17:56:23.653Z",
+      "decision": "owner, 20 September 2026: exchange hot wallet profile above 20,000 SOL, blocked"
+    },
+    {
+      "owner": "6JGvsM8dMXXLheM6td1vGtQwarCZoPCwBqVNX1W6cEGE",
+      "reason": "custodial signal: ~69,001 SOL, 133 token accounts; 0.27% of the Fartcoin pool (after the confirmed exclusions)",
+      "parent": "Fartcoin",
+      "confirmed": true,
+      "flaggedAt": "2026-09-20T17:56:23.653Z",
+      "decision": "owner, 20 September 2026: exchange hot wallet profile above 20,000 SOL, blocked"
+    },
+    {
+      "owner": "6gVV6PiRfAmCWBocCAASyvhFjihBakxjybFEjRbSoKvr",
+      "reason": "custodial signal: ~6,808 SOL, 189 token accounts; 0.26% of the Fartcoin pool (after the confirmed exclusions)",
+      "parent": "Fartcoin",
+      "confirmed": true,
+      "flaggedAt": "2026-09-20T17:56:23.653Z",
+      "decision": "owner, 20 September 2026: delegated to the operator; exchange/custodial profile (thousands of SOL, 100+ token accounts), blocked"
+    },
+    {
+      "owner": "6xfPFKnwv48XvxpFf4athewqGFvSTKQcMmfzYapgZ2sG",
+      "reason": "custodial signal: ~9,605 SOL, 492 token accounts; 0.43% of the Fartcoin pool (after the confirmed exclusions)",
+      "parent": "Fartcoin",
+      "confirmed": true,
+      "flaggedAt": "2026-09-20T17:56:23.653Z",
+      "decision": "owner, 20 September 2026: delegated to the operator; exchange/custodial profile (thousands of SOL, 100+ token accounts), blocked"
+    },
+    {
+      "owner": "7jzQekjqQT2ZYe7TAidjCzD1AJjJMneHKy1mVf1hChh7",
+      "reason": "custodial signal: ~275,532 SOL, 297 token accounts; 0.99% of the Fartcoin pool (after the confirmed exclusions)",
+      "parent": "Fartcoin",
+      "confirmed": true,
+      "flaggedAt": "2026-09-20T17:56:23.653Z",
+      "decision": "owner, 20 September 2026: exchange hot wallet profile above 20,000 SOL, blocked"
+    },
+    {
+      "owner": "8XczZeEmUpyvbYF6mbzFX2kTreAu9zLxygRqX4hCUBRv",
+      "reason": "custodial signal: ~9,114 SOL, 113 token accounts; 0.51% of the Fartcoin pool (after the confirmed exclusions)",
+      "parent": "Fartcoin",
+      "confirmed": true,
+      "flaggedAt": "2026-09-20T17:56:23.653Z",
+      "decision": "owner, 20 September 2026: delegated to the operator; exchange/custodial profile (thousands of SOL, 100+ token accounts), blocked"
+    },
+    {
+      "owner": "9A9dUreQvTNoqNrqQC2DN1onfZWBtCBsTiuA6oGXZwc6",
+      "reason": "custodial signal: ~52,664 SOL, 738 token accounts; 0.56% of the Fartcoin pool (after the confirmed exclusions)",
+      "parent": "Fartcoin",
+      "confirmed": true,
+      "flaggedAt": "2026-09-20T17:56:23.653Z",
+      "decision": "owner, 20 September 2026: exchange hot wallet profile above 20,000 SOL, blocked"
+    },
+    {
+      "owner": "9D8xSHWqF9NJWqCtn3rNxYEox63aCbWxYzTMfMur7Cc9",
+      "reason": "custodial signal: ~111,067 SOL, 314 token accounts; 0.29% of the Fartcoin pool (after the confirmed exclusions)",
+      "parent": "Fartcoin",
+      "confirmed": true,
+      "flaggedAt": "2026-09-20T17:56:23.653Z",
+      "decision": "owner, 20 September 2026: exchange hot wallet profile above 20,000 SOL, blocked"
+    },
+    {
+      "owner": "9rrsyYStsj5TVQ63REsJS5AFXCRV2fkjpqH8gy8WVUNb",
+      "reason": "custodial signal: ~2,804 SOL, 102 token accounts; 0.27% of the Fartcoin pool (after the confirmed exclusions)",
+      "parent": "Fartcoin",
+      "confirmed": true,
+      "flaggedAt": "2026-09-20T17:56:23.653Z",
+      "decision": "owner, 20 September 2026: delegated to the operator; exchange/custodial profile (thousands of SOL, 100+ token accounts), blocked"
+    },
+    {
+      "owner": "A77HErqtfN1hLLpvZ9pCtu66FEtM8BveoaKbbMoZ4RiR",
+      "reason": "custodial signal: ~56,010 SOL, 1000+ token accounts; 0.14% of the Fartcoin pool (after the confirmed exclusions)",
+      "parent": "Fartcoin",
+      "confirmed": true,
+      "flaggedAt": "2026-09-20T17:56:23.653Z",
+      "decision": "owner, 20 September 2026: exchange hot wallet profile above 20,000 SOL, blocked"
+    },
+    {
+      "owner": "BmFdpraQhkiDQE6SnfG5omcA1VwzqfXrwtNYBwWTymy6",
+      "reason": "custodial signal: ~33,643 SOL, 1000+ token accounts; 0.25% of the Fartcoin pool (after the confirmed exclusions)",
+      "parent": "Fartcoin",
+      "confirmed": true,
+      "flaggedAt": "2026-09-20T17:56:23.653Z",
+      "decision": "owner, 20 September 2026: exchange hot wallet profile above 20,000 SOL, blocked"
+    },
+    {
+      "owner": "CSEncqtqbmNRjve42sNnbs5cCSmrjUNsAEwc17XY2RCs",
+      "reason": "custodial signal: ~18,968 SOL, 1000+ token accounts; 0.16% of the Fartcoin pool (after the confirmed exclusions)",
+      "parent": "Fartcoin",
+      "confirmed": true,
+      "flaggedAt": "2026-09-20T17:56:23.653Z",
+      "decision": "owner, 20 September 2026: delegated to the operator; exchange/custodial profile (thousands of SOL, 100+ token accounts), blocked"
+    },
+    {
+      "owner": "D89hHJT5Aqyx1trP6EnGY9jJUB3whgnq3aUvvCqedvzf",
+      "reason": "custodial signal: ~17,003 SOL, 470 token accounts; 0.24% of the Fartcoin pool (after the confirmed exclusions)",
+      "parent": "Fartcoin",
+      "confirmed": true,
+      "flaggedAt": "2026-09-20T17:56:23.653Z",
+      "decision": "owner, 20 September 2026: delegated to the operator; exchange/custodial profile (thousands of SOL, 100+ token accounts), blocked"
+    },
+    {
+      "owner": "EWJH1tZ7i7FsZBZVYVXyTu1rAyYtxWSS9gv1MJaknxdU",
+      "reason": "custodial signal: ~69,251 SOL, 102 token accounts; 0.17% of the Fartcoin pool (after the confirmed exclusions)",
+      "parent": "Fartcoin",
+      "confirmed": true,
+      "flaggedAt": "2026-09-20T17:56:23.653Z",
+      "decision": "owner, 20 September 2026: exchange hot wallet profile above 20,000 SOL, blocked"
+    },
+    {
+      "owner": "FixDET3jRBMjT9M69Wim8iRpMQiJHkSSfD7wivStuuph",
+      "reason": "custodial signal: ~47,948 SOL, 806 token accounts; 0.67% of the Fartcoin pool (after the confirmed exclusions)",
+      "parent": "Fartcoin",
+      "confirmed": true,
+      "flaggedAt": "2026-09-20T17:56:23.653Z",
+      "decision": "owner, 20 September 2026: exchange hot wallet profile above 20,000 SOL, blocked"
+    },
+    {
+      "owner": "HFWv1riXSRJ3nVnnLZ9xi1K4r3zppRvcfVuiAGqAA8Y6",
+      "reason": "custodial signal: ~5,315 SOL, 483 token accounts; 0.12% of the Fartcoin pool (after the confirmed exclusions)",
+      "parent": "Fartcoin",
+      "confirmed": true,
+      "flaggedAt": "2026-09-20T17:56:23.653Z",
+      "decision": "owner, 20 September 2026: delegated to the operator; exchange/custodial profile (thousands of SOL, 100+ token accounts), blocked"
+    },
+    {
+      "owner": "HiXhw6DyaFsGVntujTDrRcmutEWMfgD3edAhXZidv2PV",
+      "reason": "custodial signal: ~34,000 SOL, 191 token accounts; 1.13% of the Fartcoin pool (after the confirmed exclusions)",
+      "parent": "Fartcoin",
+      "confirmed": true,
+      "flaggedAt": "2026-09-20T17:56:23.653Z",
+      "decision": "owner, 20 September 2026: exchange hot wallet profile above 20,000 SOL, blocked"
+    },
+    {
+      "owner": "M2St7Gra11AKvk3tC4fJPkxviWYKpLZSMmKcHNoDtxp",
+      "reason": "custodial signal: ~20,625 SOL, 316 token accounts; 0.33% of the Fartcoin pool (after the confirmed exclusions)",
+      "parent": "Fartcoin",
+      "confirmed": true,
+      "flaggedAt": "2026-09-20T17:56:23.653Z",
+      "decision": "owner, 20 September 2026: exchange hot wallet profile above 20,000 SOL, blocked"
+    },
+    {
+      "owner": "DAEdBmTPEKM6xkwfzC3d411QUe6coKpkND6UURa4CvHC",
+      "reason": "custodial signal: ~2,011 SOL, 1000+ token accounts; 0.6% of the Buttcoin pool (after the confirmed exclusions)",
+      "parent": "Buttcoin",
+      "confirmed": true,
+      "flaggedAt": "2026-09-20T17:56:00.169Z",
+      "decision": "owner, 20 September 2026: delegated to the operator; exchange/custodial profile (thousands of SOL, 100+ token accounts), blocked"
+    }
+  ]
+}

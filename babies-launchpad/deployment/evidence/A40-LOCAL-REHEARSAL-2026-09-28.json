@@ -1,0 +1,31 @@
+{
+  "network": "localnet",
+  "requestId": "f2d83488-1121-42ee-bb51-4814ea7dd1bb",
+  "campaign": "CNmvfW8VPW3iBtu6wETa1xzDKi1NEYAxggzvZCwVEnh3",
+  "mint": "AegrdzE73sWuJo6wBHg2RqezPQzXpebLWQnrRVcpkids",
+  "signatures": {
+    "launch": "2V84jGe5ZHHBn8orbxLfk6AKx6gS7zodtuZrkcCYLCXBy5g97nohcqJ5xWrJtJ7dvM7VLCLFU9FQg5sPrE8NqvMa",
+    "operating-reserve": "2V84jGe5ZHHBn8orbxLfk6AKx6gS7zodtuZrkcCYLCXBy5g97nohcqJ5xWrJtJ7dvM7VLCLFU9FQg5sPrE8NqvMa"
+  },
+  "independentApprovals": 1,
+  "oneTransaction": true,
+  "secondsFromClickToConfirmed": 3.899,
+  "secondsFromFirstApprovalToConfirmed": 2.242,
+  "secondsFromFirstApprovalToComplete": 17.439,
+  "operatingReserve": {
+    "lamports": "100000000",
+    "payer": "5wL76N2RJAMCEGyDS6rkvpd57WeReg16VJPZaKeto61n",
+    "signature": "2V84jGe5ZHHBn8orbxLfk6AKx6gS7zodtuZrkcCYLCXBy5g97nohcqJ5xWrJtJ7dvM7VLCLFU9FQg5sPrE8NqvMa",
+    "payerBalanceDeltaLamports": "100000000",
+    "budgetReservedLamports": "100000000",
+    "fundingSlot": 308394
+  },
+  "restartResume": true,
+  "finalizedRegistration": true,
+  "publishedProfile": true,
+  "publishedVideo": false,
+  "readOnlyDiscoveryJobs": 3,
+  "workerActivation": true,
+  "metadataProvider": "synthetic-receipts-not-hosted-publication",
+  "wallet": "owned-local-test-key-not-extension"
+}

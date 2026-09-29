@@ -1,0 +1,43 @@
+import test from 'node:test';import assert from 'node:assert/strict';
+import {createAlertDelivery,formatAlertMessage,alertKey} from './alert-delivery.mjs';
+const snap=(alerts,extra={})=>({observedAt:'2026-09-28T00:00:00.000Z',alerts,operating:{lowReserves:0,unscheduledFunded:0,...extra}});
+test('alert delivery: change, silence, reminder, recovery; JSON for generic webhooks',async()=>{
+ const posts=[],logs=[];let t=1_000_000;
+ const d=createAlertDelivery({webhookUrl:'https://discord.example/api/webhooks/1/abc',fetchImpl:async(url,init)=>{posts.push({url,init});return {ok:true,status:200};},now:()=>t,repeatMs:3600000,label:'KIDS test',log:l=>logs.push(l)});
+ assert.deepEqual(await d.deliver(snap([])),{sent:false,reason:'unchanged'});assert.equal(posts.length,0,'no message while healthy');
+ const alerts=[{code:'worker-missing',lane:'lifecycle'},{code:'worker-missing',lane:'recovery'},{code:'low-operating-reserve',lane:'accounting'}];
+ assert.deepEqual(await d.deliver(snap(alerts,{lowReserves:1})),{sent:true,reason:'changed'});
+ assert.equal(posts.length,1);const body=JSON.parse(posts[0].init.body);
+ assert.equal(body.content,body.text);assert.match(body.content,/^KIDS test: 3 alerts at 2026-09-28T00:00:00.000Z: low-operating-reserve \(accounting\); worker-missing \(lifecycle, recovery\)\. 1 campaign with a low operating reserve\.$/);
+ assert.equal(posts[0].init.headers['content-type'],'application/json');assert.equal(posts[0].init.redirect,'error');
+ t+=60000;assert.deepEqual(await d.deliver(snap([...alerts].reverse(),{lowReserves:1})),{sent:false,reason:'unchanged'},'order does not matter');
+ t+=3600000;assert.deepEqual(await d.deliver(snap(alerts,{lowReserves:1})),{sent:true,reason:'reminder'});assert.equal(posts.length,2);
+ t+=1000;assert.deepEqual(await d.deliver(snap([{code:'worker-missing',lane:'lifecycle'}])),{sent:true,reason:'changed'});
+ t+=1000;assert.deepEqual(await d.deliver(snap([])),{sent:true,reason:'recovered'});assert.match(JSON.parse(posts.at(-1).init.body).content,/recovered, no alerts/);
+ t+=1000;assert.deepEqual(await d.deliver(snap([])),{sent:false,reason:'unchanged'});
+ assert.ok(logs.every(l=>!JSON.stringify(l).includes('discord.example')),'the webhook URL never reaches the log');
+});
+test('alert delivery: Telegram bot URLs get form text; failures back off and never throw',async()=>{
+ let fail=true,t=5_000_000;const posts=[],logs=[];
+ const d=createAlertDelivery({webhookUrl:'https://api.telegram.org/bot123:secret/sendMessage?chat_id=9',fetchImpl:async(url,init)=>{posts.push(init);if(fail)throw Object.assign(Error('boom'),{name:'TypeError'});return {ok:true,status:200};},now:()=>t,label:'KIDS test',log:l=>logs.push(l)});
+ assert.equal(d.telegram,true);
+ const alerts=[{code:'unscheduled-funded-campaign',lane:'lifecycle'}];
+ assert.deepEqual(await d.deliver(snap(alerts,{unscheduledFunded:1})),{sent:false,reason:'failed'});
+ assert.equal(logs.at(-1).event,'alert-delivery-failed');assert.equal(logs.at(-1).category,'network');assert.equal(logs.at(-1).retryInMs,60000);
+ assert.ok(!JSON.stringify(logs).includes('secret'),'the bot token never reaches the log');
+ t+=1000;assert.deepEqual(await d.deliver(snap(alerts,{unscheduledFunded:1})),{sent:false,reason:'backoff'});assert.equal(posts.length,1);
+ fail=false;t+=60000;assert.deepEqual(await d.deliver(snap(alerts,{unscheduledFunded:1})),{sent:true,reason:'changed'});
+ assert.equal(posts.at(-1).headers['content-type'],'application/x-www-form-urlencoded');
+ const text=new URLSearchParams(posts.at(-1).body).get('text');assert.match(text,/unscheduled-funded-campaign \(lifecycle\)\. 1 funded campaign without a schedule\./);
+ fail=true;const status={ok:false,status:500};const e=createAlertDelivery({webhookUrl:'https://hooks.example/x',fetchImpl:async()=>status,now:()=>t,log:l=>logs.push(l)});
+ assert.deepEqual(await e.deliver(snap(alerts)),{sent:false,reason:'failed'});assert.equal(logs.at(-1).category,'HTTP 500');
+ assert.equal(e.state().failures,1);
+});
+test('alert delivery configuration and message helpers',()=>{
+ assert.throws(()=>createAlertDelivery({webhookUrl:'http://hooks.example/x'}),/https/);
+ assert.throws(()=>createAlertDelivery({webhookUrl:'not a url'}),/URL/);
+ assert.throws(()=>createAlertDelivery({webhookUrl:'https://hooks.example/x',repeatMs:1000}),/one minute/);
+ assert.equal(alertKey({alerts:[{code:'b',lane:'y'},{code:'a',lane:'x'},{code:'b',lane:'y'}]}),'a@x,b@y');assert.equal(alertKey({}),'');
+ assert.equal(formatAlertMessage({observedAt:'T',alerts:[]},{recovered:true}),'KIDS public launches: recovered, no alerts at T.');
+ assert.equal(formatAlertMessage({observedAt:'T',alerts:[{code:'failed-work',lane:'harvest'}]}),'KIDS public launches: 1 alert at T: failed-work (harvest).');
+});

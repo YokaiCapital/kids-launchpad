@@ -1,0 +1,63 @@
+{
+  "schemaVersion": 1,
+  "status": "research-only",
+  "activation": null,
+  "ownerApproved": "Implement a separate Direct launch feature, retaining parent/Family and existing Standard launches. Same prelaunch mechanics; new liquidity policy starts at pool creation: 50/50 permanent/temporary LP and 3% of remaining temporary LP per daily cycle. On 25 September: preserve treasury/dev fee entitlements from both LP halves; do not recycle their earned fees with temporary principal.",
+  "selectedPolicy": null,
+  "unresolved": [
+    "durationDays",
+    "executionPriceGuard",
+    "minimumEconomicBatch",
+    "maximumExecutionCost",
+    "upgradeAuthorityPolicy",
+    "startDelaySeconds"
+  ],
+  "candidatePolicies": [
+    {
+      "kind": "standard-bounded-recycling-v1",
+      "mode": "standard",
+      "permanentLpBps": 9500,
+      "recyclableLpBps": 500,
+      "dailyRemainingBps": 100,
+      "durationDays": 90
+    },
+    {
+      "kind": "standard-bounded-recycling-v1",
+      "mode": "standard",
+      "permanentLpBps": 9000,
+      "recyclableLpBps": 1000,
+      "dailyRemainingBps": 100,
+      "durationDays": 90
+    },
+    {
+      "kind": "standard-bounded-recycling-v1",
+      "mode": "standard",
+      "permanentLpBps": 9500,
+      "recyclableLpBps": 500,
+      "dailyRemainingBps": 50,
+      "durationDays": 90
+    },
+    {
+      "kind": "standard-bounded-recycling-v1",
+      "mode": "standard",
+      "permanentLpBps": 9000,
+      "recyclableLpBps": 1000,
+      "dailyRemainingBps": 50,
+      "durationDays": 90
+    }
+  ],
+  "note": "Direct is a separate new feature with new program IDs. Historical candidatePolicies below remain separate. The approved 50/50 and 3% rule now has an isolated Rust kernel and offline Direct model, but no deployed contract/account adapter/CPIs. selectedPolicy and activation remain null; schedule, implementation of the selected fee-preservation policy, execution policy and complete release evidence are still required. Existing launches and programs are preserved.",
+  "selectedDesign": {
+    "mode": "direct",
+    "permanentLpBps": 5000,
+    "recyclableLpBps": 5000,
+    "dailyRemainingBps": 300,
+    "status": "implementation-authorized-not-activated",
+    "implementedByResearchModel": true,
+    "startDelaySeconds": null,
+    "durationDays": null,
+    "implementation": "programs/kids-liquidity-v1: library-only kernel; localnet/recycling/direct-policy.mjs: offline SDK; no on-chain entrypoint or active policy",
+    "temporaryFeeTreatment": "preserve-treasury-dev",
+    "feePreservationImplemented": false
+  }
+}

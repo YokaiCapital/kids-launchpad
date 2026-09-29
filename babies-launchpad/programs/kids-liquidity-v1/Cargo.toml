@@ -1,0 +1,11 @@
+[package]
+name = "kids-liquidity-v1"
+version = "0.1.0"
+edition = "2021"
+license = "PolyForm-Noncommercial-1.0.0"
+publish = false
+
+# Economic/state-transition kernel only. Deliberately not a deployable cdylib:
+# the account adapter, fixed Raydium CPIs and price-reference validation are release gates.
+[lib]
+crate-type = ["lib"]

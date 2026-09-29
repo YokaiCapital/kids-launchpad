@@ -1,0 +1,266 @@
+{
+  "schemaVersion": 1,
+  "network": "mainnet",
+  "genesisHash": "5eykt4UsFv8P8NJdTREpY1vzqKqZKvdpKuc147dw2N9d",
+  "status": "FIRST MAINNET LAUNCH DONE (test campaign)",
+  "verifiedAt": "2026-09-20T17:20:00Z",
+  "verificationMethod": "public RPC read of the mint accounts and metadata; owner supplied the addresses on 20 September 2026",
+  "parents": [
+    {
+      "role": "parentA",
+      "name": "Fartcoin",
+      "mint": "9BB6NFEcjBCtnNLFko2FqVQBq8HHM13kCyYcdQbgpump",
+      "tokenProgram": "spl-token",
+      "decimals": 6,
+      "supplyRawAtVerification": "999971960354570",
+      "mintAuthority": null,
+      "freezeAuthority": null,
+      "metadata": "Metaplex token metadata, name Fartcoin",
+      "pythFeedId": "58cd29ef0e714c5affc44f269b2c1899a52da4169d7acc147b9da692e6953608",
+      "pythFeedNote": "Pyth sponsored on-chain feed FARTCOIN/USD (shard 0), read through the KIDS RPC"
+    },
+    {
+      "role": "parentB",
+      "name": "Buttcoin",
+      "mint": "Cm6fNnMk7NfzStP9CZpsQA2v3jjzbcYGAxdJySmHpump",
+      "tokenProgram": "token-2022",
+      "decimals": 6,
+      "supplyRawAtVerification": "999939456371879",
+      "mintAuthority": null,
+      "freezeAuthority": null,
+      "extensions": [
+        "metadataPointer",
+        "tokenMetadata"
+      ],
+      "metadata": "Token-2022 embedded metadata, name Buttcoin",
+      "pythFeedId": null,
+      "pythFeedNote": "No Pyth feed: buybacks use the impact cap and the 0.1 SOL no-reference slice"
+    }
+  ],
+  "devWallet": {
+    "address": "EkqTC1NbAg9zjFxdWY4psYtyHU3JpXDeXCkerSahraSJ",
+    "createdBy": "operator on the owner's Mac, 22 September 2026 (owner: \"real treasury and dev wallet can be created by you and I will save private keys\")",
+    "keyLocation": "~/.config/kids/mainnet/dev-keypair.json (owner Mac, 0600)",
+    "status": "created; unfunded; replaces the earlier owner-supplied address",
+    "previousOwnerSuppliedAddress": "FvvCnPgyMrLCLVU6XvEsijFpyoJg65pp6CT3rP9WMxoi"
+  },
+  "treasuryWallet": {
+    "address": "91eLwFTAxkcQLPSMxbzdSFkTyEwyRYcoZk64HMZj8vX",
+    "createdBy": "operator on the owner's Mac, 20 September 2026",
+    "keyLocation": "~/.config/kids/treasury-keypair.json (mode 0600, outside the repository; move to a hardware wallet or multisig before real funds)",
+    "onChainAccountAtVerification": false,
+    "status": "generated 20 September 2026; unfunded; owner to move the key to hardware custody before real funds"
+  },
+  "openQuestions": [
+    "Move the treasury and operator keys to owner-controlled custody (hardware wallet or multisig) before real funds",
+    "Upgrade authority after the first deploy: operator key now, multisig later (owner decision)",
+    "Cap conversion source and timing for the soft and hard caps"
+  ],
+  "solUsdPythFeedId": "ef0d8b6fda2ceba41da15d4095d1da392a0d2f8ed0c6c7bc0f4cfac8c280b56d",
+  "updatedAt": "2026-09-27T22:55:00Z",
+  "program": {
+    "programId": "BLiaZWNQoPm4mG4cXNm4sXifFqs1Xmxx12qD9T4Y5NeN",
+    "binarySha256": "9721a4d8b7cdcc4aebe11ca54d968e0be73d0e2dfea261e4954eeacdc7d8ae58",
+    "keyLocation": "~/.config/kids/mainnet/program-keypair.json (owner Mac, 0600)",
+    "status": "UPGRADED to build 2 on 23 September 2026 (owner command, governance key): coin-side fees burned, 2 % and 2.5 % tiers, sell instruction retired; bytes verified on chain, program-data extended by 10,240 bytes",
+    "deploySignature": "2Ty3yuDMkY9FDGdr6EkaVcWvCVZSZ2CHPxtVFJYHkdj8DFPeZz4QPfh5N54zdSuMN6CCJYPRiEtZSH22H81jCga2",
+    "upgradeAuthority": "EPwoPzJ5wuFgvMxUs7gQyUgb48dfZh4k6TxpZsTpWf2Y",
+    "explorer": "https://solscan.io/account/BLiaZWNQoPm4mG4cXNm4sXifFqs1Xmxx12qD9T4Y5NeN",
+    "binarySize": 200784,
+    "features": [
+      "burn-child-fees",
+      "cpmm-config-allowlist"
+    ],
+    "builds": [
+      {
+        "version": 1,
+        "sha256": "ef584ae7555415215b8cda0597cfff8362a7ecdbb31fdc07aa747c3f63368923",
+        "binarySize": 199008,
+        "features": [],
+        "note": "deployed 23 September 2026; coin-side fees converted to SOL; 2 % CPMM tier only"
+      },
+      {
+        "version": 2,
+        "sha256": "9721a4d8b7cdcc4aebe11ca54d968e0be73d0e2dfea261e4954eeacdc7d8ae58",
+        "binarySize": 200784,
+        "features": [
+          "burn-child-fees",
+          "cpmm-config-allowlist"
+        ],
+        "note": "reproducible CI build 1b1c47f (23 September 2026): coin-side fees burned (tag 26), launch accepts the 2 % and 2.5 % Raydium tiers, sell instruction (tag 22) retired; program-data account grows by 1776 bytes (extend); upgrade signed by the governance key"
+      },
+      {
+        "version": 3,
+        "sha256": "05b5a03bbd7e5043d7aa177fcf9feea782c56927f491c26729bff40468c599a7",
+        "binarySize": 210432,
+        "features": [
+          "burn-child-fees",
+          "cpmm-config-allowlist",
+          "claim-vaults"
+        ],
+        "note": "reproducible CI build 4cf5e9c (23 September 2026): launch funds the claim vaults and activates kids-distribution when the campaign records it; NOT deployed, awaiting review"
+      },
+      {
+        "version": 4,
+        "sha256": "21a911e04e36e995b1df921c007fe582d34e6663c3cc284a7a249400bcb51e1e",
+        "binarySize": 210664,
+        "features": [
+          "burn-child-fees",
+          "cpmm-config-allowlist",
+          "claim-vaults",
+          "revoke-at-creation",
+          "jupiter-route"
+        ],
+        "note": "reproducible CI build 755ff9d (24 September 2026, runners ubuntu-22.04 and ubuntu-24.04 identical): tag 25 also accepts Jupiter's classic route instruction (the public API's), slot 0 = the parent's token program, no custody account may appear among a route's remaining accounts; carries the claim-vault integration and revoke-at-creation of build 3 (inactive for campaigns without a distribution program); program-data account grows by 9,880 bytes (extend, loader minimum 10,240); upgrade signed by the governance key"
+      },
+      {
+        "version": 5,
+        "sha256": "245b4f4878f767c7181349306e56a266157095f0db6e74ba67b4ddbdee7fbf1b",
+        "binarySize": 210560,
+        "features": [
+          "burn-child-fees",
+          "cpmm-config-allowlist",
+          "claim-vaults",
+          "revoke-at-creation",
+          "jupiter-route"
+        ],
+        "note": "reproducible CI build 9aa084e (24 September 2026, runners identical): build 4 minus the over-strict custody guard that refused every live Jupiter route (the wSOL custody is repeated by Jupiter among the route's working accounts); coin custody and the other parent's custody stay refused"
+      },
+      {
+        "version": 6,
+        "sha256": "d940770300e25d48e05cc952ae53c22a309cf351f44b2368e45c0d5fd24c8e3d",
+        "binarySize": 197440,
+        "status": "built: reproducible CI build ee85f05 (24 September 2026, runners ubuntu-22.04 and ubuntu-24.04 identical); not deployed until the owner runs the upgrade",
+        "features": [
+          "burn-child-fees",
+          "cpmm-config-allowlist",
+          "claim-vaults",
+          "revoke-at-creation",
+          "parent-claim-expiry",
+          "child-buyback"
+        ],
+        "note": "owner decisions of 24 September 2026 (deployment/decisions/BUILD-6-2026-09-24.md): parent claims (tag 10) close 30 days after the recorded launch time (error 45) and tag 11 then burns the unclaimed rest of both reserves from launch custody, recorded at KIDSPAR1 offsets 224/232/240; the parent buyback budgets buy and burn the coin through the campaign's own pool (tag 27, 0.5 SOL slices, 1 % sealed slippage, parent A's pending budget first); tags 24 and 25 refused, their code removed; 'jupiter-route' is not carried forward. Every live account keeps its layout; no migration CI run 36039516112."
+      }
+    ],
+    "buildsNote": "The service accepts any listed build on chain and records the live one in its program manifest; the keeper plans only what the live build supports. Move `binarySha256`/`binarySize` to version 2 once the upgrade is verified on chain.",
+    "upgradeSignature": "5CBxyEGnWFUohPBL4JTD4YGNfCdJCoZMYGs7JomjuAVHnG3gG85miiHGs3e4K7iu4696ph7YPoatgt6nEYJrzYf",
+    "extensionRentFundingSignature": "3XDsec3sNgka7Fa8LrVFecHvwQY5UQQ6eiEdzjGedwEo2oxtWeV1LtvauxVUUUFbqLFhgpyJqtLBFLB3RjELNdyk"
+  },
+  "operatorWallet": {
+    "address": "AAuwkFNvXRimHyvdQfh7Zik9baw8W2ufSbc5cyBqsdoE",
+    "role": "keeper signer only (signer service kids-signer, policy-bound); no longer the upgrade authority; the API service holds no key",
+    "keyLocation": "~/.config/kids/mainnet/operator-keypair.json (owner Mac, 0600); copied into the signer service by the owner",
+    "status": "funded by the owner with 3 SOL on 23 September 2026; paid the program deployment"
+  },
+  "hosting": {
+    "railwayProject": "kids-mainnet",
+    "projectId": "6f623b65-d0e5-4416-acb0-61d4e3507ac9",
+    "serviceId": "94b2dd49-f671-4b80-bf62-d5d5cc0393d5",
+    "environmentId": "65ff9abc-ea23-423b-b157-ac8bc7342320",
+    "domain": "https://kids-api-production-fc8e.up.railway.app",
+    "volume": "2d191ef3-32be-4671-939a-2910bc1121dc",
+    "secrets": "set by the owner on 23 September 2026 (gateway tokens, Helius URL, operator key)",
+    "apiStatus": "live in signer mode since 23 September 2026 01:17 UTC (deployment e6fedb5c); operator key removed from its variables and wiped from its volume",
+    "site": {
+      "vercelProject": "kids-mainnet",
+      "productionUrl": "https://kids-mainnet.vercel.app",
+      "bundle": "index-BaQa7pHR.js",
+      "gate": "same password gate as kids.fun; deployment-hash URLs sit behind Vercel login (deployment protection), the production domain is the one to use",
+      "note": "kids.fun still points at the private test ledger until the owner moves it"
+    },
+    "signer": {
+      "serviceId": "43bbd628-b232-43cf-9ea8-1e5941942d4e",
+      "name": "kids-signer",
+      "volume": "1eb79c89-c262-424b-928f-43992e7be467",
+      "reach": "private network http://kids-signer.railway.internal:4176",
+      "status": "live 23 September 2026 01:23 UTC; KIDS_SIGNER_KEY_JSON removed after first boot; API reports signer reachable"
+    }
+  },
+  "firstCampaign": {
+    "campaign": "8LmwBAa5XquvtUrsKrvspfV6da9T7sHiXXMVDmEdYew",
+    "coinMint": "8P47V2fj1yfg1C76YAZEXJBVzDJBFfURUUTeJjVJq5bz",
+    "pool": "FAThun8yCqyatCAmcUAfqdmD83zHN3RZieEk6FkB5Zcn",
+    "launchSignature": "4x6SEETKp9EV89pRY1PJQx7CTxhHxdnxLB2bJwrnhV7PHF7sbsHXLMefShUUDFJa2mCW68pJozU7ef2ZxcfKQoba",
+    "launchedAt": "2026-09-23T02:08:49Z",
+    "terms": "1 SOL soft, 5 SOL hard, 10 minutes (owner test)",
+    "committed": "2 SOL by the owner",
+    "note": "First campaign 9zT7cyDv\u2026 (3-minute window) closed without commitments at 01:47 UTC; its coin GF28FYe4\u2026 exists on mainnet unused."
+  },
+  "governanceKey": {
+    "address": "EPwoPzJ5wuFgvMxUs7gQyUgb48dfZh4k6TxpZsTpWf2Y",
+    "role": "program upgrade authority only; never used by keepers",
+    "keyLocation": "~/.config/kids/mainnet/governance-keypair.json (owner Mac, 0600); move to a hardware wallet or multisig",
+    "createdAt": "2026-09-23"
+  },
+  "distribution": {
+    "programId": null,
+    "binarySha256": "2523827fc49cf439a03323c7411a9ecb7d04daa6bdfff266112fadba26e490b0",
+    "binarySize": 128576,
+    "status": "BUILT (reproducible CI 4cf5e9c), NOT deployed; deploy with localnet/deploy-program-network.mjs --program distribution after the review; record programId here, then revoke its upgrade authority after a verified test launch",
+    "keyLocation": "~/.config/kids/mainnet/distribution-program-keypair.json (created by the deploy tool on first use)",
+    "source": "programs/kids-distribution"
+  },
+  "programV3": {
+    "programId": "ABq14qMonDrPbRJUbyfACsazK2ESaiKWcw5u66qy6f7T",
+    "role": "public-launch issuer, version 3 (Standard economics of 27 September 2026); a separate program, never the launch program of the existing coins",
+    "source": "programs/kids-launch-v3/src/lib.rs",
+    "binarySha256": "ec8f995140f3e2f2c49af14aa4a60518192f1c1eb9c969599205ef4ccc1a68c8",
+    "binarySize": 206464,
+    "features": [],
+    "pilotCreator": "JBjY3ETQWkJa79G1URqFsgzqxKqxWeNfNycccQLkGVgn",
+    "deploySignature": "3xgHNJGLswJ4bD7yzhpLyQL2daYdUEHket5vXk8MFzYox8Ue1Sv765AV3PFATiaCS6phKbMtGmALzfQAPT9aNGhA",
+    "upgradeAuthority": "EPwoPzJ5wuFgvMxUs7gQyUgb48dfZh4k6TxpZsTpWf2Y",
+    "upgradeAuthorityRole": "governance key (owner Mac, ~/.config/kids/mainnet/governance-keypair.json)",
+    "keyLocation": "~/.config/kids/mainnet/launch-v3-program-keypair.json (owner Mac, 0600)",
+    "buildNote": "owner build on the Mac with the bundled Solana platform tools (solana-cli 4.0.1), no localnet features; bytes verified on chain by the deploy tool",
+    "status": "UPGRADED twice on 28 September 2026: 11:28 UTC to 71d0d62c\u2026 (tag 20 payer-signed), 14:57 UTC to ec8f9951\u2026 (tag 40 compact creation, one-transaction launch; upgrade 4og1tfAo\u2026, slot 451352437); on-chain bytes verified equal to build ec8f9951\u2026 over the public RPC; upgrade authority unchanged",
+    "builds": [
+      {
+        "sha256": "f74b9458446e862363fc00bb0fde4335ad4cd6a97aec7aa42350339138d17ce9",
+        "binarySize": 201488,
+        "features": [],
+        "note": "first deploy 27 September 2026 (tag 20 treasury-signed); superseded by the 28 September upgrade"
+      },
+      {
+        "sha256": "71d0d62c3582c28bb702b5e0e33c3d9cb41d7881ee93394eb25c527800ab6869",
+        "binarySize": 201640,
+        "features": [],
+        "note": "28 September 2026: tag 20 (fee-cycle opening) payer-signed for Standard campaigns, Family unchanged; deployed by upgrade BrUvyR8nM6DfhF6XPRk31mEKDxLzPRRDRN1ajxXx6pHuFLHVVy7sCnrZ7JcbWhEHCD1anD51ve6YKh8T4qg4kQR at slot 451305566"
+      },
+      {
+        "sha256": "ec8f995140f3e2f2c49af14aa4a60518192f1c1eb9c969599205ef4ccc1a68c8",
+        "binarySize": 206464,
+        "features": [],
+        "note": "28 September 2026 (afternoon), clean target: tag 40 compact creation for the one-transaction launch (owner rule), 30-day bounds on windows and scheduled openings; deployed by upgrade 4og1tfAo8LPtZD8DZmJBoBvQhkcTrahUumTwLL93LGw7aurLmd9aKj3RRyJmTw9XzoVepAWzMqPrnRjWBSrSYjNG at slot 451352437 (2026-09-28T14:57:43Z), on-chain bytes verified equal over the public RPC"
+      }
+    ],
+    "upgradeSignature": "4og1tfAo8LPtZD8DZmJBoBvQhkcTrahUumTwLL93LGw7aurLmd9aKj3RRyJmTw9XzoVepAWzMqPrnRjWBSrSYjNG",
+    "upgradedAt": "2026-09-28T14:57:43Z",
+    "lastDeployedSlot": 451352437,
+    "programDataLength": 211773,
+    "previousUpgrades": [
+      {
+        "signature": "BrUvyR8nM6DfhF6XPRk31mEKDxLzPRRDRN1ajxXx6pHuFLHVVy7sCnrZ7JcbWhEHCD1anD51ve6YKh8T4qg4kQR",
+        "upgradedAt": "2026-09-28T11:28:01Z",
+        "slot": 451305566,
+        "sha256": "71d0d62c3582c28bb702b5e0e33c3d9cb41d7881ee93394eb25c527800ab6869"
+      }
+    ],
+    "pilotApproval": {
+      "requestId": "a0f49ec9-723b-46c4-8ec8-a89e5ee9111b",
+      "mint": "4nVTgLJispDNSNybmxZ8ScGHbFfmtmgihmcKd88Tkids",
+      "campaign": "AKRz4b3sBFDBpuZ6WNxftEoTTBXDAHhT5hfDmbaRMpQq",
+      "status": "Browser network propagation fix b32803d implemented, tested and deployed; CI passed, nine services SUCCESS, API ready 28 September 17:08 UTC; owner wallet verification pending",
+      "creationSignature": null,
+      "evidence": "deployment/evidence/A38-PILOT-LAUNCH-2026-09-28.md"
+    }
+  },
+  "creatorExperienceRelease": {
+    "registrySchemaVersion": 40,
+    "status": "deployed-ff31e2d-nine-services-success-schema40-ready-owner-wallet-and-hosted-timing-pending",
+    "evidence": "deployment/evidence/A40-CREATOR-LAUNCH-RELEASE-2026-09-28.md",
+    "programChanged": false,
+    "commit": "ff31e2d3656064c46ef1229032900d1749b22d7d",
+    "verifiedAt": "2026-09-28T18:17:46.678Z"
+  }
+}

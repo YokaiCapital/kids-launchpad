@@ -1,0 +1,21 @@
+{
+  "mode": "hosted",
+  "lane": "indexing",
+  "programVersion": 3,
+  "genesisHash": "5eykt4UsFv8P8NJdTREpY1vzqKqZKvdpKuc147dw2N9d",
+  "programId": "ABq14qMonDrPbRJUbyfACsazK2ESaiKWcw5u66qy6f7T",
+  "concurrency": 2,
+  "rpcAdmission": {
+    "resource": "rpc-indexing",
+    "policy": {
+      "ratePerSecond": 10,
+      "burst": 20,
+      "lanes": {
+        "indexing": {
+          "ratePerSecond": 10,
+          "burst": 20
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,9 @@
+# Wallet-signed localnet trades
+
+Authenticated external wallets can quote a registered, verified launched campaign and use `postlaunch/trade/prepare` and `postlaunch/trade/submit`. The browser owns both the wallet signer and a fresh temporary wrapped-SOL signer; neither private key reaches the service. Existing operator-only test-wallet execution remains available separately.
+
+Quotes bind wallet, campaign, mint, canonical pool, deployment hash, genesis, direction, input, minimum output and 30-second expiration. Preparation fixes the temporary public key and exact unsigned message. Only five instructions are allowed: idempotent recipient ATA creation, temporary wrapped-SOL account creation and initialization, canonical CPMM swap, and temporary-account closure returning rent/output to the same wallet. Wallet-added compute budget instructions are bounded by the shared validator. After validating wallet-returned bytes, the browser re-signs the temporary account over that exact message.
+
+Both signatures and the approved message are verified server-side. Exact signed bytes are durably journaled before every broadcast. Retries reconcile or resend those same bytes, never reconstruct a transaction. The quote expiration is a submission deadline, not an on-chain inclusion deadline; minimum output remains enforced on chain. A wallet refusal before submission leaves editing available. Uncertain submitted outcomes retain the same intent instead of automatically quoting again.
+
+`node --test test/external-trade.test.mjs` checks buy/sell shapes, changed input, recipient, tips, stale quotes, campaign mismatch and missing temporary signatures. `node verify-external-trade.mjs` funds an isolated test wallet on the verified local validator, signs outside the service, executes buy/sell and checks idempotent retry. Both passed. A real browser wallet-extension interaction still needs manual qualification. No mainnet trading is enabled.

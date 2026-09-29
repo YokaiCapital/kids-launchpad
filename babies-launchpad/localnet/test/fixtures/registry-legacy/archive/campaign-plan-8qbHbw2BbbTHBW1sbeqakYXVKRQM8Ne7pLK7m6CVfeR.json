@@ -1,0 +1,13 @@
+{
+  "network": "mainnet",
+  "programId": "4vJ9JU1bJJE96FWSJKvHsmmFADCg4gpZQff4P3bkLKi",
+  "creator": "US517G5965aydkZ46HS38QLi7UQiSojurfbQfKCELFx",
+  "nonce": "18253652853150507660",
+  "campaign": "8qbHbw2BbbTHBW1sbeqakYXVKRQM8Ne7pLK7m6CVfeR",
+  "terms": {"soft": "1000000000", "hard": "5000000000", "deadlineSeconds": 600},
+  "token": {"name": "Fixture test coin", "symbol": "FTEST"},
+  "parents": [{"role": "parentA", "mint": "YMN9Qj5jPNp7j14VPcML1B6xGgcPWVZUGLFU3Mnyfaf"}, {"role": "parentB", "mint": "cGfHiC6Kgg3FpFZvgwGcswsCRtp4aBP2fzuXRQPizuN"}],
+  "dev": "US517G5965aydkZ46HS38QLi7UQiSojurfbQfKCELFx",
+  "treasury": "QWmroo4YnnMqYW3cnxWkFdaTxGD3P7vMSzwMHGbUzwF",
+  "plannedAt": "2026-09-23T01:48:17.662Z"
+}

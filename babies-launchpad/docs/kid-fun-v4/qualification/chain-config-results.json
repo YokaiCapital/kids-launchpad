@@ -1,0 +1,39 @@
+{
+  "checkedAt": "2026-09-19T21:40:22.127Z",
+  "status": "Global configuration read and decoded at finalized commitment; platform and launch remain unqualified",
+  "address": "6s1xP3hpbAfFoNtUNF8mfHsjr2Bd97JxFJRWLbL6aHuX",
+  "owner": "LanMV9sAd7wArD4vJFi2qDdfnVhFxYSUg6eADduJ3uj",
+  "slot": 448531652,
+  "config": {
+    "curveType": "0",
+    "index": "0",
+    "migrateFee": "0",
+    "tradeFeeRate": "2500",
+    "maxShareFeeRate": "10000",
+    "minSupplyA": "10000000",
+    "maxLockRate": "800000",
+    "minSellRateA": "200000",
+    "minMigrateRateA": "150000",
+    "minFundRaisingB": "24000000000",
+    "mintB": "So11111111111111111111111111111111111111112",
+    "protocolFeeOwner": "rayvTLcCMDs7P5tgpuoNA6ZYeLERegeCphdqLSgdKms",
+    "migrateFeeOwner": "rayHQtJKrtvqUs3HnhDW9RKubHRbu87eESKEYD5xosa",
+    "migrateToAmmWallet": "RAYzrepoBdjSFg7MZj2vy4XBSv2azKRXC72ztUMZMJB",
+    "migrateToCpmmWallet": "RAYpQbFNq9i3mu6cKpTKKRwwHFDeK5AuZz8xvxUrCgw"
+  },
+  "presetBounds": {
+    "supply": true,
+    "saleRate": true,
+    "migrationRate": true,
+    "lockRate": true,
+    "raise": true
+  },
+  "protocolTradingFeePercent": 0.25,
+  "missing": [
+    "kid.fun platform configuration and fee beneficiaries",
+    "chosen migration pool fee tier and LP custody/rights",
+    "launch mint/pool accounts and unsigned execution simulation",
+    "reserve recipient, unlock schedule and funded claim rehearsal"
+  ],
+  "rawAccountBase64": "lQicyqD8sNnBAwAAAAAAAAAAAAAAAAAAAAAAxAkAAAAAAAAQJwAAAAAAAICWmAAAAAAAADUMAAAAAABADQMAAAAAAPBJAgAAAAAAAPCClgUAAAAGm4hX/quBhPtof2NGGMA12sQ53BrrO1WYoPAAAAAAAQyz4e5t0cIQzcDSX4MHTIDK0v9FiO4+tNA3FD3gRgUiDLPevnctauoG6DOOMPSKGFjctO/P9tXw/LdYKgFdwIUGML1SYnBjHI8sW0M/s3jLoiH369IfbHsD8odEFvzLFAYwvGw1LgPHgfQBOLmbBdQ7GAZ6dG85H/e4gZH21Q8QAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA="
+}

@@ -1,0 +1,43 @@
+{
+  "mode": "hosted",
+  "lane": "provisioning",
+  "programVersion": 3,
+  "genesisHash": "5eykt4UsFv8P8NJdTREpY1vzqKqZKvdpKuc147dw2N9d",
+  "programId": "ABq14qMonDrPbRJUbyfACsazK2ESaiKWcw5u66qy6f7T",
+  "concurrency": 2,
+  "rpcAdmission": {
+    "resource": "rpc-provisioning",
+    "policy": {
+      "ratePerSecond": 10,
+      "burst": 20,
+      "lanes": {
+        "provisioning": {
+          "ratePerSecond": 10,
+          "burst": 20
+        }
+      }
+    }
+  },
+  "signer": {
+    "url": "http://kids-signer-v3.railway.internal:4177",
+    "publicKey": "7MESsrmBCSAnA32uA67K9V9cwXnkVNGr6C8eSLEGJkzi"
+  },
+  "signerAdmission": {
+    "resource": "signer-provisioning",
+    "policy": {
+      "ratePerSecond": 10,
+      "burst": 20,
+      "lanes": {
+        "provisioning": {
+          "ratePerSecond": 10,
+          "burst": 20
+        }
+      }
+    }
+  },
+  "feeOperator": "7MESsrmBCSAnA32uA67K9V9cwXnkVNGr6C8eSLEGJkzi",
+  "feeActivation": {
+    "policy": "creator-funded-v1",
+    "minimumReserveLamports": "20000000"
+  }
+}

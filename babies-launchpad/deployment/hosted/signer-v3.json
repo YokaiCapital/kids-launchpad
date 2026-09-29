@@ -1,0 +1,13 @@
+{
+  "listen": {
+    "host": "::",
+    "port": 4177
+  },
+  "rpcAdmission": {
+    "resource": "signer-rpc",
+    "ratePerSecond": 20,
+    "burst": 40
+  },
+  "policy": "creator-funded-v1",
+  "feeOperator": "7MESsrmBCSAnA32uA67K9V9cwXnkVNGr6C8eSLEGJkzi"
+}

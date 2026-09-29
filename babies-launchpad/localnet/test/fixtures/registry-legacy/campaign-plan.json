@@ -1,0 +1,15 @@
+{
+  "network": "mainnet",
+  "programId": "4vJ9JU1bJJE96FWSJKvHsmmFADCg4gpZQff4P3bkLKi",
+  "creator": "US517G5965aydkZ46HS38QLi7UQiSojurfbQfKCELFx",
+  "nonce": "5670353423629921200",
+  "campaign": "CktRuQ2mttgRGkXJtyksdKHjUdc2C4TgDzyB98oEzy8",
+  "mint": "LbUiWL3xVV8hTFYBVdbTNrpDo41NKS6o3LHHuDzjfcY",
+  "opensAt": "2026-09-23T23:30:00Z",
+  "terms": {"soft": "200000000000", "hard": "1000000000000", "deadlineSeconds": 7200},
+  "token": {"name": "Fixture coin", "symbol": "FIX", "description": "fixture", "image": "x.png"},
+  "parents": [{"role": "parentA", "mint": "YMN9Qj5jPNp7j14VPcML1B6xGgcPWVZUGLFU3Mnyfaf"}, {"role": "parentB", "mint": "cGfHiC6Kgg3FpFZvgwGcswsCRtp4aBP2fzuXRQPizuN"}],
+  "dev": "US517G5965aydkZ46HS38QLi7UQiSojurfbQfKCELFx",
+  "treasury": "QWmroo4YnnMqYW3cnxWkFdaTxGD3P7vMSzwMHGbUzwF",
+  "plannedAt": "2026-09-23T18:23:20.408Z"
+}

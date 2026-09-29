@@ -1,0 +1,17 @@
+**
+!babies-launchpad/
+!babies-launchpad/**
+!deployment-artifacts/
+!deployment-artifacts/kids_atomic_launch.so
+**/.runtime/**
+**/node_modules/**
+**/target/**
+**/dist/**
+**/.git/**
+**/.env*
+**/*-keypair.json
+**/*-secret.json
+**/*.sqlite*
+**/*.db
+**/*.log
+**/.runtime*/**

@@ -1,0 +1,535 @@
+{
+ "$comment": "Development fixtures for the public-launches UI. Never a production fallback: loaded only when VITE_KIDS_PUBLIC_LAUNCHES_FIXTURES is '1'. Every address is a fixture placeholder, not a real mint or program.",
+ "adapterVersion": 1,
+ "clock": {
+  "chainTimeUnix": 1790000000
+ },
+ "manifest": {
+  "version": "public-presets-v2",
+  "status": "proposed",
+  "activatedAtUnix": null,
+  "presets": [
+   {
+    "id": "community",
+    "label": "Community launch",
+    "softLamports": "50000000000",
+    "hardLamports": "100000000000",
+    "default": true,
+    "note": "Proposed default for public launches"
+   },
+   {
+    "id": "larger",
+    "label": "Larger launch",
+    "softLamports": "100000000000",
+    "hardLamports": "250000000000",
+    "default": false,
+    "note": "Proposed advanced option"
+   }
+  ],
+  "fundingSeconds": 7200,
+  "launchWindowSeconds": 7200,
+  "minimumCommitmentLamports": "50000000",
+  "supply": {
+   "totalBaseUnits": "1000000000000000",
+   "decimals": 6,
+   "standard": {
+    "participantsBps": 4750,
+    "liquidityBps": 4750,
+    "parentsBps": 0,
+    "devBps": 500
+   },
+   "family": {
+    "participantsBps": 4350,
+    "liquidityBps": 4350,
+    "parentsBps": 1000,
+    "devBps": 300
+   }
+  },
+  "vesting": {
+   "immediateBps": 150,
+   "vestedBps": 350,
+   "months": 3
+  },
+  "fee": {
+   "totalBps": 250,
+   "creatorFeeEnabled": false,
+   "tokenSide": "burn",
+   "poolConfig": "FixturePoolConfig111111111111111111111111111",
+   "solRouting": {
+    "standard": {
+     "treasury": 148,
+     "dev": 20,
+     "of": 168
+    },
+    "family": {
+     "treasury": 98,
+     "dev": 20,
+     "parentA": 25,
+     "parentB": 25,
+     "of": 168
+    }
+   }
+  },
+  "lock": {
+   "program": "FixtureLockProgram111111111111111111111111",
+   "model": "Liquidity principal locked at launch; fee collection rights retained under the displayed policy"
+  },
+  "upgradeAuthority": "FixtureUpgradeAuthority1111111111111111111",
+  "treasury": "FixtureTreasury11111111111111111111111111111",
+  "parentPolicy": {
+   "thresholdBps": 5,
+   "snapshot": "Taken at creation",
+   "reserveSplit": "equal",
+   "freeClaimExpiry": "Unresolved for the new Family version"
+  },
+  "costQuote": {
+   "validForSeconds": 600,
+   "items": [
+    {
+     "key": "budget",
+     "label": "Operational budget",
+     "note": "Refundable if unspent",
+     "lamports": "300000000",
+     "kind": "refundable"
+    },
+    {
+     "key": "creation",
+     "label": "Creation costs",
+     "note": "Mint, metadata, accounts; consumed",
+     "lamports": "120000000",
+     "kind": "consumed"
+    },
+    {
+     "key": "platform",
+     "label": "Platform charge",
+     "note": "None in the first release",
+     "lamports": "0",
+     "kind": "charge"
+    }
+   ]
+  },
+  "parents": [
+   {
+    "mint": "FixtureParentA111111111111111111111111111111",
+    "name": "Fartcoin",
+    "symbol": "FARTCOIN",
+    "logo": "/assets/parent-fartcoin.webp",
+    "verified": true,
+    "tokenProgram": "spl-token"
+   },
+   {
+    "mint": "FixtureParentB111111111111111111111111111111",
+    "name": "Buttcoin",
+    "symbol": "BUTTCOIN",
+    "logo": "/assets/parent-buttcoin.png",
+    "verified": true,
+    "tokenProgram": "spl-token"
+   },
+   {
+    "mint": "FixtureParentC111111111111111111111111111111",
+    "name": "Hookcoin",
+    "symbol": "HOOK",
+    "logo": null,
+    "verified": true,
+    "tokenProgram": "token-2022",
+    "unsupportedReason": "Token-2022 transfer hooks are not supported for snapshots yet"
+   },
+   {
+    "mint": "FixtureParentD111111111111111111111111111111",
+    "name": "Unverified",
+    "symbol": "UNV",
+    "logo": null,
+    "verified": false,
+    "tokenProgram": "spl-token"
+   }
+  ]
+ },
+ "campaigns": [
+  {
+   "identity": {
+    "genesisHash": "fixture-localnet",
+    "programId": "FixtureProgram11111111111111111111111111111",
+    "campaign": "FixtureCampaignPebble1111111111111111111111"
+   },
+   "slug": "pebble",
+   "mode": "standard",
+   "name": "Pebble",
+   "symbol": "PEBL",
+   "description": "A small round coin for people who like small round things. Funding is open for two hours; the pool locks at launch.",
+   "media": {
+    "pfp": "data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 96 96'%3E%3Crect width='96' height='96' rx='20' fill='%233a2a52'/%3E%3Cellipse cx='48' cy='54' rx='30' ry='22' fill='%23b9a9c6'/%3E%3Cellipse cx='40' cy='46' rx='10' ry='6' fill='%23e6dced'/%3E%3Ccircle cx='60' cy='58' r='3' fill='%2343304f'/%3E%3C/svg%3E",
+    "banner": "data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 900 300'%3E%3Crect width='900' height='300' fill='%232a1f3d'/%3E%3Ccircle cx='720' cy='150' r='190' fill='%23a88aff' opacity='.5'/%3E%3Ccircle cx='180' cy='260' r='120' fill='%23ff77ce' opacity='.4'/%3E%3C/svg%3E",
+    "video": null,
+    "videoCaption": null,
+    "poster": null
+   },
+   "links": {
+    "x": "https://x.com/pebblefixture",
+    "website": "https://pebble.example"
+   },
+   "creator": "FixtureCreatorPebble111111111111111111111111",
+   "devBeneficiary": "FixtureCreatorPebble111111111111111111111111",
+   "treasury": "FixtureTreasury11111111111111111111111111111",
+   "parents": [],
+   "phase": "open",
+   "terms": {
+    "version": "public-presets-v2",
+    "hash": "fixture-terms-hash",
+    "supply": {
+     "participantsBps": 4750,
+     "liquidityBps": 4750,
+     "parentsBps": 0,
+     "devBps": 500,
+     "totalBaseUnits": "1000000000000000",
+     "decimals": 6
+    },
+    "vesting": {
+     "immediateBps": 150,
+     "vestedBps": 350,
+     "months": 3
+    },
+    "fee": {
+     "totalBps": 250,
+     "creatorFeeEnabled": false,
+     "tokenSide": "burn",
+     "poolConfig": "FixturePoolConfig111111111111111111111111111",
+     "solRouting": {
+      "standard": {
+       "treasury": 148,
+       "dev": 20,
+       "of": 168
+      },
+      "family": {
+       "treasury": 98,
+       "dev": 20,
+       "parentA": 25,
+       "parentB": 25,
+       "of": 168
+      }
+     }
+    },
+    "lock": {
+     "program": "FixtureLockProgram111111111111111111111111",
+     "model": "Liquidity principal locked at launch; fee collection rights retained under the displayed policy"
+    },
+    "upgradeAuthority": "FixtureUpgradeAuthority1111111111111111111",
+    "presetId": "community",
+    "softLamports": "50000000000",
+    "hardLamports": "100000000000",
+    "opensAtUnix": 1789997120,
+    "deadlineUnix": 1790004325,
+    "launchDeadlineUnix": 1790011525
+   },
+   "totals": {
+    "committedLamports": "143200000000",
+    "acceptedLamports": null,
+    "refundableLamports": null,
+    "receiptCount": "412",
+    "settledReceiptCount": null
+   },
+   "chain": {
+    "mint": "FixtureMintPebble111111111111111111111111111",
+    "pool": null,
+    "escrow": "FixtureEscrowPebble1111111111111111111111111",
+    "lock": null,
+    "explorerUrl": null
+   },
+   "market": null,
+   "createdAtUnix": 1789989200,
+   "source": {
+    "slot": "312000418",
+    "commitment": "confirmed",
+    "fetchedAtUnix": 1789999992
+   }
+  },
+  {
+   "identity": {
+    "genesisHash": "fixture-localnet",
+    "programId": "FixtureProgram11111111111111111111111111111",
+    "campaign": "FixtureCampaignGloop11111111111111111111111"
+   },
+   "slug": "gloop",
+   "mode": "family",
+   "name": "Gloop",
+   "symbol": "GLOOP",
+   "description": "Two communities, one green blob. Launched on the community preset; the pool has been live for three days.",
+   "media": {
+    "pfp": "data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 96 96'%3E%3Crect width='96' height='96' rx='20' fill='%23183a2c'/%3E%3Cpath d='M22 62c-6-24 14-40 30-38s30 18 22 40c-6 16-46 18-52-2z' fill='%237ddc9a'/%3E%3Ccircle cx='40' cy='48' r='4' fill='%23183a2c'/%3E%3Ccircle cx='58' cy='48' r='4' fill='%23183a2c'/%3E%3Cpath d='M40 60q9 8 18 0' stroke='%23183a2c' stroke-width='3' fill='none'/%3E%3C/svg%3E",
+    "banner": "data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 900 300'%3E%3Crect width='900' height='300' fill='%2314261e'/%3E%3Ccircle cx='720' cy='150' r='190' fill='%237ddc9a' opacity='.5'/%3E%3Ccircle cx='180' cy='260' r='120' fill='%238cecff' opacity='.4'/%3E%3C/svg%3E",
+    "video": "/assets/shart-placeholder-v1.mp4",
+    "videoCaption": "Gloop's thirty-second introduction.",
+    "poster": null
+   },
+   "links": {
+    "x": "https://x.com/gloopfixture",
+    "website": null
+   },
+   "creator": "FixtureCreatorGloop1111111111111111111111111",
+   "devBeneficiary": "FixtureCreatorGloop1111111111111111111111111",
+   "treasury": "FixtureTreasury11111111111111111111111111111",
+   "parents": [
+    {
+     "mint": "FixtureParentA111111111111111111111111111111",
+     "name": "Fartcoin",
+     "symbol": "FARTCOIN",
+     "logo": "/assets/parent-fartcoin.webp",
+     "verified": true,
+     "tokenProgram": "spl-token",
+     "reserveBps": 500,
+     "thresholdBps": 5,
+     "snapshotSlot": "311800000",
+     "claimExpiryUnix": null
+    },
+    {
+     "mint": "FixtureParentB111111111111111111111111111111",
+     "name": "Buttcoin",
+     "symbol": "BUTTCOIN",
+     "logo": "/assets/parent-buttcoin.png",
+     "verified": true,
+     "tokenProgram": "spl-token",
+     "reserveBps": 500,
+     "thresholdBps": 5,
+     "snapshotSlot": "311800000",
+     "claimExpiryUnix": null
+    }
+   ],
+   "phase": "live",
+   "terms": {
+    "version": "presets-v1-proposed",
+    "hash": "fixture-terms-hash",
+    "supply": {
+     "participantsBps": 4350,
+     "liquidityBps": 4350,
+     "parentsBps": 1000,
+     "devBps": 300,
+     "totalBaseUnits": "1000000000000000",
+     "decimals": 6
+    },
+    "vesting": {
+     "immediateBps": 100,
+     "vestedBps": 200,
+     "months": 3
+    },
+    "fee": {
+     "totalBps": 250,
+     "creatorFeeEnabled": false,
+     "tokenSide": "burn",
+     "poolConfig": "FixturePoolConfig111111111111111111111111111",
+     "solRouting": {
+      "standard": {
+       "treasury": 148,
+       "dev": 20,
+       "of": 168
+      },
+      "family": {
+       "treasury": 98,
+       "dev": 20,
+       "parentA": 25,
+       "parentB": 25,
+       "of": 168
+      }
+     }
+    },
+    "lock": {
+     "program": "FixtureLockProgram111111111111111111111111",
+     "model": "Liquidity principal locked at launch; fee collection rights retained under the displayed policy"
+    },
+    "upgradeAuthority": "FixtureUpgradeAuthority1111111111111111111",
+    "presetId": "community",
+    "softLamports": "50000000000",
+    "hardLamports": "100000000000",
+    "opensAtUnix": 1789733600,
+    "deadlineUnix": 1789740800,
+    "launchDeadlineUnix": 1789748000
+   },
+   "totals": {
+    "committedLamports": "118400000000",
+    "acceptedLamports": "99999999982",
+    "refundableLamports": "18400000018",
+    "receiptCount": "263",
+    "settledReceiptCount": "263"
+   },
+   "chain": {
+    "mint": "FixtureMintGloop1111111111111111111111111111",
+    "pool": "FixturePoolGloop1111111111111111111111111111",
+    "escrow": "FixtureEscrowGloop11111111111111111111111111",
+    "lock": "FixtureLockGloop1111111111111111111111111111",
+    "explorerUrl": null
+   },
+   "market": {
+    "priceLamportsPerToken": "241",
+    "fdvLamports": "241000000000",
+    "liquidityLamports": "212300000000",
+    "volume24hLamports": "38700000000",
+    "tradeCount": "1842",
+    "lastTradeUnix": 1789999860,
+    "asOfUnix": 1789999988
+   },
+   "createdAtUnix": 1789654400,
+   "source": {
+    "slot": "312000418",
+    "commitment": "confirmed",
+    "fetchedAtUnix": 1789999988
+   }
+  },
+  {
+   "identity": {
+    "genesisHash": "fixture-localnet",
+    "programId": "FixtureProgram11111111111111111111111111111",
+    "campaign": "FixtureCampaignSprout1111111111111111111111"
+   },
+   "slug": "sprout",
+   "mode": "standard",
+   "name": "Sprout",
+   "symbol": "SPRT",
+   "description": "A garden coin that did not reach its minimum. Every commitment is refundable in full.",
+   "media": {
+    "pfp": "data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 96 96'%3E%3Crect width='96' height='96' rx='20' fill='%234a3a1c'/%3E%3Cpath d='M48 82V44' stroke='%23c9b06a' stroke-width='5' stroke-linecap='round'/%3E%3Cpath d='M48 50c-2-16-14-22-26-20 2 14 12 22 26 20zM48 40c2-14 12-20 24-18-2 12-10 20-24 18z' fill='%23ffc68a'/%3E%3C/svg%3E",
+    "banner": "data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 900 300'%3E%3Crect width='900' height='300' fill='%232e2414'/%3E%3Ccircle cx='720' cy='150' r='190' fill='%23ffc68a' opacity='.5'/%3E%3Ccircle cx='180' cy='260' r='120' fill='%237ddc9a' opacity='.4'/%3E%3C/svg%3E",
+    "video": null,
+    "videoCaption": null,
+    "poster": null
+   },
+   "links": {
+    "x": null,
+    "website": null
+   },
+   "creator": "FixtureCreatorSprout111111111111111111111111",
+   "devBeneficiary": "FixtureCreatorSprout111111111111111111111111",
+   "treasury": "FixtureTreasury11111111111111111111111111111",
+   "parents": [],
+   "phase": "refund",
+   "terms": {
+    "version": "public-presets-v2",
+    "hash": "fixture-terms-hash",
+    "supply": {
+     "participantsBps": 4750,
+     "liquidityBps": 4750,
+     "parentsBps": 0,
+     "devBps": 500,
+     "totalBaseUnits": "1000000000000000",
+     "decimals": 6
+    },
+    "vesting": {
+     "immediateBps": 150,
+     "vestedBps": 350,
+     "months": 3
+    },
+    "fee": {
+     "totalBps": 250,
+     "creatorFeeEnabled": false,
+     "tokenSide": "burn",
+     "poolConfig": "FixturePoolConfig111111111111111111111111111",
+     "solRouting": {
+      "standard": {
+       "treasury": 148,
+       "dev": 20,
+       "of": 168
+      },
+      "family": {
+       "treasury": 98,
+       "dev": 20,
+       "parentA": 25,
+       "parentB": 25,
+       "of": 168
+      }
+     }
+    },
+    "lock": {
+     "program": "FixtureLockProgram111111111111111111111111",
+     "model": "Liquidity principal locked at launch; fee collection rights retained under the displayed policy"
+    },
+    "upgradeAuthority": "FixtureUpgradeAuthority1111111111111111111",
+    "presetId": "community",
+    "softLamports": "50000000000",
+    "hardLamports": "100000000000",
+    "opensAtUnix": 1789222400,
+    "deadlineUnix": 1789229600,
+    "launchDeadlineUnix": 1789236800
+   },
+   "totals": {
+    "committedLamports": "12000000000",
+    "acceptedLamports": "0",
+    "refundableLamports": "12000000000",
+    "receiptCount": "31",
+    "settledReceiptCount": "31"
+   },
+   "chain": {
+    "mint": null,
+    "pool": null,
+    "escrow": "FixtureEscrowSprout1111111111111111111111111",
+    "lock": null,
+    "explorerUrl": null
+   },
+   "market": null,
+   "createdAtUnix": 1789136000,
+   "source": {
+    "slot": "312000418",
+    "commitment": "confirmed",
+    "fetchedAtUnix": 1789999970
+   }
+  }
+ ],
+ "wallet": {
+  "address": "FixtureWallet1111111111111111111111111111111",
+  "positions": [
+   {
+    "campaign": "FixtureCampaignPebble1111111111111111111111",
+    "commitLamports": "5000000000",
+    "acceptedLamports": null,
+    "refundedLamports": "0",
+    "tokensBaseUnits": null,
+    "claimedTokensBaseUnits": "0",
+    "walletTokensBaseUnits": null,
+    "eligibility": "participant",
+    "parents": [],
+    "dev": null
+   },
+   {
+    "campaign": "FixtureCampaignGloop11111111111111111111111",
+    "commitLamports": "3000000000",
+    "acceptedLamports": "2533783783",
+    "refundedLamports": "0",
+    "tokensBaseUnits": "11021959456000",
+    "claimedTokensBaseUnits": "0",
+    "walletTokensBaseUnits": "0",
+    "walletTokensAsOfUnix": 1789999988,
+    "eligibility": "participant",
+    "parents": [
+     {
+      "mint": "FixtureParentA111111111111111111111111111111",
+      "eligibility": "eligible",
+      "amountBaseUnits": "412000000000",
+      "claimed": false
+     },
+     {
+      "mint": "FixtureParentB111111111111111111111111111111",
+      "eligibility": "below-threshold"
+     }
+    ],
+    "dev": null
+   },
+   {
+    "campaign": "FixtureCampaignSprout1111111111111111111111",
+    "commitLamports": "1500000000",
+    "acceptedLamports": "0",
+    "refundedLamports": "0",
+    "tokensBaseUnits": "0",
+    "claimedTokensBaseUnits": "0",
+    "walletTokensBaseUnits": null,
+    "eligibility": "participant",
+    "parents": [],
+    "dev": null
+   }
+  ],
+  "drafts": [
+   {
+    "id": "draft-1",
+    "name": "Nib",
+    "symbol": "NIB",
+    "mode": "standard",
+    "updatedAtUnix": 1789999100
+   }
+  ]
+ }
+}

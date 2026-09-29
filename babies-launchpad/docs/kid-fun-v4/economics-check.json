@@ -1,0 +1,157 @@
+{
+  "status": "Design arithmetic passed; not chain-simulated",
+  "assumptions": [
+    "Zero migration fee and transfer tax",
+    "Full-range constant-product opening pool",
+    "Parent sells without intervening buying",
+    "Fees excluded except labeled sensitivity",
+    "No rent or priority fee included"
+  ],
+  "fixedPreset": {
+    "curvePercent": 55,
+    "poolPercent": 35,
+    "parentsPercent": 10,
+    "raiseSOL": 85,
+    "parentMinimumPercent": 0.05
+  },
+  "curveStates": [
+    {
+      "progressPercent": 0,
+      "netRaisedSOL": 0,
+      "tokensSold": 0,
+      "uncappedQuoteOverflowRaw": "0",
+      "spotSOLPerToken": 9.834710743780996e-8
+    },
+    {
+      "progressPercent": 10,
+      "netRaisedSOL": 8.5,
+      "tokensSold": 81756756.756958,
+      "uncappedQuoteOverflowRaw": "0",
+      "spotSOLPerToken": 1.0990791027123588e-7
+    },
+    {
+      "progressPercent": 25,
+      "netRaisedSOL": 21.25,
+      "tokensSold": 189062500.000555,
+      "uncappedQuoteOverflowRaw": "0",
+      "spotSOLPerToken": 1.284533648165154e-7
+    },
+    {
+      "progressPercent": 50,
+      "netRaisedSOL": 42.5,
+      "tokensSold": 336111111.112319,
+      "uncappedQuoteOverflowRaw": "0",
+      "spotSOLPerToken": 1.6257378984568986e-7
+    },
+    {
+      "progressPercent": 75,
+      "netRaisedSOL": 63.75,
+      "tokensSold": 453750000.001868,
+      "uncappedQuoteOverflowRaw": "0",
+      "spotSOLPerToken": 2.0070838252533315e-7
+    },
+    {
+      "progressPercent": 100,
+      "netRaisedSOL": 85,
+      "tokensSold": 550000000,
+      "uncappedQuoteOverflowRaw": "2499",
+      "spotSOLPerToken": 2.4285714285481464e-7
+    }
+  ],
+  "openingPoolBuyScenarios": [
+    {
+      "openingQuoteSOL": 85,
+      "buySOL": 1,
+      "averagePricePremiumPercent": 1.17647058823529,
+      "tokenShortfallVersusSpotPercent": 1.1627906976744187
+    },
+    {
+      "openingQuoteSOL": 85,
+      "buySOL": 5,
+      "averagePricePremiumPercent": 5.882352941176472,
+      "tokenShortfallVersusSpotPercent": 5.555555555555555
+    },
+    {
+      "openingQuoteSOL": 85,
+      "buySOL": 10,
+      "averagePricePremiumPercent": 11.76470588235292,
+      "tokenShortfallVersusSpotPercent": 10.526315789473683
+    },
+    {
+      "openingQuoteSOL": 170,
+      "buySOL": 1,
+      "averagePricePremiumPercent": 0.5882352941176228,
+      "tokenShortfallVersusSpotPercent": 0.5847953216374269
+    },
+    {
+      "openingQuoteSOL": 170,
+      "buySOL": 5,
+      "averagePricePremiumPercent": 2.941176470588225,
+      "tokenShortfallVersusSpotPercent": 2.857142857142857
+    },
+    {
+      "openingQuoteSOL": 170,
+      "buySOL": 10,
+      "averagePricePremiumPercent": 5.882352941176472,
+      "tokenShortfallVersusSpotPercent": 5.555555555555555
+    },
+    {
+      "openingQuoteSOL": 340,
+      "buySOL": 1,
+      "averagePricePremiumPercent": 0.2941176470588003,
+      "tokenShortfallVersusSpotPercent": 0.2932551319648094
+    },
+    {
+      "openingQuoteSOL": 340,
+      "buySOL": 5,
+      "averagePricePremiumPercent": 1.4705882352941124,
+      "tokenShortfallVersusSpotPercent": 1.4492753623188406
+    },
+    {
+      "openingQuoteSOL": 340,
+      "buySOL": 10,
+      "averagePricePremiumPercent": 2.941176470588225,
+      "tokenShortfallVersusSpotPercent": 2.857142857142857
+    }
+  ],
+  "parentReserveSellScenarios": [
+    {
+      "fractionOfParentReserveSold": 0.25,
+      "tokensSold": 25000000,
+      "SOLReceived": 5.666666666666667,
+      "remainingPoolSOL": 79.33333333333333,
+      "spotPriceDropPercent": 12.888888888888882
+    },
+    {
+      "fractionOfParentReserveSold": 0.5,
+      "tokensSold": 50000000,
+      "SOLReceived": 10.625,
+      "remainingPoolSOL": 74.375,
+      "spotPriceDropPercent": 23.4375
+    },
+    {
+      "fractionOfParentReserveSold": 1,
+      "tokensSold": 100000000,
+      "SOLReceived": 18.88888888888889,
+      "remainingPoolSOL": 66.11111111111111,
+      "spotPriceDropPercent": 39.50617283950617
+    }
+  ],
+  "illustrativeFeeSensitivity": [
+    {
+      "illustrativeInputFeePercent": 0,
+      "buySOL": 10,
+      "averageCostPremiumPercent": 11.76470588235292
+    },
+    {
+      "illustrativeInputFeePercent": 0.25,
+      "buySOL": 10,
+      "averageCostPremiumPercent": 12.015332448768955
+    },
+    {
+      "illustrativeInputFeePercent": 1,
+      "buySOL": 10,
+      "averageCostPremiumPercent": 12.77480689245396
+    }
+  ]
+}

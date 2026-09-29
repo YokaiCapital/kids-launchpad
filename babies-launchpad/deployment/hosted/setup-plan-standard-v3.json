@@ -1,0 +1,8 @@
+{
+  "version": "hosted-standard-v3-1",
+  "recordedAt": "2026-09-27",
+  "purpose": "Counts the creator's setup quote is priced on for a Standard version-3 campaign (the same shape the local rehearsal qualified); its canonical hash is pinned into every quote as planHash.",
+  "counts": { "transactions": 8, "signatures": 11, "ataCreates": 9, "lockedPositions": 1, "feeStates": 1 },
+  "priorityFeeLamports": "10000",
+  "marginBps": 1500
+}

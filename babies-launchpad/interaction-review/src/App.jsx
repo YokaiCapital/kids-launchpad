@@ -1,0 +1,68 @@
+import {useEffect,useRef,useState} from 'react';
+import {Wallet,Users} from '@phosphor-icons/react';
+import {Account,accountApi} from './Account';
+import {lazy,Suspense} from 'react';
+// Admin exists only in the local development server (owner rule, 22 September 2026): production builds strip the
+// view, the navigation entry and the route, so nothing uploaded to Vercel or Railway contains admin functions.
+const LOCAL_ADMIN=import.meta.env.DEV===true;
+const Admin=LOCAL_ADMIN?lazy(()=>import('./Admin').then(m=>({default:m.Admin}))):null;
+// Public launches (spec P4 scaffold, 24 September 2026): mounted only when the build-time flag is '1'. With the flag off
+// (the default) nothing below is bundled: no routes, no navigation change, no fixtures.
+const PUBLIC_LAUNCHES=import.meta.env.VITE_KIDS_PUBLIC_LAUNCHES==='1';
+const PublicLaunches=PUBLIC_LAUNCHES?lazy(()=>import('./public/PublicLaunches.jsx').then(m=>({default:m.PublicLaunches}))):null;
+const PUBLIC_ROUTES=PUBLIC_LAUNCHES?{explore:'Explore','launch-new':'LaunchNew',coin:'Coin',portfolio:'Portfolio','my-launches':'MyLaunches'}:{};
+const PUBLIC_VIEWS=['Explore','LaunchNew','Coin','Portfolio','MyLaunches'];
+const HASHES={PostLaunch:'shart-live',PostLaunchPreview:'shart-preview',LaunchNew:'launch-new',MyLaunches:'my-launches'};
+import {Home} from './Home';
+import {PostLaunch} from './PostLaunch';
+import {SITE_NETWORK} from './network-label.mjs';
+import {Prelaunch} from './Prelaunch.jsx';
+import {emptyPrelaunch} from './prelaunch.js';
+import {loadDemo,saveDemo} from './demo-api';
+import {LaunchCountdown} from './LaunchCountdown';
+import {AllocationsModal} from './ClaimPanel';
+import {coinDestination} from './claim-view.mjs';
+const Docs=lazy(()=>import('./Docs').then(m=>({default:m.Docs})));
+// Community pages (23 September 2026): the believers roll call and the blocked wallets, both lazy like Docs. Their
+// stylesheet is imported here so the tighter phone navigation (one more item) applies before either page loads.
+import './community.css';
+const Believers=lazy(()=>import('./Believers').then(m=>({default:m.Believers})));
+const Blocked=lazy(()=>import('./Blocked').then(m=>({default:m.Blocked})));
+const route=()=>({...PUBLIC_ROUTES,...(LOCAL_ADMIN?{admin:'Admin'}:{}),'shart-live':'PostLaunch','shart-preview':'PostLaunchPreview',shart:'Shart',docs:'Docs',believers:'Believers',blocked:'Blocked',launch:'Launch',vote:'Launch',submit:'Launch',archive:'Launch'}[location.hash.slice(1).split('/')[0]]||'Today');
+function Modal({title,children,onClose}){
+ const ref=useRef(null),previous=useRef(document.activeElement);
+ useEffect(()=>{const dialog=ref.current;dialog.showModal();return()=>{dialog.close();previous.current?.focus();};},[]);
+ return <dialog ref={ref} onCancel={e=>{e.preventDefault();onClose();}} aria-labelledby="dialog-title"><div className="dialog-head"><h2 id="dialog-title">{title}</h2><button onClick={onClose}>Close</button></div>{children}</dialog>;
+}
+export function App(){
+ const [view,setView]=useState(route),[modal,setModal]=useState(null),[identity,setIdentity]=useState(null);
+ const pilotAllowed=PUBLIC_LAUNCHES&&identity?.publicLaunches?.allowed===true;
+ const [service,setService]=useState('Loading local records…'),[serviceReady,setServiceReady]=useState(false);
+ const [prelaunch,setPrelaunch]=useState(emptyPrelaunch),[coinProfile,setCoinProfile]=useState(null),[coinPosts,setCoinPosts]=useState([]);
+ const revision=useRef(0),pending=useRef(null);
+ // One served lifecycle for the whole site: the header link and the home row open the live coin page once the campaign has launched.
+ const [launch,setLaunch]=useState(null);
+ useEffect(()=>{let active=true;accountApi('prelaunch').then(d=>{if(active)setLaunch(d);}).catch(()=>{if(active)setLaunch({configured:false,unavailable:true});});return()=>{active=false;};},[identity?.owner]);
+ function applyServer(state){setPrelaunch(state.prelaunch||emptyPrelaunch);setCoinProfile(state.coinProfile||null);setCoinPosts(state.coinPosts||[]);revision.current=state.revision;setServiceReady(true);setService('Saved locally');}
+ async function refreshRecords(){const [preview,account]=await Promise.allSettled([loadDemo(),accountApi('state')]);if(account.status==='fulfilled')setIdentity(account.value);else setIdentity(null);if(preview.status==='fulfilled')applyServer(preview.value);else{setServiceReady(false);setService(preview.reason.message);}}
+ useEffect(()=>{refreshRecords();},[]);
+ // Recheck a private pilot session on return and periodically; an expired/revoked session must hide cached views.
+ useEffect(()=>{if(!PUBLIC_LAUNCHES)return;let active=true,running=false;const check=async()=>{if(document.hidden||running)return;running=true;try{const account=await accountApi('state');if(active)setIdentity(account);}catch{if(active)setIdentity(null);}finally{running=false;}};window.addEventListener('focus',check);document.addEventListener('visibilitychange',check);const timer=setInterval(check,60000);return()=>{active=false;clearInterval(timer);window.removeEventListener('focus',check);document.removeEventListener('visibilitychange',check);};},[identity?.owner]);
+ useEffect(()=>{function openHash(){setView(route());setModal(null);}window.addEventListener('hashchange',openHash);return()=>window.removeEventListener('hashchange',openHash);},[]);
+ function go(next,sub){const destination=['Vote','Submit','Archive'].includes(next)?'Launch':next;setView(destination);setModal(null);history.replaceState(null,'',`#${HASHES[destination]||destination.toLowerCase()}${sub?'/'+encodeURIComponent(sub):''}`);window.dispatchEvent(new HashChangeEvent('hashchange'));window.scrollTo(0,0);}
+ const goCoin=sub=>go(coinDestination(launch?.phase),sub);
+ async function persist(action,payload={}){
+  if(!serviceReady)throw Error('Local records are not connected. Refresh records to retry.');
+  const content=JSON.stringify({action,payload});if(!pending.current||pending.current.content!==content)pending.current={content,input:{action,payload,revision:revision.current,requestId:crypto.randomUUID()}};
+  try{const result=await saveDemo(pending.current.input);applyServer(result);pending.current=null;return result;}catch(e){if(e.message.includes('another tab')){pending.current=null;await refreshRecords();}throw e;}
+ }
+ return <><header><button className="brand" aria-label="KIDS home" onClick={()=>go('Today')}><img className="brand-integrated" src="/assets/kids-logo-integrated-v1.png" alt="kids.fun"/></button><nav aria-label="Main navigation">{pilotAllowed?<>{[['Explore','Explore'],['Shart','Shartcoin'],['LaunchNew','Launch'],['Portfolio','Portfolio']].map(([v,label])=><button key={v} className={`${(view===v||(['PostLaunch','PostLaunchPreview'].includes(view)&&v==='Shart'))?'active ':''}${v==='LaunchNew'?'launch-nav':''}`} aria-current={view===v?'page':undefined} onClick={()=>v==='Shart'?goCoin():go(v)}>{label}</button>)}<button className={view==='Docs'?'active':''} aria-current={view==='Docs'?'page':undefined} onClick={()=>go('Docs','start')}>Guide</button></>:<>{['Today','Shart','Launch'].map(v=><button key={v} className={`${(view===v||(['PostLaunch','PostLaunchPreview'].includes(view)&&v==='Shart'))?'active ':''}${v==='Launch'?'launch-nav':''}`} onClick={()=>v==='Shart'?goCoin():go(v)}>{v==='Today'?'Explore':v==='Shart'?'Shartcoin':v}</button>)}<button onClick={()=>setModal('rules')}>Guide</button><button className={view==='Docs'?'active':''} aria-current={view==='Docs'?'page':undefined} onClick={()=>go('Docs','start')}>Docs</button><button className={view==='Believers'?'active':''} aria-current={view==='Believers'?'page':undefined} onClick={()=>go('Believers')}>Believers</button><button className={view==='Blocked'?'active':''} aria-current={view==='Blocked'?'page':undefined} onClick={()=>go('Blocked')}>Blocklist</button></>}{LOCAL_ADMIN&&<button onClick={()=>go('Admin')}>Admin</button>}</nav><div className="account"><button onClick={()=>setModal('allocations')}><Users size={22}/> My allocations</button><button className="outlined" onClick={()=>setModal('wallet')}><Wallet size={22}/><span>{identity?.owner?identity.owner.slice(0,4)+'…'+identity.owner.slice(-4):'Sign in'}</span></button></div></header>
+ <main>{PUBLIC_VIEWS.includes(view)&&!pilotAllowed&&<Home open={type=>type==='shart'?goCoin():setModal(type)} go={go} launch={launch}/>} {view==='Docs'&&<Suspense fallback={<p className="small muted">Loading the guide…</p>}><Docs/></Suspense>}{view==='Believers'&&<Suspense fallback={<p className="small muted">Loading the believers…</p>}><Believers/></Suspense>}{view==='Blocked'&&<Suspense fallback={<p className="small muted">Loading the blocked wallets…</p>}><Blocked/></Suspense>}{['PostLaunch','PostLaunchPreview'].includes(view)&&<PostLaunch key={view} preview={view==='PostLaunchPreview'} identity={identity} onSignIn={()=>setModal('wallet')} profile={coinProfile} posts={coinPosts} go={go}/>}{LOCAL_ADMIN&&view==='Admin'&&<Suspense fallback={null}><Admin/></Suspense>}{view==='Launch'&&<LaunchCountdown go={go}/>}{view==='Shart'&&<Prelaunch identity={identity} onSignIn={()=>setModal('wallet')} state={prelaunch} service={service} onRefresh={refreshRecords} profile={coinProfile} posts={coinPosts} onAction={persist} ready={serviceReady} go={go}/>}{view==='Today'&&<Home open={type=>type==='shart'?goCoin():setModal(type)} go={go} launch={launch}/>}{PublicLaunches&&pilotAllowed&&PUBLIC_VIEWS.includes(view)&&<Suspense fallback={<p className="small muted">Loading…</p>}><PublicLaunches view={view} go={go} identity={identity} onSignIn={()=>setModal('wallet')}/></Suspense>}</main>
+ <footer><span>KIDS &nbsp; // &nbsp; SOLANA &nbsp; // &nbsp; TWO COMMUNITIES. ONE KID.</span><button className="text-button" onClick={()=>setModal('rules')}>Launch rules</button><button className="text-button" onClick={()=>go('Docs','start')}>Docs</button><button className="text-button" onClick={()=>go('Blocked')}>Blocked wallets</button>{pilotAllowed&&<button className="text-button" onClick={()=>go('Believers')}>Believers</button>}<span>{SITE_NETWORK==='mainnet'?'Solana mainnet · Live':SITE_NETWORK==='devnet'?'Devnet · Rehearsal':'Localnet · Not live'}</span></footer>
+ {modal&&<Modal title={{wallet:'Wallet account',allocations:'My allocations',rules:'Launch rules',kid:'Meet KIDS.'}[modal]||'KIDS'} onClose={()=>setModal(null)}>
+ {modal==='wallet'&&<><Account onChange={setIdentity}/>{pilotAllowed&&<button className="outlined" style={{width:'100%',marginTop:12}} onClick={()=>go('MyLaunches')}>My launches</button>}</>}
+ {modal==='allocations'&&<AllocationsModal identity={identity} onSignIn={()=>setModal('wallet')} onOpen={()=>go('PostLaunch','claims')}/>}
+ {modal==='kid'&&<><img className="kid-profile" src="/assets/kids-mutt-v4.png" alt="KIDS, the pink mutt mascot"/><p>KIDS is the platform mascot. Shartcoin is the first coin: Fartcoin × Buttcoin.</p><button className="primary" onClick={()=>go('Launch')}>Launch your kid</button></>}
+ {modal==='rules'&&<><p>Two parent communities. One new coin.</p><dl><dt>Supply allocation</dt><dd>43.5% prelaunch · 43.5% liquidity · 10% parents · 3% dev.</dd><dt>Dev vesting</dt><dd>1% at launch; 2% linear over three months, no cliff.</dd><dt>Parent eligibility</dt><dd>Hold at least 0.05% of a parent’s supply at its snapshot. Each community receives 5%.</dd><dt>Opening pool</dt><dd>$40K soft cap · $200K hard cap. Half SOL, half the new coin. Excess commitments are refunded proportionally.</dd><dt>Trading</dt><dd>2% trading fee · Permanently locked liquidity with fee collection retained.</dd></dl><button className="primary" onClick={()=>go('Launch')}>Public launches</button></>}
+ </Modal>}</>;
+}

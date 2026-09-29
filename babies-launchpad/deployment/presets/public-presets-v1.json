@@ -1,0 +1,162 @@
+{
+  "schemaVersion": 1,
+  "policyVersion": "public-presets-v2",
+  "status": "proposed",
+  "activation": null,
+  "recordedAt": "2026-09-27",
+  "source": "deployment/decisions/DECISION-REGISTER-2026-09-24.md",
+  "note": "Nothing in this file is a live default. A preset becomes live only through an activation record (date, preset hash, policy version, owner sign-off, release commit, evidence path) written at release. The decision block records what the owner chose on 27 September 2026; existing funded campaigns keep their sealed terms.",
+  "agreed": {
+    "feePolicy": {
+      "ammProgram": "CPMMoo8L3F4NbTegBCKVNunggL7H1ZpdTHKxQB5qKP1C",
+      "ammConfig": "ESLj2Rzmvn3RhDo4Z18hY1wYmGyC9xM4ZtRXhvoFkDAi",
+      "ammConfigIndex": 7,
+      "tradeFeeBps": 250,
+      "creatorFeeEnabled": false,
+      "verifiedAt": [
+        "creation",
+        "launch"
+      ]
+    },
+    "devSupply": {
+      "bps": 500,
+      "immediateBps": 150,
+      "linearBps": 350,
+      "vestingMonths": 3,
+      "calendar": "UTC, month-end clamp",
+      "cliff": false,
+      "appliesTo": "new Standard campaigns on the version-3 issuer; existing coins keep their sealed 3 percent"
+    },
+    "funding": {
+      "escrow": "program",
+      "hardCapClosesFunding": false,
+      "minimumCommitmentLamports": "50000000",
+      "minimumCommitmentEnforcedBy": "API commit preparation (the version-3 layout has no field for it)",
+      "perWalletCap": null
+    },
+    "operating": {
+      "status": "proposed",
+      "decision": "owner, 27 September 2026: option 1, a creator-funded reserve, then self-funding from the coin's own treasury fee share; numbers set under 'do the rest' and adjustable before activation",
+      "reserveLamports": "100000000",
+      "floorLamports": "20000000",
+      "refillBps": 1000,
+      "returnUnusedOnRefund": true,
+      "payer": "the keeper signer of the release manifest (signerPublicKey); the rehearsal uses its local treasury key",
+      "coverage": "keeper transactions after creation: settlement, launch, refunds and fee cycles. The pool-initialization reserve inside the setup quote is separate and returns to the creator through the program.",
+      "fundedBy": "a separate creator approval after registration: a transfer to the payer carrying a memo that binds it to the campaign, credited to the campaign's operating budget on finalized chain evidence"
+    },
+    "oversubscription": {
+      "rule": "accepted_i = floor(commit_i * min(T, H) / T)",
+      "priority": "none"
+    },
+    "liquidity": {
+      "acceptedSolFundsPool": true,
+      "lpLock": "permanent (Raydium lock, fee NFT to the program)"
+    },
+    "authorities": {
+      "freezeRevokedAtCreation": true,
+      "mintRevokedAtLaunch": true
+    },
+    "tokenSideFees": "burn",
+    "softCapRangeSol": {
+      "min": 50,
+      "max": 100
+    }
+  },
+  "modes": {
+    "standard": {
+      "status": "proposed",
+      "activation": null,
+      "parents": 0,
+      "supplySplitBps": {
+        "participants": 4750,
+        "liquidity": 4750,
+        "dev": 500
+      },
+      "solFeeRouting": {
+        "denominator": 168,
+        "treasury": 148,
+        "dev": 20
+      }
+    },
+    "family": {
+      "status": "proposed",
+      "activation": null,
+      "parents": 2,
+      "supplySplitBps": {
+        "participants": 4350,
+        "liquidity": 4350,
+        "parentA": 500,
+        "parentB": 500,
+        "dev": 300
+      },
+      "solFeeRouting": {
+        "denominator": 168,
+        "treasury": 98,
+        "dev": 20,
+        "parentA": 25,
+        "parentB": 25
+      }
+    }
+  },
+  "capPresets": [
+    {
+      "id": "default",
+      "label": "Default public preset",
+      "softCapLamports": "50000000000",
+      "hardCapLamports": "100000000000",
+      "advanced": false,
+      "status": "proposed",
+      "activation": null
+    },
+    {
+      "id": "large",
+      "label": "Larger preset",
+      "softCapLamports": "100000000000",
+      "hardCapLamports": "250000000000",
+      "advanced": true,
+      "status": "proposed",
+      "activation": null
+    },
+    {
+      "id": "pilot",
+      "label": "Private pilot (1 to 5 SOL)",
+      "softCapLamports": "1000000000",
+      "hardCapLamports": "5000000000",
+      "advanced": true,
+      "pilotOnly": true,
+      "decision": "owner, 27 September 2026, 22:35 UTC: a pilot-only preset, usable only behind the pilot wallet restriction and removed before the public opening",
+      "status": "proposed",
+      "activation": null
+    }
+  ],
+  "schedule": {
+    "status": "proposed",
+    "activation": null,
+    "fundingDurationSeconds": 600,
+    "launchWindowSeconds": 1200,
+    "startRule": "creator picks a future UTC start or opens on confirmation; the program enforces the start",
+    "note": "PILOT SETTING (owner, 28 September 2026): ten-minute funding round and a twenty-minute launch window so test launches are quick; restore 7200 / 7200 before the public opening. The launch window needs the worst-case settlement benchmark (Shartcoin: 196 receipts settled and refunded in 3 m 30 s)"
+  },
+  "platformCreationCharge": {
+    "status": "proposed",
+    "activation": null,
+    "lamports": "0",
+    "creatorFundsSetupCosts": true
+  },
+  "unresolved": [
+    {
+      "id": "free-parent-claim-expiry",
+      "note": "explicit policy for the new Family version only; existing campaigns never expire"
+    },
+    {
+      "id": "per-receipt-operational-funding",
+      "note": "committing wallet pays its own receipt rent; any execution budget quoted, never deducted"
+    }
+  ],
+  "decision": {
+    "date": "2026-09-27",
+    "by": "owner",
+    "summary": "Standard split 47.5 / 47.5 / 5 with dev 1.5 percent at launch and 3.5 percent linear over three calendar months; presets 50 to 100 SOL and 100 to 250 SOL; two-hour funding window; two-hour launch window; minimum commitment 0.05 SOL; no per-wallet cap; operating funding option 1 (creator reserve, then self-funding from the coin fee share). Sealed in the program as split policy 3 and vesting rule 2. Activation still requires the release record below."
+  }
+}

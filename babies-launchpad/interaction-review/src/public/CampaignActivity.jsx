@@ -1,0 +1,29 @@
+import {useEffect,useState} from 'react';import {accountApi} from '../Account';import {startPolling,relativeTime,utcStamp} from '../market-data.mjs';
+import {ACTIVITY_LABELS,readCampaignActivity} from './campaign-activity.mjs';import {marketExplorer} from './campaign-market.mjs';import {solAmount,tokenAmount,shortAddress} from './campaign-adapter.mjs';import {ExactAmount,CopyButton} from './ExactAmount';
+export function CampaignActivity(props){return <Contents key={props.vm.id+':'+(props.owner||'')+':'+props.enabled} {...props}/>;}
+function Contents({vm,owner,enabled=false,onConnect,api=accountApi}){
+ const [filter,setFilter]=useState('movements'),[cursors,setCursors]=useState([null]),[page,setPage]=useState(0),[retry,setRetry]=useState(0),[state,setState]=useState({data:null,loading:true,error:false}),[now,setNow]=useState(Date.now);
+ useEffect(()=>{
+  setState({data:null,loading:true,error:false});if(!enabled||!owner)return;const controller=new AbortController();let stopped=false,running=false;
+  const tick=async()=>{if(stopped||running)return;running=true;try{const data=await readCampaignActivity({api,vm,owner,filter,cursor:cursors[page]??null,signal:controller.signal});if(!stopped)setState({data,loading:false,error:false});}catch{if(!stopped)setState(s=>({...s,loading:false,error:true}));}finally{running=false;}};
+  const stop=startPolling(tick,10000),timer=setInterval(()=>setNow(Date.now()),1000);return()=>{stopped=true;controller.abort();stop();clearInterval(timer);};
+ },[vm.id,owner,enabled,filter,cursors,page,retry,api]);
+ if(!enabled)return <p className="pl-small pl-muted">Program activity indexing is not enabled for this launch yet.</p>;
+ if(!owner)return <div><p className="pl-small pl-muted">Connect your pilot wallet to view program activity.</p><button type="button" className="pl-btn-sm" onClick={onConnect}>Connect wallet</button></div>;
+ const data=state.data,stale=state.error||data?.freshness?.stale||data?.available&&(!Number.isSafeInteger(data.freshness.updatedAt)||now-data.freshness.updatedAt>30000||data.freshness.updatedAt>now+5000),rows=data?.events||[];
+ const health=state.error?'Updates unavailable':stale?'Data is stale':data?.status==='indexing-error'?'History needs recovery':data?.available?data.coverage.complete?'Finalized activity':'Partial history':'Indexing activity';
+ function choose(value){setFilter(value);setPage(0);setCursors([null]);}
+ const amount=a=>a.mint==='SOL'?solAmount(a.amountRaw):tokenAmount(a.amountRaw,a.decimals,a.mint===vm.chain.mint?'$'+vm.symbol:a.role==='lock'?'LP':shortAddress(a.mint,3,3));
+ return <section className="pl-activity" aria-label="Program activity">
+  <div className="pl-panel-head"><h3 className="pl-label">Program activity</h3><span className="pl-small pl-muted">{health}</span></div>
+  <div className="pl-market-view" role="group" aria-label="Activity filter">{[['movements','Money movements'],['all','All events'],['failed','Failed attempts']].map(([value,label])=><button key={value} type="button" aria-pressed={filter===value} onClick={()=>choose(value)}>{label}</button>)}</div>
+  {state.loading&&!data?<div className="pl-skel" style={{height:80}} aria-label="Loading activity"/>:rows.length?<ol className="pl-program-events">{rows.map(e=><li key={e.signature+':'+e.instructionPath}>
+   <div className="pl-activity-event-head"><strong>{ACTIVITY_LABELS[e.kind]}</strong><time title={utcStamp(e.blockTimeUnix)} dateTime={new Date(e.blockTimeUnix*1000).toISOString()}>{relativeTime(e.blockTimeUnix,Math.floor(now/1000))}</time></div>
+   {e.failed?<p className="pl-small pl-muted">Attempt failed. No program asset changes.</p>:<div className="pl-activity-assets">{e.assets.filter(a=>BigInt(a.amountRaw)>0n).map((a,i)=><span key={i}><ExactAmount amount={amount(a)}/><small>{a.direction==='burn'?' burned':a.direction==='in'?' received':a.role==='pool'?' into pool':a.role==='lock'?' locked':a.role?' to '+a.role:' paid'}</small></span>)}{e.amountsUnresolved&&<span className="pl-small pl-muted">Refund amount could not be attributed from this transaction.</span>}{e.kind==='authority-revoked'&&<span className="pl-small pl-muted">{e.detail==='mintTokens'?'Mint authority removed':e.detail==='freezeAccount'?'Freeze authority removed':'Authority removed'}</span>}</div>}
+   <div className="pl-activity-meta">{e.actor&&<ExactAmount amount={{compact:shortAddress(e.actor),exact:e.actor,unit:''}} label="Transaction signer"/>}<span>{marketExplorer(vm.identity.genesisHash,e.signature)?<a href={marketExplorer(vm.identity.genesisHash,e.signature)} target="_blank" rel="noopener noreferrer">View transaction ↗</a>:<span className="pl-mono">{shortAddress(e.signature)}</span>}<CopyButton value={e.signature} label="activity signature"/></span></div>
+  </li>)}</ol>:<p className="pl-small pl-muted">{state.error?'Activity is temporarily unavailable.':data?.available?(filter==='failed'?'No failed attempts in indexed history.':filter==='movements'?'No asset movements in indexed history.':'No indexed events yet.'):'Program history is being indexed.'}</p>}
+  {(state.error||stale||data?.status==='indexing-error')&&<button type="button" className="pl-btn-sm" onClick={()=>setRetry(n=>n+1)}>Retry activity</button>}
+  {data?.available&&!data.coverage.complete&&<p className="pl-help-text">History is incomplete. Missing events are not treated as zero activity.</p>}
+  {(page>0||data?.nextCursor)&&<div className="pl-market-pages"><button type="button" className="pl-btn-sm" disabled={!page||state.loading} onClick={()=>setPage(p=>p-1)}>Newer activity</button><span className="pl-small pl-muted">Page {page+1} · 8 per page</span><button type="button" className="pl-btn-sm" disabled={!data?.nextCursor||state.loading} onClick={()=>{setCursors(c=>[...c.slice(0,page+1),data.nextCursor]);setPage(p=>p+1);}}>Older activity</button></div>}
+ </section>;
+}

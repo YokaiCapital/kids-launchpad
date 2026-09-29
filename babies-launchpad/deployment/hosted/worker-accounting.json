@@ -1,0 +1,25 @@
+{
+  "mode": "hosted",
+  "lane": "accounting",
+  "programVersion": 3,
+  "genesisHash": "5eykt4UsFv8P8NJdTREpY1vzqKqZKvdpKuc147dw2N9d",
+  "programId": "ABq14qMonDrPbRJUbyfACsazK2ESaiKWcw5u66qy6f7T",
+  "concurrency": 2,
+  "rpcAdmission": {
+    "resource": "rpc-accounting",
+    "policy": {
+      "ratePerSecond": 10,
+      "burst": 20,
+      "lanes": {
+        "accounting": {
+          "ratePerSecond": 10,
+          "burst": 20
+        }
+      }
+    }
+  },
+  "operating": {
+    "payer": "7MESsrmBCSAnA32uA67K9V9cwXnkVNGr6C8eSLEGJkzi",
+    "policy": "creator-funded-v1"
+  }
+}

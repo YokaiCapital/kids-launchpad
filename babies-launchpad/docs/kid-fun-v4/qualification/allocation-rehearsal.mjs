@@ -1,0 +1,25 @@
+// Offline fixture rehearsal only. Never creates, funds or sends a claim.
+import assert from 'node:assert/strict';
+import {createHash} from 'node:crypto';
+import {readFileSync,writeFileSync} from 'node:fs';
+import {stripTypeScriptTypes} from 'node:module';
+import {PublicKey} from '@solana/web3.js';
+import {computeCommunityAllocation} from '../../../shared/community-allocation.ts';
+const merkleSource=readFileSync(new URL('../../../shared/community-merkle.ts',import.meta.url),'utf8');
+const merkleModule=stripTypeScriptTypes(merkleSource).replaceAll("'@noble/hashes/sha3.js'",JSON.stringify(import.meta.resolve('@noble/hashes/sha3.js'))).replaceAll("'@solana/web3.js'",JSON.stringify(import.meta.resolve('@solana/web3.js')));
+const {buildCommunityMerkleTree,verifyCommunityProof,rewardsLeafHash}=await import('data:text/javascript;base64,'+Buffer.from(merkleModule).toString('base64'));
+const supply=1000000000000000n, minimum=(supply+1999n)/2000n, pool=50000000000000n;
+const owner=i=>new PublicKey(createHash('sha256').update(`kidfun-synthetic-owner-${i}`).digest()).toBase58();
+const accounts=offset=>Array.from({length:2000},(_,i)=>({address:`fixture-${offset}-${i}`,owner:owner(offset+i),amountRaw:minimum,frozen:false,ownerOnCurve:true}));
+const inputs=[0,2000].map((offset,i)=>({snapshot:{mint:`fixture-parent-${i}`,slot:1,decimals:6,supplyRaw:supply,accounts:accounts(offset),source:'synthetic-offline-2000-owner-boundary'},poolRaw:pool}));
+const rules={version:1,minimumOwnerBalanceRaw:minimum,minimumOwnerShareBps:5,perOwnerCapBps:200,excludedOwners:[],excludeOffCurveOwners:true,excludeFrozenAccounts:true};
+const allocation=computeCommunityAllocation(inputs,rules);
+assert.equal(allocation.allocations.length,4000);assert.equal(allocation.totalAllocatedRaw,2n*pool);assert.equal(allocation.totalRemainderRaw,0n);
+for(const community of allocation.communities)assert.equal(community.eligibleOwners,2000);
+const tree=buildCommunityMerkleTree(allocation.allocations);assert.equal(tree.totalRaw,2n*pool);
+for(const leaf of tree.leaves)assert(verifyCommunityProof(leaf.leafHash,leaf.proof,tree.root));
+const first=tree.leaves[0];assert(!verifyCommunityProof(rewardsLeafHash(new PublicKey(first.owner),first.amountRaw+1n),first.proof,tree.root));
+const reversed=computeCommunityAllocation(inputs.map(i=>({...i,snapshot:{...i.snapshot,accounts:[...i.snapshot.accounts].reverse()}})),rules);
+assert.equal(reversed.allocationSha256,allocation.allocationSha256);
+const report={status:'Offline allocation and proof rehearsal passed; no funded claim or program execution',merkleSourceSha256:createHash('sha256').update(merkleSource).digest('hex'),ownersPerParent:2000,distinctRecipients:4000,eligibilityFloorPercent:0.05,perOwnerAllocationCapPercent:2,totalAllocatedRaw:allocation.totalAllocatedRaw.toString(),remainderRaw:allocation.totalRemainderRaw.toString(),allocationSha256:allocation.allocationSha256,merkleRoot:tree.rootHex,validProofs:4000,tamperedAmountRejected:true,inputOrderInvariant:true,limits:['Synthetic ownerOnCurve flags; not a live wallet eligibility snapshot','Both parents use equal fixture supply; different supplies require separate floors before aggregation','No proof verification in the deployed program','No distributor funded; no claims sent']};
+writeFileSync(new URL('./allocation-results.json',import.meta.url),JSON.stringify(report,null,2)+'\n');console.log(JSON.stringify(report,null,2));

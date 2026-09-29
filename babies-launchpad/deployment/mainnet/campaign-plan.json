@@ -1,0 +1,34 @@
+{
+  "network": "mainnet",
+  "programId": "BLiaZWNQoPm4mG4cXNm4sXifFqs1Xmxx12qD9T4Y5NeN",
+  "creator": "AAuwkFNvXRimHyvdQfh7Zik9baw8W2ufSbc5cyBqsdoE",
+  "nonce": "5670353423629921200",
+  "campaign": "9FjwHicbkzP17NEW94UasBa3LfWtqmsmddzstq8UqKxP",
+  "mint": "UpBBfyC75u3kxDGWmmmW2yauk9YY3CqZhdt1KUDkids",
+  "opensAt": "2026-09-23T23:30:00Z",
+  "terms": {
+    "soft": "200000000000",
+    "hard": "1000000000000",
+    "deadlineSeconds": 7200
+  },
+  "token": {
+    "name": "Shartcoin",
+    "symbol": "SHARTCOIN",
+    "description": "Shartcoin brings together Fartcoin and Buttcoin. Two communities, one new coin, launched on kids.fun.",
+    "image": "interaction-review/public/assets/shart-pfp.png"
+  },
+  "parents": [
+    {
+      "role": "parentA",
+      "mint": "9BB6NFEcjBCtnNLFko2FqVQBq8HHM13kCyYcdQbgpump"
+    },
+    {
+      "role": "parentB",
+      "mint": "Cm6fNnMk7NfzStP9CZpsQA2v3jjzbcYGAxdJySmHpump"
+    }
+  ],
+  "dev": "EkqTC1NbAg9zjFxdWY4psYtyHU3JpXDeXCkerSahraSJ",
+  "treasury": "91eLwFTAxkcQLPSMxbzdSFkTyEwyRYcoZk64HMZj8vX",
+  "plannedAt": "2026-09-23T18:23:20.408Z",
+  "snapshotDirectory": "deployment/mainnet/snapshots/9FjwHicbkzP17NEW94UasBa3LfWtqmsmddzstq8UqKxP"
+}

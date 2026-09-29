@@ -1,0 +1,20 @@
+import test from 'node:test';import assert from 'node:assert/strict';
+import {Keypair} from '@solana/web3.js';
+import {receiptAddress} from '../protocol-v2/client.mjs';
+import {withReceiptBatches} from '../protocol-v3/receipt-batch.mjs';
+const key=()=>Keypair.generate().publicKey;
+test('v3 receipt adapter binds exact owners, packet scope and durable sender options',async()=>{
+ const programId=key(),genesisHash=key(),campaign=key(),sent=[];
+ const base={programId,genesisHash,send:async(ix,options)=>{sent.push({ix,options});return {status:'unknown',signature:'existing-signature'};}};
+ const chain=withReceiptBatches(base,{programVersion:3}),id={programId:programId.toBase58(),genesisHash:genesisHash.toBase58(),campaign:campaign.toBase58()};
+ const receipts=Array.from({length:8},()=>{const owner=key().toBase58();return {owner,address:receiptAddress(programId,campaign,owner).toBase58()};});
+ const options={operationId:'stable-operation',fencingToken:7,operationKey:'refunds',holds:async()=>true};
+ assert.equal((await chain.refundBatch(id,receipts,options)).status,'unknown');
+ assert.equal(sent[0].ix.length,8);assert.equal(sent[0].options.computeUnits,480000);assert.equal(sent[0].options.campaign,id.campaign);assert.equal(sent[0].options.fencingToken,7);assert.equal(sent[0].options.holds,options.holds);
+ sent[0].ix.forEach((ix,i)=>{assert.ok(ix.programId.equals(programId));assert.equal(ix.data[0],3);assert.equal(ix.keys[2].pubkey.toBase58(),receipts[i].owner);});
+ await chain.settleBatch(id,receipts,options);assert.ok(sent[1].ix.every(ix=>ix.data[0]===4&&ix.keys.length===2));
+ for(const list of [[],[...receipts,receipts[0]],[receipts[0],receipts[0]],[{...receipts[0],address:key().toBase58()}]])await assert.rejects(chain.refundBatch(id,list,options));
+ await assert.rejects(chain.settleBatch({...id,programId:key().toBase58()},receipts,options));
+ await assert.rejects(chain.settleBatch({...id,genesisHash:key().toBase58()},receipts,options));
+ assert.equal(sent.length,2);assert.throws(()=>withReceiptBatches(base,{programVersion:2}));
+});

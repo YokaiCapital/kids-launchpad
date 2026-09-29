@@ -1,0 +1,12 @@
+[package]
+name = "kids-distribution"
+version = "0.1.0"
+edition = "2021"
+license = "PolyForm-Noncommercial-1.0.0"
+[lib]
+crate-type = ["cdylib", "lib"]
+[dependencies]
+# Same pin as programs/atomic-launch: the two programs share account layouts and the SBF toolchain build.
+solana-program = "=2.3.0"
+[features]
+no-entrypoint = []

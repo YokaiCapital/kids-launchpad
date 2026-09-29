@@ -1,0 +1,20 @@
+{
+  "version": "kidfun-pilot-v1",
+  "scope": "local-rehearsal-only",
+  "publicLaunchesOpen": false,
+  "supplyRaw": "1000000000000000",
+  "decimals": 6,
+  "curveRaw": "550000000000000",
+  "migrationRaw": "350000000000000",
+  "parentReserveRaw": "100000000000000",
+  "parentSplitBps": 5000,
+  "netRaiseLamports": "85000000000",
+  "eligibilitySupplyBps": 5,
+  "perOwnerAllocationCapBps": 200,
+  "fees": {"protocolMillionths":2500,"platformMillionths":0,"creatorMillionths":0,"shareMillionths":0,"migrationLamports":"0","postMigrationFeeTier":null},
+  "lp": {"burnMillionths":1000000,"creatorMillionths":0,"platformMillionths":0},
+  "reserve": {"unlock":"after-confirmed-graduation","claimWindowDays":90,"unclaimed":"burn","funding":"verified-reserve-to-distributor-transfer-before-claims"},
+  "voting": {"quorumBps":500,"weight":"linear-raw-snapshot-balance","tie":"skip-and-runoff","invalidWinner":"skip-no-runner-up","oneActiveProposalPerOwner":true},
+  "deployment": {"platform":null,"feeBeneficiary":null,"reserveCustodian":null,"cpmmConfig":null,"genesisMint":null,"distributor":null},
+  "qualification": {"finalFill":false,"graduation":false,"lpCustody":false,"reserveFunding":false,"claimExecution":false}
+}

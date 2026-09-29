@@ -1,0 +1,6 @@
+{
+  "version": 3, "network": "localnet", "programId": "4vJ9JU1bJJE96FWSJKvHsmmFADCg4gpZQff4P3bkLKi", "genesisHash": "YMN9Qj5jPNp7j14VPcML1B6xGgcPWVZUGLFU3Mnyfaf",
+  "creator": "US517G5965aydkZ46HS38QLi7UQiSojurfbQfKCELFx", "nonce": "6", "address": "GgBaCs3NCBuZN12kCJgAW63ydqohFkHEdfdEXBPzLHq", "mint": "8qbHbw2BbbTHBW1sbeqakYXVKRQM8Ne7pLK7m6CVfeR",
+  "supply": "1000000000000000", "soft": "1000000000", "hard": "5000000000", "deadline": 1789000000, "launchDeadline": 1789086400,
+  "dev": "US517G5965aydkZ46HS38QLi7UQiSojurfbQfKCELFx", "treasury": "QWmroo4YnnMqYW3cnxWkFdaTxGD3P7vMSzwMHGbUzwF", "parentMints": [], "ready": true
+}

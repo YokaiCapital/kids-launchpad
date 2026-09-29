@@ -1,0 +1,32 @@
+{
+  "network": "mainnet",
+  "programId": "BLiaZWNQoPm4mG4cXNm4sXifFqs1Xmxx12qD9T4Y5NeN",
+  "creator": "AAuwkFNvXRimHyvdQfh7Zik9baw8W2ufSbc5cyBqsdoE",
+  "nonce": "18253652853150507660",
+  "campaign": "8VGyvxeczUz31PGGZMFg1dwHqo8qxiUNMddrtSVYmSgv",
+  "terms": {
+    "soft": "1000000000",
+    "hard": "5000000000",
+    "deadlineSeconds": 600
+  },
+  "token": {
+    "name": "KIDS test coin",
+    "symbol": "KTEST",
+    "description": "Test launch on kids.fun. Not Shartcoin, not the public launch. Trading it has no purpose.",
+    "image": "interaction-review/public/assets/kids-test-pfp.png"
+  },
+  "parents": [
+    {
+      "role": "parentA",
+      "mint": "9BB6NFEcjBCtnNLFko2FqVQBq8HHM13kCyYcdQbgpump"
+    },
+    {
+      "role": "parentB",
+      "mint": "Cm6fNnMk7NfzStP9CZpsQA2v3jjzbcYGAxdJySmHpump"
+    }
+  ],
+  "dev": "EkqTC1NbAg9zjFxdWY4psYtyHU3JpXDeXCkerSahraSJ",
+  "treasury": "91eLwFTAxkcQLPSMxbzdSFkTyEwyRYcoZk64HMZj8vX",
+  "plannedAt": "2026-09-23T16:11:50.105Z",
+  "snapshotDirectory": "deployment/mainnet/snapshots/8VGyvxeczUz31PGGZMFg1dwHqo8qxiUNMddrtSVYmSgv"
+}

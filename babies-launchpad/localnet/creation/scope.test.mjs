@@ -1,0 +1,22 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {CREATION_MODES,creationMode,creationRpc,assertCreationScope} from './scope.mjs';
+test('creator services accept the localnet rehearsal on loopback and a verified hosted release on a provider endpoint, nothing else',()=>{
+ assert.deepEqual([...CREATION_MODES],['localnet-rehearsal','hosted']);
+ assert.equal(creationMode('hosted'),true);assert.equal(creationMode('localnet-rehearsal'),true);assert.equal(creationMode('mainnet'),false);assert.equal(creationMode(undefined),false);
+ const u=x=>new URL(x);
+ assert.equal(creationRpc(u('http://127.0.0.1:19199'),'localnet-rehearsal'),true);
+ assert.equal(creationRpc(u('https://rpc.example.test/v1'),'localnet-rehearsal'),false);
+ assert.equal(creationRpc(u('https://rpc.example.test/v1?api-key=x'),'hosted'),true);
+ assert.equal(creationRpc(u('http://kids-rpc.railway.internal:8899'),'hosted'),true);
+ assert.equal(creationRpc(u('http://127.0.0.1:8899'),'hosted'),false);
+ assert.equal(creationRpc(u('https://user:pw@rpc.example.test'),'hosted'),false);
+ assert.equal(creationRpc(u('http://rpc.example.test'),'hosted'),false,'plain http only on the private network');
+ assert.equal(creationRpc(u('ftp://127.0.0.1'),'localnet-rehearsal'),false);
+ const release={genesisHash:'g',programId:'p'};
+ assert.equal(assertCreationScope({mode:'hosted',programVersion:3,genesisHash:'g',programId:'p',release}).mode,'hosted');
+ assert.throws(()=>assertCreationScope({mode:'hosted',programVersion:3,genesisHash:'g',programId:'p'}),/verified release/);
+ assert.throws(()=>assertCreationScope({mode:'hosted',programVersion:3,genesisHash:'other',programId:'p',release}),/verified release/);
+ assert.throws(()=>assertCreationScope({mode:'localnet-rehearsal',programVersion:3,genesisHash:'g',programId:'p',release}),/no release/);
+ assert.throws(()=>assertCreationScope({mode:'hosted',programVersion:2,genesisHash:'g',programId:'p',release}),/version 3/);
+});

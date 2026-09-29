@@ -1,0 +1,8 @@
+{
+  "coin": "Shartcoin",
+  "opensAt": null,
+  "soft": "100000000000",
+  "hard": "500000000000",
+  "deadlineSeconds": 86400,
+  "note": "Opening date to be announced. Set opensAt (ISO 8601, UTC) here and redeploy the API; the campaign itself is created on launch day."
+}

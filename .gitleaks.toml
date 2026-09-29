@@ -1,0 +1,38 @@
+title = "KIDS secret protection"
+[extend]
+useDefault = true
+
+[[rules]]
+id = "solana-private-key-array"
+description = "Potential 64-byte Solana signing key (review exact test vectors individually)"
+regex = '''\[\s*(?:[0-9]{1,3}\s*,\s*){63}[0-9]{1,3}\s*\]'''
+
+[[rules]]
+id = "credentialed-database-url"
+description = "Password in a database URL"
+regex = '''(?i)(?:postgres(?:ql)?|mysql|mongodb(?:\+srv)?|rediss?)://[^\s:/@]+:([^\s@]+)@'''
+secretGroup = 1
+
+[[rules]]
+id = "private-rpc-query-key"
+description = "Literal RPC/API URL key"
+regex = '''[?&](?:api-key|api_key|apikey)=([a-zA-Z0-9_-]{8,})'''
+secretGroup = 1
+
+[[rules]]
+id = "literal-service-password"
+description = "Literal password or service credential"
+regex = '''(?i)(?:password|passwd|secret_key|private_key|signer_token|custody_token|backend_token)\s*["']?\s*[:=]\s*["']([^\s"'${}]{8,})["']'''
+secretGroup = 1
+
+[[rules]]
+id = "labelled-seed-phrase"
+description = "Labelled twelve-to-twenty-four-word wallet recovery phrase"
+regex = '''(?i)(?:mnemonic|seed[_ -]?phrase)\s*["']?\s*[:=]\s*["']((?:[a-z]+\s+){11,23}[a-z]+)["']'''
+secretGroup = 1
+
+[[rules]]
+id = "solana-base58-private-key"
+description = "Labelled base58 Solana private signing key"
+regex = '''(?i)(?:secret[_-]?key|private[_-]?key)\s*["']?\s*[:=]\s*["']([1-9A-HJ-NP-Za-km-z]{80,90})["']'''
+secretGroup = 1

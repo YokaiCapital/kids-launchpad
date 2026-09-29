@@ -1,0 +1,2378 @@
+{
+ "version": 2,
+ "generatedBy": "localnet/protocol-v2/make-test-vectors.mjs",
+ "platformTreasury": "020d5fde31a2acb8ef4fb1e5f1f4034f1907798a66e887aa9255f3bcefca8bac",
+ "buybackSlippageCeilingBps": 500,
+ "settlement": [
+  {
+   "name": "live Family campaign: 2,500 committed against a 1,000 cap",
+   "hard": "1000000000000",
+   "total": "2500000000000",
+   "commits": [
+    "2500000000000"
+   ],
+   "accepted": [
+    "1000000000000"
+   ],
+   "refundable": [
+    "1500000000000"
+   ],
+   "totalAccepted": "1000000000000"
+  },
+  {
+   "name": "three wallets, 180 against 100",
+   "hard": "100000000000",
+   "total": "180000000000",
+   "commits": [
+    "40000000000",
+    "60000000000",
+    "80000000000"
+   ],
+   "accepted": [
+    "22222222222",
+    "33333333333",
+    "44444444444"
+   ],
+   "refundable": [
+    "17777777778",
+    "26666666667",
+    "35555555556"
+   ],
+   "totalAccepted": "99999999999"
+  },
+  {
+   "name": "exactly the hard cap",
+   "hard": "100000000000",
+   "total": "100000000000",
+   "commits": [
+    "50000000000",
+    "50000000000"
+   ],
+   "accepted": [
+    "50000000000",
+    "50000000000"
+   ],
+   "refundable": [
+    "0",
+    "0"
+   ],
+   "totalAccepted": "100000000000"
+  },
+  {
+   "name": "one lamport over the hard cap",
+   "hard": "100000000000",
+   "total": "100000000001",
+   "commits": [
+    "50000000000",
+    "50000000001"
+   ],
+   "accepted": [
+    "49999999999",
+    "50000000000"
+   ],
+   "refundable": [
+    "1",
+    "1"
+   ],
+   "totalAccepted": "99999999999"
+  },
+  {
+   "name": "one lamport under the hard cap",
+   "hard": "100000000000",
+   "total": "99999999999",
+   "commits": [
+    "50000000000",
+    "49999999999"
+   ],
+   "accepted": [
+    "50000000000",
+    "49999999999"
+   ],
+   "refundable": [
+    "0",
+    "0"
+   ],
+   "totalAccepted": "99999999999"
+  },
+  {
+   "name": "thirty single lamports against a cap of 20",
+   "hard": "20",
+   "total": "30",
+   "commits": [
+    "1",
+    "1",
+    "1",
+    "1",
+    "1",
+    "1",
+    "1",
+    "1",
+    "1",
+    "1",
+    "1",
+    "1",
+    "1",
+    "1",
+    "1",
+    "1",
+    "1",
+    "1",
+    "1",
+    "1",
+    "1",
+    "1",
+    "1",
+    "1",
+    "1",
+    "1",
+    "1",
+    "1",
+    "1",
+    "1"
+   ],
+   "accepted": [
+    "0",
+    "0",
+    "0",
+    "0",
+    "0",
+    "0",
+    "0",
+    "0",
+    "0",
+    "0",
+    "0",
+    "0",
+    "0",
+    "0",
+    "0",
+    "0",
+    "0",
+    "0",
+    "0",
+    "0",
+    "0",
+    "0",
+    "0",
+    "0",
+    "0",
+    "0",
+    "0",
+    "0",
+    "0",
+    "0"
+   ],
+   "refundable": [
+    "1",
+    "1",
+    "1",
+    "1",
+    "1",
+    "1",
+    "1",
+    "1",
+    "1",
+    "1",
+    "1",
+    "1",
+    "1",
+    "1",
+    "1",
+    "1",
+    "1",
+    "1",
+    "1",
+    "1",
+    "1",
+    "1",
+    "1",
+    "1",
+    "1",
+    "1",
+    "1",
+    "1",
+    "1",
+    "1"
+   ],
+   "totalAccepted": "0"
+  },
+  {
+   "name": "u64 extremes",
+   "hard": "9223372036854775807",
+   "total": "9223372036854788153",
+   "commits": [
+    "4611686018427387904",
+    "4611686018427400249"
+   ],
+   "accepted": [
+    "4611686018427381731",
+    "4611686018427394075"
+   ],
+   "refundable": [
+    "6173",
+    "6174"
+   ],
+   "totalAccepted": "9223372036854775806"
+  },
+  {
+   "name": "u64 max total",
+   "hard": "18446744073709551614",
+   "total": "18446744073709551615",
+   "commits": [
+    "18446744073709551614",
+    "1"
+   ],
+   "accepted": [
+    "18446744073709551613",
+    "0"
+   ],
+   "refundable": [
+    "1",
+    "1"
+   ],
+   "totalAccepted": "18446744073709551613"
+  },
+  {
+   "name": "no commitments",
+   "hard": "100000000000",
+   "total": "0",
+   "commits": [],
+   "accepted": [],
+   "refundable": [],
+   "totalAccepted": "0"
+  },
+  {
+   "name": "rounding dust 11 of 761 against 500",
+   "hard": "500",
+   "total": "761",
+   "commits": [
+    "11",
+    "750"
+   ],
+   "accepted": [
+    "7",
+    "492"
+   ],
+   "refundable": [
+    "4",
+    "258"
+   ],
+   "totalAccepted": "499"
+  }
+ ],
+ "refund": [
+  {
+   "commit": "11",
+   "total": "761",
+   "hard": "500",
+   "failed": false,
+   "refundable": "4"
+  },
+  {
+   "commit": "11",
+   "total": "761",
+   "hard": "500",
+   "failed": true,
+   "refundable": "11"
+  },
+  {
+   "commit": "11",
+   "total": "400",
+   "hard": "500",
+   "failed": false,
+   "refundable": "0"
+  },
+  {
+   "commit": "18446744073709551615",
+   "total": "18446744073709551615",
+   "hard": "18446744073709551614",
+   "failed": false,
+   "refundable": "1"
+  },
+  {
+   "commit": "18446744073709551615",
+   "total": "18446744073709551615",
+   "hard": "18446744073709551614",
+   "failed": true,
+   "refundable": "18446744073709551615"
+  },
+  {
+   "commit": "0",
+   "total": "0",
+   "hard": "5",
+   "failed": false,
+   "refundable": "0"
+  },
+  {
+   "commit": "5",
+   "total": "5",
+   "hard": "0",
+   "failed": false,
+   "refundable": "5"
+  }
+ ],
+ "split": [
+  {
+   "policy": 1,
+   "supply": "1000000000000000",
+   "participants": "485000000000000",
+   "liquidity": "485000000000000",
+   "parentA": "0",
+   "parentB": "0",
+   "dev": "30000000000000",
+   "dustToLiquidity": "0"
+  },
+  {
+   "policy": 2,
+   "supply": "1000000000000000",
+   "participants": "435000000000000",
+   "liquidity": "435000000000000",
+   "parentA": "50000000000000",
+   "parentB": "50000000000000",
+   "dev": "30000000000000",
+   "dustToLiquidity": "0"
+  },
+  {
+   "policy": 3,
+   "supply": "1000000000000000",
+   "participants": "475000000000000",
+   "liquidity": "475000000000000",
+   "parentA": "0",
+   "parentB": "0",
+   "dev": "50000000000000",
+   "dustToLiquidity": "0"
+  },
+  {
+   "policy": 1,
+   "supply": "0",
+   "participants": "0",
+   "liquidity": "0",
+   "parentA": "0",
+   "parentB": "0",
+   "dev": "0",
+   "dustToLiquidity": "0"
+  },
+  {
+   "policy": 2,
+   "supply": "0",
+   "participants": "0",
+   "liquidity": "0",
+   "parentA": "0",
+   "parentB": "0",
+   "dev": "0",
+   "dustToLiquidity": "0"
+  },
+  {
+   "policy": 3,
+   "supply": "0",
+   "participants": "0",
+   "liquidity": "0",
+   "parentA": "0",
+   "parentB": "0",
+   "dev": "0",
+   "dustToLiquidity": "0"
+  },
+  {
+   "policy": 1,
+   "supply": "1",
+   "participants": "0",
+   "liquidity": "1",
+   "parentA": "0",
+   "parentB": "0",
+   "dev": "0",
+   "dustToLiquidity": "1"
+  },
+  {
+   "policy": 2,
+   "supply": "1",
+   "participants": "0",
+   "liquidity": "1",
+   "parentA": "0",
+   "parentB": "0",
+   "dev": "0",
+   "dustToLiquidity": "1"
+  },
+  {
+   "policy": 3,
+   "supply": "1",
+   "participants": "0",
+   "liquidity": "1",
+   "parentA": "0",
+   "parentB": "0",
+   "dev": "0",
+   "dustToLiquidity": "1"
+  },
+  {
+   "policy": 1,
+   "supply": "7",
+   "participants": "0",
+   "liquidity": "7",
+   "parentA": "0",
+   "parentB": "0",
+   "dev": "0",
+   "dustToLiquidity": "7"
+  },
+  {
+   "policy": 2,
+   "supply": "7",
+   "participants": "0",
+   "liquidity": "7",
+   "parentA": "0",
+   "parentB": "0",
+   "dev": "0",
+   "dustToLiquidity": "7"
+  },
+  {
+   "policy": 3,
+   "supply": "7",
+   "participants": "0",
+   "liquidity": "7",
+   "parentA": "0",
+   "parentB": "0",
+   "dev": "0",
+   "dustToLiquidity": "7"
+  },
+  {
+   "policy": 1,
+   "supply": "9999",
+   "participants": "0",
+   "liquidity": "9999",
+   "parentA": "0",
+   "parentB": "0",
+   "dev": "0",
+   "dustToLiquidity": "9999"
+  },
+  {
+   "policy": 2,
+   "supply": "9999",
+   "participants": "0",
+   "liquidity": "9999",
+   "parentA": "0",
+   "parentB": "0",
+   "dev": "0",
+   "dustToLiquidity": "9999"
+  },
+  {
+   "policy": 3,
+   "supply": "9999",
+   "participants": "0",
+   "liquidity": "9999",
+   "parentA": "0",
+   "parentB": "0",
+   "dev": "0",
+   "dustToLiquidity": "9999"
+  },
+  {
+   "policy": 1,
+   "supply": "10000",
+   "participants": "4850",
+   "liquidity": "4850",
+   "parentA": "0",
+   "parentB": "0",
+   "dev": "300",
+   "dustToLiquidity": "0"
+  },
+  {
+   "policy": 2,
+   "supply": "10000",
+   "participants": "4350",
+   "liquidity": "4350",
+   "parentA": "500",
+   "parentB": "500",
+   "dev": "300",
+   "dustToLiquidity": "0"
+  },
+  {
+   "policy": 3,
+   "supply": "10000",
+   "participants": "4750",
+   "liquidity": "4750",
+   "parentA": "0",
+   "parentB": "0",
+   "dev": "500",
+   "dustToLiquidity": "0"
+  },
+  {
+   "policy": 1,
+   "supply": "10001",
+   "participants": "4850",
+   "liquidity": "4851",
+   "parentA": "0",
+   "parentB": "0",
+   "dev": "300",
+   "dustToLiquidity": "1"
+  },
+  {
+   "policy": 2,
+   "supply": "10001",
+   "participants": "4350",
+   "liquidity": "4351",
+   "parentA": "500",
+   "parentB": "500",
+   "dev": "300",
+   "dustToLiquidity": "1"
+  },
+  {
+   "policy": 3,
+   "supply": "10001",
+   "participants": "4750",
+   "liquidity": "4751",
+   "parentA": "0",
+   "parentB": "0",
+   "dev": "500",
+   "dustToLiquidity": "1"
+  },
+  {
+   "policy": 1,
+   "supply": "19999",
+   "participants": "4850",
+   "liquidity": "14849",
+   "parentA": "0",
+   "parentB": "0",
+   "dev": "300",
+   "dustToLiquidity": "9999"
+  },
+  {
+   "policy": 2,
+   "supply": "19999",
+   "participants": "4350",
+   "liquidity": "14349",
+   "parentA": "500",
+   "parentB": "500",
+   "dev": "300",
+   "dustToLiquidity": "9999"
+  },
+  {
+   "policy": 3,
+   "supply": "19999",
+   "participants": "4750",
+   "liquidity": "14749",
+   "parentA": "0",
+   "parentB": "0",
+   "dev": "500",
+   "dustToLiquidity": "9999"
+  },
+  {
+   "policy": 1,
+   "supply": "123456789",
+   "participants": "59873250",
+   "liquidity": "59880039",
+   "parentA": "0",
+   "parentB": "0",
+   "dev": "3703500",
+   "dustToLiquidity": "6789"
+  },
+  {
+   "policy": 2,
+   "supply": "123456789",
+   "participants": "53700750",
+   "liquidity": "53707539",
+   "parentA": "6172500",
+   "parentB": "6172500",
+   "dev": "3703500",
+   "dustToLiquidity": "6789"
+  },
+  {
+   "policy": 3,
+   "supply": "123456789",
+   "participants": "58638750",
+   "liquidity": "58645539",
+   "parentA": "0",
+   "parentB": "0",
+   "dev": "6172500",
+   "dustToLiquidity": "6789"
+  },
+  {
+   "policy": 1,
+   "supply": "18446744073709551614",
+   "participants": "8946670875749131750",
+   "liquidity": "8946670875749133364",
+   "parentA": "0",
+   "parentB": "0",
+   "dev": "553402322211286500",
+   "dustToLiquidity": "1614"
+  },
+  {
+   "policy": 2,
+   "supply": "18446744073709551614",
+   "participants": "8024333672063654250",
+   "liquidity": "8024333672063655864",
+   "parentA": "922337203685477500",
+   "parentB": "922337203685477500",
+   "dev": "553402322211286500",
+   "dustToLiquidity": "1614"
+  },
+  {
+   "policy": 3,
+   "supply": "18446744073709551614",
+   "participants": "8762203435012036250",
+   "liquidity": "8762203435012037864",
+   "parentA": "0",
+   "parentB": "0",
+   "dev": "922337203685477500",
+   "dustToLiquidity": "1614"
+  },
+  {
+   "policy": 1,
+   "supply": "18446744073709551615",
+   "participants": "8946670875749131750",
+   "liquidity": "8946670875749133365",
+   "parentA": "0",
+   "parentB": "0",
+   "dev": "553402322211286500",
+   "dustToLiquidity": "1615"
+  },
+  {
+   "policy": 2,
+   "supply": "18446744073709551615",
+   "participants": "8024333672063654250",
+   "liquidity": "8024333672063655865",
+   "parentA": "922337203685477500",
+   "parentB": "922337203685477500",
+   "dev": "553402322211286500",
+   "dustToLiquidity": "1615"
+  },
+  {
+   "policy": 3,
+   "supply": "18446744073709551615",
+   "participants": "8762203435012036250",
+   "liquidity": "8762203435012037865",
+   "parentA": "0",
+   "parentB": "0",
+   "dev": "922337203685477500",
+   "dustToLiquidity": "1615"
+  }
+ ],
+ "participantTokens": [
+  {
+   "reserve": "485000000000000",
+   "accepted": "1",
+   "totalAccepted": "3",
+   "tokens": "161666666666666"
+  },
+  {
+   "reserve": "485000000000000",
+   "accepted": "3",
+   "totalAccepted": "3",
+   "tokens": "485000000000000"
+  },
+  {
+   "reserve": "485000000000000",
+   "accepted": "22222222222",
+   "totalAccepted": "99999999999",
+   "tokens": "107777777777777"
+  },
+  {
+   "reserve": "435000000000000",
+   "accepted": "1000000000000",
+   "totalAccepted": "1000000000000",
+   "tokens": "435000000000000"
+  },
+  {
+   "reserve": "18446744073709551615",
+   "accepted": "18446744073709551615",
+   "totalAccepted": "18446744073709551615",
+   "tokens": "18446744073709551615"
+  },
+  {
+   "reserve": "485000000000000",
+   "accepted": "0",
+   "totalAccepted": "5",
+   "tokens": "0"
+  },
+  {
+   "reserve": "1",
+   "accepted": "1",
+   "totalAccepted": "2",
+   "tokens": "0"
+  }
+ ],
+ "calendarMonths": [
+  {
+   "start": "1706659323",
+   "months": 3,
+   "end": "1714435323"
+  },
+  {
+   "start": "1701302400",
+   "months": 3,
+   "end": "1709164800"
+  },
+  {
+   "start": "1732924800",
+   "months": 3,
+   "end": "1740700800"
+  },
+  {
+   "start": "1827446407",
+   "months": 3,
+   "end": "1835395207"
+  },
+  {
+   "start": "4099680000",
+   "months": 3,
+   "end": "4107456000"
+  },
+  {
+   "start": "1793491199",
+   "months": 3,
+   "end": "1801439999"
+  },
+  {
+   "start": "1790258000",
+   "months": 3,
+   "end": "1798120400"
+  },
+  {
+   "start": "1798675200",
+   "months": 3,
+   "end": "1806451200"
+  },
+  {
+   "start": "1768435200",
+   "months": 1,
+   "end": "1771113600"
+  },
+  {
+   "start": "1835395200",
+   "months": 12,
+   "end": "1866931200"
+  },
+  {
+   "start": "0",
+   "months": 3,
+   "end": "7776000"
+  },
+  {
+   "start": "1",
+   "months": 3,
+   "end": "7776001"
+  }
+ ],
+ "vesting": [
+  {
+   "rule": 1,
+   "supply": "1000000000000000",
+   "start": "1832889600",
+   "now": "1832889600",
+   "end": "1840665600",
+   "entitled": "10000000000000"
+  },
+  {
+   "rule": 2,
+   "supply": "1000000000000000",
+   "start": "1832889600",
+   "now": "1832889600",
+   "end": "1840665600",
+   "entitled": "15000000000000"
+  },
+  {
+   "rule": 1,
+   "supply": "1000000000000000",
+   "start": "1832889600",
+   "now": "1832889601",
+   "end": "1840665600",
+   "entitled": "10000002572016"
+  },
+  {
+   "rule": 2,
+   "supply": "1000000000000000",
+   "start": "1832889600",
+   "now": "1832889601",
+   "end": "1840665600",
+   "entitled": "15000004501028"
+  },
+  {
+   "rule": 1,
+   "supply": "1000000000000000",
+   "start": "1832889600",
+   "now": "1836777600",
+   "end": "1840665600",
+   "entitled": "20000000000000"
+  },
+  {
+   "rule": 2,
+   "supply": "1000000000000000",
+   "start": "1832889600",
+   "now": "1836777600",
+   "end": "1840665600",
+   "entitled": "32500000000000"
+  },
+  {
+   "rule": 1,
+   "supply": "1000000000000000",
+   "start": "1832889600",
+   "now": "1840665599",
+   "end": "1840665600",
+   "entitled": "29999997427983"
+  },
+  {
+   "rule": 2,
+   "supply": "1000000000000000",
+   "start": "1832889600",
+   "now": "1840665599",
+   "end": "1840665600",
+   "entitled": "49999995498971"
+  },
+  {
+   "rule": 1,
+   "supply": "1000000000000000",
+   "start": "1832889600",
+   "now": "1840665600",
+   "end": "1840665600",
+   "entitled": "30000000000000"
+  },
+  {
+   "rule": 2,
+   "supply": "1000000000000000",
+   "start": "1832889600",
+   "now": "1840665600",
+   "end": "1840665600",
+   "entitled": "50000000000000"
+  },
+  {
+   "rule": 1,
+   "supply": "1000000000000000",
+   "start": "1832889600",
+   "now": "1840665601",
+   "end": "1840665600",
+   "entitled": "30000000000000"
+  },
+  {
+   "rule": 2,
+   "supply": "1000000000000000",
+   "start": "1832889600",
+   "now": "1840665601",
+   "end": "1840665600",
+   "entitled": "50000000000000"
+  },
+  {
+   "rule": 1,
+   "supply": "1000000000000000",
+   "start": "1832889600",
+   "now": "1872201600",
+   "end": "1840665600",
+   "entitled": "30000000000000"
+  },
+  {
+   "rule": 2,
+   "supply": "1000000000000000",
+   "start": "1832889600",
+   "now": "1872201600",
+   "end": "1840665600",
+   "entitled": "50000000000000"
+  },
+  {
+   "rule": 1,
+   "supply": "1000000000000000",
+   "start": "1832889600",
+   "now": "9223372036854775807",
+   "end": "1840665600",
+   "entitled": "30000000000000"
+  },
+  {
+   "rule": 2,
+   "supply": "1000000000000000",
+   "start": "1832889600",
+   "now": "9223372036854775807",
+   "end": "1840665600",
+   "entitled": "50000000000000"
+  },
+  {
+   "rule": 1,
+   "supply": "1000000000000000",
+   "start": "1827536400",
+   "now": "1827536400",
+   "end": "1835398800",
+   "entitled": "10000000000000"
+  },
+  {
+   "rule": 2,
+   "supply": "1000000000000000",
+   "start": "1827536400",
+   "now": "1827536400",
+   "end": "1835398800",
+   "entitled": "15000000000000"
+  },
+  {
+   "rule": 1,
+   "supply": "1000000000000000",
+   "start": "1827536400",
+   "now": "1827536401",
+   "end": "1835398800",
+   "entitled": "10000002543752"
+  },
+  {
+   "rule": 2,
+   "supply": "1000000000000000",
+   "start": "1827536400",
+   "now": "1827536401",
+   "end": "1835398800",
+   "entitled": "15000004451566"
+  },
+  {
+   "rule": 1,
+   "supply": "1000000000000000",
+   "start": "1827536400",
+   "now": "1831467600",
+   "end": "1835398800",
+   "entitled": "20000000000000"
+  },
+  {
+   "rule": 2,
+   "supply": "1000000000000000",
+   "start": "1827536400",
+   "now": "1831467600",
+   "end": "1835398800",
+   "entitled": "32500000000000"
+  },
+  {
+   "rule": 1,
+   "supply": "1000000000000000",
+   "start": "1827536400",
+   "now": "1835398799",
+   "end": "1835398800",
+   "entitled": "29999997456247"
+  },
+  {
+   "rule": 2,
+   "supply": "1000000000000000",
+   "start": "1827536400",
+   "now": "1835398799",
+   "end": "1835398800",
+   "entitled": "49999995548433"
+  },
+  {
+   "rule": 1,
+   "supply": "1000000000000000",
+   "start": "1827536400",
+   "now": "1835398800",
+   "end": "1835398800",
+   "entitled": "30000000000000"
+  },
+  {
+   "rule": 2,
+   "supply": "1000000000000000",
+   "start": "1827536400",
+   "now": "1835398800",
+   "end": "1835398800",
+   "entitled": "50000000000000"
+  },
+  {
+   "rule": 1,
+   "supply": "1000000000000000",
+   "start": "1827536400",
+   "now": "1835398801",
+   "end": "1835398800",
+   "entitled": "30000000000000"
+  },
+  {
+   "rule": 2,
+   "supply": "1000000000000000",
+   "start": "1827536400",
+   "now": "1835398801",
+   "end": "1835398800",
+   "entitled": "50000000000000"
+  },
+  {
+   "rule": 1,
+   "supply": "1000000000000000",
+   "start": "1827536400",
+   "now": "1866934800",
+   "end": "1835398800",
+   "entitled": "30000000000000"
+  },
+  {
+   "rule": 2,
+   "supply": "1000000000000000",
+   "start": "1827536400",
+   "now": "1866934800",
+   "end": "1835398800",
+   "entitled": "50000000000000"
+  },
+  {
+   "rule": 1,
+   "supply": "1000000000000000",
+   "start": "1827536400",
+   "now": "9223372036854775807",
+   "end": "1835398800",
+   "entitled": "30000000000000"
+  },
+  {
+   "rule": 2,
+   "supply": "1000000000000000",
+   "start": "1827536400",
+   "now": "9223372036854775807",
+   "end": "1835398800",
+   "entitled": "50000000000000"
+  },
+  {
+   "rule": 1,
+   "supply": "18446744073709551615",
+   "start": "1790208000",
+   "now": "1790208000",
+   "end": "1798070400",
+   "entitled": "184467440737095500"
+  },
+  {
+   "rule": 2,
+   "supply": "18446744073709551615",
+   "start": "1790208000",
+   "now": "1790208000",
+   "end": "1798070400",
+   "entitled": "276701161105643250"
+  },
+  {
+   "rule": 1,
+   "supply": "18446744073709551615",
+   "start": "1790208000",
+   "now": "1790208001",
+   "end": "1798070400",
+   "entitled": "184467487661047661"
+  },
+  {
+   "rule": 2,
+   "supply": "18446744073709551615",
+   "start": "1790208000",
+   "now": "1790208001",
+   "end": "1798070400",
+   "entitled": "276701243222559532"
+  },
+  {
+   "rule": 1,
+   "supply": "18446744073709551615",
+   "start": "1790208000",
+   "now": "1794139200",
+   "end": "1798070400",
+   "entitled": "368934881474191000"
+  },
+  {
+   "rule": 2,
+   "supply": "18446744073709551615",
+   "start": "1790208000",
+   "now": "1794139200",
+   "end": "1798070400",
+   "entitled": "599519182395560375"
+  },
+  {
+   "rule": 1,
+   "supply": "18446744073709551615",
+   "start": "1790208000",
+   "now": "1798070399",
+   "end": "1798070400",
+   "entitled": "553402275287334338"
+  },
+  {
+   "rule": 2,
+   "supply": "18446744073709551615",
+   "start": "1790208000",
+   "now": "1798070399",
+   "end": "1798070400",
+   "entitled": "922337121568561217"
+  },
+  {
+   "rule": 1,
+   "supply": "18446744073709551615",
+   "start": "1790208000",
+   "now": "1798070400",
+   "end": "1798070400",
+   "entitled": "553402322211286500"
+  },
+  {
+   "rule": 2,
+   "supply": "18446744073709551615",
+   "start": "1790208000",
+   "now": "1798070400",
+   "end": "1798070400",
+   "entitled": "922337203685477500"
+  },
+  {
+   "rule": 1,
+   "supply": "18446744073709551615",
+   "start": "1790208000",
+   "now": "1798070401",
+   "end": "1798070400",
+   "entitled": "553402322211286500"
+  },
+  {
+   "rule": 2,
+   "supply": "18446744073709551615",
+   "start": "1790208000",
+   "now": "1798070401",
+   "end": "1798070400",
+   "entitled": "922337203685477500"
+  },
+  {
+   "rule": 1,
+   "supply": "18446744073709551615",
+   "start": "1790208000",
+   "now": "1829606400",
+   "end": "1798070400",
+   "entitled": "553402322211286500"
+  },
+  {
+   "rule": 2,
+   "supply": "18446744073709551615",
+   "start": "1790208000",
+   "now": "1829606400",
+   "end": "1798070400",
+   "entitled": "922337203685477500"
+  },
+  {
+   "rule": 1,
+   "supply": "18446744073709551615",
+   "start": "1790208000",
+   "now": "9223372036854775807",
+   "end": "1798070400",
+   "entitled": "553402322211286500"
+  },
+  {
+   "rule": 2,
+   "supply": "18446744073709551615",
+   "start": "1790208000",
+   "now": "9223372036854775807",
+   "end": "1798070400",
+   "entitled": "922337203685477500"
+  },
+  {
+   "rule": 1,
+   "supply": "12345",
+   "start": "1790208000",
+   "now": "1790208000",
+   "end": "1798070400",
+   "entitled": "100"
+  },
+  {
+   "rule": 2,
+   "supply": "12345",
+   "start": "1790208000",
+   "now": "1790208000",
+   "end": "1798070400",
+   "entitled": "150"
+  },
+  {
+   "rule": 1,
+   "supply": "12345",
+   "start": "1790208000",
+   "now": "1790208001",
+   "end": "1798070400",
+   "entitled": "100"
+  },
+  {
+   "rule": 2,
+   "supply": "12345",
+   "start": "1790208000",
+   "now": "1790208001",
+   "end": "1798070400",
+   "entitled": "150"
+  },
+  {
+   "rule": 1,
+   "supply": "12345",
+   "start": "1790208000",
+   "now": "1794139200",
+   "end": "1798070400",
+   "entitled": "200"
+  },
+  {
+   "rule": 2,
+   "supply": "12345",
+   "start": "1790208000",
+   "now": "1794139200",
+   "end": "1798070400",
+   "entitled": "325"
+  },
+  {
+   "rule": 1,
+   "supply": "12345",
+   "start": "1790208000",
+   "now": "1798070399",
+   "end": "1798070400",
+   "entitled": "299"
+  },
+  {
+   "rule": 2,
+   "supply": "12345",
+   "start": "1790208000",
+   "now": "1798070399",
+   "end": "1798070400",
+   "entitled": "499"
+  },
+  {
+   "rule": 1,
+   "supply": "12345",
+   "start": "1790208000",
+   "now": "1798070400",
+   "end": "1798070400",
+   "entitled": "300"
+  },
+  {
+   "rule": 2,
+   "supply": "12345",
+   "start": "1790208000",
+   "now": "1798070400",
+   "end": "1798070400",
+   "entitled": "500"
+  },
+  {
+   "rule": 1,
+   "supply": "12345",
+   "start": "1790208000",
+   "now": "1798070401",
+   "end": "1798070400",
+   "entitled": "300"
+  },
+  {
+   "rule": 2,
+   "supply": "12345",
+   "start": "1790208000",
+   "now": "1798070401",
+   "end": "1798070400",
+   "entitled": "500"
+  },
+  {
+   "rule": 1,
+   "supply": "12345",
+   "start": "1790208000",
+   "now": "1829606400",
+   "end": "1798070400",
+   "entitled": "300"
+  },
+  {
+   "rule": 2,
+   "supply": "12345",
+   "start": "1790208000",
+   "now": "1829606400",
+   "end": "1798070400",
+   "entitled": "500"
+  },
+  {
+   "rule": 1,
+   "supply": "12345",
+   "start": "1790208000",
+   "now": "9223372036854775807",
+   "end": "1798070400",
+   "entitled": "300"
+  },
+  {
+   "rule": 2,
+   "supply": "12345",
+   "start": "1790208000",
+   "now": "9223372036854775807",
+   "end": "1798070400",
+   "entitled": "500"
+  },
+  {
+   "rule": 1,
+   "supply": "9999",
+   "start": "1790208000",
+   "now": "1790208000",
+   "end": "1798070400",
+   "entitled": "0"
+  },
+  {
+   "rule": 2,
+   "supply": "9999",
+   "start": "1790208000",
+   "now": "1790208000",
+   "end": "1798070400",
+   "entitled": "0"
+  },
+  {
+   "rule": 1,
+   "supply": "9999",
+   "start": "1790208000",
+   "now": "1790208001",
+   "end": "1798070400",
+   "entitled": "0"
+  },
+  {
+   "rule": 2,
+   "supply": "9999",
+   "start": "1790208000",
+   "now": "1790208001",
+   "end": "1798070400",
+   "entitled": "0"
+  },
+  {
+   "rule": 1,
+   "supply": "9999",
+   "start": "1790208000",
+   "now": "1794139200",
+   "end": "1798070400",
+   "entitled": "0"
+  },
+  {
+   "rule": 2,
+   "supply": "9999",
+   "start": "1790208000",
+   "now": "1794139200",
+   "end": "1798070400",
+   "entitled": "0"
+  },
+  {
+   "rule": 1,
+   "supply": "9999",
+   "start": "1790208000",
+   "now": "1798070399",
+   "end": "1798070400",
+   "entitled": "0"
+  },
+  {
+   "rule": 2,
+   "supply": "9999",
+   "start": "1790208000",
+   "now": "1798070399",
+   "end": "1798070400",
+   "entitled": "0"
+  },
+  {
+   "rule": 1,
+   "supply": "9999",
+   "start": "1790208000",
+   "now": "1798070400",
+   "end": "1798070400",
+   "entitled": "0"
+  },
+  {
+   "rule": 2,
+   "supply": "9999",
+   "start": "1790208000",
+   "now": "1798070400",
+   "end": "1798070400",
+   "entitled": "0"
+  },
+  {
+   "rule": 1,
+   "supply": "9999",
+   "start": "1790208000",
+   "now": "1798070401",
+   "end": "1798070400",
+   "entitled": "0"
+  },
+  {
+   "rule": 2,
+   "supply": "9999",
+   "start": "1790208000",
+   "now": "1798070401",
+   "end": "1798070400",
+   "entitled": "0"
+  },
+  {
+   "rule": 1,
+   "supply": "9999",
+   "start": "1790208000",
+   "now": "1829606400",
+   "end": "1798070400",
+   "entitled": "0"
+  },
+  {
+   "rule": 2,
+   "supply": "9999",
+   "start": "1790208000",
+   "now": "1829606400",
+   "end": "1798070400",
+   "entitled": "0"
+  },
+  {
+   "rule": 1,
+   "supply": "9999",
+   "start": "1790208000",
+   "now": "9223372036854775807",
+   "end": "1798070400",
+   "entitled": "0"
+  },
+  {
+   "rule": 2,
+   "supply": "9999",
+   "start": "1790208000",
+   "now": "9223372036854775807",
+   "end": "1798070400",
+   "entitled": "0"
+  },
+  {
+   "rule": 1,
+   "supply": "1000000000000000",
+   "start": "1798675201",
+   "now": "1798675201",
+   "end": "1806451201",
+   "entitled": "10000000000000"
+  },
+  {
+   "rule": 2,
+   "supply": "1000000000000000",
+   "start": "1798675201",
+   "now": "1798675201",
+   "end": "1806451201",
+   "entitled": "15000000000000"
+  },
+  {
+   "rule": 1,
+   "supply": "1000000000000000",
+   "start": "1798675201",
+   "now": "1798675202",
+   "end": "1806451201",
+   "entitled": "10000002572016"
+  },
+  {
+   "rule": 2,
+   "supply": "1000000000000000",
+   "start": "1798675201",
+   "now": "1798675202",
+   "end": "1806451201",
+   "entitled": "15000004501028"
+  },
+  {
+   "rule": 1,
+   "supply": "1000000000000000",
+   "start": "1798675201",
+   "now": "1802563201",
+   "end": "1806451201",
+   "entitled": "20000000000000"
+  },
+  {
+   "rule": 2,
+   "supply": "1000000000000000",
+   "start": "1798675201",
+   "now": "1802563201",
+   "end": "1806451201",
+   "entitled": "32500000000000"
+  },
+  {
+   "rule": 1,
+   "supply": "1000000000000000",
+   "start": "1798675201",
+   "now": "1806451200",
+   "end": "1806451201",
+   "entitled": "29999997427983"
+  },
+  {
+   "rule": 2,
+   "supply": "1000000000000000",
+   "start": "1798675201",
+   "now": "1806451200",
+   "end": "1806451201",
+   "entitled": "49999995498971"
+  },
+  {
+   "rule": 1,
+   "supply": "1000000000000000",
+   "start": "1798675201",
+   "now": "1806451201",
+   "end": "1806451201",
+   "entitled": "30000000000000"
+  },
+  {
+   "rule": 2,
+   "supply": "1000000000000000",
+   "start": "1798675201",
+   "now": "1806451201",
+   "end": "1806451201",
+   "entitled": "50000000000000"
+  },
+  {
+   "rule": 1,
+   "supply": "1000000000000000",
+   "start": "1798675201",
+   "now": "1806451202",
+   "end": "1806451201",
+   "entitled": "30000000000000"
+  },
+  {
+   "rule": 2,
+   "supply": "1000000000000000",
+   "start": "1798675201",
+   "now": "1806451202",
+   "end": "1806451201",
+   "entitled": "50000000000000"
+  },
+  {
+   "rule": 1,
+   "supply": "1000000000000000",
+   "start": "1798675201",
+   "now": "1837987201",
+   "end": "1806451201",
+   "entitled": "30000000000000"
+  },
+  {
+   "rule": 2,
+   "supply": "1000000000000000",
+   "start": "1798675201",
+   "now": "1837987201",
+   "end": "1806451201",
+   "entitled": "50000000000000"
+  },
+  {
+   "rule": 1,
+   "supply": "1000000000000000",
+   "start": "1798675201",
+   "now": "9223372036854775807",
+   "end": "1806451201",
+   "entitled": "30000000000000"
+  },
+  {
+   "rule": 2,
+   "supply": "1000000000000000",
+   "start": "1798675201",
+   "now": "9223372036854775807",
+   "end": "1806451201",
+   "entitled": "50000000000000"
+  }
+ ],
+ "feeRouting": [
+  {
+   "version": 1,
+   "mode": 0,
+   "collected": "0",
+   "treasury": "0",
+   "dev": "0",
+   "parentA": "0",
+   "parentB": "0",
+   "dust": "0"
+  },
+  {
+   "version": 1,
+   "mode": 1,
+   "collected": "0",
+   "treasury": "0",
+   "dev": "0",
+   "parentA": "0",
+   "parentB": "0",
+   "dust": "0"
+  },
+  {
+   "version": 1,
+   "mode": 0,
+   "collected": "1",
+   "treasury": "0",
+   "dev": "0",
+   "parentA": "0",
+   "parentB": "0",
+   "dust": "1"
+  },
+  {
+   "version": 1,
+   "mode": 1,
+   "collected": "1",
+   "treasury": "0",
+   "dev": "0",
+   "parentA": "0",
+   "parentB": "0",
+   "dust": "1"
+  },
+  {
+   "version": 1,
+   "mode": 0,
+   "collected": "167",
+   "treasury": "147",
+   "dev": "19",
+   "parentA": "0",
+   "parentB": "0",
+   "dust": "1"
+  },
+  {
+   "version": 1,
+   "mode": 1,
+   "collected": "167",
+   "treasury": "97",
+   "dev": "19",
+   "parentA": "24",
+   "parentB": "24",
+   "dust": "3"
+  },
+  {
+   "version": 1,
+   "mode": 0,
+   "collected": "168",
+   "treasury": "148",
+   "dev": "20",
+   "parentA": "0",
+   "parentB": "0",
+   "dust": "0"
+  },
+  {
+   "version": 1,
+   "mode": 1,
+   "collected": "168",
+   "treasury": "98",
+   "dev": "20",
+   "parentA": "25",
+   "parentB": "25",
+   "dust": "0"
+  },
+  {
+   "version": 1,
+   "mode": 0,
+   "collected": "169",
+   "treasury": "148",
+   "dev": "20",
+   "parentA": "0",
+   "parentB": "0",
+   "dust": "1"
+  },
+  {
+   "version": 1,
+   "mode": 1,
+   "collected": "169",
+   "treasury": "98",
+   "dev": "20",
+   "parentA": "25",
+   "parentB": "25",
+   "dust": "1"
+  },
+  {
+   "version": 1,
+   "mode": 0,
+   "collected": "16800000",
+   "treasury": "14800000",
+   "dev": "2000000",
+   "parentA": "0",
+   "parentB": "0",
+   "dust": "0"
+  },
+  {
+   "version": 1,
+   "mode": 1,
+   "collected": "16800000",
+   "treasury": "9800000",
+   "dev": "2000000",
+   "parentA": "2500000",
+   "parentB": "2500000",
+   "dust": "0"
+  },
+  {
+   "version": 1,
+   "mode": 0,
+   "collected": "1000000007",
+   "treasury": "880952387",
+   "dev": "119047619",
+   "parentA": "0",
+   "parentB": "0",
+   "dust": "1"
+  },
+  {
+   "version": 1,
+   "mode": 1,
+   "collected": "1000000007",
+   "treasury": "583333337",
+   "dev": "119047619",
+   "parentA": "148809524",
+   "parentB": "148809524",
+   "dust": "3"
+  },
+  {
+   "version": 1,
+   "mode": 0,
+   "collected": "18446744073709551615",
+   "treasury": "16250703112553652613",
+   "dev": "2196040961155899001",
+   "parentA": "0",
+   "parentB": "0",
+   "dust": "1"
+  },
+  {
+   "version": 1,
+   "mode": 1,
+   "collected": "18446744073709551615",
+   "treasury": "10760600709663905108",
+   "dev": "2196040961155899001",
+   "parentA": "2745051201444873752",
+   "parentB": "2745051201444873752",
+   "dust": "2"
+  }
+ ],
+ "parentEligibility": [
+  {
+   "parentSupply": "0",
+   "threshold": "0"
+  },
+  {
+   "parentSupply": "1",
+   "threshold": "1"
+  },
+  {
+   "parentSupply": "10001",
+   "threshold": "6"
+  },
+  {
+   "parentSupply": "1000000000",
+   "threshold": "500000"
+  },
+  {
+   "parentSupply": "1000000000000",
+   "threshold": "500000000"
+  },
+  {
+   "parentSupply": "18446744073709551615",
+   "threshold": "9223372036854776"
+  }
+ ],
+ "parentAllocation": [
+  {
+   "reserve": "100",
+   "balance": "1",
+   "eligible": "3",
+   "allocation": "33"
+  },
+  {
+   "reserve": "50000000000000",
+   "balance": "400000000000",
+   "eligible": "400000000000",
+   "allocation": "50000000000000"
+  },
+  {
+   "reserve": "50000000000000",
+   "balance": "1",
+   "eligible": "400000000000",
+   "allocation": "125"
+  },
+  {
+   "reserve": "18446744073709551615",
+   "balance": "18446744073709551615",
+   "eligible": "18446744073709551615",
+   "allocation": "18446744073709551615"
+  }
+ ],
+ "lifecycle": [
+  {
+   "phase": 0,
+   "opensAt": "100",
+   "deadline": "200",
+   "launchDeadline": "300",
+   "soft": "50",
+   "total": "60",
+   "receiptCount": "2",
+   "settledCount": "2",
+   "settledAccepted": "60",
+   "now": "99",
+   "fundingOpen": false,
+   "failed": false,
+   "ready": false
+  },
+  {
+   "phase": 0,
+   "opensAt": "100",
+   "deadline": "200",
+   "launchDeadline": "300",
+   "soft": "50",
+   "total": "60",
+   "receiptCount": "2",
+   "settledCount": "2",
+   "settledAccepted": "60",
+   "now": "100",
+   "fundingOpen": true,
+   "failed": false,
+   "ready": false
+  },
+  {
+   "phase": 0,
+   "opensAt": "100",
+   "deadline": "200",
+   "launchDeadline": "300",
+   "soft": "50",
+   "total": "60",
+   "receiptCount": "2",
+   "settledCount": "2",
+   "settledAccepted": "60",
+   "now": "199",
+   "fundingOpen": true,
+   "failed": false,
+   "ready": false
+  },
+  {
+   "phase": 0,
+   "opensAt": "100",
+   "deadline": "200",
+   "launchDeadline": "300",
+   "soft": "50",
+   "total": "60",
+   "receiptCount": "2",
+   "settledCount": "2",
+   "settledAccepted": "60",
+   "now": "200",
+   "fundingOpen": false,
+   "failed": false,
+   "ready": true
+  },
+  {
+   "phase": 1,
+   "opensAt": "100",
+   "deadline": "200",
+   "launchDeadline": "300",
+   "soft": "50",
+   "total": "60",
+   "receiptCount": "2",
+   "settledCount": "2",
+   "settledAccepted": "60",
+   "now": "200",
+   "fundingOpen": false,
+   "failed": false,
+   "ready": true
+  },
+  {
+   "phase": 1,
+   "opensAt": "100",
+   "deadline": "200",
+   "launchDeadline": "300",
+   "soft": "50",
+   "total": "60",
+   "receiptCount": "2",
+   "settledCount": "2",
+   "settledAccepted": "60",
+   "now": "299",
+   "fundingOpen": false,
+   "failed": false,
+   "ready": true
+  },
+  {
+   "phase": 1,
+   "opensAt": "100",
+   "deadline": "200",
+   "launchDeadline": "300",
+   "soft": "50",
+   "total": "60",
+   "receiptCount": "2",
+   "settledCount": "2",
+   "settledAccepted": "60",
+   "now": "300",
+   "fundingOpen": false,
+   "failed": true,
+   "ready": false
+  },
+  {
+   "phase": 0,
+   "opensAt": "100",
+   "deadline": "200",
+   "launchDeadline": "300",
+   "soft": "50",
+   "total": "60",
+   "receiptCount": "2",
+   "settledCount": "2",
+   "settledAccepted": "60",
+   "now": "250",
+   "fundingOpen": false,
+   "failed": false,
+   "ready": true
+  },
+  {
+   "phase": 2,
+   "opensAt": "100",
+   "deadline": "200",
+   "launchDeadline": "300",
+   "soft": "50",
+   "total": "60",
+   "receiptCount": "2",
+   "settledCount": "2",
+   "settledAccepted": "60",
+   "now": "250",
+   "fundingOpen": false,
+   "failed": true,
+   "ready": false
+  },
+  {
+   "phase": 3,
+   "opensAt": "100",
+   "deadline": "200",
+   "launchDeadline": "300",
+   "soft": "50",
+   "total": "60",
+   "receiptCount": "2",
+   "settledCount": "2",
+   "settledAccepted": "60",
+   "now": "250",
+   "fundingOpen": false,
+   "failed": false,
+   "ready": false
+  },
+  {
+   "phase": 1,
+   "opensAt": "100",
+   "deadline": "200",
+   "launchDeadline": "300",
+   "soft": "50",
+   "total": "60",
+   "receiptCount": "2",
+   "settledCount": "1",
+   "settledAccepted": "60",
+   "now": "250",
+   "fundingOpen": false,
+   "failed": false,
+   "ready": false
+  },
+  {
+   "phase": 1,
+   "opensAt": "100",
+   "deadline": "200",
+   "launchDeadline": "300",
+   "soft": "50",
+   "total": "60",
+   "receiptCount": "0",
+   "settledCount": "0",
+   "settledAccepted": "60",
+   "now": "250",
+   "fundingOpen": false,
+   "failed": false,
+   "ready": false
+  },
+  {
+   "phase": 1,
+   "opensAt": "100",
+   "deadline": "200",
+   "launchDeadline": "300",
+   "soft": "50",
+   "total": "60",
+   "receiptCount": "2",
+   "settledCount": "2",
+   "settledAccepted": "49",
+   "now": "250",
+   "fundingOpen": false,
+   "failed": false,
+   "ready": false
+  },
+  {
+   "phase": 1,
+   "opensAt": "100",
+   "deadline": "200",
+   "launchDeadline": "300",
+   "soft": "50",
+   "total": "49",
+   "receiptCount": "2",
+   "settledCount": "2",
+   "settledAccepted": "49",
+   "now": "250",
+   "fundingOpen": false,
+   "failed": true,
+   "ready": false
+  },
+  {
+   "phase": 3,
+   "opensAt": "100",
+   "deadline": "200",
+   "launchDeadline": "300",
+   "soft": "50",
+   "total": "60",
+   "receiptCount": "2",
+   "settledCount": "2",
+   "settledAccepted": "60",
+   "now": "400",
+   "fundingOpen": false,
+   "failed": false,
+   "ready": false
+  },
+  {
+   "phase": 1,
+   "opensAt": "100",
+   "deadline": "200",
+   "launchDeadline": "300",
+   "soft": "50",
+   "total": "60",
+   "receiptCount": "2",
+   "settledCount": "2",
+   "settledAccepted": "60",
+   "now": "400",
+   "fundingOpen": false,
+   "failed": true,
+   "ready": false
+  }
+ ],
+ "buybackFloor": [
+  {
+   "name": "one SOL into 100 SOL / 1e6 parent at 0.25 %",
+   "amount": "1000000000",
+   "reserveIn": "100000000000",
+   "reserveOut": "1000000",
+   "tradeFeeRate": "2500",
+   "maxSlippageBps": 150,
+   "referenceOut": "9876",
+   "floor": "9727"
+  },
+  {
+   "name": "the production quote case",
+   "amount": "1000",
+   "reserveIn": "10000",
+   "reserveOut": "10000",
+   "tradeFeeRate": "20000",
+   "maxSlippageBps": 200,
+   "referenceOut": "892",
+   "floor": "874"
+  },
+  {
+   "name": "parent A test pool, 1,000 lamports",
+   "amount": "1000",
+   "reserveIn": "100000000000",
+   "reserveOut": "1000000000000",
+   "tradeFeeRate": "2500",
+   "maxSlippageBps": 150,
+   "referenceOut": "9969",
+   "floor": "9819"
+  },
+  {
+   "name": "parent A test pool, 0.3 SOL",
+   "amount": "300000000",
+   "reserveIn": "100000000000",
+   "reserveOut": "1000000000000",
+   "tradeFeeRate": "2500",
+   "maxSlippageBps": 150,
+   "referenceOut": "2983571661",
+   "floor": "2938818086"
+  },
+  {
+   "name": "parent A test pool, 0.5 SOL",
+   "amount": "500000000",
+   "reserveIn": "100000000000",
+   "reserveOut": "1000000000000",
+   "tradeFeeRate": "2500",
+   "maxSlippageBps": 150,
+   "referenceOut": "4962748292",
+   "floor": "4888307067"
+  },
+  {
+   "name": "parent B test pool, 0.5 SOL, on the 2.5 % tier",
+   "amount": "500000000",
+   "reserveIn": "50000000000",
+   "reserveOut": "250000000000",
+   "tradeFeeRate": "25000",
+   "maxSlippageBps": 150,
+   "referenceOut": "2413963852",
+   "floor": "2377754394"
+  },
+  {
+   "name": "parent B test pool, 1,000 lamports, on the 2.5 % tier",
+   "amount": "1000",
+   "reserveIn": "50000000000",
+   "reserveOut": "250000000000",
+   "tradeFeeRate": "25000",
+   "maxSlippageBps": 150,
+   "referenceOut": "4874",
+   "floor": "4800"
+  },
+  {
+   "name": "no slippage allowance",
+   "amount": "10000",
+   "reserveIn": "1000000",
+   "reserveOut": "1000000",
+   "tradeFeeRate": "0",
+   "maxSlippageBps": 0,
+   "referenceOut": "9900",
+   "floor": "9900"
+  },
+  {
+   "name": "the 5 % ceiling",
+   "amount": "10000",
+   "reserveIn": "1000000",
+   "reserveOut": "1000000",
+   "tradeFeeRate": "2500",
+   "maxSlippageBps": 500,
+   "referenceOut": "9876",
+   "floor": "9382"
+  },
+  {
+   "name": "u64 extremes",
+   "amount": "18446744073709551615",
+   "reserveIn": "18446744073709551615",
+   "reserveOut": "18446744073709551615",
+   "tradeFeeRate": "25000",
+   "maxSlippageBps": 500,
+   "referenceOut": "9106620492084462189",
+   "floor": "8651289467480239079"
+  },
+  {
+   "name": "one unit of input is all fee",
+   "amount": "1",
+   "reserveIn": "1000000",
+   "reserveOut": "1000000",
+   "tradeFeeRate": "2500",
+   "maxSlippageBps": 100,
+   "referenceOut": null,
+   "floor": null
+  },
+  {
+   "name": "empty input reserve",
+   "amount": "1000",
+   "reserveIn": "0",
+   "reserveOut": "1",
+   "tradeFeeRate": "0",
+   "maxSlippageBps": 100,
+   "referenceOut": null,
+   "floor": null
+  },
+  {
+   "name": "empty output reserve",
+   "amount": "1000",
+   "reserveIn": "1",
+   "reserveOut": "0",
+   "tradeFeeRate": "0",
+   "maxSlippageBps": 100,
+   "referenceOut": null,
+   "floor": null
+  },
+  {
+   "name": "output rounds to zero",
+   "amount": "1000",
+   "reserveIn": "1000000000",
+   "reserveOut": "1",
+   "tradeFeeRate": "0",
+   "maxSlippageBps": 100,
+   "referenceOut": null,
+   "floor": null
+  },
+  {
+   "name": "a 100 % fee is not a pool",
+   "amount": "1000",
+   "reserveIn": "1",
+   "reserveOut": "1",
+   "tradeFeeRate": "1000000",
+   "maxSlippageBps": 100,
+   "referenceOut": null,
+   "floor": null
+  }
+ ],
+ "termsHash": [
+  {
+   "name": "standard",
+   "terms": {
+    "layoutVersion": 2,
+    "mode": 0,
+    "decimals": 6,
+    "splitPolicy": 1,
+    "vestingRule": 1,
+    "feeRoutingVersion": 1,
+    "creatorFeeEnabled": 0,
+    "genesis": "0707070707070707070707070707070707070707070707070707070707070707",
+    "creator": "0101010101010101010101010101010101010101010101010101010101010101",
+    "nonce": "11",
+    "dev": "0202020202020202020202020202020202020202020202020202020202020202",
+    "treasury": "020d5fde31a2acb8ef4fb1e5f1f4034f1907798a66e887aa9255f3bcefca8bac",
+    "childMint": "0404040404040404040404040404040404040404040404040404040404040404",
+    "supply": "1000000000000000",
+    "opensAt": "1790000100",
+    "deadline": "1790007300",
+    "launchDeadline": "1790014500",
+    "soft": "50000000000",
+    "hard": "100000000000",
+    "ammProgram": "a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1",
+    "ammConfig": "a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2",
+    "ammTradeFeeRate": "25000",
+    "ammConfigIndex": 7,
+    "feeWeights": {
+     "treasury": 148,
+     "dev": 20,
+     "parentA": 0,
+     "parentB": 0
+    },
+    "splitBps": {
+     "participants": 4850,
+     "liquidity": 4850,
+     "parentA": 0,
+     "parentB": 0,
+     "dev": 300
+    },
+    "vesting": {
+     "instantBps": 100,
+     "linearBps": 200,
+     "months": 3
+    },
+    "buybackMaxSlippageBps": 0,
+    "lockProgram": "b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1",
+    "distributionProgram": "0000000000000000000000000000000000000000000000000000000000000000",
+    "parentMint": [
+     "0000000000000000000000000000000000000000000000000000000000000000",
+     "0000000000000000000000000000000000000000000000000000000000000000"
+    ],
+    "parentProgram": [
+     "0000000000000000000000000000000000000000000000000000000000000000",
+     "0000000000000000000000000000000000000000000000000000000000000000"
+    ],
+    "parentSlot": [
+     "0",
+     "0"
+    ],
+    "parentRoot": [
+     "0000000000000000000000000000000000000000000000000000000000000000",
+     "0000000000000000000000000000000000000000000000000000000000000000"
+    ],
+    "parentSupply": [
+     "0",
+     "0"
+    ],
+    "parentEligible": [
+     "0",
+     "0"
+    ],
+    "parentExpirySeconds": "0",
+    "metadataHash": "0909090909090909090909090909090909090909090909090909090909090909",
+    "metadataUri": "ipfs://bafybeigdyrzt5sfp7udm7hu76uh7y26nf3efuylqabf3oclgtqy55fbzdi/kids.json",
+    "parentReferenceConfig": [
+     0,
+     0
+    ]
+   },
+   "sealedHex": "0200000601010100070707070707070707070707070707070707070707070707070707070707070701010101010101010101010101010101010101010101010101010101010101010b000000000000000202020202020202020202020202020202020202020202020202020202020202020d5fde31a2acb8ef4fb1e5f1f4034f1907798a66e887aa9255f3bcefca8bac04040404040404040404040404040404040404040404040404040404040404040080c6a47e8d0300e43bb16a000000000458b16a000000002474b16a0000000000743ba40b00000000e8764817000000a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a86100000000000007009400140000000000f212f212000000002c016400c80003000000b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b10000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000009090909090909090909090909090909090909090909090909090909090909094c697066733a2f2f62616679626569676479727a74357366703775646d37687537367568377932366e6633656675796c71616266336f636c67747179353566627a64692f6b6964732e6a736f6e00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+   "hash": "9370017cb7b6775832606916292b414dfc825659c793a27f52830f6645103499"
+  },
+  {
+   "name": "family",
+   "terms": {
+    "layoutVersion": 2,
+    "mode": 1,
+    "decimals": 6,
+    "splitPolicy": 2,
+    "vestingRule": 1,
+    "feeRoutingVersion": 1,
+    "creatorFeeEnabled": 0,
+    "genesis": "0707070707070707070707070707070707070707070707070707070707070707",
+    "creator": "0101010101010101010101010101010101010101010101010101010101010101",
+    "nonce": "11",
+    "dev": "0202020202020202020202020202020202020202020202020202020202020202",
+    "treasury": "020d5fde31a2acb8ef4fb1e5f1f4034f1907798a66e887aa9255f3bcefca8bac",
+    "childMint": "0404040404040404040404040404040404040404040404040404040404040404",
+    "supply": "1000000000000000",
+    "opensAt": "1790000100",
+    "deadline": "1790007300",
+    "launchDeadline": "1790014500",
+    "soft": "50000000000",
+    "hard": "100000000000",
+    "ammProgram": "a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1",
+    "ammConfig": "a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2",
+    "ammTradeFeeRate": "25000",
+    "ammConfigIndex": 7,
+    "feeWeights": {
+     "treasury": 98,
+     "dev": 20,
+     "parentA": 25,
+     "parentB": 25
+    },
+    "splitBps": {
+     "participants": 4350,
+     "liquidity": 4350,
+     "parentA": 500,
+     "parentB": 500,
+     "dev": 300
+    },
+    "vesting": {
+     "instantBps": 100,
+     "linearBps": 200,
+     "months": 3
+    },
+    "buybackMaxSlippageBps": 150,
+    "lockProgram": "b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1",
+    "distributionProgram": "d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1",
+    "parentMint": [
+     "1111111111111111111111111111111111111111111111111111111111111111",
+     "1212121212121212121212121212121212121212121212121212121212121212"
+    ],
+    "parentProgram": [
+     "2121212121212121212121212121212121212121212121212121212121212121",
+     "2222222222222222222222222222222222222222222222222222222222222222"
+    ],
+    "parentSlot": [
+     "446208617",
+     "446208618"
+    ],
+    "parentRoot": [
+     "3131313131313131313131313131313131313131313131313131313131313131",
+     "3232323232323232323232323232323232323232323232323232323232323232"
+    ],
+    "parentSupply": [
+     "1000000000000",
+     "500000000000"
+    ],
+    "parentEligible": [
+     "400000000000",
+     "200000000000"
+    ],
+    "parentExpirySeconds": "2592000",
+    "metadataHash": "0909090909090909090909090909090909090909090909090909090909090909",
+    "metadataUri": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "parentReferenceConfig": [
+     1,
+     8
+    ]
+   },
+   "sealedHex": "0200010602010100070707070707070707070707070707070707070707070707070707070707070701010101010101010101010101010101010101010101010101010101010101010b000000000000000202020202020202020202020202020202020202020202020202020202020202020d5fde31a2acb8ef4fb1e5f1f4034f1907798a66e887aa9255f3bcefca8bac04040404040404040404040404040404040404040404040404040404040404040080c6a47e8d0300e43bb16a000000000458b16a000000002474b16a0000000000743ba40b00000000e8764817000000a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a86100000000000007006200140019001900fe10fe10f401f4012c016400c80003960000b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d11111111111111111111111111111111111111111111111111111111111111111121212121212121212121212121212121212121212121212121212121212121221212121212121212121212121212121212121212121212121212121212121212222222222222222222222222222222222222222222222222222222222222222699a981a000000006a9a981a00000000313131313131313131313131313131313131313131313131313131313131313132323232323232323232323232323232323232323232323232323232323232320010a5d4e80000000088526a7400000000a0db215d00000000d0ed902e000000008d2700000000000909090909090909090909090909090909090909090909090909090909090909806161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161010800",
+   "hash": "e89932d064254f99ac20821daeac435b2effaafaa81aaa28eb948a6a8c9de895"
+  },
+  {
+   "name": "extremes",
+   "terms": {
+    "layoutVersion": 2,
+    "mode": 0,
+    "decimals": 6,
+    "splitPolicy": 1,
+    "vestingRule": 1,
+    "feeRoutingVersion": 1,
+    "creatorFeeEnabled": 0,
+    "genesis": "0707070707070707070707070707070707070707070707070707070707070707",
+    "creator": "0101010101010101010101010101010101010101010101010101010101010101",
+    "nonce": "18446744073709551615",
+    "dev": "0202020202020202020202020202020202020202020202020202020202020202",
+    "treasury": "020d5fde31a2acb8ef4fb1e5f1f4034f1907798a66e887aa9255f3bcefca8bac",
+    "childMint": "0404040404040404040404040404040404040404040404040404040404040404",
+    "supply": "18446744073709551615",
+    "opensAt": "9223372036854775805",
+    "deadline": "9223372036854775806",
+    "launchDeadline": "9223372036854775807",
+    "soft": "1",
+    "hard": "18446744073709551615",
+    "ammProgram": "a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1",
+    "ammConfig": "a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2",
+    "ammTradeFeeRate": "18446744073709551615",
+    "ammConfigIndex": 65535,
+    "feeWeights": {
+     "treasury": 148,
+     "dev": 20,
+     "parentA": 0,
+     "parentB": 0
+    },
+    "splitBps": {
+     "participants": 4850,
+     "liquidity": 4850,
+     "parentA": 0,
+     "parentB": 0,
+     "dev": 300
+    },
+    "vesting": {
+     "instantBps": 100,
+     "linearBps": 200,
+     "months": 3
+    },
+    "buybackMaxSlippageBps": 65535,
+    "lockProgram": "b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1",
+    "distributionProgram": "0000000000000000000000000000000000000000000000000000000000000000",
+    "parentMint": [
+     "0000000000000000000000000000000000000000000000000000000000000000",
+     "0000000000000000000000000000000000000000000000000000000000000000"
+    ],
+    "parentProgram": [
+     "0000000000000000000000000000000000000000000000000000000000000000",
+     "0000000000000000000000000000000000000000000000000000000000000000"
+    ],
+    "parentSlot": [
+     "0",
+     "0"
+    ],
+    "parentRoot": [
+     "0000000000000000000000000000000000000000000000000000000000000000",
+     "0000000000000000000000000000000000000000000000000000000000000000"
+    ],
+    "parentSupply": [
+     "0",
+     "0"
+    ],
+    "parentEligible": [
+     "0",
+     "0"
+    ],
+    "parentExpirySeconds": "0",
+    "metadataHash": "0909090909090909090909090909090909090909090909090909090909090909",
+    "metadataUri": "x",
+    "parentReferenceConfig": [
+     254,
+     255
+    ]
+   },
+   "sealedHex": "020000060101010007070707070707070707070707070707070707070707070707070707070707070101010101010101010101010101010101010101010101010101010101010101ffffffffffffffff0202020202020202020202020202020202020202020202020202020202020202020d5fde31a2acb8ef4fb1e5f1f4034f1907798a66e887aa9255f3bcefca8bac0404040404040404040404040404040404040404040404040404040404040404fffffffffffffffffdffffffffffff7ffeffffffffffff7fffffffffffffff7f0100000000000000ffffffffffffffffa1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2ffffffffffffffffffff9400140000000000f212f212000000002c016400c80003ffff00b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000909090909090909090909090909090909090909090909090909090909090909017800000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000feff00",
+   "hash": "05c4752fc8cba6c950bf77ab0b04aa674f7c20335beda5f525b85be8abc14829"
+  }
+ ]
+}

@@ -1,0 +1,38 @@
+{
+  "mode": "hosted",
+  "lane": "economics",
+  "programVersion": 3,
+  "genesisHash": "5eykt4UsFv8P8NJdTREpY1vzqKqZKvdpKuc147dw2N9d",
+  "programId": "ABq14qMonDrPbRJUbyfACsazK2ESaiKWcw5u66qy6f7T",
+  "concurrency": 2,
+  "rpcAdmission": {
+    "resource": "rpc-economics",
+    "policy": {
+      "ratePerSecond": 10,
+      "burst": 20,
+      "lanes": {
+        "economics": {
+          "ratePerSecond": 10,
+          "burst": 20
+        }
+      }
+    }
+  },
+  "signer": {
+    "url": "http://kids-signer-v3.railway.internal:4177",
+    "publicKey": "7MESsrmBCSAnA32uA67K9V9cwXnkVNGr6C8eSLEGJkzi"
+  },
+  "signerAdmission": {
+    "resource": "signer-economics",
+    "policy": {
+      "ratePerSecond": 10,
+      "burst": 20,
+      "lanes": {
+        "economics": {
+          "ratePerSecond": 10,
+          "burst": 20
+        }
+      }
+    }
+  }
+}

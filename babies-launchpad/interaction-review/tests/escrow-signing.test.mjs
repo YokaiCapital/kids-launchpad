@@ -1,0 +1,33 @@
+import test from 'node:test';import assert from 'node:assert/strict';
+import {Keypair,Transaction,TransactionInstruction,SystemProgram,ComputeBudgetProgram,VersionedTransaction}from'@solana/web3.js';
+import {decodeApprovedEscrow,assertApprovedMessage}from'../src/escrow-signing.mjs';
+function fixture(){const signer=Keypair.generate(),program=Keypair.generate().publicKey,campaign=Keypair.generate().publicKey;const tx=new Transaction({feePayer:signer.publicKey,recentBlockhash:Keypair.generate().publicKey.toBase58()}).add(new TransactionInstruction({programId:program,keys:[{pubkey:signer.publicKey,isSigner:true,isWritable:true},{pubkey:campaign,isSigner:false,isWritable:true},{pubkey:Keypair.generate().publicKey,isSigner:false,isWritable:true},{pubkey:SystemProgram.programId,isSigner:false,isWritable:false}],data:Buffer.from([1,1,0,0,0,0,0,0,0])}));return{signer,tx,terms:{owner:signer.publicKey.toBase58(),programId:program.toBase58(),campaign:campaign.toBase58(),action:'commit'}};}
+test('external signing preserves legacy approved bytes and server signature validation',()=>{for(let n=0;n<50;n++){const{signer,tx,terms}=fixture(),approved=tx.serializeMessage(),wire=tx.serialize({requireAllSignatures:false,verifySignatures:false});const decoded=decodeApprovedEscrow(wire,terms);assert.equal(decoded.version,'legacy');decoded.sign([signer]);const server=Transaction.from(assertApprovedMessage(decoded,approved));assert.deepEqual(server.serializeMessage(),approved);assert.equal(server.verifySignatures(),true);}});
+test('wallet changes and incorrect payer/program/campaign remain rejected',()=>{const{signer,tx,terms}=fixture(),wire=tx.serialize({requireAllSignatures:false,verifySignatures:false}),decoded=decodeApprovedEscrow(wire,terms),approved=decoded.message.serialize().slice();decoded.message.recentBlockhash=Keypair.generate().publicKey.toBase58();decoded.sign([signer]);assert.throws(()=>assertApprovedMessage(decoded,approved),/Wallet changed/);for(const key of ['owner','programId','campaign'])assert.throws(()=>decodeApprovedEscrow(wire,{...terms,[key]:Keypair.generate().publicKey.toBase58()}));});
+test('compiled signing path avoids locale-dependent account sorting',()=>{const{tx,terms}=fixture(),wire=tx.serialize({requireAllSignatures:false,verifySignatures:false}),original=String.prototype.localeCompare;try{String.prototype.localeCompare=()=>{throw Error('unexpected account recompilation');};const decoded=decodeApprovedEscrow(wire,terms);assert.deepEqual(decoded.message.serialize(),VersionedTransaction.deserialize(wire).message.serialize());}finally{String.prototype.localeCompare=original;}});
+
+test('bounded wallet priority fees work while transfers and excess fees are rejected',()=>{const {signer,tx,terms}=fixture(),approved=tx.serializeMessage();const sign=extra=>{const modified=new Transaction({feePayer:tx.feePayer,recentBlockhash:tx.recentBlockhash}).add(...extra,...tx.instructions);modified.sign(signer);return modified;};assert.doesNotThrow(()=>assertApprovedMessage(sign([ComputeBudgetProgram.setComputeUnitLimit({units:200000}),ComputeBudgetProgram.setComputeUnitPrice({microLamports:1000})]),approved));assert.throws(()=>assertApprovedMessage(sign([SystemProgram.transfer({fromPubkey:signer.publicKey,toPubkey:Keypair.generate().publicKey,lamports:1})]),approved),/unapproved/);assert.throws(()=>assertApprovedMessage(sign([ComputeBudgetProgram.setComputeUnitPrice({microLamports:100000000})]),approved),/fee exceeds/);assert.throws(()=>assertApprovedMessage(sign([ComputeBudgetProgram.setComputeUnitLimit({units:200000}),ComputeBudgetProgram.setComputeUnitLimit({units:200000})]),approved),/Unapproved/);});
+test('escrow data and account privileges cannot be changed',()=>{for(const kind of ['data','account','writable','signer']){const{signer,tx}=fixture(),approved=tx.serializeMessage(),ix=tx.instructions[0];if(kind==='data')ix.data[1]++;if(kind==='account')ix.keys[1].pubkey=Keypair.generate().publicKey;if(kind==='writable')ix.keys[1].isWritable=false;if(kind==='signer')ix.keys[1].isSigner=true;const modified=VersionedTransaction.deserialize(tx.serialize({requireAllSignatures:false,verifySignatures:false}));assert.throws(()=>assertApprovedMessage(modified,approved),/changed/);}});
+test('legacy refund accepts bounded fee without changing recipient, and wire signature fails after tampering',async()=>{
+ const {validateApprovedMessage}=await import('../../shared/approved-message.mjs');
+ const {verifySignature}=await import('../../shared/solana.mjs');
+ const {signer,tx}=fixture();tx.instructions[0].data=Buffer.from([3]);
+ const approved=VersionedTransaction.deserialize(tx.serialize({requireAllSignatures:false,verifySignatures:false}));
+ const modified=new Transaction({feePayer:tx.feePayer,recentBlockhash:tx.recentBlockhash}).add(ComputeBudgetProgram.setComputeUnitLimit({units:1000000}),ComputeBudgetProgram.setComputeUnitPrice({microLamports:100000}),...tx.instructions);
+ modified.sign(signer);const wire=VersionedTransaction.deserialize(modified.serialize());
+ assert.equal(validateApprovedMessage(wire.message,approved.message),true);
+ assert.equal(verifySignature(signer.publicKey.toBase58(),wire.message.serialize(),wire.signatures[0]),true);
+ wire.message.recentBlockhash=Keypair.generate().publicKey.toBase58();
+ assert.equal(verifySignature(signer.publicKey.toBase58(),wire.message.serialize(),wire.signatures[0]),false);
+ const excessive=new Transaction({feePayer:tx.feePayer,recentBlockhash:tx.recentBlockhash}).add(ComputeBudgetProgram.setComputeUnitLimit({units:1000000}),ComputeBudgetProgram.setComputeUnitPrice({microLamports:100001}),...tx.instructions);
+ assert.throws(()=>validateApprovedMessage(VersionedTransaction.deserialize(excessive.serialize({requireAllSignatures:false,verifySignatures:false})).message,approved.message),/fee exceeds/);
+});
+test('price-only wallet budgets use the maximum runtime limit for fee-cap enforcement',()=>{
+ const {signer,tx}=fixture(),approved=tx.serializeMessage();
+ const priceOnly=price=>{const modified=new Transaction({feePayer:tx.feePayer,recentBlockhash:tx.recentBlockhash}).add(ComputeBudgetProgram.setComputeUnitPrice({microLamports:price}),...tx.instructions);modified.sign(signer);return modified;};
+ // At 1.4m units, ceiling(71428 * 1.4m / 1m) is exactly the allowed100k lamports.
+ assert.doesNotThrow(()=>assertApprovedMessage(priceOnly(71428),approved));
+ assert.throws(()=>assertApprovedMessage(priceOnly(71429),approved),/fee exceeds/);
+ // The previous200k assumption would incorrectly permit this price for multi-instruction claims.
+ assert.throws(()=>assertApprovedMessage(priceOnly(500000),approved),/fee exceeds/);
+});

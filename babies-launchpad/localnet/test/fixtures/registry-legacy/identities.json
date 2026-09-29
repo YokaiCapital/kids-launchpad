@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "network": "mainnet",
+  "genesisHash": "5eykt4UsFv8P8NJdTREpY1vzqKqZKvdpKuc147dw2N9d",
+  "parents": [{"role": "parentA", "mint": "YMN9Qj5jPNp7j14VPcML1B6xGgcPWVZUGLFU3Mnyfaf"}, {"role": "parentB", "mint": "cGfHiC6Kgg3FpFZvgwGcswsCRtp4aBP2fzuXRQPizuN"}],
+  "devWallet": {"address": "US517G5965aydkZ46HS38QLi7UQiSojurfbQfKCELFx"},
+  "treasuryWallet": {"address": "QWmroo4YnnMqYW3cnxWkFdaTxGD3P7vMSzwMHGbUzwF"},
+  "program": {"programId": "4vJ9JU1bJJE96FWSJKvHsmmFADCg4gpZQff4P3bkLKi"},
+  "firstCampaign": {
+    "campaign": "8qbHbw2BbbTHBW1sbeqakYXVKRQM8Ne7pLK7m6CVfeR",
+    "coinMint": "LbUiWL3xVV8hTFYBVdbTNrpDo41NKS6o3LHHuDzjfcY",
+    "pool": "CktRuQ2mttgRGkXJtyksdKHjUdc2C4TgDzyB98oEzy8",
+    "launchSignature": "4x6SEETKp9EV89pRY1PJQx7CTxhHxdnxLB2bJwrnhV7PHF7sbsHXLMefShUUDFJa2mCW68pJozU7ef2ZxcfKQoba",
+    "launchedAt": "2026-09-23T02:08:49Z",
+    "terms": "1 SOL soft, 5 SOL hard, 10 minutes (test)"
+  }
+}

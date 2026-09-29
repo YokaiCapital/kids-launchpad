@@ -1,0 +1,80 @@
+import {feeAddresses} from './atomic-fees.mjs';
+import {networkProfile,scopeFor} from './network.mjs';
+const PROFILE=networkProfile();
+import {fileURLToPath as _furl} from 'node:url';
+const feeJournalPath=_furl(new URL('./.runtime/active-fee-operator.json',import.meta.url));
+/** Confirmed fee operations for this campaign, newest first, public fields only. */
+export function readFeeEvents(campaign,path=feeJournalPath){
+ if(!existsSync(path))return [];let j;try{j=JSON.parse(readFileSync(path,'utf8'));}catch{return [];}
+ if(j?.identity?.campaign!==campaign||!Array.isArray(j.history))return [];
+ return j.history.slice(-60).reverse().map(e=>({id:e.id,kind:e.kind,index:e.index??null,amount:e.amount??null,signature:e.signature,at:e.at,delta:e.delta||null}));
+}
+/** The keeper's running totals of the coin buyback (build 6, tag 27): SOL spent and coins bought and burned, from the
+ * confirmed counter deltas. The on-chain counters cannot give these on their own (spent A and B include the parent
+ * purchases made before the upgrade; the burned-coin counter includes the coin-side fee burns of tag 26). Null without
+ * a journal for this campaign; never zero when unknown. */
+export function readChildBuybackTotals(campaign,path=feeJournalPath){
+ if(!existsSync(path))return null;let j;try{j=JSON.parse(readFileSync(path,'utf8'));}catch{return null;}
+ if(j?.identity?.campaign!==campaign)return null;const t=j.childBuyback;
+ if(!t)return {spentLamports:'0',boughtAndBurnedRaw:'0',slices:0};
+ return {spentLamports:String(t.spentLamports||'0'),boughtAndBurnedRaw:String(t.boughtAndBurnedRaw||'0'),slices:Number(t.slices||0)};
+}
+/** Fee block for the site: the on-chain counters as served today, plus the coin-buyback bucket when the live build has
+ * 'child-buyback' (pending from the chain, spent and burned from the keeper's totals). Older builds get the same object
+ * as before, byte for byte. */
+export function feeBlock(counters,features,totals){
+ if(!counters)return null;const fees={...counters};
+ if(Array.isArray(features)&&features.includes('child-buyback')){
+  const pending=BigInt(counters.parentAAllocated)+BigInt(counters.parentBAllocated)-BigInt(counters.parentASpent)-BigInt(counters.parentBSpent);
+  fees.childBuybackPending=(pending>0n?pending:0n).toString();fees.childBuybackSpent=totals?totals.spentLamports:null;fees.childBoughtAndBurned=totals?totals.boughtAndBurnedRaw:null;
+ }
+ return fees;
+}
+import {resolvePostlaunchCampaign} from './postlaunch-campaign.mjs';
+// Read-only view of the latest qualified local fixture. Never selects the public campaign.
+import {readFileSync,existsSync} from 'node:fs';
+import {PublicKey} from '@solana/web3.js';
+import {NATIVE_MINT,TOKEN_PROGRAM_ID,unpackAccount,unpackMint} from '@solana/spl-token';
+import {atomicContext,readCampaign,CPMM,campaignPoolAddresses,approvedTier} from './atomic-launch.mjs';
+import {distributionAddress,vaultAddress,decodeDistribution,distributionSummary} from './distribution.mjs';import {parentStats} from './parent-stats.mjs';
+import {manifestFeatures} from './program-builds.mjs';
+import {poolAddresses,decodePool} from './cpmm.mjs';
+import {singleFlight} from '../shared/single-flight.mjs';
+async function readPostlaunchState(scope='active'){
+ const selected=await resolvePostlaunchCampaign(scope);
+ if(!selected)return {configured:false,network:PROFILE.network,scope:scopeFor(PROFILE,scope==='active'),claims:null};
+ const {ctx,state:campaign,signature}=selected;
+ const p=campaignPoolAddresses(campaign.mint,campaign.pool);
+ const {context,value}=await ctx.connection.getMultipleAccountsInfoAndContext([p.pool,p.vault0,p.vault1,campaign.mint],{commitment:'confirmed'});
+ const pool=decodePool(value[0],CPMM,p);
+ if(!pool.config.equals(p.config)||!approvedTier(pool.config)||pool.creatorFeesEnabled)throw Error('Pool policy mismatch');
+ const vaults=[unpackAccount(p.vault0,value[1],TOKEN_PROGRAM_ID),unpackAccount(p.vault1,value[2],TOKEN_PROGRAM_ID)],mint=unpackMint(campaign.mint,value[3],TOKEN_PROGRAM_ID),data=value[0].data;
+ for(let i=0;i<2;i++)if(!vaults[i].owner.equals(p.authority)||!vaults[i].mint.equals(i?p.mint1:p.mint0))throw Error('Pool vault identity mismatch');
+ const reserve0=vaults[0].amount-data.readBigUInt64LE(341)-data.readBigUInt64LE(357)-data.readBigUInt64LE(397);
+ const reserve1=vaults[1].amount-data.readBigUInt64LE(349)-data.readBigUInt64LE(365)-data.readBigUInt64LE(405);
+ if(reserve0<=0n||reserve1<=0n)throw Error('Pool reserves unavailable');
+ const childFirst=p.mint0.equals(campaign.mint);
+ const feeAddress=feeAddresses(ctx,selected.campaign,campaign.mint).state,feeAccount=await ctx.connection.getAccountInfo(feeAddress,'confirmed');let fees=null;
+ if(feeAccount){const d=feeAccount.data;if(!feeAccount.owner.equals(ctx.programId)||d.length!==128||d.subarray(0,8).toString()!=='KIDSFEE1'||!d.subarray(8,40).equals(selected.campaign.toBuffer()))throw Error('Fee account identity mismatch');fees=Object.fromEntries(['childPending','totalSol','treasuryPaid','devPaid','parentAAllocated','parentBAllocated','parentASpent','parentBSpent','parentABurned','parentBBurned','childBurned'].map((name,i)=>[name,d.readBigUInt64LE(40+i*8).toString()]));}
+ const programFeatures=manifestFeatures(ctx.manifest);fees=feeBlock(fees,programFeatures,readChildBuybackTotals(selected.campaign.toBase58()));
+
+ const {authorityAddress}=await import('./atomic-launch.mjs');const configInfo=await ctx.connection.getAccountInfo(p.config,'confirmed');const tradeFeeBps=configInfo?Number(configInfo.data.readBigUInt64LE(12))/100:p.tier.tradeFeeBps;const launchAuthority=authorityAddress(ctx,selected.campaign);
+
+ const feeEvents=readFeeEvents(selected.campaign.toBase58());
+ let parentStatsBlock=null;try{parentStatsBlock=await parentStats(ctx,campaign);}catch(error){console.log(JSON.stringify({event:'parent-stats-unavailable',reason:String(error?.message||error).slice(0,120)}));}
+ let distribution=null;
+ if(campaign.distributionActivated){const dp=campaign.distributionProgram,info=await ctx.connection.getAccountInfo(distributionAddress(dp,campaign.address),'confirmed');if(info){const dist=decodeDistribution(info,dp),s=distributionSummary(dist,Math.floor(Date.now()/1000));
+  distribution={program:dp.toBase58(),account:distributionAddress(dp,campaign.address).toBase58(),vaults:[0,1,2,3].map(k=>vaultAddress(dp,campaign.address,k,campaign.mint).toBase58()),allocationRaw:dist.allocation.map(String),claimedRaw:dist.claimed.map(String),burnedRaw:dist.burned.map(String),remainingRaw:s.remaining.map(String),launchTimeUnix:dist.launchTime,parentExpiryUnix:dist.parentExpiry,parentWindowOpen:s.parentWindowOpen,parentExpired:s.parentExpired,parentBurned:dist.parentBurned,devStartUnix:dist.devStart,devEndUnix:dist.devEnd};}}
+
+ return {configured:true,network:PROFILE.network,explorerUrl:PROFILE.explorerUrl,explorerCluster:PROFILE.explorerCluster,scope:selected.scope,genesisHash:ctx.manifest.genesisHash,programId:ctx.programId.toBase58(),programFeatures,campaign:selected.campaign.toBase58(),mint:campaign.mint.toBase58(),pool:campaign.pool.toBase58(),launchSignature:signature,feeEvents,distribution,parentStats:parentStatsBlock,parentClaimWindow:parentStatsBlock?.window??null,receiptHistoryAvailable:selected.receiptHistoryAvailable,launchedAt:campaign.launchedAt,baseReserveRaw:(childFirst?reserve0:reserve1).toString(),quoteReserveLamports:(childFirst?reserve1:reserve0).toString(),supplyRaw:mint.supply.toString(),decimals:mint.decimals,tradeFeeBps,launchAuthority:launchAuthority.toBase58(),mintAuthorityRevoked:mint.mintAuthority===null,freezeAuthorityRevoked:mint.freezeAuthority===null,fees,liquidityLocked:null,liquidityLockQualified:true,claims:null,observedSlot:context.slot,observedAt:new Date().toISOString(),notice:selected.scope.startsWith('active-')?(PROFILE.network==='mainnet'?'Active Shartcoin campaign on Solana mainnet.':'Active Shartcoin campaign launched on isolated '+PROFILE.network+'. No mainnet funds.'):'Separate rehearsal coin. This is not the active Shartcoin campaign. Liquidity lock was verified at qualification; balances are read from the local chain.'};
+}
+
+const active=singleFlight(()=>readPostlaunchState('active'),{ttlMs:2000}),rehearsal=singleFlight(()=>readPostlaunchState('rehearsal'),{ttlMs:2000});
+/** SOL and coin balances of the signed-in wallet on this ledger (strings), read at confirmed commitment. */
+export async function walletBalances(connection,owner,mint){
+ const {PublicKey}=await import('@solana/web3.js');const {getAssociatedTokenAddressSync,TOKEN_PROGRAM_ID}=await import('@solana/spl-token');
+ const wallet=new PublicKey(owner),ata=getAssociatedTokenAddressSync(new PublicKey(mint),wallet,false,TOKEN_PROGRAM_ID);
+ const [sol,coin]=await Promise.all([connection.getBalance(wallet,'confirmed'),connection.getTokenAccountBalance(ata,'confirmed').catch(()=>null)]);
+ return {owner,solLamports:String(sol),coinRaw:String(coin?.value?.amount||'0'),coinDecimals:6,feeReserveLamports:'10000000'};
+}
+export const postlaunchState=(scope='active')=>scope==='rehearsal'?rehearsal():active();

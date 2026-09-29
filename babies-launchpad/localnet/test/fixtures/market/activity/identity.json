@@ -1,0 +1,12 @@
+{
+ "genesis": "5eykt4UsFv8P8NJdTREpY1vzqKqZKvdpKuc147dw2N9d",
+ "campaign": "8LmwBAa5XquvtUrsKrvspfV6da9T7sHiXXMVDmEdYew",
+ "launchProgram": "BLiaZWNQoPm4mG4cXNm4sXifFqs1Xmxx12qD9T4Y5NeN",
+ "mint": "8P47V2fj1yfg1C76YAZEXJBVzDJBFfURUUTeJjVJq5bz",
+ "coinDecimals": 6,
+ "feeState": "2GaGJZiZKB4gfyg1mJV9FuapFauc29mDW5aYnwNw8caP",
+ "feeAuthority": "HiYxdiJzZruQ2X5rr2Wf36SMPdNDdLAP3RjPY7eX1toG",
+ "launchAuthority": "Eoj5idruuN4UzAxw63e17Z7hb32bT9JKZFSoRwepfvFx",
+ "distributionProgram": null,
+ "distribution": null
+}

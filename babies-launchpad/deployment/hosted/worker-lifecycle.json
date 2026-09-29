@@ -1,0 +1,45 @@
+{
+  "mode": "hosted",
+  "lane": "lifecycle",
+  "programVersion": 3,
+  "genesisHash": "5eykt4UsFv8P8NJdTREpY1vzqKqZKvdpKuc147dw2N9d",
+  "programId": "ABq14qMonDrPbRJUbyfACsazK2ESaiKWcw5u66qy6f7T",
+  "concurrency": 2,
+  "rpcAdmission": {
+    "resource": "rpc-lifecycle",
+    "policy": {
+      "ratePerSecond": 10,
+      "burst": 20,
+      "lanes": {
+        "lifecycle": {
+          "ratePerSecond": 10,
+          "burst": 20
+        }
+      }
+    }
+  },
+  "signer": {
+    "url": "http://kids-signer-v3.railway.internal:4177",
+    "publicKey": "7MESsrmBCSAnA32uA67K9V9cwXnkVNGr6C8eSLEGJkzi"
+  },
+  "signerAdmission": {
+    "resource": "signer-lifecycle",
+    "policy": {
+      "ratePerSecond": 10,
+      "burst": 20,
+      "lanes": {
+        "lifecycle": {
+          "ratePerSecond": 10,
+          "burst": 20
+        }
+      }
+    }
+  },
+  "receiptBatchSize": 4,
+  "lifecycle": {
+    "setupHandoff": true,
+    "policy": "creator-funded-v1",
+    "minimumReserveLamports": "20000000",
+    "refundAllowanceSeconds": 86400
+  }
+}

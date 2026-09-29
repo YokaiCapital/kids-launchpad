@@ -1,0 +1,62 @@
+import test from 'node:test';import assert from 'node:assert/strict';
+import {PublicKey} from '@solana/web3.js';
+import {compactCreateBody,expandCompactBody,compactCreateInstruction,metadataCid,programErrorNameV3,CREATE_V3_TAG,CREATE_V3_URI_PREFIX,CREATE_V3_FIXED_LEN,CREATE_V3_MAX_WINDOW_SECONDS,CREATE_V3_MAX_SCHEDULE_SECONDS} from './client.mjs';
+import {encodeTerms,termsHash} from '../protocol-v2/policy.mjs';
+import {createInstruction,normalizeTerms,AMM_CONFIG_TIERS,campaignAddress} from '../protocol-v2/client.mjs';
+import {provisionTerms} from '../creation/provision-packet.mjs';
+import {provisionFixture} from '../test/helpers/provision-fixture.mjs';
+const cid='QmXoypizjW3WknFiJnKLwHCnL72vedxjQkDDP1mXWo6uco';
+const gateway=fixture=>{const {intent,quote}=fixture;return {quote,intent:{...intent,mint:{...intent.mint,metadata:{...intent.mint.metadata,uri:CREATE_V3_URI_PREFIX+cid}}}};};
+test('the compact body expands to exactly the sealed terms a full create would carry, hash included',()=>{
+ const {intent}=gateway(provisionFixture());const terms=provisionTerms(intent),m=intent.mint,p=intent.policy;
+ const fields={genesisHash:m.genesisHash,nonce:m.nonce,childMint:m.mint,opensAt:intent.opensAt,fundingDurationSeconds:p.fundingDurationSeconds,launchWindowSeconds:p.launchWindowSeconds,softCapLamports:p.softCapLamports,hardCapLamports:p.hardCapLamports,ammConfigIndex:p.ammConfigIndex,metadataHash:m.metadata.documentHash,metadataUri:m.metadata.uri};
+ const body=compactCreateBody(fields);assert.equal(body.length,CREATE_V3_FIXED_LEN+metadataCid(m.metadata.uri).length);
+ const expanded=expandCompactBody(body,{creator:m.creator,now:Number(intent.opensAt)-10});
+ const full=createInstruction(m.programId,terms);
+ const encodedExpanded=encodeTerms({...expanded,treasury:normalizeTerms(terms).treasury});
+ assert.deepEqual(Buffer.from(encodedExpanded),Buffer.from(full.sealed),'same 800 sealed bytes');
+ assert.equal(termsHash(encodedExpanded).toString('hex'),full.hash.toString('hex'));
+ const ix=compactCreateInstruction(m.programId,{...fields,creator:m.creator});
+ assert.equal(ix.instruction.data[0],CREATE_V3_TAG);assert.deepEqual(ix.instruction.data.subarray(1),body);
+ assert.deepEqual(ix.instruction.keys.map(k=>[k.pubkey.toBase58(),k.isSigner,k.isWritable]),full.instruction.keys.map(k=>[k.pubkey.toBase58(),k.isSigner,k.isWritable]),'same four accounts as the full create');
+ assert.ok(ix.campaign.equals(campaignAddress(m.programId,m.creator,m.nonce)));
+ assert.ok(ix.instruction.data.length<=1+CREATE_V3_FIXED_LEN+64);
+});
+test('opening time 0 means the chain time when the transaction runs; the deadlines follow from it',()=>{
+ const {intent}=gateway(provisionFixture());const m=intent.mint,p=intent.policy;
+ const body=compactCreateBody({genesisHash:m.genesisHash,nonce:m.nonce,childMint:m.mint,opensAt:'0',fundingDurationSeconds:p.fundingDurationSeconds,launchWindowSeconds:p.launchWindowSeconds,softCapLamports:p.softCapLamports,hardCapLamports:p.hardCapLamports,ammConfigIndex:p.ammConfigIndex,metadataHash:m.metadata.documentHash,metadataUri:m.metadata.uri});
+ const t=expandCompactBody(body,{creator:m.creator,now:1_800_000_000});
+ assert.equal(t.opensAt,'1800000000');assert.equal(t.deadline,String(1_800_000_000+p.fundingDurationSeconds));assert.equal(t.launchDeadline,String(1_800_000_000+p.fundingDurationSeconds+p.launchWindowSeconds));
+ assert.throws(()=>expandCompactBody(body,{creator:m.creator,now:0}),/positive/);
+});
+test('refusals: foreign gateway, bad CID, unknown tier, zero windows, wrong sizes',()=>{
+ const {intent}=gateway(provisionFixture());const m=intent.mint,p=intent.policy;
+ const base={genesisHash:m.genesisHash,nonce:m.nonce,childMint:m.mint,opensAt:'0',fundingDurationSeconds:p.fundingDurationSeconds,launchWindowSeconds:p.launchWindowSeconds,softCapLamports:p.softCapLamports,hardCapLamports:p.hardCapLamports,ammConfigIndex:p.ammConfigIndex,metadataHash:m.metadata.documentHash,metadataUri:m.metadata.uri};
+ assert.throws(()=>compactCreateBody({...base,metadataUri:'https://example.com/'+cid}),/gateway/);
+ assert.throws(()=>compactCreateBody({...base,metadataUri:CREATE_V3_URI_PREFIX+'0000'}),/base58/);
+ assert.throws(()=>compactCreateBody({...base,metadataUri:CREATE_V3_URI_PREFIX+'Q'.repeat(65)}),/base58/);
+ assert.throws(()=>compactCreateBody({...base,ammConfigIndex:3}),/tier/);
+ assert.throws(()=>compactCreateBody({...base,fundingDurationSeconds:0}),/window/);
+ assert.throws(()=>compactCreateBody({...base,opensAt:'-1'}),/opening/);
+ const body=compactCreateBody(base);
+ assert.throws(()=>expandCompactBody(body.subarray(0,body.length-1),{creator:m.creator,now:1}),/length/);
+ assert.throws(()=>expandCompactBody(Buffer.concat([body,Buffer.from('x')]),{creator:m.creator,now:1}),/length/);
+ assert.ok(AMM_CONFIG_TIERS.length>=2);
+});
+test('the program refuses windows over 30 days and a scheduled opening over 30 days ahead; the mirror refuses the same',()=>{
+ const {intent}=gateway(provisionFixture());const m=intent.mint,p=intent.policy;
+ const base={genesisHash:m.genesisHash,nonce:m.nonce,childMint:m.mint,opensAt:'0',fundingDurationSeconds:p.fundingDurationSeconds,launchWindowSeconds:p.launchWindowSeconds,softCapLamports:p.softCapLamports,hardCapLamports:p.hardCapLamports,ammConfigIndex:p.ammConfigIndex,metadataHash:m.metadata.documentHash,metadataUri:m.metadata.uri};
+ assert.throws(()=>compactCreateBody({...base,fundingDurationSeconds:CREATE_V3_MAX_WINDOW_SECONDS+1}),/30 days/);
+ assert.throws(()=>compactCreateBody({...base,launchWindowSeconds:4294967295}),/30 days/);
+ const wide=compactCreateBody({...base,fundingDurationSeconds:CREATE_V3_MAX_WINDOW_SECONDS,launchWindowSeconds:CREATE_V3_MAX_WINDOW_SECONDS});
+ assert.equal(BigInt(expandCompactBody(wide,{creator:m.creator,now:5}).launchDeadline),5n+2n*BigInt(CREATE_V3_MAX_WINDOW_SECONDS));
+ const scheduled=compactCreateBody({...base,opensAt:String(1_800_000_000)});
+ assert.throws(()=>expandCompactBody(scheduled,{creator:m.creator,now:1_800_000_000-CREATE_V3_MAX_SCHEDULE_SECONDS-1}),/30 days/);
+ assert.equal(expandCompactBody(scheduled,{creator:m.creator,now:1_800_000_000-CREATE_V3_MAX_SCHEDULE_SECONDS}).opensAt,'1800000000');
+ assert.equal(programErrorNameV3(104),'createBody');assert.equal(programErrorNameV3(102),'pilotCreator');assert.equal(programErrorNameV3(1),null);
+});
+test('the shared cross-language vectors are current and cover the bounds',async()=>{
+ const {makeVectors,CASES}=await import('./make-test-vectors.mjs');const {readFileSync}=await import('node:fs');
+ assert.equal(readFileSync(new URL('./test-vectors.txt',import.meta.url),'utf8'),makeVectors(),'run node localnet/protocol-v3/make-test-vectors.mjs after changing the encoder');
+ assert.ok(CASES.length>=4);
+});

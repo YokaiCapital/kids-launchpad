@@ -1,0 +1,11 @@
+# Private failed-job recovery
+
+The operator entry point is `localnet/jobs/recover-failed.mjs`. It is not mounted on a public, creator or admin HTTP route. Only an operator with private database maintenance access can call it. This does not replace alerting or confer signer authority.
+
+1. Drain affected workers and inspect the exact failed job and immutable packet journal. Diagnose and fix the cause first. An uncertain or merely confirmed packet must be reconciled before recovery; never delete it or substitute its signature.
+2. Supply the exact ledger/program/campaign, job ID, current fencing token and SHA-256 canonical hash of its complete result. Record an operator identity, unique recovery request ID and allowed reason (`transient-retry-reviewed` or the specifically diagnosed `reconciliation-budget-correction`).
+3. The operation permits only an exhausted transient retry, or the reviewed unsigned/previous-packet expiry bug. It refuses wrong scope/version, expired job deadlines, pending signed packets, auth/validation failures and changed revisions. A changed capability, insufficient funding or expired grant is not repaired here.
+4. One database transaction preserves the full old result in `job_recoveries`, advances the fencing token and resets only the transient retry counter. Concurrent identical requests replay once. A different request cannot erase or reapply that review. Packet bytes, operation identity, signer journal and budgets remain untouched.
+5. Resume the normal scoped worker. It must re-read authoritative chain state and use the same immutable packet identity and guarded signer. Verify final entitlements, transaction outcomes and operating holds afterward. Keep the initial failure in the evidence report; successful recovery is not an uninterrupted capacity pass.
+
+Funding restarts can call `credited` with the exact source, amount, signature, policy and campaign. This is a read-only consistency check of the previously finalized funding proof plus its atomic accounting entry. It cannot add money or trust a cached balance alone. A missing receipt still requires ordinary finality verification via `credit`. Restore provenance and external backup integrity remain separate requirements.

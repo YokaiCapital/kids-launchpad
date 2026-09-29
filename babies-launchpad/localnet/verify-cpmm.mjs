@@ -1,0 +1,20 @@
+// Creates a separate test mint/pool. Never consumes active campaign funds.
+import assert from 'node:assert/strict';
+import {writeFileSync} from 'node:fs';
+import {Keypair,Transaction,SystemProgram,sendAndConfirmTransaction,ComputeBudgetProgram} from '@solana/web3.js';
+import {NATIVE_MINT,createMint,getOrCreateAssociatedTokenAccount,mintTo,getAccount,getMint,createSyncNativeInstruction,createSetAuthorityInstruction,AuthorityType,getAssociatedTokenAddressSync} from '@solana/spl-token';
+import {localKey} from './dev-vesting.mjs';
+import {cpmmContext,initializePoolInstruction,decodePool} from './cpmm.mjs';
+const ctx=await cpmmContext(),payer=localKey('alice'),c=ctx.connection;
+const mint=await createMint(c,payer,payer.publicKey,payer.publicKey,6,Keypair.generate());
+const source=await getOrCreateAssociatedTokenAccount(c,payer,mint,payer.publicKey),wsol=await getOrCreateAssociatedTokenAccount(c,payer,NATIVE_MINT,payer.publicKey);
+const supply=1000000000000000n,baseAmount=supply*4350n/10000n,quoteAmount=10000000000n;
+await mintTo(c,payer,mint,source.address,payer,supply);
+await sendAndConfirmTransaction(c,new Transaction().add(SystemProgram.transfer({fromPubkey:payer.publicKey,toPubkey:wsol.address,lamports:quoteAmount}),createSyncNativeInstruction(wsol.address)),[payer]);
+const {addresses:p,instruction}=initializePoolInstruction(ctx,payer.publicKey,mint,NATIVE_MINT,baseAmount,quoteAmount);
+const signature=await sendAndConfirmTransaction(c,new Transaction().add(ComputeBudgetProgram.setComputeUnitLimit({units:400000}),instruction,createSetAuthorityInstruction(mint,payer.publicKey,AuthorityType.MintTokens,null),createSetAuthorityInstruction(mint,payer.publicKey,AuthorityType.FreezeAccount,null)),[payer]);
+const pool=decodePool(await c.getAccountInfo(p.pool),ctx.programId,p);assert.ok(pool.config.equals(ctx.ammConfig));assert.ok(pool.creator.equals(payer.publicKey));assert.equal(pool.creatorFeesEnabled,false);
+const [v0,v1,lp,token]=await Promise.all([getAccount(c,p.vault0),getAccount(c,p.vault1),getAccount(c,getAssociatedTokenAddressSync(p.lpMint,payer.publicKey)),getMint(c,mint)]);
+assert.equal(v0.amount,p.mint0.equals(mint)?baseAmount:quoteAmount);assert.equal(v1.amount,p.mint1.equals(mint)?baseAmount:quoteAmount);assert.ok(v0.owner.equals(p.authority)&&v1.owner.equals(p.authority));assert.equal(token.mintAuthority,null);assert.equal(token.freezeAuthority,null);assert.equal(pool.lpSupply-lp.amount,100n);
+const result={network:'localnet',purpose:'separate CPMM qualification fixture, not SHART launch',genesisHash:ctx.config.genesisHash,programId:ctx.programId.toBase58(),config:ctx.ammConfig.toBase58(),pool:p.pool.toBase58(),mint:mint.toBase58(),signature,tradeFeePpm:Number(ctx.fee.trade),creatorFeePpm:Number(ctx.fee.creator),baseReserve:baseAmount.toString(),quoteReserve:quoteAmount.toString(),mintAuthority:null,freezeAuthority:null,liquidityLocked:false,checks:['real pinned Raydium program','2% on-chain fee config','exact source and vault amounts','canonical sorted mint PDAs','LP issuance less upstream 100-unit minimum','mint/freeze revocation atomic with pool creation']};
+writeFileSync(new URL('./.runtime/cpmm-verification.json',import.meta.url),JSON.stringify(result,null,2)+'\n',{mode:0o600});console.log(JSON.stringify(result,null,2));

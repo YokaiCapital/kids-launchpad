@@ -1,0 +1,21 @@
+{
+  "status": "Offline allocation and proof rehearsal passed; no funded claim or program execution",
+  "merkleSourceSha256": "f4728198cbad6bbab064a10c5f32a7327ae3bb81e2d6de00bd578b825d2bf001",
+  "ownersPerParent": 2000,
+  "distinctRecipients": 4000,
+  "eligibilityFloorPercent": 0.05,
+  "perOwnerAllocationCapPercent": 2,
+  "totalAllocatedRaw": "100000000000000",
+  "remainderRaw": "0",
+  "allocationSha256": "35bd4d371e3bec391031d902fae0e00c34f23a95a5eee09e949e712715bff3b5",
+  "merkleRoot": "8add223ef850a3db6f39eb34983ca5bfac31a2f2c92397056e42b36525af3b90",
+  "validProofs": 4000,
+  "tamperedAmountRejected": true,
+  "inputOrderInvariant": true,
+  "limits": [
+    "Synthetic ownerOnCurve flags; not a live wallet eligibility snapshot",
+    "Both parents use equal fixture supply; different supplies require separate floors before aggregation",
+    "No proof verification in the deployed program",
+    "No distributor funded; no claims sent"
+  ]
+}

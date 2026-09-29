@@ -1,0 +1,83 @@
+import {useEffect,useState,useRef} from 'react';
+import {CoinSkeleton} from './CoinSkeleton';
+import {CoinPfp} from './CoinPfp';
+import {explorerAccount,netLabel} from './network-label.mjs';
+import {ArrowRight,ArrowSquareOut,CaretRight,Copy,Check} from '@phosphor-icons/react';
+import {describeLaunch,formatCountdown,formatUtc} from './launch-status';
+function useCopy(){
+ const [copied,setCopied]=useState(false);
+ useEffect(()=>{if(!copied)return;const id=setTimeout(()=>setCopied(false),1500);return()=>clearTimeout(id);},[copied]);
+ return [copied,async value=>{try{await navigator.clipboard.writeText(value);setCopied(true);}catch{}}];
+}
+function CopyButton({label,value}){
+ const [copied,copy]=useCopy();
+ return <button type="button" className={'launch-copy'+(copied?' is-copied':'')} aria-label={'Copy '+label} onClick={()=>copy(value)}>{copied?<Check size={14}/>:<Copy size={14}/>}{copied?'Copied':'Copy'}</button>;
+}
+function Address({label,value,explorer}){
+ return <div className="launch-address"><span>{label}</span><code>{value}</code><div className="launch-address-actions"><CopyButton label={label} value={value}/>{explorer&&<a className="launch-explorer" href={explorer} target="_blank" rel="noreferrer" aria-label={label+' on the explorer'}>Explorer <ArrowSquareOut size={14}/></a>}</div></div>;
+}
+const shortAddress=v=>v?v.slice(0,5)+'…'+v.slice(-4):'';
+/** Compact card for a launched coin: identity row, completed-launch stats, coin address, and the contract details folded away. */
+function LaunchedCard({d,data,go}){
+ const mintExplorer=data?.mintExplorerUrl||(d.explorerUrl?d.explorerUrl.replace(/\/$/,'')+'/token/'+(data?.mint||'')+(data?.explorerCluster||''):null);
+ const rows=[...d.addresses.map(a=>({...a,explorer:a.label==='Coin address'?mintExplorer:explorerAccount(data,a.value)})),data?.programId&&{label:'Program',value:data.programId,explorer:explorerAccount(data,data.programId)}].filter(Boolean);
+ return <section className="launch-status is-launched tone-ok" aria-live="polite" aria-label="Shartcoin is live">
+  <div className="launch-live-head">
+   <CoinPfp className="launch-live-pfp" alt="" size={44}/>
+   <div className="launch-live-title"><div><h2>Shartcoin</h2><span className="live-badge"><i aria-hidden="true"/>Live</span></div><p className="launch-live-sub">{d.sub}</p></div>
+   {go&&<button className="primary launch-view" onClick={()=>go('PostLaunch')}>View coin <ArrowRight size={18}/></button>}
+  </div>
+  {d.stats?.length>0&&<ul className="launch-stats" aria-label="Launch results">{d.stats.map(s=><li key={s.label}><span>{s.label}</span><strong>{s.value}{s.unit&&<small>{s.unit}</small>}</strong></li>)}</ul>}
+  {data?.mint&&<div className="launch-address-row"><span>Coin address</span><code title={data.mint}>{shortAddress(data.mint)}</code><CopyButton label="coin address" value={data.mint}/></div>}
+  <details className="launch-contract">
+   <summary><CaretRight size={14} aria-hidden="true"/>Contract details</summary>
+   <div className="launch-addresses">{rows.map(a=><Address key={a.label} {...a}/>)}<small>{mintExplorer?<a href={mintExplorer} target="_blank" rel="noreferrer">View the coin on the explorer</a>:'Private test ledger ('+netLabel(data?.network).name+'): these addresses do not appear on public explorers or trading terminals.'}</small></div>
+  </details>
+ </section>;
+}
+/** Big status card at the top of the launch page. `data` is the live readActive() payload, {configured:false} or null while loading. */
+export function LaunchStatus({data,go,onRefresh}){
+ const [skew,setSkew]=useState(0),[now,setNow]=useState(Date.now());
+ useEffect(()=>{if(data?.configured===true&&Number.isFinite(data.chainTimeUnix))setSkew(data.chainTimeUnix*1000-Date.now());},[data]);
+ useEffect(()=>{const id=setInterval(()=>setNow(Date.now()),1000);return()=>clearInterval(id);},[]);
+ const nowUnix=Math.floor((now+skew)/1000),d=describeLaunch(data,nowUnix);
+ // When a countdown hits zero the phase changes on the ledger; ask for a fresh read once.
+ useEffect(()=>{if(d.countdown&&d.countdown.seconds<=0&&onRefresh){const id=setTimeout(onRefresh,1500);return()=>clearTimeout(id);}},[d.countdown&&d.countdown.seconds<=0,d.phase]);
+ // Momentum while open: how many commitments landed in the last five minutes and how long ago the last one was.
+ const history=useRef([]);
+ useEffect(()=>{if(d.phase!=='open')return;const n=Number(data?.receiptCount||0),h=history.current,last=h[h.length-1];if(!last||last.n!==n)h.push({t:Date.now(),n});history.current=h.filter(x=>Date.now()-x.t<=5*60*1000+1000).slice(-200);},[data,d.phase]);
+ const momentum=(()=>{if(d.phase!=='open')return null;const h=history.current;if(h.length<2)return null;const recent=h[h.length-1].n-h[0].n;const ago=Math.max(0,Math.floor((now-h[h.length-1].t)/1000));return {recent,ago};})();
+ if(!data)return <section className="launch-status"><CoinSkeleton variant="status"/></section>;
+ if(d.phase==='launched')return <LaunchedCard d={d} data={data} go={go}/>;
+ return <section className={'launch-status tone-'+d.tone+(d.progress?.full?' is-over':'')} aria-live="polite">
+  <div className="launch-status-head"><span className="launch-pill">{d.pill}</span>{d.countdown&&<span className="launch-when">{d.countdown.label.replace(' in','')} {formatUtc(d.countdown.at)}</span>}</div>
+  <h2>{d.headline}</h2>
+  {d.countdown&&<div className="launch-countdown"><span>{d.countdown.label}</span><strong>{formatCountdown(d.countdown.seconds)}</strong></div>}
+  <p>{d.sub}</p>
+  {momentum&&<p className="launch-momentum"><strong>{momentum.recent>0?'+'+momentum.recent+' commitment'+(momentum.recent===1?'':'s')+' in the last 5 minutes':'Watching for new commitments'}</strong>{momentum.recent>0&&<span> · last one {momentum.ago<60?momentum.ago+' s':Math.floor(momentum.ago/60)+' min'} ago</span>}</p>}
+  {d.progress&&<div className="launch-progress" role="img" aria-label={d.progress.raised+' SOL committed, soft cap '+d.progress.soft+' SOL, hard cap '+d.progress.hard+' SOL'}><div className="launch-bar"><div style={{width:d.progress.pct+'%'}}/>{d.progress.full&&<em className="launch-bar-over" style={{left:d.progress.hardPct+'%',width:Math.max(0,d.progress.pct-d.progress.hardPct)+'%'}}/>}{d.progress.full&&<b className="launch-bar-badge" style={{left:d.progress.pct+'%'}}>{d.progress.subscribed.toLocaleString('en-GB',{maximumFractionDigits:1})}%</b>}<i style={{left:d.progress.softPct+'%'}} title="Soft cap"/>{d.progress.hardPct<100&&<i className="is-hard" style={{left:d.progress.hardPct+'%'}} title="Hard cap"/>}</div><div className="launch-progress-labels"><span><strong>{d.progress.raised} SOL</strong> committed{d.progress.subscribed>0?' · '+d.progress.subscribed.toLocaleString('en-GB',{maximumFractionDigits:1})+'% of the hard cap':''}</span><span>Soft cap {d.progress.soft} SOL{d.progress.reached?' ✓':''}</span><span>Hard cap {d.progress.hard} SOL{d.progress.full?' ✓':''}</span></div></div>}
+  {d.addresses&&<div className="launch-addresses">{d.addresses.map(a=><Address key={a.label} {...a}/>)}<small>{d.explorerUrl?<a href={d.explorerUrl+'/token/'+(data?.mint||'')+(data?.explorerCluster||'')} target="_blank" rel="noreferrer">View the coin on the explorer</a>:'Private test ledger: these addresses do not appear on public explorers or trading terminals.'}</small></div>}
+  {d.phase==='launched'&&go&&<button className="primary launch-cta" onClick={()=>go('PostLaunch')}>Open the coin page: claim and trade <ArrowRight size={20}/></button>}
+ </section>;
+}
+/** Ticking countdown above the live commit box while commitments are open: "Closes in 01:58:20" and the UTC close time.
+ * The clock is the campaign's on-chain deadline; the chain time from the API corrects the viewer's clock. */
+export function ClosesIn({data}){
+ const [skew,setSkew]=useState(0),[now,setNow]=useState(Date.now());
+ useEffect(()=>{if(Number.isFinite(data?.chainTimeUnix))setSkew(data.chainTimeUnix*1000-Date.now());},[data]);
+ useEffect(()=>{const id=setInterval(()=>setNow(Date.now()),1000);return()=>clearInterval(id);},[]);
+ const at=data?.deadlineUnix;if(data?.phase!=='open'||!Number.isFinite(at))return null;
+ const seconds=at-Math.floor((now+skew)/1000);
+ return <div className={'opens-in closes-in'+(seconds<=0?' is-due':'')}><span>{seconds>0?'Closes in':'Closing'}</span><strong>{seconds>0?formatCountdown(seconds):'the window has reached its close time'}</strong><small>{formatUtc(at)}</small></div>;
+}
+/** Ticking countdown for the disabled commit box: "Opens in 02:14:09" above the greyed controls. */
+export function OpensIn({data}){
+ const [skew,setSkew]=useState(0),[now,setNow]=useState(Date.now());
+ useEffect(()=>{if(Number.isFinite(data?.chainTimeUnix))setSkew(data.chainTimeUnix*1000-Date.now());},[data]);
+ useEffect(()=>{const id=setInterval(()=>setNow(Date.now()),1000);return()=>clearInterval(id);},[]);
+ const at=data?.next?.opensAtUnix;if(!at)return <div className="opens-in is-tba"><span>Opens</span><strong>Date to be announced</strong></div>;
+ const seconds=at-Math.floor((now+skew)/1000);
+ // The announced time is one canonical UTC value. Reaching it changes only this label: the campaign opens when the
+ // service creates it on chain, and the live status above decides whether commitments are possible.
+ return <div className={'opens-in'+(seconds<=0?' is-due':'')}><span>{seconds>0?'Opens in':'Opening'}</span><strong>{seconds>0?formatCountdown(seconds):'waiting for the campaign to open on chain'}</strong><small>{formatUtc(at)}</small></div>;
+}

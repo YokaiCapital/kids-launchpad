@@ -1,0 +1,22 @@
+{
+  "version": 1,
+  "network": "mainnet",
+  "genesisHash": "5eykt4UsFv8P8NJdTREpY1vzqKqZKvdpKuc147dw2N9d",
+  "programId": "ABq14qMonDrPbRJUbyfACsazK2ESaiKWcw5u66qy6f7T",
+  "programVersion": 3,
+  "binarySha256": "ec8f995140f3e2f2c49af14aa4a60518192f1c1eb9c969599205ef4ccc1a68c8",
+  "binarySize": 206464,
+  "ammConfig": {
+    "address": "ESLj2Rzmvn3RhDo4Z18hY1wYmGyC9xM4ZtRXhvoFkDAi",
+    "index": 7,
+    "tradeFeeRate": "25000"
+  },
+  "ammConfigHash": "7d060a13c637a9254090ed5d18afb90f53d0779a904a70ba1a1bf9eaf2940ce6",
+  "presets": {
+    "file": "deployment/presets/public-presets-v1.json",
+    "sha256": "8a1f242cf89de0199d341fc522e71b3f2890f39f31a44f3b268cfc30df50f513"
+  },
+  "treasury": "91eLwFTAxkcQLPSMxbzdSFkTyEwyRYcoZk64HMZj8vX",
+  "signerPublicKey": "7MESsrmBCSAnA32uA67K9V9cwXnkVNGr6C8eSLEGJkzi",
+  "registrySchemaVersion": 40
+}
