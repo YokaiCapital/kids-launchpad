@@ -50,17 +50,17 @@ jobs:
       - name: Scan exact binary upload artifacts
         env:
           KIDS_CONFIDENTIAL_TERMS: ${{ secrets.KIDS_CONFIDENTIAL_TERMS }}
-        run: python3 scripts/secret-scan.py artifacts "$RUNNER_TEMP/sbf"
+        run: |
+          mkdir -p "$RUNNER_TEMP/sbf-upload"
+          for so in kids_atomic_launch kids_distribution kids_launch_v3; do
+            cp "$RUNNER_TEMP/sbf/$so.so" "$RUNNER_TEMP/sbf-upload/"
+            cp "$so-${{ matrix.runner }}.sha256" "$RUNNER_TEMP/sbf-upload/"
+          done
+          python3 scripts/secret-scan.py artifacts "$RUNNER_TEMP/sbf-upload"
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
           name: sbf-${{ matrix.runner }}
-          path: |
-            ${{ runner.temp }}/sbf/kids_atomic_launch.so
-            ${{ runner.temp }}/sbf/kids_distribution.so
-            ${{ runner.temp }}/sbf/kids_launch_v3.so
-            kids_atomic_launch-${{ matrix.runner }}.sha256
-            kids_distribution-${{ matrix.runner }}.sha256
-            kids_launch_v3-${{ matrix.runner }}.sha256
+          path: ${{ runner.temp }}/sbf-upload/
           retention-days: 30
   compare:
     needs: build
